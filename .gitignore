@@ -99,3 +99,5 @@ target/
 cache/!.*
 cov.xml
 report.xml
+
+*node_modules/
