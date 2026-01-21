@@ -23,10 +23,10 @@ dependencies = [
   "httpx>=0.28.1",
   "python-multipart>=0.0.20",
   "aiosqlite>=0.21.0",
-  "llama-index>=0.14.7",
-  "json-repair>=0.55.0",
   "asyncmy>=0.2.11",
   "cryptography>=46.0.3",
+  "aiofiles>=25.1.0",
+  "marko>=2.2.2",
 ]
 
 [project.urls]

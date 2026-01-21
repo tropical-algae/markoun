@@ -3,11 +3,15 @@ import pkgutil
 import secrets
 import string
 from collections.abc import Callable
+from pathlib import Path
 from types import ModuleType
 from typing import Any
 
+import aiofiles
 import yaml
 
+from markoun.common.config import settings
+from markoun.common.logging import logger
 from markoun.core.db.session import LocalSession
 
 TOKEN_SEQUENCE = string.ascii_uppercase + string.digits
@@ -19,6 +23,30 @@ async def async_db_wrapper(func: Callable, *args, **kwargs) -> Any:
             return await func(*args, db=db, **kwargs)
     except Exception:
         return None
+
+
+async def aread_file(path: Path) -> str:
+    try:
+        async with aiofiles.open(str(path), encoding="utf-8") as f:
+            content = await f.read()
+            return content
+    except FileNotFoundError:
+        logger.error("Error: The file was not found.")
+        raise
+
+
+async def awrite_file(file: Path, content) -> None:
+    try:
+        file.parent.mkdir(parents=True, exist_ok=True)
+        async with aiofiles.open(file, mode="w", encoding="utf-8") as f:
+            await f.write(content)
+    except Exception as err:
+        logger.error(f"Error: Failed to write file. {err}")
+
+
+def get_static_asset_path(path: Path):
+    asset_relative_path = path.relative_to(Path(settings.DOCUMENT_ROOT).absolute())
+    return str(settings.DOCUMENT_STATIC_ASSET_PATH / asset_relative_path)
 
 
 def load_yaml(yaml_path: str) -> dict:

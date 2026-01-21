@@ -36,6 +36,10 @@ class BasicSetting(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
     ACCESS_TOKEN_SECRET_KEY: str = secrets.token_hex(32)
 
+    DOCUMENT_ROOT: str = "./data"
+    DOCUMENT_STATIC_ASSET_PATH: str = "/static"
+    DISPLAYED_FILE_TYPES: list = ["md", "png", "jpg", "jpeg", "bmp", "svg"]
+
 
 class LogSetting(BaseSettings):
     # logger

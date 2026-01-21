@@ -1,6 +1,7 @@
 import json
 from contextlib import asynccontextmanager
 from datetime import datetime
+from pathlib import Path
 from typing import Any
 
 import pytz
@@ -48,6 +49,7 @@ async def lifespan(app: FastAPI):
     logger.info("Starting service...")
     _ = app
     await init_db_models()
+    Path(settings.DOCUMENT_ROOT).mkdir(parents=True, exist_ok=True)
 
     yield
     logger.info("Shut down and clear cache...")
