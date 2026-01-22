@@ -1,0 +1,15 @@
+.sidebar-core {
+  position: relative;
+}
+
+.sidebar-container {
+  position: relative;
+}
+
+.file-tree-header {
+	height: 50px;
+}
+
+.file-tree-container {
+	overflow-y: scroll;
+}

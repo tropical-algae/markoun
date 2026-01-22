@@ -1,0 +1,117 @@
+.is-resizing {
+  user-select: none;
+  cursor: col-resize;
+}
+
+/* 编辑器部分 */
+
+.editor-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background-color: var(--color-bg-sec);
+  overflow: hidden; 
+}
+
+.editor-header {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+	border-bottom: 1px solid var(--color-accent-pri);
+  box-sizing: border-box;
+}
+
+.editor-wrapper .floating-left {
+  position: absolute;
+  left: 16px;
+  display: flex;
+  gap: 8px;
+}
+
+.editor-wrapper .floating-right {
+  position: absolute;
+  right: 16px;
+  display: flex;
+  gap: 8px;
+}
+
+.editor-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  overflow: hidden; 
+}
+
+.markdown-editor {
+  width: 100%;
+  height: 100%;
+
+  padding: 30px calc(max(20px, (100% - 800px) / 2));
+
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text-main);
+  font-size: 16px;
+  line-height: 1.6;
+  resize: none;
+  box-sizing: border-box;
+  
+	overflow-y: scroll;
+}
+
+/* 侧边栏信息部分 */
+
+.inspector-wrapper {
+  position: relative;
+  overflow: hidden; 
+  transition: background-color 0.3s, border-color 0.3s;
+	/* border-left: 1px solid var(--color-accent-pri); */
+
+  flex-shrink: 0;
+}
+
+.inspector-container {
+  height: 100%; 
+  font-size: 14px;
+
+  display: flex;
+  flex-direction: column;
+  white-space: nowrap; 
+}
+
+.inspector-title {
+  padding: 24px;
+}
+
+.note-meta,
+.note-preview {
+  flex: 1;
+  padding-left: 24px;
+  padding-right: 24px;
+
+  overflow-y: scroll;
+  overflow-x: hidden;
+  white-space: normal;
+}
+
+.note-preview 
+h1 { 
+  font-size: 1.5rem; 
+  margin-top: 0; 
+}
+
+/* 淡入淡出动画 */
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.15s;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
+.fade-enter-to, .fade-leave-from {
+  opacity: 1;
+}
