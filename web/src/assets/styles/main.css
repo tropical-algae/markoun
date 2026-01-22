@@ -1,4 +1,6 @@
-@import url("@/assets/styles/workspace.css");
+@import url("@/assets/styles/views/workspace.css");
+@import url("@/assets/styles/views/login.css");
+
 @import url("@/assets/styles/comps/sidebar.css");
 @import url("@/assets/styles/comps/fileNode.css");
 @import url("@/assets/styles/comps/nodeEditor.css");
@@ -8,10 +10,11 @@
   --color-bg-pri: #ffffff;
   --color-bg-sec: #f9f9f9;
   --color-text-pri: #161616;
-  --color-text-sec: #313131;
-  --color-accent-pri: #c6c6c6;
+  --color-text-sec: rgb(138, 138, 138);
+  --color-accent-pri: #d2d2d2;
 
-  --color-bg-selected: rgba(45, 45, 45, 0.08);
+  /* --color-bg-selected: rgba(45, 45, 45, 0.08); */
+  --color-bg-selected: #e5e5e5;
 
   --color-action: #79b5f2;
 }

@@ -1,0 +1,148 @@
+.auth-wrapper {
+  min-height: 100vh;
+  width: 100%;
+  background-color: var(--color-text-pri);
+  display: flex;
+	
+  justify-content: center;
+}
+
+.site-brand {
+	height: 80px;
+	width: 100%;
+	color: var(--color-bg-pri);
+	font-weight: bold;
+	font-size: 2rem;
+}
+
+.auth-container {
+	width: 100%;
+  background-color: var(--color-bg-pri);
+  padding: 20px;
+  
+  border-top-right-radius: 80px;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  
+  box-shadow: 0 -10px 20px rgba(123, 123, 123, 0.5); 
+}
+
+.auth-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-text-pri);
+  margin-bottom: 50px;
+  letter-spacing: -1px;
+}
+
+.auth-input-wrapper {
+  position: relative;
+  border-radius: 8px;
+  margin-bottom: 32px;
+	padding: 7px 12px;
+  transition: background-color 0.3s ease;
+
+	background-color: var(--color-bg-sec);
+}
+
+
+.auth-input-wrapper:focus-within {
+  background-color: var(--color-bg-selected);
+}
+
+.auth-input-wrapper:focus-within .input-label::before{
+  background-color: var(--color-bg-selected);
+}
+
+.input-label {
+	position: absolute;
+	padding: 0px 14px;
+	top: -14px;
+	left: 0px;
+	height: 28px;
+
+	display: flex;
+	align-items: center;
+  pointer-events: none;
+
+  font-size: 0.75rem;
+  color: #666;
+  font-weight: 600;
+  z-index: 1;
+}
+
+.input-label::before {
+  content: "";
+  position: absolute;
+	top: 0;
+  bottom: -20px;
+  left: 0;
+  right: 0;
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: -1;
+  transition: background-color 0.3s ease;
+	background-color: var(--color-bg-sec);
+}
+
+.input-field {
+  position: relative;
+  width: 100%;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 1.1rem;
+  border-radius: 8px;
+
+  color: var(--color-text-pri);
+  font-family: inherit;
+  font-weight: 600;
+  z-index: 2;
+}
+
+.auth-form .links-row {
+  display: flex;
+  margin-bottom: 56px;
+
+  justify-content: space-between;
+}
+
+.auth-form .links-row a {
+  font-size: 0.85rem;
+  color: var(--color-text-sec);
+  text-decoration: none;
+  font-weight: 600;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.3s ease;
+}
+
+.auth-form .links-row a:hover {
+  border-bottom-color: var(--color-text-sec);
+}
+
+.btn-container {
+  display: flex;
+  justify-content: center;
+}
+
+.auth-submit-btn {
+  background-color: var(--color-text-pri);
+  color: var(--color-bg-pri);
+  font-family: inherit;
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 8px 80px;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.3s ease-in-out;
+}
+
+.auth-submit-btn:hover {
+  transform: scale(1.03);
+}
+
+.auth-submit-btn:active {
+  transform: scale(0.97);
+}
