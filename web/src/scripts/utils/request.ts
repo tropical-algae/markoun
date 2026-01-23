@@ -1,19 +1,14 @@
 import axios, { type InternalAxiosRequestConfig, type AxiosResponse } from "axios"
-import { useUserStore } from "@/scripts/stores/user"
 
 
 const service = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
-  timeout: 10000
+  timeout: 10000,
+  withCredentials: true
 })
 
 service.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const userStore = useUserStore()
-    if (userStore.token) {
-      config.headers = config.headers || {} 
-      config.headers["Authorization"] = `Bearer ${userStore.token}`
-    }
     return config
   },
   (error: any) => {

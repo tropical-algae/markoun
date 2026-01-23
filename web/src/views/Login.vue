@@ -5,13 +5,13 @@ import router from '@/router'
 
 const userStore = useUserStore()
 
-const loginForm = reactive({ username: "", password: "" })
-const registerForm = reactive({ 
-  email: "", 
-  username: "", 
-  password: "", 
-  confirmPassword: "" 
-})
+const loginForm = reactive({ username: "", password: "", remember_me: false })
+// const registerForm = reactive({ 
+//   email: "", 
+//   username: "", 
+//   password: "", 
+//   confirmPassword: "" 
+// })
 
 const onLogin = async () => {
 	await userStore.handleLogin(loginForm)
@@ -23,9 +23,9 @@ const onLogin = async () => {
 	// 	})
 }
 
-const onRegister = async () => {
+// const onRegister = async () => {
   
-}
+// }
 </script>
 
 <template>
@@ -60,8 +60,11 @@ const onRegister = async () => {
 					</div>
 
 					<div class="links-row">
-						<a href="#">Forgot password ?</a>
-						<a href="#">Create an account</a>
+            <button >Create an account</button>
+            <label class="d-flex gap-2">
+              <input type="checkbox" v-model="loginForm.remember_me">
+              <span>Remember me</span>
+            </label>
 					</div>
 
 					<div class="d-flex justify-content-center">

@@ -1,38 +1,59 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { login, testToken, type LoginForm } from '@/api/user'
+import { loginReq, testTokenReq, logoutReq, type LoginForm } from '@/api/user'
 
 export const useUserStore = defineStore('user', () => {
-  const token = ref<string>(localStorage.getItem('access_token') || '')
-  const userInfo = ref<any>({})
+  const isAuthed = ref(false)
+  const isChecked = ref(false)
+  let checkPromise: Promise<boolean> | null = null 
 
   const handleLogin = async (loginForm: LoginForm) => {
     try {
-      const res = await login(loginForm)
-      const accessToken = res.access_token
-      
-      token.value = accessToken
-      localStorage.setItem('access_token', accessToken)
+      const res = await loginReq(loginForm)
+      isAuthed.value = true
+      isChecked.value = true
       return res
     } catch (error) {
+      isAuthed.value = false
+      isChecked.value = false 
       throw error
     }
   }
 
   const checkAuth = async () => {
-    try {
-      const res = await testToken()
-      return res
-    } catch (error) {
-      return null
+    if (isChecked.value) {
+      console.log("验证过")
+      return isAuthed.value
     }
+
+    if (checkPromise) {
+      return checkPromise
+    }
+
+    checkPromise = (async () => {
+      try {
+        console.log("执行后端验证...")
+        const res = await testTokenReq()
+        console.log(res)
+        isAuthed.value = res.data
+        return isAuthed.value
+      } catch (error) {
+        isAuthed.value = false
+        return false
+      } finally {
+        isChecked.value = true
+        checkPromise = null
+      }
+    })()
+
+    return checkPromise
   }
 
-  const logout = () => {
-    token.value = ''
-    userInfo.value = {}
-    localStorage.removeItem('access_token')
+  const logout = async () => {
+    await logoutReq()
+    isAuthed.value = false
+    isChecked.value = false
   }
 
-  return { token, userInfo, handleLogin, checkAuth, logout }
+  return { handleLogin, checkAuth, logout }
 })

@@ -108,7 +108,7 @@
   justify-content: space-between;
 }
 
-.auth-form .links-row a {
+.auth-form .links-row button,span{
   font-size: 0.85rem;
   color: var(--color-text-sec);
   text-decoration: none;
@@ -117,7 +117,7 @@
   transition: border-color 0.3s ease;
 }
 
-.auth-form .links-row a:hover {
+.auth-form .links-row button:hover {
   border-bottom-color: var(--color-text-sec);
 }
 
