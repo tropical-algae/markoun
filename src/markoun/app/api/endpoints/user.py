@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from typing import Any
 
 import pytz
-from fastapi import APIRouter, Depends, HTTPException, Security
+from fastapi import APIRouter, Depends, Form, HTTPException, Request, Response, Security
 from fastapi.security import OAuth2PasswordRequestForm, SecurityScopes
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -14,17 +14,20 @@ from markoun.common.config import settings
 from markoun.core.db.crud import insert_user, select_user_by_full_name, verify_password
 from markoun.core.db.crud.crud_user import select_user_by_email
 from markoun.core.db.models import UserAccount
-from markoun.core.model.user import ScopeType, Token, TokenPayload, UserBasicInfo
+from markoun.core.model.user import LoginResponse, ScopeType, TokenPayload, UserBasicInfo
 
 router = APIRouter()
 
 
-@router.post("/access-token", response_model=Token)
+@router.post("/access-token", response_model=LoginResponse)
 async def login_access_token(
-    db: AsyncSession = Depends(get_db), form_data: OAuth2PasswordRequestForm = Depends()
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    remember_me: bool = Form(False),
 ) -> Any:
     """
-    OAuth2 compatible token login, get an access token for future requests
+    OAuth2 compatible token login, sets HttpOnly Cookie
     """
     user = await select_user_by_full_name(db, full_name=form_data.username)
     if not user:
@@ -34,14 +37,29 @@ async def login_access_token(
         raise HTTPException(**CONSTANT.RESP_USER_INCORRECT_PASSWD)
 
     scopes = json.loads(str(user.scopes))
-    form_data.scopes = scopes
-    return Token(
+    access_token_expires = timedelta(
+        minutes=settings.ACCESS_TOKEN_EXTENDED_EXPIRE_MINUTES
+        if remember_me
+        else settings.ACCESS_TOKEN_DEFAULT_EXPIRE_MINUTES
+    )
+    access_token = security.get_access_token(
+        data=TokenPayload(userid=user.id, username=user.full_name, scopes=scopes),
+        expires_delta=access_token_expires,
+    )
+
+    response.set_cookie(
+        key="access_token",
+        value=f"Bearer {access_token}",
+        httponly=True,
+        max_age=int(access_token_expires.total_seconds()),
+        expires=int(access_token_expires.total_seconds()),
+        samesite="lax",
+        secure=False,
+        path="/",
+    )
+
+    return LoginResponse(
         **CONSTANT.RESP_SUCCESS,
-        access_token=security.get_access_token(
-            data=TokenPayload(userid=user.id, username=user.full_name, scopes=scopes),
-            expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
-        ),
-        token_type="bearer",
         user_id=user.id,
         scopes=scopes,
         timestamp=pytz.timezone("Asia/Shanghai")
@@ -50,15 +68,38 @@ async def login_access_token(
     )
 
 
-@router.post("/test-token", response_model=UserAccount)
+@router.post("/logout")
+async def logout(response: Response):
+    """
+    User logout delete cookie
+    """
+    response.delete_cookie(
+        key="access_token",
+        path="/",
+        samesite="lax",
+    )
+    return "Success!"
+
+
+@router.post("/test-token")
 async def token_test(
-    current_user: UserAccount = Security(get_current_user, scopes=[ScopeType.ADMIN]),
+    request: Request,
+    db: AsyncSession = Depends(get_db),
 ) -> Any:
     """
     Test access token
     """
-    del current_user.password
-    return current_user
+    try:
+        await get_current_user(
+            request=request,
+            security_scopes=SecurityScopes(
+                [ScopeType.ADMIN, ScopeType.USER, ScopeType.GUEST]
+            ),
+            db=db,
+        )
+        return True
+    except Exception:
+        return False
 
 
 @router.post("/register", response_model=UserAccount)

@@ -33,7 +33,9 @@ class BasicSetting(BaseSettings):
     SQL_POOL_TIMEOUT: int = 30
     SQL_POOL_RECYCLE: int = 1800
 
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
+    ACCESS_TOKEN_DEFAULT_EXPIRE_MINUTES: int = 60 * 24
+    ACCESS_TOKEN_EXTENDED_EXPIRE_MINUTES: int = 60 * 24 * 30
+
     ACCESS_TOKEN_SECRET_KEY: str = secrets.token_hex(32)
 
     DOCUMENT_ROOT: str = "./data"

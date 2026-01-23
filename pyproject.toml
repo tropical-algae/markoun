@@ -47,6 +47,7 @@ dev = [
   "sqlacodegen==3.0.0rc5",
   "pre-commit>=4.3.0,<5",
   "poethepoet>=0.37.0",
+  "types-aiofiles>=25.1.0.20251011",
 ]
 release = ["python-semantic-release>=10.3.1,<11"]
 aws = ["mangum>=0.17.0,<0.18"]

@@ -14,14 +14,12 @@ class ScopeType(StrEnum):
     GUEST = "GUEST"
 
 
-class Token(BaseModel):
-    user_id: str
-    access_token: str
-    token_type: str
-    message: str
-    timestamp: datetime
-    scopes: list[str]
+class LoginResponse(BaseModel):
     status: int
+    message: str
+    user_id: str
+    scopes: list[str]
+    timestamp: str
 
 
 class TokenPayload(BaseModel):

@@ -26,6 +26,10 @@ class Constant(BaseSettings):
         "status_code": status.HTTP_401_UNAUTHORIZED,
         "detail": "Access Token不存在，请先登录",
     }
+    RESP_TOKEN_INVALID: dict = {
+        "status_code": status.HTTP_401_UNAUTHORIZED,
+        "detail": "Access Token不合法",
+    }
     RESP_TOKEN_EXPIRED: dict = {
         "status_code": status.HTTP_401_UNAUTHORIZED,
         "detail": "Access Token过期，需要重新登录",

@@ -1,6 +1,6 @@
 from collections.abc import AsyncGenerator, Awaitable, Callable
 
-from fastapi import Body, Depends, Header, HTTPException, Security
+from fastapi import Body, Depends, Header, HTTPException, Request, Security
 from fastapi.security import OAuth2PasswordBearer, SecurityScopes
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -38,10 +38,18 @@ async def get_db() -> AsyncGenerator:
 
 
 async def get_current_user(
+    request: Request,
     security_scopes: SecurityScopes,
     db: AsyncSession = Depends(get_db),
-    token: str = Depends(reusable_oauth2),
 ) -> UserAccount:
+    authorization: str | None = request.cookies.get("access_token")
+    if not authorization:
+        raise HTTPException(**CONSTANT.RESP_TOKEN_NOT_EXISTED)
+
+    scheme, _, token = authorization.partition(" ")
+    if not scheme or scheme.lower() != "bearer":
+        raise HTTPException(**CONSTANT.RESP_TOKEN_INVALID)
+
     headers = {AUTHENTICATE_HEADER: "Bearer"}
     if security_scopes.scopes:
         headers = {AUTHENTICATE_HEADER: f'Bearer scope="{security_scopes.scope_str}"'}

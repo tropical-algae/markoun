@@ -36,9 +36,6 @@ async def get_file_tree(
     return FileNode(**basic_info) if file_type in displayed_file_types else None
 
 
-p1 = "/workspace/project/markoun/data/RAG-WM/RAG-WM: An Efficient Black-Box Watermarking Approach for Retrieval-Augmented Generation of Large Language Models.md"
-
-
 async def get_local_markdown(file_path: Path) -> str:
     parent_path = file_path.parent.absolute()
     md = Markdown(renderer=MarkdownRenderer)
