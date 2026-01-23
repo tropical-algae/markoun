@@ -18,7 +18,7 @@ from markoun.common.config import settings
 from markoun.common.logging import logger
 from markoun.core.db.session import init_db_models
 
-origins = ["*"]
+# ALLOW_ORIGINS = ["*"]
 
 
 def resp_success(response_body: Any) -> Response:
@@ -58,31 +58,46 @@ async def lifespan(app: FastAPI):
 def add_middleware(app: FastAPI):
     async def log_response(request: Request, call_next):
         response = await call_next(request)
-        # return directly if not an api endpoint
+
         is_not_api: bool = not request.url.path.startswith(settings.API_PREFIX)
         is_access: bool = request.url.path.endswith("access-token")
         is_stream: bool = request.url.path.endswith("stream")
+
         if is_access or is_not_api or is_stream:
             return response
 
-        # return exception
-        response_body = [chunk async for chunk in response.body_iterator]
-        response.body_iterator = iterate_in_threadpool(iter(response_body))
-        response_body = json.loads(response_body[0].decode())
+        body_bytes = b""
+        async for chunk in response.body_iterator:
+            body_bytes += chunk
+
+        try:
+            response_body = {} if not body_bytes else json.loads(body_bytes.decode())
+        except json.JSONDecodeError:
+            return Response(
+                content=body_bytes,
+                status_code=response.status_code,
+                headers=dict(response.headers),
+                media_type=response.media_type,
+            )
+
         if isinstance(response_body, dict) and response_body.get("is_exception", False):
-            return resp_error(response_body)
+            new_response = resp_error(response_body)
+        else:
+            new_response = resp_success(response_body)
 
-        response_body = [chunk async for chunk in response.body_iterator]
-        response.body_iterator = iterate_in_threadpool(iter(response_body))
-        response_body = json.loads(response_body[0].decode())
+        for key, value in response.headers.items():
+            if key.lower() not in ["content-length", "content-type"]:
+                new_response.headers[key] = value
 
-        return resp_success(response_body)
+        return new_response
 
     app.add_middleware(BaseHTTPMiddleware, dispatch=log_response)
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=origins,
+        allow_origins=settings.TRUSTED_ORIGINS,
+        # allow_origin_regex=r"https?://.*",
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
+        max_age=60 * 60 * 12,
     )

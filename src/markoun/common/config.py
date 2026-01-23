@@ -23,6 +23,8 @@ class SysSetting(BaseSettings):
     API_PREFIX: str = "/api/v1"
     DEBUG: bool = False
 
+    TRUSTED_ORIGINS: list[str] = ["http://localhost:8080"]
+
 
 class BasicSetting(BaseSettings):
     # database
