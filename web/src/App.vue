@@ -1,10 +1,10 @@
 <template>
-  <!-- <Workspace /> -->
-  <Login />
+  <RouterView v-slot="{ Component }">
+    <component :is="Component" :key="$route.fullPath" />
+  </RouterView>
 </template>
 
 <script setup lang="ts">
-import Workspace from "@/views/Workspace.vue"
-import Login from "@/views/Login.vue";
+import { RouterView } from "vue-router";
 
 </script>

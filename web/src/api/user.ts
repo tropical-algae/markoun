@@ -1,5 +1,5 @@
 import request from '@/scripts/utils/request'
-import type { LoginResponse } from '@/scripts/types'
+import type { LoginResponse, User } from '@/scripts/types'
 
 export interface LoginForm {
   username: string
@@ -28,7 +28,7 @@ export function login(data: LoginForm): Promise<LoginResponse> {
 /**
  * 测试接口
  */
-export function testToken(): Promise<any> {
+export function testToken(): Promise<User> {
   return request({
     url: '/api/v1/user/test-token',
     method: 'post',

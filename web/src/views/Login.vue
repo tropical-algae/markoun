@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { reactive } from 'vue'
 import { useUserStore } from '@/scripts/stores/user'
+import router from '@/router'
 
 const userStore = useUserStore()
 
@@ -12,9 +13,9 @@ const registerForm = reactive({
   confirmPassword: "" 
 })
 
-
 const onLogin = async () => {
 	await userStore.handleLogin(loginForm)
+  router.push("/")
 	// const tl = gsap.timeline()
 	// tl.to(".auth-panel", { y: -50, opacity: 0, duration: 0.5 })
 	// 	.add(() => {

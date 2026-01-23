@@ -14,3 +14,14 @@ export interface LoginResponse {
   scopes: string[]
   status: number
 }
+
+export interface User {
+  id: string
+  email: string
+  scopes: string
+  full_name: string | null
+  is_active: boolean | null
+  is_superuser: boolean | null
+  create_date: string | null
+  profile: string | null
+}

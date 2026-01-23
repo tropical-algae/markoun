@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { login, type LoginForm } from '@/api/user'
+import { login, testToken, type LoginForm } from '@/api/user'
 
 export const useUserStore = defineStore('user', () => {
   const token = ref<string>(localStorage.getItem('access_token') || '')
@@ -19,11 +19,20 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  const checkAuth = async () => {
+    try {
+      const res = await testToken()
+      return res
+    } catch (error) {
+      return null
+    }
+  }
+
   const logout = () => {
     token.value = ''
     userInfo.value = {}
     localStorage.removeItem('access_token')
   }
 
-  return { token, userInfo, handleLogin, logout }
+  return { token, userInfo, handleLogin, checkAuth, logout }
 })
