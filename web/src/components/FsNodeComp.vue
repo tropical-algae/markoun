@@ -5,7 +5,7 @@
       :style="{ paddingLeft: depth * 12 + 'px' }"
       @click="handleClickNode"
     >
-      <div class="node-content">
+      <div class="node-content" :class="{ 'is-selected': isActive }">
         <span class="icon-disclosure">{{ isDir ? (isOpen ? '▾' : '▸') : '' }}</span>
         <span :class="{ 'file-name': !isDir, 'dir-name': isDir }">{{ node.name }}</span>
       </div>
@@ -41,7 +41,9 @@ const node = computed(() => {
   }
   return props.node;
 });
-
+const isActive = computed(() => {
+  return nodeStore.currentNode?.path === node.value.path;
+});
 const isDir = computed(() => node.value.type === 'dir');
 const normalizedChildren = computed(() => (node.value.children || []));
 
@@ -74,7 +76,3 @@ const handleClickNode = () => {
   
 };
 </script>
-
-<style scoped>
-
-</style>

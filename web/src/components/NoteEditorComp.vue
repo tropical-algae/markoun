@@ -17,10 +17,7 @@ const inspectorWidth = ref(0);
 const lastWidth = ref(300);
 const isResizing = ref(false);
 
-const noteTitle = ref("README.md")
-
 const renderedContent = computed(() => marked.parse(nodeStore.currentFile.content));
-
 
 const inspectMode = ref<'meta' | 'preview'>('meta');
 const inspectIcons = [

@@ -17,6 +17,10 @@
   transition: background-color 0.3s ease;
 }
 
+.node-content.is-selected {
+  background-color: var(--color-bg-selected);
+}
+
 .node-content:hover {
   background-color: var(--color-bg-selected);
 }
