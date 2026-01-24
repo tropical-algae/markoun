@@ -1,16 +1,18 @@
-export interface FileNode {
-  name: string;
-  path: string;
-  type: 'file' | 'directory';
-  children?: FileNode[];
-}
-
+// API response
 export interface ApiResponse<T = any> {
   status: number;
   message: string;
   timestamp: string;
   data: T;
 }
+
+export interface FsNode {
+  name: string;
+  path: string;
+  type: 'file' | 'dir';
+  children?: FsNode[];
+}
+
 
 export interface LoginResponse {
   user_id: string
@@ -29,4 +31,13 @@ export interface User {
   is_superuser: boolean | null
   create_date: string | null
   profile: string | null
+}
+
+// type wrapper
+export interface FileDetail {
+  name: string;
+  path: string;
+  suffix: string;
+  content: string;
+  meta: Record<string, string>
 }

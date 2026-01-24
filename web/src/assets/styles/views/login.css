@@ -125,10 +125,6 @@
   border-bottom-color: var(--color-text-sec);
 }
 
-.auth-form .separator-line {
-  color: var(--color-text-pri);
-} 
-
 .btn-container {
   display: flex;
   justify-content: center;

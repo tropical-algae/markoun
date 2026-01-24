@@ -1,14 +1,16 @@
 
 <script setup lang="ts">
+import gsap from 'gsap';
+import { marked } from 'marked';
 import { ref, computed } from 'vue';
 
 import PreviewIcon from "@/assets/icons/overview.svg"
 import MetaIcon from "@/assets/icons/info.svg"
 import SidebarToggleIcon from "@/assets/icons/sidebar.svg"
+import { useNodeStore } from '@/scripts/stores/note';
 
 
-import { marked } from 'marked';
-import gsap from 'gsap';
+const nodeStore = useNodeStore()
 
 const showInspector = ref(false);
 const inspectorWidth = ref(0);
@@ -16,8 +18,9 @@ const lastWidth = ref(300);
 const isResizing = ref(false);
 
 const noteTitle = ref("README.md")
-const markdown = ref('# Hello Felix\nStart editing your notes here...');
-const renderedContent = computed(() => marked.parse(markdown.value));
+
+const renderedContent = computed(() => marked.parse(nodeStore.currentFile.content));
+
 
 const inspectMode = ref<'meta' | 'preview'>('meta');
 const inspectIcons = [
@@ -27,7 +30,6 @@ const inspectIcons = [
 const sidebarIcons = [
   { icon: SidebarToggleIcon }
 ] as const
-
 
 const toggleInspector = (newMode: 'meta' | 'preview') => {
   if (showInspector.value && inspectMode.value === newMode) {
@@ -87,7 +89,7 @@ const stopResizing = () => {
           <component :is="item.icon" class="icon-btn"></component>
         </button>
       </div>
-      <span class="text-muted">{{ noteTitle }}</span>
+      <span class="text-muted">{{ nodeStore.currentFile.name }}</span>
       <div class="floating-right">
         <button 
           v-for="(item, _) in inspectIcons" 
@@ -101,7 +103,7 @@ const stopResizing = () => {
     
     <div class="editor-container">
       <textarea 
-        v-model="markdown" 
+        v-model="nodeStore.currentFile.content" 
         class="markdown-editor"
         placeholder="Start typing..."
         spellcheck="false"
@@ -131,7 +133,20 @@ const stopResizing = () => {
       <transition name="fade" mode="out-in">
         <div v-if="inspectMode === 'meta'" class="d-flex flex-column h-100 overflow-hidden p-0 small text-muted">
           <div class="inspector-title uppercase">Metadata</div>
-          <div class="note-meta"><span>Characters:</span> <span>{{ markdown.length }}</span></div>
+
+          <div class="note-meta">
+            <div class="meta-grid">
+              <div class="meta-key">characters:</div>
+              <div class="meta-value">{{ nodeStore.currentFile.content.length }}</div>
+              <template
+                v-for="(value, key) in nodeStore.currentFile.meta"
+                :key="key"
+              >
+                <div class="meta-key">{{ key }}:</div>
+                <div class="meta-value">{{ value }}</div>
+              </template> 
+            </div>
+          </div>
         </div>
 
         <div v-else class="d-flex flex-column h-100 overflow-hidden p-0">

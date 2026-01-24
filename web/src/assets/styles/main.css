@@ -62,6 +62,11 @@ body {
   }
 }
 
+.separator-line {
+  width: 100%;
+  color: var(--color-text-pri);
+} 
+
 .vertical-line {
   width: 2px;
   top: 0;

@@ -14,7 +14,7 @@
         </button>
       </div>
       <div class="file-tree-container p-2 flex-grow-1">
-        <FileNodeComp v-for="item in mockTree" :key="item.path" :node="item" :depth="1" />
+        <FsNodeComp v-for="item in nodeStore.nodeTree" :key="item.path" :node="item" :depth="1" />
       </div>
     </div>
 
@@ -32,23 +32,41 @@ import FileTreeIcon from "@/assets/icons/rectangle-list.svg"
 import SettingIcon from "@/assets/icons/settings.svg"
 
 
-import FileNodeComp from "./FileNodeComp.vue";
-import { mockTree } from "@/scripts/mock"
+import FsNodeComp from "@/components/FsNodeComp.vue";
 
-function onCreateNewPage() {
+import type { FsNode } from "@/scripts/types"
+import { useNodeStore } from "@/scripts/stores/note"
 
+const nodeStore = useNodeStore()
+refreshNodePage()
+
+console.log(nodeStore.nodeTree)
+
+function createNewPage() {
+  const newPageNode: FsNode = {
+    name: 'aaaaa',
+    path: '/aaaaa',
+    type: 'dir'
+  }
+
+  nodeStore.addNewNode(newPageNode)
 } 
 
+function refreshNodePage() {
+  nodeStore.refrestNodeTree()
+}
+
+
 const sideBtns = [
-  { icon: FileTreeIcon, func: onCreateNewPage },
-  { icon: SettingIcon, func: onCreateNewPage }
+  { icon: FileTreeIcon, func: createNewPage },
+  { icon: SettingIcon, func: createNewPage }
 ]
 
 const toolBtns = [
-  { icon: NewNoteIcon, func: onCreateNewPage },
-  { icon: NewFolderIcon, func: onCreateNewPage },
-  { icon: UploadIcon, func: onCreateNewPage },
-  { icon: TrashIcon, func: onCreateNewPage },
+  { icon: NewNoteIcon, func: createNewPage },
+  { icon: NewFolderIcon, func: createNewPage },
+  { icon: UploadIcon, func: createNewPage },
+  { icon: TrashIcon, func: createNewPage },
 
 ]
 
