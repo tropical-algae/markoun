@@ -20,7 +20,7 @@
   align-items: center;
   justify-content: center;
   position: relative;
-	border-bottom: 1px solid var(--color-accent-pri);
+	border-bottom: 1px solid var(--color-line);
   box-sizing: border-box;
 }
 
@@ -69,7 +69,7 @@
   position: relative;
   overflow: hidden; 
   transition: background-color 0.3s, border-color 0.3s;
-	/* border-left: 1px solid var(--color-accent-pri); */
+	/* border-left: 1px solid var(--color-line); */
 
   flex-shrink: 0;
 }

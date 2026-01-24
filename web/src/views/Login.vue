@@ -29,13 +29,13 @@ const onLogin = async () => {
 </script>
 
 <template>
-  <div class="auth-wrapper d-flex flex-column justify-content-center align-items-center px-4 pb-4">
+  <div class="auth-wrapper d-flex flex-column justify-content-center align-items-center">
 		<div class="site-brand d-flex align-items-center">
 			MARKOUN.
 		</div>
 
     <div class="auth-container d-flex flex-grow-1 justify-content-center align-items-center">
-      <div style="width: 100%; max-width: 480px; min-width: 320px;">
+      <div style="width: 100%; max-width: 480px; min-width: 300px;">
 
 				<h1 class="auth-title">Login</h1>
 				<form @submit.prevent="onLogin" class="auth-form">
@@ -66,6 +66,8 @@ const onLogin = async () => {
               <span>Remember me</span>
             </label>
 					</div>
+
+					<hr class="separator-line"/>
 
 					<div class="d-flex justify-content-center">
 						<button type="submit" class="auth-submit-btn">

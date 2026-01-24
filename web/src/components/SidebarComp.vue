@@ -29,6 +29,8 @@ import UploadIcon from "@/assets/icons/cloud-upload-alt.svg"
 import TrashIcon from "@/assets/icons/trash.svg"
 
 import FileTreeIcon from "@/assets/icons/rectangle-list.svg"
+import SettingIcon from "@/assets/icons/settings.svg"
+
 
 import FileNodeComp from "./FileNodeComp.vue";
 import { mockTree } from "@/scripts/mock"
@@ -39,7 +41,7 @@ function onCreateNewPage() {
 
 const sideBtns = [
   { icon: FileTreeIcon, func: onCreateNewPage },
-
+  { icon: SettingIcon, func: onCreateNewPage }
 ]
 
 const toolBtns = [

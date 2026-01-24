@@ -1,7 +1,8 @@
 .auth-wrapper {
   min-height: 100vh;
   width: 100%;
-  background-color: var(--color-text-pri);
+  padding: 0 72px 72px 72px;
+
   display: flex;
 	
   justify-content: center;
@@ -10,22 +11,24 @@
 .site-brand {
 	height: 80px;
 	width: 100%;
-	color: var(--color-bg-pri);
+	color: var(--color-text-pri);
 	font-weight: bold;
 	font-size: 2rem;
 }
 
 .auth-container {
 	width: 100%;
-  background-color: var(--color-bg-pri);
+  background-color: var(--color-bg-sec);
+  border: 1px solid var(--color-line);
+  box-sizing: border-box;
+
   padding: 20px;
-  
-  border-top-right-radius: 80px;
+  border-top-right-radius: 120px;
   border-top-left-radius: 5px;
-  border-bottom-left-radius: 5px;
+  border-bottom-left-radius: 120px;
   border-bottom-right-radius: 5px;
   
-  box-shadow: 0 -10px 20px rgba(123, 123, 123, 0.5); 
+  /* box-shadow: 0 -10px 20px rgba(123, 123, 123, 0.5);  */
 }
 
 .auth-title {
@@ -43,7 +46,7 @@
 	padding: 7px 12px;
   transition: background-color 0.3s ease;
 
-	background-color: var(--color-bg-sec);
+	background-color: var(--color-text-field);
 }
 
 
@@ -83,7 +86,7 @@
   pointer-events: none;
   z-index: -1;
   transition: background-color 0.3s ease;
-	background-color: var(--color-bg-sec);
+	background-color: var(--color-text-field);
 }
 
 .input-field {
@@ -108,7 +111,8 @@
   justify-content: space-between;
 }
 
-.auth-form .links-row button,span{
+.auth-form .links-row button,
+.auth-form .links-row span {
   font-size: 0.85rem;
   color: var(--color-text-sec);
   text-decoration: none;
@@ -120,6 +124,10 @@
 .auth-form .links-row button:hover {
   border-bottom-color: var(--color-text-sec);
 }
+
+.auth-form .separator-line {
+  color: var(--color-text-pri);
+} 
 
 .btn-container {
   display: flex;
@@ -133,7 +141,7 @@
   font-size: 1.1rem;
   font-weight: 700;
   padding: 8px 80px;
-  border-radius: 50px;
+  border-radius: 10px;
   border: none;
   cursor: pointer;
   transition: transform 0.3s ease-in-out;

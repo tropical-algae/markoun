@@ -9,12 +9,15 @@
 :root {
   --color-bg-pri: #ffffff;
   --color-bg-sec: #f9f9f9;
+
   --color-text-pri: #161616;
-  --color-text-sec: rgb(138, 138, 138);
-  --color-accent-pri: #d2d2d2;
+  --color-text-sec: #8a8a8a;
+  --color-text-field: #f0f0f0;
+  
+  --color-line: #d2d2d2;
 
   /* --color-bg-selected: rgba(45, 45, 45, 0.08); */
-  --color-bg-selected: #e5e5e5;
+  --color-bg-selected: #e1e1e1;
 
   --color-action: #79b5f2;
 }
@@ -65,19 +68,19 @@ body {
   bottom: 0;
   position: absolute;
   background-color: transparent;
-  /* background-color: var(--color-accent-pri); */
+  /* background-color: var(--color-line); */
 
   transition: border-color 0.5s ease;
   z-index: 100;
 }
 
 .vertical-line.turn-left {
-	border-left: 1px solid var(--color-accent-pri);
+	border-left: 1px solid var(--color-line);
   left: 0;
 }
 
 .vertical-line.turn-right {
-	border-right: 1px solid var(--color-accent-pri);
+	border-right: 1px solid var(--color-line);
   right: 0;
 }
 
