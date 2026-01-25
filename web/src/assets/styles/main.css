@@ -6,6 +6,7 @@
 @import url("@/assets/styles/comps/nodeEditor.css");
 
 @import url("@/assets/styles/base/inputField.css");
+@import url("@/assets/styles/base/baseModal.css");
 
 :root {
   --color-bg-pri: #ffffff;

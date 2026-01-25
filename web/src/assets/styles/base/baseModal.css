@@ -1,0 +1,46 @@
+.base-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  background-color: var(--color-backdrop); 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.base-modal-card {
+  background-color: var(--color-bg-pri);
+  box-shadow: 0 10px 40px var(--color-light-shadow);
+  border-radius: 12px;
+  overflow: hidden;
+  
+  width: fit-content;
+  height: fit-content;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.base-modal-header {
+  padding: 10px 24px;
+  border-bottom: 1px solid var(--color-line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--color-bg-sec);
+}
+
+.base-modal-title {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: var(--color-text-pri);
+}
+
+.base-modal-body {
+  padding: 24px;
+  overflow-y: auto; 
+}

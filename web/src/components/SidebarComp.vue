@@ -19,10 +19,13 @@
     </div>
 
     <div class="vertical-line turn-right"></div>
+
+    <CreateNoteModal v-model="showNewFolder"/>
   </aside>
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from "vue"
 import NewNoteIcon from "@/assets/icons/add-document.svg"
 import NewFolderIcon from "@/assets/icons/folder-plus-circle.svg"
 import UploadIcon from "@/assets/icons/cloud-upload-alt.svg"
@@ -33,14 +36,14 @@ import SettingIcon from "@/assets/icons/settings.svg"
 
 
 import FsNodeComp from "@/components/FsNodeComp.vue";
+import CreateNoteModal from "@/components/modals/CreateNoteModal.vue"
 
 import type { FsNode } from "@/scripts/types"
 import { useNodeStore } from "@/scripts/stores/note"
 
 const nodeStore = useNodeStore()
-refreshNodePage()
 
-console.log(nodeStore.nodeTree)
+const showNewFolder = ref(false);
 
 function createNewPage() {
   const newPageNode: FsNode = {
@@ -52,10 +55,6 @@ function createNewPage() {
   nodeStore.addNewNode(newPageNode)
 } 
 
-function refreshNodePage() {
-  nodeStore.refrestNodeTree()
-}
-
 
 const sideBtns = [
   { icon: FileTreeIcon, func: createNewPage },
@@ -63,12 +62,16 @@ const sideBtns = [
 ]
 
 const toolBtns = [
-  { icon: NewNoteIcon, func: createNewPage },
+  { icon: NewNoteIcon, func: () => { showNewFolder.value = true } },
   { icon: NewFolderIcon, func: createNewPage },
   { icon: UploadIcon, func: createNewPage },
   { icon: TrashIcon, func: createNewPage },
 
 ]
+
+onMounted(async () => {
+  await nodeStore.refrestNodeTree()
+})
 
 </script>
 
