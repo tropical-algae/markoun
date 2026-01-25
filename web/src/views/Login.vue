@@ -1,33 +1,3 @@
-<script setup lang="ts">
-import { reactive } from 'vue'
-import { useUserStore } from '@/scripts/stores/user'
-import router from '@/router'
-
-const userStore = useUserStore()
-
-const loginForm = reactive({ username: "", password: "", remember_me: false })
-// const registerForm = reactive({ 
-//   email: "", 
-//   username: "", 
-//   password: "", 
-//   confirmPassword: "" 
-// })
-
-const onLogin = async () => {
-	await userStore.handleLogin(loginForm)
-  router.push("/")
-	// const tl = gsap.timeline()
-	// tl.to(".auth-panel", { y: -50, opacity: 0, duration: 0.5 })
-	// 	.add(() => {
-	// 		router.push("/edit")
-	// 	})
-}
-
-// const onRegister = async () => {
-  
-// }
-</script>
-
 <template>
   <div class="auth-wrapper d-flex flex-column justify-content-center align-items-center">
 		<div class="site-brand d-flex align-items-center">
@@ -39,25 +9,24 @@ const onLogin = async () => {
 
 				<h1 class="auth-title">Login</h1>
 				<form @submit.prevent="onLogin" class="auth-form">
-					
-					<div class="auth-input-wrapper">
-						<label class="input-label">Name</label>
-						<input 
-							v-model="loginForm.username" 
-							type="text" 
-							class="input-field"
-						/>
-					</div>
 
-					<div class="auth-input-wrapper mb-3">
-						<label class="input-label">Password</label>
-						<input 
-							v-model="loginForm.password" 
-							type="password" 
-							class="input-field"
-							placeholder=""
-						/>
-					</div>
+          <InputField
+            v-model="loginForm.username"
+            label="Name"
+            type="text"
+            class="mb-3"
+            placeholder=""
+            autocomplete="text"
+          />
+
+          <InputField
+            v-model="loginForm.password"
+            ref="inputRef"
+            label="Password"
+            type="password"
+            class="mb-3"
+            placeholder=""
+          />
 
 					<div class="links-row">
             <button >Create an account</button>
@@ -81,3 +50,35 @@ const onLogin = async () => {
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+import { reactive } from 'vue'
+import { useUserStore } from '@/scripts/stores/user'
+import InputField from '@/components/common/InputField.vue'
+import router from '@/router'
+
+const userStore = useUserStore()
+
+const loginForm = reactive({ username: "", password: "", remember_me: false })
+// const registerForm = reactive({ 
+//   email: "", 
+//   username: "", 
+//   password: "", 
+//   confirmPassword: "" 
+// })
+
+const onLogin = async () => {
+  console.log(loginForm)
+	await userStore.handleLogin(loginForm)
+  router.push("/")
+	// const tl = gsap.timeline()
+	// tl.to(".auth-panel", { y: -50, opacity: 0, duration: 0.5 })
+	// 	.add(() => {
+	// 		router.push("/edit")
+	// 	})
+}
+
+// const onRegister = async () => {
+  
+// }
+</script>

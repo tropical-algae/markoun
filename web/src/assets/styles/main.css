@@ -5,6 +5,7 @@
 @import url("@/assets/styles/comps/fileNode.css");
 @import url("@/assets/styles/comps/nodeEditor.css");
 
+@import url("@/assets/styles/base/inputField.css");
 
 :root {
   --color-bg-pri: #ffffff;
@@ -15,6 +16,13 @@
   --color-text-field: #f0f0f0;
   
   --color-line: #d2d2d2;
+  --color-theme: #708e56;
+
+  /* 弹窗的布景色 */
+  --color-backdrop: rgba(0, 0, 0, 0.4); 
+
+  /* 亮色的阴影色 */
+  --color-light-shadow: rgba(255, 255, 255, 0.1);
 
   /* --color-bg-selected: rgba(45, 45, 45, 0.08); */
   --color-bg-selected: #e1e1e1;
@@ -76,7 +84,7 @@ body {
   /* background-color: var(--color-line); */
 
   transition: border-color 0.5s ease;
-  z-index: 100;
+  z-index: 9;
 }
 
 .vertical-line.turn-left {
