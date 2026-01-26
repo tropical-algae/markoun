@@ -1,7 +1,7 @@
 <template>
   <BaseModal 
     v-model="isVisible" 
-    title="New Note"
+    title="New Folder"
     @opened="handleOpened"
   >
     <div style="width: 340px;">
@@ -9,13 +9,13 @@
       <InputField
         v-model="folderName"
         ref="inputRef"
-        label="Note Name"
+        label="Folder Name"
         type="text"
         class="mb-2"
-        placeholder="e.g. my_note"
+        placeholder="e.g. temp_folder"
       />
 
-      <TextHint :icon="InfoIcon" text="Created in the selected path. No extension needed." class="mb-3 mx-1"/>
+      <TextHint :icon="InfoIcon" text="Created in the selected path." class="mb-3 mx-1"/>
       
       <div class="d-flex justify-content-end gap-2">
         <button class="btn btn-sm btn-secondary" @click="isVisible = false">Cancel</button>
@@ -56,7 +56,7 @@ const handleConfirm = async () => {
   if (!folderName.value.trim()) return;
   
   console.log(folderName.value)
-  await nodeStore.addNewNode(folderName.value, 'file')
+  await nodeStore.addNewNode(folderName.value, 'dir')
   
   // 初始化状态
   isVisible.value = false;

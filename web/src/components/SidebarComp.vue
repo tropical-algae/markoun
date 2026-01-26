@@ -20,7 +20,9 @@
 
     <div class="vertical-line turn-right"></div>
 
-    <CreateNoteModal v-model="showNewFolder"/>
+    <CreateNoteModal v-model="showNewNote"/>
+    <CreateDirModal v-model="showNewFolder"/>
+
   </aside>
 </template>
 
@@ -37,12 +39,16 @@ import SettingIcon from "@/assets/icons/settings.svg"
 
 import FsNodeComp from "@/components/FsNodeComp.vue";
 import CreateNoteModal from "@/components/modals/CreateNoteModal.vue"
+import CreateDirModal from "@/components/modals/CreateDirModal.vue"
+
 
 import { useNodeStore } from "@/scripts/stores/note"
 
 const nodeStore = useNodeStore()
 
+const showNewNote = ref(false);
 const showNewFolder = ref(false);
+
 
 function runFunction() {
   console.log('run')
@@ -55,8 +61,8 @@ const sideBtns = [
 ]
 
 const toolBtns = [
-  { icon: NewNoteIcon, func: () => { showNewFolder.value = true } },
-  { icon: NewFolderIcon, func: runFunction },
+  { icon: NewNoteIcon, func: () => { showNewNote.value = true } },
+  { icon: NewFolderIcon, func: () => { showNewFolder.value = true } },
   { icon: UploadIcon, func: runFunction },
   { icon: TrashIcon, func: runFunction },
 
