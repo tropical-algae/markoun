@@ -4,16 +4,18 @@
     title="New Note"
     @opened="handleOpened"
   >
-    <div style="width: 320px;">
+    <div style="width: 340px;">
 
       <InputField
         v-model="folderName"
         ref="inputRef"
-        label="Folder Name"
+        label="Note Name"
         type="text"
-        class="mb-3"
+        class="mb-2"
         placeholder="e.g. my_note"
       />
+
+      <TextHint :icon="InfoIcon" text="Created in the selected path. No extension needed." class="mb-3 mx-1"/>
       
       <div class="d-flex justify-content-end gap-2">
         <button class="btn btn-sm btn-secondary" @click="isVisible = false">Cancel</button>
@@ -27,7 +29,13 @@
 import { ref, computed } from 'vue';
 import BaseModal from '@/components/common/BaseModal.vue';
 import InputField from '@/components/common/InputField.vue';
+import TextHint from '@/components/common/TextHint.vue';
 
+import InfoIcon from "@/assets/icons/info.svg"
+
+import { useNodeStore } from "@/scripts/stores/note"
+
+const nodeStore = useNodeStore()
 const props = defineProps<{ modelValue: boolean }>();
 const emit = defineEmits(['update:modelValue']);
 
@@ -48,6 +56,9 @@ const handleConfirm = () => {
   if (!folderName.value.trim()) return;
   
   console.log(folderName.value)
+  nodeStore.addNewNode(folderName.value)
+
+
   
   // 初始化状态
   isVisible.value = false;

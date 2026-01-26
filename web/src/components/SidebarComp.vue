@@ -38,34 +38,27 @@ import SettingIcon from "@/assets/icons/settings.svg"
 import FsNodeComp from "@/components/FsNodeComp.vue";
 import CreateNoteModal from "@/components/modals/CreateNoteModal.vue"
 
-import type { FsNode } from "@/scripts/types"
 import { useNodeStore } from "@/scripts/stores/note"
 
 const nodeStore = useNodeStore()
 
 const showNewFolder = ref(false);
 
-function createNewPage() {
-  const newPageNode: FsNode = {
-    name: 'aaaaa',
-    path: '/aaaaa',
-    type: 'dir'
-  }
-
-  nodeStore.addNewNode(newPageNode)
+function runFunction() {
+  console.log('run')
 } 
 
 
 const sideBtns = [
-  { icon: FileTreeIcon, func: createNewPage },
-  { icon: SettingIcon, func: createNewPage }
+  { icon: FileTreeIcon, func: runFunction },
+  { icon: SettingIcon, func: runFunction }
 ]
 
 const toolBtns = [
   { icon: NewNoteIcon, func: () => { showNewFolder.value = true } },
-  { icon: NewFolderIcon, func: createNewPage },
-  { icon: UploadIcon, func: createNewPage },
-  { icon: TrashIcon, func: createNewPage },
+  { icon: NewFolderIcon, func: runFunction },
+  { icon: UploadIcon, func: runFunction },
+  { icon: TrashIcon, func: runFunction },
 
 ]
 

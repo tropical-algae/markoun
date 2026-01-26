@@ -36,14 +36,14 @@ export const useNodeStore = defineStore('note', () => {
     }
   }
 
-  const addNewNode = async (node: FsNode) => {
+  const addNewNode = async (noteName: string) => {
     // 取得当前节点位置，创建节点（后端实现）
 
-    mockTree.push({
-      name: node.name,
-      path: node.path,
-      type: node.type
-    })
+    // mockTree.push({
+    //   name: node.name,
+    //   path: node.path,
+    //   type: node.type
+    // })
 
     await refrestNodeTree()
   }

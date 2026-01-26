@@ -53,6 +53,21 @@
   border-radius: 8px;
   color: var(--color-text-pri);
   font-family: inherit;
-  font-weight: 600;
   z-index: 2;
+}
+
+.input-field-content::input-placeholder{
+	color: var(--color-text-trifle);
+}
+.input-field-content::-webkit-input-placeholder{
+	color: var(--color-text-trifle);
+}
+.input-field-content::-moz-placeholder{
+	color: var(--color-text-trifle);
+}
+.input-field-content::-moz-placeholder{
+	color: var(--color-text-trifle);
+}
+.input-field-content::-ms-input-placeholder{
+	color: var(--color-text-trifle);
 }
