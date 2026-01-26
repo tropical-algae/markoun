@@ -2,11 +2,13 @@ from typing import Union
 
 from pydantic import BaseModel
 
+from markoun.core.model.base import FsNodeType
+
 
 class FileNode(BaseModel):
     name: str
     path: str
-    type: str
+    type: FsNodeType
     suffix: str
 
 

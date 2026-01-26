@@ -20,7 +20,7 @@ router = APIRouter()
 
 
 @router.post("/access-token", response_model=LoginResponse)
-async def login_access_token(
+async def api_user_login(
     response: Response,
     db: AsyncSession = Depends(get_db),
     form_data: OAuth2PasswordRequestForm = Depends(),
@@ -69,7 +69,7 @@ async def login_access_token(
 
 
 @router.post("/logout")
-async def logout(response: Response):
+async def api_user_logout(response: Response):
     """
     User logout delete cookie
     """
@@ -82,7 +82,7 @@ async def logout(response: Response):
 
 
 @router.post("/test-token")
-async def token_test(
+async def api_test_token(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ) -> Any:
@@ -103,7 +103,7 @@ async def token_test(
 
 
 @router.post("/register", response_model=UserAccount)
-async def user_register(
+async def api_user_register(
     user: UserBasicInfo,
     db: AsyncSession = Depends(get_db),
 ) -> Any:

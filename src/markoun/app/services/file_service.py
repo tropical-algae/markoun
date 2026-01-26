@@ -2,12 +2,15 @@ from datetime import datetime
 from pathlib import Path
 
 import anyio
+from fastapi import HTTPException
 from marko import Markdown
 from marko.inline import Image, Link
 from marko.md_renderer import MarkdownRenderer
 
+from markoun.app.utils.constant import CONSTANT
 from markoun.common.config import settings
 from markoun.common.decorator import exception_handling
+from markoun.common.logging import logger
 from markoun.common.util import (
     abs_path_to_relative_path,
     aread_file,
@@ -19,6 +22,7 @@ from markoun.core.model.base import FsNodeType
 from markoun.core.model.file import FileMeta, FileNode, PathNode
 
 TIME_FORMAT = "%Y-%m-%d %H:%M"
+NOTE_SUFFIX = "md"
 
 
 @exception_handling
@@ -49,11 +53,11 @@ async def get_file_tree(
     return FileNode(**basic_info) if suffix in displayed_file_types else None
 
 
-async def get_format_markdown(abs_file_path: Path) -> str:
-    parent_path = abs_file_path.parent.resolve()
+async def get_format_markdown(abs_filepath: Path) -> str:
+    parent_path = abs_filepath.parent.resolve()
     md = Markdown(renderer=MarkdownRenderer)
 
-    content = await aread_file(abs_file_path)
+    content = await aread_file(abs_filepath)
     doc = md.parse(content)
 
     def walk(node):
@@ -76,19 +80,52 @@ async def get_format_markdown(abs_file_path: Path) -> str:
     return final_md
 
 
-def get_file_meta(abs_file_path: Path) -> FileMeta:
-    if not abs_file_path.exists():
-        raise FileNotFoundError(f"Error: {abs_file_path} is not existed")
+def get_file_meta(abs_filepath: Path) -> FileMeta:
+    if not abs_filepath.exists():
+        raise FileNotFoundError(f"Error: {abs_filepath} is not existed")
 
     def fmt(ts: float) -> str:
         return datetime.fromtimestamp(ts).strftime(TIME_FORMAT)
 
-    stat = abs_file_path.stat()
+    stat = abs_filepath.stat()
     return FileMeta(
-        path=str(abs_path_to_relative_path(abs_file_path)),
-        suffix=file_suffix(abs_file_path),
+        path=str(abs_path_to_relative_path(abs_filepath)),
+        suffix=file_suffix(abs_filepath),
         size=formated_file_size(stat.st_size),
         mtime=fmt(stat.st_mtime),
         ctime=fmt(stat.st_ctime),
         atime=fmt(stat.st_atime),
+    )
+
+
+def create_note(abs_path: Path, file_name: str) -> FileNode:
+    new_filepath = abs_path / f"{file_name}.{NOTE_SUFFIX}"
+
+    if new_filepath.exists():
+        logger.error(f"[{new_filepath} is existed]")
+        raise HTTPException(**CONSTANT.SERV_FILE_EXISTED)
+
+    new_filepath.touch()
+    return FileNode(
+        name=file_name,
+        path=str(abs_path_to_relative_path(new_filepath)),
+        type=FsNodeType.FILE,
+        suffix=NOTE_SUFFIX,
+    )
+
+
+def create_folder(abs_path: Path, folder_name: str) -> PathNode:
+    new_folder_path = abs_path / folder_name
+
+    if new_folder_path.exists():
+        logger.error(f"[{new_folder_path} is existed]")
+        raise HTTPException(**CONSTANT.SERV_FOLDER_EXISTED)
+
+    new_folder_path.mkdir()
+    return PathNode(
+        name=folder_name,
+        path=str(abs_path_to_relative_path(new_folder_path)),
+        type=FsNodeType.DIR,
+        suffix="",
+        children=[],
     )

@@ -78,6 +78,22 @@ class Constant(BaseSettings):
         "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
         "detail": "读取本地文件树失败",
     }
+    SERV_FILE_EXISTED: dict = {
+        "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+        "detail": "文件已存在",
+    }
+    SERV_FILE_CREATE_FAIL: dict = {
+        "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+        "detail": "文件创建失败",
+    }
+    SERV_FOLDER_EXISTED: dict = {
+        "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+        "detail": "文件夹已存在",
+    }
+    SERV_FOLDER_CREATE_FAIL: dict = {
+        "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+        "detail": "文件夹创建失败",
+    }
 
 
 CONSTANT = Constant()
