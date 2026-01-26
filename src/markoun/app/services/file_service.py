@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 
 import anyio
@@ -7,7 +8,10 @@ from marko.md_renderer import MarkdownRenderer
 
 from markoun.common.config import settings
 from markoun.common.util import aread_file, get_static_asset_path
-from markoun.core.model.file import FileNode, PathNode
+from markoun.core.model.base import FsNodeType
+from markoun.core.model.file import FileMeta, FileNode, PathNode
+
+TIME_FORMAT = "%Y-%m-%d %H:%M"
 
 
 async def get_file_tree(
@@ -15,12 +19,13 @@ async def get_file_tree(
 ) -> FileNode | PathNode | None:
     is_dir = await anyio.Path(current_path).is_dir()
 
-    file_type = current_path.suffix.lower().lstrip(".")
+    suffix = current_path.suffix.lower().lstrip(".")
 
     basic_info = {
         "name": current_path.stem,
         "path": str(current_path.absolute()),
-        "type": "dir" if is_dir else file_type,
+        "type": FsNodeType.DIR if is_dir else FsNodeType.FILE,
+        "suffix": suffix,
     }
 
     if is_dir:
@@ -33,10 +38,10 @@ async def get_file_tree(
         path_node.children.sort(key=lambda x: (x.type != "dir", x.name))
         return path_node
 
-    return FileNode(**basic_info) if file_type in displayed_file_types else None
+    return FileNode(**basic_info) if suffix in displayed_file_types else None
 
 
-async def get_local_markdown(file_path: Path) -> str:
+async def get_format_markdown(file_path: Path) -> str:
     parent_path = file_path.parent.absolute()
     md = Markdown(renderer=MarkdownRenderer)
 
@@ -61,3 +66,21 @@ async def get_local_markdown(file_path: Path) -> str:
 
     final_md = md.render(doc)
     return final_md
+
+
+def get_file_meta(path: Path) -> FileMeta:
+    if not path.exists():
+        raise FileNotFoundError(f"Error: {path} is not existed")
+
+    def fmt(ts: float) -> str:
+        return datetime.fromtimestamp(ts).strftime(TIME_FORMAT)
+
+    stat = path.stat()
+    return FileMeta(
+        path=str(path),
+        suffix=path.suffix,
+        size=str(stat.st_size),
+        mtime=fmt(stat.st_mtime),
+        ctime=fmt(stat.st_ctime),
+        atime=fmt(stat.st_atime),
+    )

@@ -11,3 +11,8 @@ class SystemStatusType(StrEnum):
 class SystemStatus(BaseModel):
     status: str
     version: str
+
+
+class FsNodeType(StrEnum):
+    FILE = "file"
+    DIR = "dir"

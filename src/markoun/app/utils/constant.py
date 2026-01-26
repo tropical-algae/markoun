@@ -69,5 +69,11 @@ class Constant(BaseSettings):
         "detail": "无效的模型",
     }
 
+    # 业务
+    SERV_LOAD_FILE_FAIL: dict = {
+        "status_code": status.HTTP_501_NOT_IMPLEMENTED,
+        "detail": "读取本地文件失败",
+    }
+
 
 CONSTANT = Constant()
