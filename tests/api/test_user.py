@@ -33,11 +33,11 @@ def test_user_register(client: TestClient, user: dict):
     url = f"{settings.API_PREFIX}/user/register"
 
     response = client.post(url=url, json=user)
-    tokens = response.json()
+    data = response.json()
 
     assert response.status_code == 200
-    assert response.json()["status"] == 200
-    assert tokens["data"]["full_name"] == user["full_name"]
+    assert data["status"] == 200
+    assert data["data"]["full_name"] == user["full_name"]
 
 
 @pytest.mark.run(order=3)
@@ -53,21 +53,21 @@ def test_user_login_api(client: TestClient, data_store: DataStore, user: dict):
     }
 
     response = client.post(url=url, data=login_data)
-    tokens = response.json()
+    access_token = response.cookies.get("access_token")
+    data = response.json()
 
     assert response.status_code == 200
-    assert response.json()["status"] == 200
-    assert "access_token" in tokens
-    assert tokens["access_token"]
+    assert data["status"] == 200
+    assert access_token
 
     # store token data
-    data_store.admin_token_data = tokens["access_token"]
-    data_store.admin_user_id = tokens["user_id"]
+    data_store.admin_user_id = data["user_id"]
 
 
 @pytest.mark.run(order=4)
-def test_user_token(client: TestClient, data_store: DataStore):
-    header = {"Authorization": f"Bearer {data_store.admin_token_data}"}
+def test_user_token(client: TestClient):
     url = f"{settings.API_PREFIX}/user/test-token"
-    response = client.post(url=url, headers=header)
+    response = client.post(url=url)
+    data = response.json()
     assert response.status_code == 200
+    assert data["data"]
