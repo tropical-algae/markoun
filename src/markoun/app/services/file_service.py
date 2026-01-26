@@ -7,23 +7,31 @@ from marko.inline import Image, Link
 from marko.md_renderer import MarkdownRenderer
 
 from markoun.common.config import settings
-from markoun.common.util import aread_file, get_static_asset_path
+from markoun.common.decorator import exception_handling
+from markoun.common.util import (
+    abs_path_to_relative_path,
+    aread_file,
+    file_suffix,
+    formated_file_size,
+    get_static_asset_path,
+)
 from markoun.core.model.base import FsNodeType
 from markoun.core.model.file import FileMeta, FileNode, PathNode
 
 TIME_FORMAT = "%Y-%m-%d %H:%M"
 
 
+@exception_handling
 async def get_file_tree(
     current_path: Path, displayed_file_types: set[str]
 ) -> FileNode | PathNode | None:
     is_dir = await anyio.Path(current_path).is_dir()
 
-    suffix = current_path.suffix.lower().lstrip(".")
+    suffix = file_suffix(current_path)
 
     basic_info = {
         "name": current_path.stem,
-        "path": str(current_path.absolute()),
+        "path": str(abs_path_to_relative_path(current_path.resolve())),
         "type": FsNodeType.DIR if is_dir else FsNodeType.FILE,
         "suffix": suffix,
     }
@@ -41,11 +49,11 @@ async def get_file_tree(
     return FileNode(**basic_info) if suffix in displayed_file_types else None
 
 
-async def get_format_markdown(file_path: Path) -> str:
-    parent_path = file_path.parent.absolute()
+async def get_format_markdown(abs_file_path: Path) -> str:
+    parent_path = abs_file_path.parent.resolve()
     md = Markdown(renderer=MarkdownRenderer)
 
-    content = await aread_file(file_path)
+    content = await aread_file(abs_file_path)
     doc = md.parse(content)
 
     def walk(node):
@@ -56,7 +64,7 @@ async def get_format_markdown(file_path: Path) -> str:
                 dest_path = Path(original_dest)
                 if not dest_path.is_absolute():
                     resolved_abs_path = (parent_path / dest_path).resolve()
-                    node.dest = get_static_asset_path(resolved_abs_path)
+                    node.dest = str(get_static_asset_path(resolved_abs_path))
 
         if hasattr(node, "children") and isinstance(node.children, list):
             for child in node.children:
@@ -68,18 +76,18 @@ async def get_format_markdown(file_path: Path) -> str:
     return final_md
 
 
-def get_file_meta(path: Path) -> FileMeta:
-    if not path.exists():
-        raise FileNotFoundError(f"Error: {path} is not existed")
+def get_file_meta(abs_file_path: Path) -> FileMeta:
+    if not abs_file_path.exists():
+        raise FileNotFoundError(f"Error: {abs_file_path} is not existed")
 
     def fmt(ts: float) -> str:
         return datetime.fromtimestamp(ts).strftime(TIME_FORMAT)
 
-    stat = path.stat()
+    stat = abs_file_path.stat()
     return FileMeta(
-        path=str(path),
-        suffix=path.suffix,
-        size=str(stat.st_size),
+        path=str(abs_path_to_relative_path(abs_file_path)),
+        suffix=file_suffix(abs_file_path),
+        size=formated_file_size(stat.st_size),
         mtime=fmt(stat.st_mtime),
         ctime=fmt(stat.st_ctime),
         atime=fmt(stat.st_atime),

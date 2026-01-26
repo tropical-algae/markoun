@@ -15,6 +15,8 @@ from markoun.common.logging import logger
 from markoun.core.db.session import LocalSession
 
 TOKEN_SEQUENCE = string.ascii_uppercase + string.digits
+DOUCMENT_ABS_ROOT = Path(settings.DOCUMENT_ROOT).absolute()
+SIZE_UNITS = ["B", "KB", "MB", "GB"]
 
 
 async def async_db_wrapper(func: Callable, *args, **kwargs) -> Any:
@@ -44,9 +46,32 @@ async def awrite_file(file: Path, content) -> None:
         logger.error(f"Error: Failed to write file. {err}")
 
 
-def get_static_asset_path(path: Path):
-    asset_relative_path = path.relative_to(Path(settings.DOCUMENT_ROOT).absolute())
-    return str(settings.DOCUMENT_STATIC_ASSET_PATH / asset_relative_path)
+def get_static_asset_path(abs_path: Path) -> Path:
+    asset_relative_path = abs_path.relative_to(DOUCMENT_ABS_ROOT)
+    return settings.DOCUMENT_STATIC_ASSET_PATH / asset_relative_path
+
+
+def abs_path_to_relative_path(abs_path: Path) -> Path:
+    return abs_path.relative_to(DOUCMENT_ABS_ROOT)
+
+
+def relative_path_to_abs_path(relative_path: Path) -> Path:
+    return (DOUCMENT_ABS_ROOT / relative_path).resolve()
+
+
+def file_suffix(path: Path) -> str:
+    return path.suffix.lower().lstrip(".")
+
+
+def formated_file_size(size: int) -> str:
+    value = float(size)
+
+    for unit in SIZE_UNITS[:-1]:
+        if value < 1024:
+            return f"{value:.2f} {unit}"
+        value /= 1024
+
+    return f"{value:.2f} {SIZE_UNITS[-1]}"
 
 
 def load_yaml(yaml_path: str) -> dict:

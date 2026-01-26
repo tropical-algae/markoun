@@ -71,8 +71,12 @@ class Constant(BaseSettings):
 
     # 业务
     SERV_LOAD_FILE_FAIL: dict = {
-        "status_code": status.HTTP_501_NOT_IMPLEMENTED,
+        "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
         "detail": "读取本地文件失败",
+    }
+    SERV_LOAD_TREE_FAIL: dict = {
+        "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+        "detail": "读取本地文件树失败",
     }
 
 
