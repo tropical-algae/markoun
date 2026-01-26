@@ -32,7 +32,7 @@ const props = defineProps<{
   title?: string;
 }>();
 
-const emit = defineEmits(['update:modelValue', 'close']);
+const emit = defineEmits(['update:modelValue', 'close', 'opened']);
 
 const close = () => {
   emit('update:modelValue', false);
@@ -45,7 +45,12 @@ const handleBackdropClick = () => {
 
 const onEnter = (el: Element, done: () => void) => {
   const card = el.querySelector('.base-modal-card');
-  const tl = gsap.timeline({ onComplete: done });
+  const tl = gsap.timeline({ 
+    onComplete: () => {
+      done();
+      emit('opened');
+    } 
+  });
   tl.fromTo(el, 
     { opacity: 0 },
     { 
@@ -76,13 +81,13 @@ const onLeave = (el: Element, done: () => void) => {
     opacity: 0, 
     y: 10, 
     scale: 0.98,
-    duration: 0.2, 
+    duration: 0.4, 
     ease: 'power2.in' 
   });
 
   tl.to(el, { 
     opacity: 0, 
-    duration: 0.2 
+    duration: 0.4
   }, '<');
 };
 </script>
