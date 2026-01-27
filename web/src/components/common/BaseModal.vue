@@ -67,7 +67,7 @@ const onEnter = (el: Element, done: () => void) => {
       y: 0, 
       scale: 1,
       duration: 0.4, 
-      ease: 'back.out(1.5)'
+      ease: 'back.out(1.6)'
     },
     '<'
   );

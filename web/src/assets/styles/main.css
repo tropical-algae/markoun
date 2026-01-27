@@ -18,6 +18,10 @@
 
   /* 提示文本色 */
   --color-text-trifle: #b7b7b7;
+
+  --color-bg-error: #f46b6b;
+  --color-bg-warning: #f3a245;
+
   
   --color-line: #d2d2d2;
   --color-theme: #708e56;
@@ -25,8 +29,11 @@
   /* 弹窗的布景色 */
   --color-backdrop: rgba(0, 0, 0, 0.4); 
 
-  /* 亮色的阴影色 */
-  --color-light-shadow: rgba(255, 255, 255, 0.1);
+  /* 阴影色 */
+  --color-bg-pri-shadow: rgba(255, 255, 255, 0.2);
+  --color-bg-error-shadow: rgba(244, 107, 107, 0.2);
+  --color-bg-warning-shadow: rgba(243, 162, 69, 0.2);
+  --color-text-pri-shaow: rgba(22, 22, 22, 0.2);
 
   /* --color-bg-selected: rgba(45, 45, 45, 0.08); */
   --color-bg-selected: #e1e1e1;

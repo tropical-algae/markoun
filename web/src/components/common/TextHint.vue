@@ -1,5 +1,11 @@
 <template>
-  <div class="text-hint">
+  <div 
+    class="text-hint" 
+    :style="{ 
+      color: color, 
+      fontSize: fontSize 
+    }"
+  >
     <div class="hint-icon">
       <slot name="icon">
         <component :is="icon" v-if="icon" />
@@ -15,10 +21,15 @@
 <script setup lang="ts">
 import type { Component } from 'vue';
 
-defineProps<{
+withDefaults(defineProps<{
   text?: string;
   icon?: Component;
-}>();
+  fontSize?: string;
+  color?: string;
+}>(), {
+  fontSize: '0.7rem',
+  color: 'var(--color-text-trifle)'
+});
 </script>
 
 <style scoped>
@@ -28,7 +39,6 @@ defineProps<{
   justify-content: center;
   gap: 6px;
   
-  color: var(--color-text-trifle);
   font-size: 0.7rem;
   line-height: 0.7rem;
   width: 100%;

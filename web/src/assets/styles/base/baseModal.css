@@ -13,7 +13,7 @@
 
 .base-modal-card {
   background-color: var(--color-bg-pri);
-  box-shadow: 0 10px 40px var(--color-light-shadow);
+  box-shadow: 0 10px 40px var(--color-bg-pri-shadow);
   border-radius: 12px;
   overflow: hidden;
   
