@@ -5,9 +5,12 @@ from pydantic import BaseModel
 from markoun.core.model.base import FsNodeType
 
 
-class FileNode(BaseModel):
-    name: str
+class NodeAttr(BaseModel):
     path: str
+    name: str
+
+
+class FileNode(NodeAttr):
     type: FsNodeType
     suffix: str
 

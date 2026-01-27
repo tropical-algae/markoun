@@ -16,7 +16,7 @@ from markoun.common.config import settings
 from markoun.common.logging import logger
 from markoun.common.util import relative_path_to_abs_path
 from markoun.core.db.models import UserAccount
-from markoun.core.model.file import FileDetail, FileNode, PathNode
+from markoun.core.model.file import FileDetail, FileNode, NodeAttr, PathNode
 from markoun.core.model.user import ScopeType
 
 router = APIRouter()
@@ -55,35 +55,33 @@ async def api_load_note(
         raise HTTPException(**CONSTANT.SERV_LOAD_FILE_FAIL) from err
 
 
-@router.get("/create-note", response_model=FileNode)
+@router.post("/create-note", response_model=FileNode)
 async def api_create_note(
-    path: str,
-    file_name: str,
+    note: NodeAttr,
     _: UserAccount = Security(get_current_user, scopes=[ScopeType.ADMIN, ScopeType.USER]),
 ) -> FileNode:
     try:
-        abs_filepath = relative_path_to_abs_path(Path(path))
-        file_node = create_note(abs_filepath, file_name)
+        abs_filepath = relative_path_to_abs_path(Path(note.path))
+        file_node = create_note(abs_filepath, note.name)
         return file_node
     except HTTPException:
         raise
     except Exception as err:
-        logger.error(f"[Failed to create file {path}] {err}")
+        logger.error(f"[Failed to create file {note.path}] {err}")
         raise HTTPException(**CONSTANT.SERV_FILE_CREATE_FAIL) from err
 
 
-@router.get("/create-folder", response_model=PathNode)
+@router.post("/create-folder", response_model=PathNode)
 async def api_create_folder(
-    path: str,
-    folder_name: str,
+    note: NodeAttr,
     _: UserAccount = Security(get_current_user, scopes=[ScopeType.ADMIN, ScopeType.USER]),
 ) -> PathNode:
     try:
-        abs_path = relative_path_to_abs_path(Path(path))
-        path_node = create_folder(abs_path, folder_name)
+        abs_path = relative_path_to_abs_path(Path(note.path))
+        path_node = create_folder(abs_path, note.name)
         return path_node
     except HTTPException:
         raise
     except Exception as err:
-        logger.error(f"[Failed to create folder {path}] {err}")
+        logger.error(f"[Failed to create folder {note.path}] {err}")
         raise HTTPException(**CONSTANT.SERV_FOLDER_CREATE_FAIL) from err
