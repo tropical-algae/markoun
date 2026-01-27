@@ -4,6 +4,7 @@
       @enter="onEnter"
       @leave="onLeave"
       :css="false"
+      mode="out-in" 
     >
       <div 
         v-if="currentNotice" 
@@ -24,7 +25,6 @@
 
 <script setup lang="ts">
 import gsap from 'gsap';
-
 import { computed, watch } from 'vue';
 import { useNoticeStore } from '@/scripts/stores/notice';
 import TextHint from '@/components/common/TextHint.vue';
@@ -58,30 +58,37 @@ const noticeStore = useNoticeStore();
 const currentNotice = computed(() => noticeStore.queue[0]);
 const config = computed(() => noticeMap[currentNotice.value?.type || 'info']);
 
+let timer: number | null = null;
+
 watch(currentNotice, (val) => {
+  if (timer) {
+    clearTimeout(timer);
+    timer = null;
+  }
+
   if (!val) return;
 
-  setTimeout(() => {
+  timer = setTimeout(() => {
     if (noticeStore.queue[0]?.id === val.id) {
       noticeStore.popNotice();
     }
   }, 5000);
-}, { flush: 'post' });
+});
 
 const onEnter = (el: Element, done: () => void) => {
-  gsap.set(el, { xPercent: -50, x: 0 });
+  gsap.set(el, { xPercent: -50, x: 0 }); 
   gsap.fromTo(el, 
     { 
-      y: 40,
+      y: 20,
       opacity: 0,
-      scale: 0.9
+      scale: 0.95
     },
     { 
       y: 0,
-      opacity: 1, 
+      opacity: 0.95, 
       scale: 1,
       duration: 0.4, 
-      ease: 'back.out(1.5)',
+      ease: 'back.out(1.6)',
       onComplete: done 
     }
   );
@@ -92,7 +99,7 @@ const onLeave = (el: Element, done: () => void) => {
     y: -20,
     opacity: 0, 
     scale: 0.95,
-    duration: 0.3, 
+    duration: 0.25,
     ease: 'power2.in',
     onComplete: done 
   });
@@ -102,7 +109,7 @@ const onLeave = (el: Element, done: () => void) => {
 <style scoped>
 .notice-toast {
   position: fixed;
-  bottom: 28px;
+  bottom: 42px;
   left: 50%;
   z-index: 9999;
   
@@ -111,5 +118,6 @@ const onLeave = (el: Element, done: () => void) => {
   
   max-width: 80vw;
   min-width: 200px;
+  backdrop-filter: blur(2px);
 }
 </style>

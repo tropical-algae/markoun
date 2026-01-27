@@ -20,19 +20,13 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   (response: AxiosResponse) => {
     const res = response.data
-    if (res.status === 200 || res.message === "success") {
-      return res 
-    } else {
-      const noticeStore = useNoticeStore()
-      noticeStore.pushNotice('error', `ERROR[${res.status}]: ${res.message}`)
-
-      console.error("Error:", res.message)
-      return Promise.reject(new Error(res.message || "Error"))
-    }
+    return res 
   },
   (error: any) => {
     const noticeStore = useNoticeStore()
-    noticeStore.pushNotice('error', `[ERROR]: ${error}`)
+    const status = error?.response?.data?.status ?? error.code
+    const message = error?.response?.data?.message ?? error.message
+    noticeStore.pushNotice('error', `[ERROR]: ${message} (code: ${status})`)
     return Promise.reject(error)
   }
 )
