@@ -71,11 +71,6 @@ const onLogin = async () => {
   console.log(loginForm)
 	await userStore.handleLogin(loginForm)
   router.push("/")
-	// const tl = gsap.timeline()
-	// tl.to(".auth-panel", { y: -50, opacity: 0, duration: 0.5 })
-	// 	.add(() => {
-	// 		router.push("/edit")
-	// 	})
 }
 
 // const onRegister = async () => {
