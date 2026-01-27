@@ -1,7 +1,8 @@
 from pathlib import Path
 from typing import cast
 
-from fastapi import APIRouter, HTTPException, Security
+from fastapi import APIRouter, File, HTTPException, Security, UploadFile
+from fastapi.responses import StreamingResponse
 
 from markoun.app.api.deps import get_current_user
 from markoun.app.services.file_service import (
@@ -10,6 +11,7 @@ from markoun.app.services.file_service import (
     get_file_meta,
     get_file_tree,
     get_format_markdown,
+    upload_file,
 )
 from markoun.app.utils.constant import CONSTANT
 from markoun.common.config import settings
@@ -83,5 +85,15 @@ async def api_create_folder(
     except HTTPException:
         raise
     except Exception as err:
-        logger.error(f"[Failed to create folder {note.path}] {err}")
+        logger.error(f"[Failed to create folder {note.path}]: {err}")
         raise HTTPException(**CONSTANT.SERV_FOLDER_CREATE_FAIL) from err
+
+
+@router.post("/upload")
+async def api_upload_file(path: str, file: UploadFile = File(...)):
+    abs_path = relative_path_to_abs_path(Path(path))
+    await upload_file(abs_path, file)
+    return {
+        "status": "success",
+        "filename": file.filename,
+    }

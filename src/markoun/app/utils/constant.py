@@ -94,6 +94,10 @@ class Constant(BaseSettings):
         "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
         "detail": "文件夹创建失败",
     }
+    SERV_FILE_UPLOAD_FAIL: dict = {
+        "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+        "detail": "文件上传失败",
+    }
 
 
 CONSTANT = Constant()

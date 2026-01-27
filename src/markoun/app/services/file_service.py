@@ -1,8 +1,14 @@
+import asyncio
+import json
+import shutil
+import uuid
+from collections.abc import AsyncIterator
 from datetime import datetime
 from pathlib import Path
 
+import aiofiles
 import anyio
-from fastapi import HTTPException
+from fastapi import HTTPException, UploadFile
 from marko import Markdown
 from marko.inline import Image, Link
 from marko.md_renderer import MarkdownRenderer
@@ -129,3 +135,16 @@ def create_folder(abs_path: Path, folder_name: str) -> PathNode:
         suffix="",
         children=[],
     )
+
+
+async def upload_file(abs_path: Path, file: UploadFile) -> None:
+    file_path = abs_path / (file.filename or f"file_{uuid.uuid4().hex[:8]}.png")
+    try:
+        async with aiofiles.open(file_path, "wb") as f:
+            while content := await file.read(1024 * 1024):
+                await f.write(content)
+    except Exception as err:
+        logger.exception(err)
+        raise HTTPException(**CONSTANT.SERV_FILE_UPLOAD_FAIL) from err
+    finally:
+        await file.close()
