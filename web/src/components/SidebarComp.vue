@@ -7,14 +7,14 @@
       <div class="vertical-line turn-right"></div>
     </div>
 
-    <div class="d-flex flex-column">
+    <div class="file-tree-wrapper d-flex flex-column" style="min-width: 0;">
       <div class="file-tree-header d-flex justify-content-center align-items-center gap-2">
         <button v-for="(item, _) in toolBtns" @click="item.func()">
           <component :is="item.icon" class="icon-btn"></component>
         </button>
       </div>
       <div class="file-tree-container p-2 flex-grow-1">
-        <FsNodeComp v-for="item in nodeStore.nodeTree" :key="item.path" :node="item" :depth="1" />
+        <FsNodeComp v-for="item in nodeStore.nodeTree" :key="item.path" :node="item" :depth="0" />
       </div>
     </div>
 

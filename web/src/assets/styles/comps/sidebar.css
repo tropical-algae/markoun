@@ -8,8 +8,15 @@
 
 .file-tree-header {
 	height: 50px;
+  flex-shrink: 0;
+}
+
+.file-tree-wrapper {
+  width: 250px;
+  max-width: 300px;
 }
 
 .file-tree-container {
-	overflow-y: scroll;
+  overflow-y: scroll;
+  overflow-x: hidden;
 }

@@ -2,7 +2,7 @@
 @import url("@/assets/styles/views/login.css");
 
 @import url("@/assets/styles/comps/sidebar.css");
-@import url("@/assets/styles/comps/fileNode.css");
+@import url("@/assets/styles/comps/fsNode.css");
 @import url("@/assets/styles/comps/nodeEditor.css");
 
 @import url("@/assets/styles/base/inputField.css");
@@ -13,7 +13,7 @@
   --color-bg-sec: #f9f9f9;
 
   --color-text-pri: #161616;
-  --color-text-sec: #8a8a8a;
+  --color-text-sec: #797979;
   --color-text-field: #f0f0f0;
 
   /* 提示文本色 */
