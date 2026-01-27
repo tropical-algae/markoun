@@ -15,7 +15,6 @@ export const useNodeStore = defineStore('note', () => {
     content: 'HI, THIS IS MARKOUN',
     meta: {}
   })
-  
 
   const refrestNodeTree = async () => {
     const response = await getFileTreeReq()

@@ -1,4 +1,5 @@
 import axios, { type InternalAxiosRequestConfig, type AxiosResponse } from "axios"
+import { useNoticeStore } from "@/scripts/stores/notice";
 
 
 const service = axios.create({
@@ -22,15 +23,16 @@ service.interceptors.response.use(
     if (res.status === 200 || res.message === "success") {
       return res 
     } else {
+      const noticeStore = useNoticeStore()
+      noticeStore.pushNotice('error', `ERROR[${res.status}]: ${res.message}`)
+
       console.error("Error:", res.message)
       return Promise.reject(new Error(res.message || "Error"))
     }
   },
   (error: any) => {
-    // if (error.response && error.response.status === 401) {
-    //   const userStore = useUserStore()
-    //   userStore.logout()
-    // }
+    const noticeStore = useNoticeStore()
+    noticeStore.pushNotice('error', `[ERROR]: ${error}`)
     return Promise.reject(error)
   }
 )

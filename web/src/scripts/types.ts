@@ -47,3 +47,9 @@ export interface FileDetail {
   content: string;
   meta: Record<string, string>;
 }
+
+export interface SysNotice {
+  id: number
+  type: 'error' | 'warning' | 'info'
+  message: string
+}
