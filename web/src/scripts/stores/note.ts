@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import type { FsNode, FileDetail } from "@/scripts/types";
-
+import { useNoticeStore } from "@/scripts/stores/notice";
 import { getTargetDirPath } from "@/scripts/utils/util";
 import { getFileTreeReq, getFileDetailReq, createNoteReq, createFolderReq } from "@/api/file";
 
@@ -50,9 +50,14 @@ export const useNodeStore = defineStore('note', () => {
   }
 
   const setCurrentNode = async (node: FsNode) => {
-    currentNode.value = node
-    if (node.type === 'file') {
+    if (node.type === 'file' && node.suffix.toLowerCase() === 'md') {
+      currentNode.value = node
       await refreshCurrentFile(node)
+    } else if (node.type === 'dir') {
+      currentNode.value = node
+    } else {
+      const noticeStore = useNoticeStore()
+      noticeStore.pushNotice('warning', `WARNING: The selected object cannot be opened.`)
     }
   }
 
