@@ -16,7 +16,6 @@
             type="text"
             class="mb-3"
             placeholder=""
-            autocomplete="text"
           />
 
           <InputField
@@ -39,7 +38,7 @@
 					<hr class="separator-line"/>
 
 					<div class="d-flex justify-content-center">
-						<button type="submit" class="auth-submit-btn">
+						<button type="submit" class="confirm auth-submit">
 							Sign in
 						</button>
 					</div>

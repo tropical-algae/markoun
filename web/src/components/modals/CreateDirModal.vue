@@ -18,8 +18,8 @@
       <TextHint :icon="InfoIcon" text="Created in the selected path." class="mb-3 mx-1"/>
       
       <div class="d-flex justify-content-end gap-2">
-        <button class="btn btn-sm btn-secondary" @click="isVisible = false">Cancel</button>
-        <button class="btn btn-sm btn-primary" @click="handleConfirm">Create</button>
+        <button class="cancel px-3 py-1" @click="isVisible = false">Cancel</button>
+        <button class="confirm px-3 py-1" @click="handleConfirm">Create</button>
       </div>
     </div>
   </BaseModal>

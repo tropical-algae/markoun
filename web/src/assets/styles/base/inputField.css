@@ -3,7 +3,7 @@
   border-radius: 8px;
   padding: 7px 12px;
   transition: background-color 0.3s ease;
-  background-color: var(--color-text-field);
+  background-color: var(--color-bg-field);
 }
 
 .input-field-wrapper:focus-within {
@@ -40,7 +40,7 @@
   pointer-events: none;
   z-index: -1;
   transition: background-color 0.3s ease;
-  background-color: var(--color-text-field);
+  background-color: var(--color-bg-field);
 }
 
 .input-field-content {

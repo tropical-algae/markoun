@@ -1,30 +1,31 @@
-@import url("@/assets/styles/views/workspace.css");
-@import url("@/assets/styles/views/login.css");
+@import url('@/assets/styles/views/workspace.css');
+@import url('@/assets/styles/views/login.css');
 
-@import url("@/assets/styles/comps/sidebar.css");
-@import url("@/assets/styles/comps/fsNode.css");
-@import url("@/assets/styles/comps/nodeEditor.css");
+@import url('@/assets/styles/comps/sidebar.css');
+@import url('@/assets/styles/comps/fsNode.css');
+@import url('@/assets/styles/comps/nodeEditor.css');
 
-@import url("@/assets/styles/base/inputField.css");
-@import url("@/assets/styles/base/baseModal.css");
+@import url('@/assets/styles/base/inputField.css');
+@import url('@/assets/styles/base/baseModal.css');
+@import url('@/assets/styles/base/baseComp.css');
 
 :root {
   --color-bg-pri: #ffffff;
   --color-bg-sec: #f9f9f9;
+  --color-bg-field: #f0f0f0;
+  --color-bg-muted: #999999;
+  --color-bg-selected: #e1e1e1;
 
-  --color-text-pri: #161616;
+  --color-text-pri: #242424;
   --color-text-sec: #797979;
-  --color-text-field: #f0f0f0;
 
   /* 提示文本色 */
-  --color-text-trifle: #b7b7b7;
+  --color-text-trifle: #b3b3b3;
 
   --color-bg-error: #f46b6b;
   --color-bg-warning: #f3a245;
 
-  
   --color-line: #d2d2d2;
-  --color-theme: #708e56;
 
   /* 弹窗的布景色 */
   --color-backdrop: rgba(0, 0, 0, 0.4); 
@@ -34,9 +35,6 @@
   --color-bg-error-shadow: rgba(244, 107, 107, 0.2);
   --color-bg-warning-shadow: rgba(243, 162, 69, 0.2);
   --color-text-pri-shaow: rgba(22, 22, 22, 0.2);
-
-  /* --color-bg-selected: rgba(45, 45, 45, 0.08); */
-  --color-bg-selected: #e1e1e1;
 
   --color-action: #79b5f2;
 }
@@ -81,67 +79,3 @@ body {
   }
 }
 
-.separator-line {
-  width: 100%;
-  color: var(--color-text-pri);
-} 
-
-.vertical-line {
-  width: 2px;
-  top: 0;
-  bottom: 0;
-  position: absolute;
-  background-color: transparent;
-  /* background-color: var(--color-line); */
-
-  transition: border-color 0.5s ease;
-  z-index: 9;
-}
-
-.vertical-line.turn-left {
-	border-left: 1px solid var(--color-line);
-  left: 0;
-}
-
-.vertical-line.turn-right {
-	border-right: 1px solid var(--color-line);
-  right: 0;
-}
-
-.inspector-wrapper .vertical-line {
-  cursor: col-resize;
-}
-
-.inspector-wrapper .vertical-line:hover {
-  /* background-color: var(--color-action); */
-  border-color: var(--color-action); 
-}
-
-
-button {
-  padding: 0;
-  margin: 0;
-  background-color: transparent;
-  border: none;
-}
-
-.icon-btn {
-  width: 28px; 
-  height: 28px;
-  padding: 6px; 
-  display: inline-flex; 
-  align-items: center; 
-  justify-content: center; 
-  overflow: visible;
-
-  user-select: none;
-  border-radius: 5px;
-
-  fill: var(--color-text-pri);
-
-  transition: background-color 0.3s ease;
-}
-
-.icon-btn:hover {
-  background-color: var(--color-bg-selected);
-}

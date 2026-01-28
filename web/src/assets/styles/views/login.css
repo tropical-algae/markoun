@@ -65,23 +65,9 @@
   justify-content: center;
 }
 
-.auth-submit-btn {
-  background-color: var(--color-text-pri);
-  color: var(--color-bg-pri);
-  font-family: inherit;
+.auth-submit {
   font-size: 1.1rem;
-  font-weight: 700;
+  font-weight: bold;
   padding: 8px 80px;
   border-radius: 10px;
-  border: none;
-  cursor: pointer;
-  transition: transform 0.3s ease-in-out;
-}
-
-.auth-submit-btn:hover {
-  transform: scale(1.03);
-}
-
-.auth-submit-btn:active {
-  transform: scale(0.97);
 }
