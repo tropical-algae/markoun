@@ -39,6 +39,11 @@ export interface FileDetailResponse {
   meta: Record<string, string>;
 }
 
+export interface UploadResponse {
+  status: string;
+  filename: string;
+}
+
 // type wrapper
 export interface FileDetail {
   name: string;

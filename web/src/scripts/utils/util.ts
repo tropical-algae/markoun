@@ -1,7 +1,7 @@
 import type { FsNode } from "@/scripts/types";
 
 export const getTargetDirPath = (node?: FsNode | null): string => {
-  if (!node) return '';
+  if (!node) return './';
   // dir取dir路径
   if (node.type === 'dir') {
     return node.path;

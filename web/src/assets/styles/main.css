@@ -4,6 +4,7 @@
 @import url('@/assets/styles/comps/sidebar.css');
 @import url('@/assets/styles/comps/fsNode.css');
 @import url('@/assets/styles/comps/nodeEditor.css');
+@import url('@/assets/styles/comps/uploadModal.css');
 
 @import url('@/assets/styles/base/inputField.css');
 @import url('@/assets/styles/base/baseModal.css');
@@ -36,7 +37,8 @@
   --color-bg-warning-shadow: rgba(243, 162, 69, 0.2);
   --color-text-pri-shaow: rgba(22, 22, 22, 0.2);
 
-  --color-action: #79b5f2;
+  --color-action: #4b9ff4;
+  --color-action-light: #ecf5ff;
 }
 
 	/* background-color: var(--color-bg-pri); */

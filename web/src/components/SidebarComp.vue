@@ -22,6 +22,7 @@
 
     <CreateNoteModal v-model="showNewNote"/>
     <CreateDirModal v-model="showNewFolder"/>
+    <UploadFileModal v-model="showUpload"/>
 
   </aside>
 </template>
@@ -40,6 +41,7 @@ import SettingIcon from "@/assets/icons/settings.svg"
 import FsNodeComp from "@/components/FsNodeComp.vue";
 import CreateNoteModal from "@/components/modals/CreateNoteModal.vue"
 import CreateDirModal from "@/components/modals/CreateDirModal.vue"
+import UploadFileModal from "@/components/modals/UploadFileModal.vue"
 
 
 import { useNodeStore } from "@/scripts/stores/note"
@@ -48,12 +50,11 @@ const nodeStore = useNodeStore()
 
 const showNewNote = ref(false);
 const showNewFolder = ref(false);
-
+const showUpload = ref(false);
 
 function runFunction() {
   console.log('run')
 } 
-
 
 const sideBtns = [
   { icon: FileTreeIcon, func: runFunction },
@@ -63,7 +64,7 @@ const sideBtns = [
 const toolBtns = [
   { icon: NewNoteIcon, func: () => { showNewNote.value = true } },
   { icon: NewFolderIcon, func: () => { showNewFolder.value = true } },
-  { icon: UploadIcon, func: runFunction },
+  { icon: UploadIcon, func: () => { showUpload.value = true } },
   { icon: TrashIcon, func: runFunction },
 
 ]

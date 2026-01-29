@@ -1,9 +1,15 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { computed, ref, type Ref } from "vue";
 import type { FsNode, FileDetail } from "@/scripts/types";
 import { useNoticeStore } from "@/scripts/stores/notice";
 import { getTargetDirPath } from "@/scripts/utils/util";
-import { getFileTreeReq, getFileDetailReq, createNoteReq, createFolderReq } from "@/api/file";
+import { 
+  getFileTreeReq, 
+  getFileDetailReq, 
+  createNoteReq, 
+  createFolderReq, 
+  uploadFileReq 
+} from "@/api/file";
 
 export const useNodeStore = defineStore('note', () => {
   const nodeTree = ref<FsNode[]>([])
@@ -15,6 +21,7 @@ export const useNodeStore = defineStore('note', () => {
     content: 'HI, THIS IS MARKOUN',
     meta: {}
   })
+  const currentPath = computed(() => getTargetDirPath(currentNode.value))
 
   const refrestNodeTree = async () => {
     const response = await getFileTreeReq()
@@ -37,13 +44,12 @@ export const useNodeStore = defineStore('note', () => {
   }
 
   const addNewNode = async (noteName: string, type: 'file' | 'dir') => {
-    const currentPath = getTargetDirPath(currentNode.value)
 
     console.log('current path', currentPath)
     const response =
       type === 'file'
-        ? await createNoteReq(currentPath, noteName)
-        : await createFolderReq(currentPath, noteName)
+        ? await createNoteReq(currentPath.value, noteName)
+        : await createFolderReq(currentPath.value, noteName)
 
     await refrestNodeTree()
     await setCurrentNode(response.data)
@@ -61,9 +67,18 @@ export const useNodeStore = defineStore('note', () => {
     }
   }
 
+  const uploadFile = async (file: File, uploadPercent: Ref<number, number>) => {
+    await uploadFileReq(currentPath.value, file, (percent) => {
+      uploadPercent.value = percent
+    })
+    await refrestNodeTree()
+    const noticeStore = useNoticeStore()
+    noticeStore.pushNotice('info', `File upload successfully.`)
+  }
+
   return { 
-    currentNode, currentFile, nodeTree, 
-    refrestNodeTree, refreshCurrentFile, addNewNode, setCurrentNode 
+    nodeTree, currentNode, currentFile, currentPath,  
+    refrestNodeTree, refreshCurrentFile, addNewNode, setCurrentNode, uploadFile
   }
 });
 

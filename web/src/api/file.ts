@@ -1,5 +1,5 @@
 import request from '@/scripts/utils/request'
-import type { FsNode, FileDetailResponse, ApiResponse } from '@/scripts/types'
+import type { FsNode, FileDetailResponse, UploadResponse, ApiResponse } from '@/scripts/types'
 
 
 /**
@@ -49,6 +49,34 @@ export function createFolderReq(path: string, folderName: string): Promise<ApiRe
     data: {
       path: path,
       name: folderName
+    }
+  })
+}
+
+export function uploadFileReq(
+  targetPath: string, 
+  file: File, 
+  onProgress?: (percent: number) => void
+): Promise<ApiResponse<UploadResponse>> {
+  
+  const formData = new FormData()
+  formData.append('file', file)
+
+  return request({
+    url: '/api/v1/file/upload',
+    method: 'post',
+    params: {
+      path: targetPath
+    },
+    data: formData,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    },
+    onUploadProgress: (progressEvent) => {
+      if (progressEvent.total && onProgress) {
+        const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+        onProgress(percent)
+      }
     }
   })
 }
