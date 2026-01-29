@@ -8,7 +8,8 @@ import {
   getFileDetailReq, 
   createNoteReq, 
   createFolderReq, 
-  uploadFileReq 
+  uploadFileReq, 
+  deletedItemReq
 } from "@/api/file";
 
 export const useNodeStore = defineStore('note', () => {
@@ -44,8 +45,6 @@ export const useNodeStore = defineStore('note', () => {
   }
 
   const addNewNode = async (noteName: string, type: 'file' | 'dir') => {
-
-    console.log('current path', currentPath)
     const response =
       type === 'file'
         ? await createNoteReq(currentPath.value, noteName)
@@ -67,18 +66,33 @@ export const useNodeStore = defineStore('note', () => {
     }
   }
 
-  const uploadFile = async (file: File, uploadPercent: Ref<number, number>) => {
-    await uploadFileReq(currentPath.value, file, (percent) => {
+  const uploadFile = async (file: File, uploadPercent: Ref<number, number>): Promise<string> => {
+    const response = await uploadFileReq(currentPath.value, file, (percent) => {
       uploadPercent.value = percent
     })
+    console.log(response)
     await refrestNodeTree()
     const noticeStore = useNoticeStore()
     noticeStore.pushNotice('info', `File upload successfully.`)
+    return response.data.filename
+  }
+
+  const deletedItem = async (): Promise<void> => {
+    const noticeStore = useNoticeStore()
+    if (currentNode.value === null) {
+      noticeStore.pushNotice('warning', 'No file / folder selected.')
+      return
+    } else {
+      await deletedItemReq(currentNode.value.path)
+      const nodeType = currentNode.value.type === 'file' ? 'File' : 'Folder'
+      noticeStore.pushNotice('info', `${nodeType} has been deleted.`)
+      await refrestNodeTree()
+    }
   }
 
   return { 
     nodeTree, currentNode, currentFile, currentPath,  
-    refrestNodeTree, refreshCurrentFile, addNewNode, setCurrentNode, uploadFile
+    refrestNodeTree, refreshCurrentFile, addNewNode, setCurrentNode, uploadFile, deletedItem
   }
 });
 

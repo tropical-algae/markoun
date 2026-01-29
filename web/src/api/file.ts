@@ -53,6 +53,9 @@ export function createFolderReq(path: string, folderName: string): Promise<ApiRe
   })
 }
 
+/**
+ * 上传文件
+ */
 export function uploadFileReq(
   targetPath: string, 
   file: File, 
@@ -77,6 +80,19 @@ export function uploadFileReq(
         const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total)
         onProgress(percent)
       }
+    }
+  })
+}
+
+/**
+ * 删除文件 / 目录
+ */
+export function deletedItemReq(path: string): Promise<ApiResponse<string>> {
+  return request({
+    url: '/api/v1/file/remove',
+    method: 'post',
+    params: {
+      filepath: path
     }
   })
 }

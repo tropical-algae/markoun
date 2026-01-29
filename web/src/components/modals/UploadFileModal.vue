@@ -38,7 +38,10 @@
             </div>
           </div>
         </div>
-        <p class="text-center text-secondary small">Uploading...</p>
+        <p class="text-center text-secondary small">
+          <span v-if="uploadedFileName === ''">Uploading...</span>
+          <span v-else>{{ uploadedFileName }} has been uploaded.</span>
+        </p>
       </div>
 
       <div class="d-flex justify-content-end">
@@ -71,6 +74,7 @@ const isDragOver = ref(false)
 const isUploading = ref(false)
 const uploadPercent = ref(0)
 const currentFileName = ref('')
+const uploadedFileName = ref('')
 
 const isVisible = computed({
   get: () => props.modelValue,
@@ -104,11 +108,13 @@ const handleDrop = async (e: DragEvent) => {
 const handleUpload = async (file: File) => {
   isUploading.value = true
   uploadPercent.value = 0
-  await nodeStore.uploadFile(file, uploadPercent)
+  currentFileName.value = file.name
+  uploadedFileName.value = await nodeStore.uploadFile(file, uploadPercent)
   setTimeout(() => {
     isUploading.value = false
     uploadPercent.value = 0
     currentFileName.value = ''
+    uploadedFileName.value = ''
   }, 5000)
 }
 </script>

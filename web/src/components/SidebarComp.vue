@@ -23,6 +23,7 @@
     <CreateNoteModal v-model="showNewNote"/>
     <CreateDirModal v-model="showNewFolder"/>
     <UploadFileModal v-model="showUpload"/>
+    <DeleteItemModal v-model="deleteItem"/>
 
   </aside>
 </template>
@@ -45,12 +46,14 @@ import UploadFileModal from "@/components/modals/UploadFileModal.vue"
 
 
 import { useNodeStore } from "@/scripts/stores/note"
+import DeleteItemModal from "./modals/DeleteItemModal.vue"
 
 const nodeStore = useNodeStore()
 
 const showNewNote = ref(false);
 const showNewFolder = ref(false);
 const showUpload = ref(false);
+const deleteItem = ref(false);
 
 function runFunction() {
   console.log('run')
@@ -65,8 +68,7 @@ const toolBtns = [
   { icon: NewNoteIcon, func: () => { showNewNote.value = true } },
   { icon: NewFolderIcon, func: () => { showNewFolder.value = true } },
   { icon: UploadIcon, func: () => { showUpload.value = true } },
-  { icon: TrashIcon, func: runFunction },
-
+  { icon: TrashIcon, func: () => { deleteItem.value = true } },
 ]
 
 onMounted(async () => {
