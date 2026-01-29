@@ -11,6 +11,7 @@ from markoun.app.services.file_service import (
     get_file_meta,
     get_file_tree,
     get_format_markdown,
+    remove_path,
     upload_file,
 )
 from markoun.app.utils.constant import CONSTANT
@@ -97,3 +98,10 @@ async def api_upload_file(path: str, file: UploadFile = File(...)):
         "status": "success",
         "filename": file.filename,
     }
+
+
+@router.post("/remove")
+async def api_remove_path(filepath: str):
+    abs_path = relative_path_to_abs_path(Path(filepath))
+    remove_path(abs_path)
+    return "success"

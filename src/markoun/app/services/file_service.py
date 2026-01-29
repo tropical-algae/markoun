@@ -148,3 +148,13 @@ async def upload_file(abs_path: Path, file: UploadFile) -> None:
         raise HTTPException(**CONSTANT.SERV_FILE_UPLOAD_FAIL) from err
     finally:
         await file.close()
+
+
+def remove_path(abs_path: Path) -> None:
+    if not abs_path.exists():
+        raise HTTPException(**CONSTANT.SERV_FILE_NOT_EXISTED)
+
+    if abs_path.is_file() or abs_path.is_symlink():
+        abs_path.unlink()
+    elif abs_path.is_dir():
+        shutil.rmtree(abs_path)
