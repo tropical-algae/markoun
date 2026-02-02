@@ -98,9 +98,9 @@ def get_file_meta(abs_filepath: Path) -> FileMeta:
         path=str(abs_path_to_relative_path(abs_filepath)),
         suffix=file_suffix(abs_filepath),
         size=formated_file_size(stat.st_size),
-        mtime=fmt(stat.st_mtime),
-        ctime=fmt(stat.st_ctime),
-        atime=fmt(stat.st_atime),
+        modified=fmt(stat.st_mtime),
+        changed=fmt(stat.st_ctime),
+        accessed=fmt(stat.st_atime),
     )
 
 

@@ -23,9 +23,9 @@ class FileMeta(BaseModel):
     path: str
     suffix: str
     size: str
-    mtime: str
-    ctime: str
-    atime: str
+    modified: str
+    changed: str
+    accessed: str
 
 
 class FileDetail(BaseModel):
