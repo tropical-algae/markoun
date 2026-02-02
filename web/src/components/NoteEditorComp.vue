@@ -1,13 +1,95 @@
+<template>
+  <div class="editor-wrapper" :class="{ 'is-resizing': isResizing }">
+    <header class="editor-header">
+      <div class="floating-left">
+        <button 
+          v-for="(item, _) in sidebarIcons" 
+        >
+          <component :is="item.icon" class="icon-btn"></component>
+        </button>
+      </div>
+      <span class="text-muted">{{ nodeStore.currentFile.name }}</span>
+      <div class="floating-right">
+        <button 
+          v-for="(item, _) in inspectIcons" 
+          :class="{ active: showInspector && inspectMode === item.mode }"
+          @click="toggleInspector(item.mode)"
+        >
+          <component :is="item.icon" class="icon-btn"></component>
+        </button>
+      </div>
+    </header>
+    
+    <div class="editor-container">
+      <textarea 
+        v-model="nodeStore.currentFile.content" 
+        ref="markdownEditorRef"
+        class="markdown-editor"
+        placeholder="Start typing..."
+        spellcheck="false"
+        @paste="handlePaste" 
+      ></textarea>
+    </div>
+  </div>
+
+  <aside 
+    class="inspector-wrapper" 
+    v-if="showInspector"
+    ref="inspectorRef"
+    :style="{ 
+      width: inspectorWidth +  'px', 
+      opacity: inspectorWidth > 1 ? 1 : 0 
+    }"
+    :class="{ 'is-resizing': isResizing }"
+  >
+    <div 
+      class="vertical-line turn-left" 
+      @mousedown="startResizing"
+      :class="{ 'is-resizing': isResizing }"
+    ></div>
+    <div 
+      class="inspector-container" 
+      :style="{ width: lastWidth + 'px' }"
+    >
+      <transition name="fade" mode="out-in">
+        <div v-if="inspectMode === 'meta'" class="d-flex flex-column h-100 overflow-hidden p-0 small text-muted">
+          <div class="inspector-title uppercase">Metadata</div>
+
+          <div class="note-meta">
+            <div class="meta-grid">
+              <div class="meta-key">characters:</div>
+              <div class="meta-value">{{ nodeStore.currentFile.content.length }}</div>
+              <template
+                v-for="(value, key) in nodeStore.currentFile.meta"
+                :key="key"
+              >
+                <div class="meta-key">{{ key }}:</div>
+                <div class="meta-value">{{ value }}</div>
+              </template> 
+            </div>
+          </div>
+        </div>
+
+        <div v-else class="d-flex flex-column h-100 overflow-hidden p-0">
+          <div class="inspector-title small text-muted uppercase">Preview</div>
+          <div class="note-preview" v-html="renderedContent"></div>
+        </div>
+      </transition>
+    </div>
+  </aside>
+
+</template>
 
 <script setup lang="ts">
 import gsap from 'gsap';
 import { marked } from 'marked';
-import { ref, computed } from 'vue';
+import { ref, computed, nextTick } from 'vue';
 
 import PreviewIcon from "@/assets/icons/overview.svg"
 import MetaIcon from "@/assets/icons/info.svg"
 import SidebarToggleIcon from "@/assets/icons/sidebar.svg"
 import { useNodeStore } from '@/scripts/stores/note';
+import { insertTimeToFileName } from '@/scripts/utils/util';
 
 
 const nodeStore = useNodeStore()
@@ -16,8 +98,10 @@ const showInspector = ref(false);
 const inspectorWidth = ref(0);
 const lastWidth = ref(300);
 const isResizing = ref(false);
+const uploadPercent = ref(0)
 
 const renderedContent = computed(() => marked.parse(nodeStore.currentFile.content));
+const markdownEditorRef = ref<HTMLTextAreaElement | null>(null);
 
 const inspectMode = ref<'meta' | 'preview'>('meta');
 const inspectIcons = [
@@ -74,84 +158,48 @@ const stopResizing = () => {
   document.removeEventListener('mouseup', stopResizing);
 };
 
+const handlePaste = async (event: ClipboardEvent) => {
+  const items = event.clipboardData?.items;
+  if (!items) return;
+
+  for (const item of items) {
+    if (item.type.startsWith('image/')) {
+      event.preventDefault();
+
+      const file = item.getAsFile();
+      if (file) {
+        try {
+          const newFile = new File(
+            [file], insertTimeToFileName(file.name), { type: file.type }
+          );
+          const filename = await nodeStore.uploadFile(newFile, uploadPercent)
+          insertText(`![${filename}](${filename})`);
+        } catch (e) {
+          console.log(`Failed to paste the file: ${e}`)
+        }
+      }
+      return; 
+    }
+  }
+}
+
+const insertText = (text: string) => {
+  const textarea = markdownEditorRef.value;
+  if (!textarea) return;
+
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  const originalText = nodeStore.currentFile.content;
+
+  nodeStore.currentFile.content = 
+    originalText.substring(0, start) + 
+    text + 
+    originalText.substring(end);
+
+  nextTick(() => {
+    textarea.focus();
+    const newCursorPos = start + text.length;
+    textarea.setSelectionRange(newCursorPos, newCursorPos);
+  });
+};
 </script>
-
-<template>
-  <div class="editor-wrapper" :class="{ 'is-resizing': isResizing }">
-    <header class="editor-header">
-      <div class="floating-left">
-        <button 
-          v-for="(item, _) in sidebarIcons" 
-        >
-          <component :is="item.icon" class="icon-btn"></component>
-        </button>
-      </div>
-      <span class="text-muted">{{ nodeStore.currentFile.name }}</span>
-      <div class="floating-right">
-        <button 
-          v-for="(item, _) in inspectIcons" 
-          :class="{ active: showInspector && inspectMode === item.mode }"
-          @click="toggleInspector(item.mode)"
-        >
-          <component :is="item.icon" class="icon-btn"></component>
-        </button>
-      </div>
-    </header>
-    
-    <div class="editor-container">
-      <textarea 
-        v-model="nodeStore.currentFile.content" 
-        class="markdown-editor"
-        placeholder="Start typing..."
-        spellcheck="false"
-      ></textarea>
-    </div>
-  </div>
-
-  <aside 
-    class="inspector-wrapper" 
-    v-if="showInspector"
-    ref="inspectorRef"
-    :style="{ 
-      width: inspectorWidth +  'px', 
-      opacity: inspectorWidth > 1 ? 1 : 0 
-    }"
-    :class="{ 'is-resizing': isResizing }"
-  >
-    <div 
-      class="vertical-line turn-left" 
-      @mousedown="startResizing"
-      :class="{ 'is-resizing': isResizing }"
-    ></div>
-    <div 
-      class="inspector-container" 
-      :style="{ width: lastWidth + 'px' }"
-    >
-      <transition name="fade" mode="out-in">
-        <div v-if="inspectMode === 'meta'" class="d-flex flex-column h-100 overflow-hidden p-0 small text-muted">
-          <div class="inspector-title uppercase">Metadata</div>
-
-          <div class="note-meta">
-            <div class="meta-grid">
-              <div class="meta-key">characters:</div>
-              <div class="meta-value">{{ nodeStore.currentFile.content.length }}</div>
-              <template
-                v-for="(value, key) in nodeStore.currentFile.meta"
-                :key="key"
-              >
-                <div class="meta-key">{{ key }}:</div>
-                <div class="meta-value">{{ value }}</div>
-              </template> 
-            </div>
-          </div>
-        </div>
-
-        <div v-else class="d-flex flex-column h-100 overflow-hidden p-0">
-          <div class="inspector-title small text-muted uppercase">Preview</div>
-          <div class="note-preview" v-html="renderedContent"></div>
-        </div>
-      </transition>
-    </div>
-  </aside>
-
-</template>
