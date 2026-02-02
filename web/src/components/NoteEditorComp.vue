@@ -72,7 +72,7 @@
 
         <div v-else class="d-flex flex-column h-100 overflow-hidden p-0">
           <div class="inspector-title small text-muted uppercase">Preview</div>
-          <div class="note-preview" v-html="renderedContent"></div>
+          <div class="note-preview" v-html="nodeStore.currrentRenderedFile"></div>
         </div>
       </transition>
     </div>
@@ -82,8 +82,7 @@
 
 <script setup lang="ts">
 import gsap from 'gsap';
-import { marked } from 'marked';
-import { ref, computed, nextTick } from 'vue';
+import { ref, nextTick } from 'vue';
 
 import PreviewIcon from "@/assets/icons/overview.svg"
 import MetaIcon from "@/assets/icons/info.svg"
@@ -100,7 +99,6 @@ const lastWidth = ref(300);
 const isResizing = ref(false);
 const uploadPercent = ref(0)
 
-const renderedContent = computed(() => marked.parse(nodeStore.currentFile.content));
 const markdownEditorRef = ref<HTMLTextAreaElement | null>(null);
 
 const inspectMode = ref<'meta' | 'preview'>('meta');

@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { computed, ref, type Ref } from "vue";
 import type { FsNode, FileDetail } from "@/scripts/types";
 import { useNoticeStore } from "@/scripts/stores/notice";
-import { getTargetDirPath } from "@/scripts/utils/util";
+import { getParentPath, getMediaPath } from "@/scripts/utils/util";
 import { 
   getFileTreeReq, 
   getFileDetailReq, 
@@ -11,6 +11,8 @@ import {
   uploadFileReq, 
   deletedItemReq
 } from "@/api/file";
+import marked from "@/scripts/utils/markdown";
+import { Renderer } from "marked";
 
 export const useNodeStore = defineStore('note', () => {
   const nodeTree = ref<FsNode[]>([])
@@ -22,7 +24,22 @@ export const useNodeStore = defineStore('note', () => {
     content: 'HI, THIS IS MARKOUN',
     meta: {}
   })
-  const currentPath = computed(() => getTargetDirPath(currentNode.value))
+  const currentParentPath = computed(() => getParentPath(currentNode.value))
+  const currrentRenderedFile = computed(() => renderCurrentFileContent())
+
+  const renderCurrentFileContent = (): string => {
+    const parentPath = getParentPath(currentFile.value.path);
+    const customRenderer = new Renderer();
+    customRenderer.image = ({ href, title, text }: any) => {
+      const mediaPath = getMediaPath(parentPath, href);
+      return `<img src="${mediaPath}" title="${title || ''}" alt="${text || ''}" />`;
+    };
+
+    return marked.parse(currentFile.value.content, { 
+      renderer: customRenderer,
+      async: false 
+    });
+  };
 
   const refrestNodeTree = async () => {
     const response = await getFileTreeReq()
@@ -47,8 +64,8 @@ export const useNodeStore = defineStore('note', () => {
   const addNewNode = async (noteName: string, type: 'file' | 'dir') => {
     const response =
       type === 'file'
-        ? await createNoteReq(currentPath.value, noteName)
-        : await createFolderReq(currentPath.value, noteName)
+        ? await createNoteReq(currentParentPath.value, noteName)
+        : await createFolderReq(currentParentPath.value, noteName)
 
     await refrestNodeTree()
     await setCurrentNode(response.data)
@@ -67,7 +84,7 @@ export const useNodeStore = defineStore('note', () => {
   }
 
   const uploadFile = async (file: File, uploadPercent: Ref<number, number>): Promise<string> => {
-    const response = await uploadFileReq(currentPath.value, file, (percent) => {
+    const response = await uploadFileReq(currentParentPath.value, file, (percent) => {
       uploadPercent.value = percent
     })
     console.log(response)
@@ -91,7 +108,7 @@ export const useNodeStore = defineStore('note', () => {
   }
 
   return { 
-    nodeTree, currentNode, currentFile, currentPath,  
+    nodeTree, currentNode, currentFile, currentPath: currentParentPath, currrentRenderedFile,
     refrestNodeTree, refreshCurrentFile, addNewNode, setCurrentNode, uploadFile, deletedItem
   }
 });
