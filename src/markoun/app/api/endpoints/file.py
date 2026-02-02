@@ -17,7 +17,7 @@ from markoun.app.services.file_service import (
 from markoun.app.utils.constant import CONSTANT
 from markoun.common.config import settings
 from markoun.common.logging import logger
-from markoun.common.util import relative_path_to_abs_path
+from markoun.common.util import aread_file, relative_path_to_abs_path
 from markoun.core.db.models import UserAccount
 from markoun.core.model.file import FileDetail, FileNode, NodeAttr, PathNode
 from markoun.core.model.user import ScopeType
@@ -50,7 +50,7 @@ async def api_load_note(
 ) -> FileDetail:
     try:
         abs_filepath = relative_path_to_abs_path(Path(filepath))
-        content = await get_format_markdown(abs_filepath)
+        content = await aread_file(abs_filepath)
         meta = get_file_meta(abs_filepath)
         return FileDetail(content=content, meta=meta)
     except Exception as err:
