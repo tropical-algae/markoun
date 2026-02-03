@@ -13,7 +13,7 @@
         <button 
           v-for="(item, _) in inspectIcons" 
           :class="{ active: showInspector && inspectMode === item.mode }"
-          @click="toggleInspector(item.mode)"
+          @click="item.func()"
         >
           <component :is="item.icon" class="icon-btn"></component>
         </button>
@@ -87,6 +87,8 @@ import { ref, nextTick } from 'vue';
 import PreviewIcon from "@/assets/icons/overview.svg"
 import MetaIcon from "@/assets/icons/info.svg"
 import SidebarToggleIcon from "@/assets/icons/sidebar.svg"
+import SaveIcon from "@/assets/icons/disk.svg"
+
 import { useNodeStore } from '@/scripts/stores/note';
 import { insertTimeToFileName } from '@/scripts/utils/util';
 
@@ -103,11 +105,12 @@ const markdownEditorRef = ref<HTMLTextAreaElement | null>(null);
 
 const inspectMode = ref<'meta' | 'preview'>('meta');
 const inspectIcons = [
-  { icon: MetaIcon, mode: 'meta' },
-  { icon: PreviewIcon, mode: 'preview' }
+  { icon: SaveIcon, func: async () => { await nodeStore.saveCurrentFile() }, mode: '' },
+  { icon: PreviewIcon, func: () => { toggleInspector('preview') }, mode: 'preview' },
+  { icon: MetaIcon, func: () => { toggleInspector('meta') }, mode: 'meta' },
 ] as const
 const sidebarIcons = [
-  { icon: SidebarToggleIcon }
+  { icon: SidebarToggleIcon },
 ] as const
 
 const toggleInspector = (newMode: 'meta' | 'preview') => {

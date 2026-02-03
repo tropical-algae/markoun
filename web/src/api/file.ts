@@ -57,7 +57,7 @@ export function createFolderReq(path: string, folderName: string): Promise<ApiRe
  * 上传文件
  */
 export function uploadFileReq(
-  targetPath: string, 
+  path: string, 
   file: File, 
   onProgress?: (percent: number) => void
 ): Promise<ApiResponse<UploadResponse>> {
@@ -69,7 +69,7 @@ export function uploadFileReq(
     url: '/api/v1/file/upload',
     method: 'post',
     params: {
-      path: targetPath
+      path: path
     },
     data: formData,
     headers: {
@@ -96,3 +96,18 @@ export function deletedItemReq(path: string): Promise<ApiResponse<string>> {
     }
   })
 }
+
+/**
+ * 更新文件内容
+ */
+export function saveNoteReq(path: string, content: string): Promise<ApiResponse<Record<string, string>>> {
+  return request({
+    url: '/api/v1/file/save',
+    method: 'post',
+    data: {
+      filepath: path,
+      content: content
+    }
+  })
+}
+

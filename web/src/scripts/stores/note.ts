@@ -9,7 +9,8 @@ import {
   createNoteReq, 
   createFolderReq, 
   uploadFileReq, 
-  deletedItemReq
+  deletedItemReq,
+  saveNoteReq
 } from "@/api/file";
 import marked from "@/scripts/utils/markdown";
 import { Renderer } from "marked";
@@ -94,6 +95,14 @@ export const useNodeStore = defineStore('note', () => {
     return response.data.filename
   }
 
+  const saveCurrentFile = async (): Promise<void> => {
+    const noticeStore = useNoticeStore()
+
+    const response = await saveNoteReq(currentFile.value.path, currentFile.value.content)
+    currentFile.value.meta = response.data
+    noticeStore.pushNotice('info', 'The note has been saved.')
+  } 
+
   const deletedItem = async (): Promise<void> => {
     const noticeStore = useNoticeStore()
     if (currentNode.value === null) {
@@ -109,7 +118,7 @@ export const useNodeStore = defineStore('note', () => {
 
   return { 
     nodeTree, currentNode, currentFile, currentPath: currentParentPath, currrentRenderedFile,
-    refrestNodeTree, refreshCurrentFile, addNewNode, setCurrentNode, uploadFile, deletedItem
+    refrestNodeTree, refreshCurrentFile, addNewNode, setCurrentNode, uploadFile, saveCurrentFile, deletedItem
   }
 });
 
