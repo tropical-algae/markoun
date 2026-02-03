@@ -16,11 +16,6 @@
 
 .editor-header {
   height: 48px;
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-  justify-content: center;
-  position: relative;
 	border-bottom: 1px solid var(--color-line);
   box-sizing: border-box;
 }

@@ -1,22 +1,30 @@
 <template>
   <div class="editor-wrapper" :class="{ 'is-resizing': isResizing }">
-    <header class="editor-header">
-      <div class="floating-left">
-        <button 
-          v-for="(item, _) in sidebarIcons" 
-        >
-          <component :is="item.icon" class="icon-btn"></component>
-        </button>
-      </div>
-      <span class="text-muted">{{ nodeStore.currentFile.name }}</span>
-      <div class="floating-right">
-        <button 
-          v-for="(item, _) in inspectIcons" 
-          :class="{ active: showInspector && inspectMode === item.mode }"
-          @click="item.func()"
-        >
-          <component :is="item.icon" class="icon-btn"></component>
-        </button>
+    <header class="container-fluid">
+      <div class="row align-items-center flex-nowrap g-0 editor-header">
+
+        <div class="col-auto d-flex justify-content-start flex-shrink-0 gap-2 ps-3">
+          <button v-for="item in sidebarIcons">
+            <component :is="item.icon" class="icon-btn"></component>
+          </button>
+        </div>
+
+        <div class="col px-3" style="min-width: 0;">
+          <span class="d-block text-truncate text-muted text-center">
+            {{ nodeStore.currentFile.name }}
+          </span>
+        </div>
+
+        <div class="col-auto d-flex justify-content-end flex-shrink-0 gap-2 pe-3">
+          <button 
+            v-for="item in inspectIcons" 
+            :class="{ active: showInspector && inspectMode === item.mode }"
+            @click="item.func()"
+          >
+            <component :is="item.icon" class="icon-btn"></component>
+          </button>
+        </div>
+
       </div>
     </header>
     
