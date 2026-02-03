@@ -10,7 +10,9 @@ export interface LoginForm {
 /**
  * 登录接口
  */
-export function loginReq(data: LoginForm): Promise<LoginResponse> {
+export const loginApi = (
+  data: LoginForm
+): Promise<LoginResponse> => {
   const params = new URLSearchParams()
   params.append('grant_type', 'password')
   params.append('username', data.username)
@@ -22,7 +24,7 @@ export function loginReq(data: LoginForm): Promise<LoginResponse> {
   params.append('client_secret', 'string')
 
   return request({
-    url: '/api/v1/user/access-token',
+    url: '/api/v1/auth/login',
     method: 'post',
     data: params
   })
@@ -31,10 +33,10 @@ export function loginReq(data: LoginForm): Promise<LoginResponse> {
 /**
  * 测试接口
  */
-export function testTokenReq(): Promise<ApiResponse<boolean>> {
+export function checkTokenApi(): Promise<ApiResponse<boolean>> {
   return request({
-    url: '/api/v1/user/test-token',
-    method: 'post',
+    url: '/api/v1/auth/check',
+    method: 'get',
     data: {}
   })
 }
@@ -42,9 +44,9 @@ export function testTokenReq(): Promise<ApiResponse<boolean>> {
 /**
  * 登出接口
  */
-export function logoutReq(): Promise<ApiResponse<string>> {
+export function logoutApi(): Promise<ApiResponse<string>> {
   return request({
-    url: '/api/v1/user/logout',
+    url: '/api/v1/auth/logout',
     method: 'post',
     data: {}
   })

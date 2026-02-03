@@ -3,15 +3,9 @@ import { computed, ref, type Ref } from "vue";
 import type { FsNode, FileDetail } from "@/scripts/types";
 import { useNoticeStore } from "@/scripts/stores/notice";
 import { getParentPath, getMediaPath } from "@/scripts/utils/util";
-import { 
-  getFileTreeReq, 
-  getFileDetailReq, 
-  createNoteReq, 
-  createFolderReq, 
-  uploadFileReq, 
-  deletedItemReq,
-  saveNoteReq
-} from "@/api/file";
+import { getFileContentApi, createNoteApi, uploadFileApi, saveNoteApi } from "@/api/file";
+import { getFileTreeApi, removeItemApi } from "@/api/item";
+import { createDirApi } from "@/api/dir";
 import marked from "@/scripts/utils/markdown";
 import { Renderer } from "marked";
 
@@ -43,14 +37,14 @@ export const useNodeStore = defineStore('note', () => {
   };
 
   const refrestNodeTree = async () => {
-    const response = await getFileTreeReq()
+    const response = await getFileTreeApi()
     console.log('tree', response.data)
     nodeTree.value = response.data
   }
 
   const refreshCurrentFile = async (node: FsNode) => {
     if (node.type === 'file' && node.path !== currentFile.value?.path) {
-      const response = await getFileDetailReq(node.path)
+      const response = await getFileContentApi(node.path)
       console.log(response.data)
       currentFile.value = {
         name: node.name,
@@ -65,8 +59,8 @@ export const useNodeStore = defineStore('note', () => {
   const addNewNode = async (noteName: string, type: 'file' | 'dir') => {
     const response =
       type === 'file'
-        ? await createNoteReq(currentParentPath.value, noteName)
-        : await createFolderReq(currentParentPath.value, noteName)
+        ? await createNoteApi(currentParentPath.value, noteName)
+        : await createDirApi(currentParentPath.value, noteName)
 
     await refrestNodeTree()
     await setCurrentNode(response.data)
@@ -85,7 +79,7 @@ export const useNodeStore = defineStore('note', () => {
   }
 
   const uploadFile = async (file: File, uploadPercent: Ref<number, number>): Promise<string> => {
-    const response = await uploadFileReq(currentParentPath.value, file, (percent) => {
+    const response = await uploadFileApi(currentParentPath.value, file, (percent) => {
       uploadPercent.value = percent
     })
     console.log(response)
@@ -98,7 +92,7 @@ export const useNodeStore = defineStore('note', () => {
   const saveCurrentFile = async (): Promise<void> => {
     const noticeStore = useNoticeStore()
 
-    const response = await saveNoteReq(currentFile.value.path, currentFile.value.content)
+    const response = await saveNoteApi(currentFile.value.path, currentFile.value.content)
     currentFile.value.meta = response.data
     noticeStore.pushNotice('info', 'The note has been saved.')
   } 
@@ -109,7 +103,7 @@ export const useNodeStore = defineStore('note', () => {
       noticeStore.pushNotice('warning', 'No file / folder selected.')
       return
     } else {
-      await deletedItemReq(currentNode.value.path)
+      await removeItemApi(currentNode.value.path)
       const nodeType = currentNode.value.type === 'file' ? 'File' : 'Folder'
       noticeStore.pushNotice('info', `${nodeType} has been deleted.`)
       await refrestNodeTree()

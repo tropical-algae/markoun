@@ -9,6 +9,7 @@
         v-bind="inputAttrs"
         :value="modelValue"
         class="input-field-content"
+        autocomplete="off"
         @input="handleInput" 
       />
       </div>

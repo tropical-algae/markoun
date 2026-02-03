@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { loginReq, testTokenReq, logoutReq, type LoginForm } from '@/api/user'
+import { loginApi, checkTokenApi, logoutApi, type LoginForm } from '@/api/user'
 
 export const useUserStore = defineStore('user', () => {
   const isAuthed = ref(false)
@@ -9,7 +9,7 @@ export const useUserStore = defineStore('user', () => {
 
   const handleLogin = async (loginForm: LoginForm) => {
     try {
-      const res = await loginReq(loginForm)
+      const res = await loginApi(loginForm)
       isAuthed.value = true
       isChecked.value = true
       return res
@@ -33,7 +33,7 @@ export const useUserStore = defineStore('user', () => {
     checkPromise = (async () => {
       try {
         console.log("执行后端验证...")
-        const res = await testTokenReq()
+        const res = await checkTokenApi()
         console.log(res)
         isAuthed.value = res.data
         return isAuthed.value
@@ -50,7 +50,7 @@ export const useUserStore = defineStore('user', () => {
   }
 
   const logout = async () => {
-    await logoutReq()
+    await logoutApi()
     isAuthed.value = false
     isChecked.value = false
   }
