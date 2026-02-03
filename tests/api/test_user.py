@@ -30,7 +30,7 @@ def test_system_status(client: TestClient):
     [TEMP_USER],
 )
 def test_user_register(client: TestClient, user: dict):
-    url = f"{settings.API_PREFIX}/user/register"
+    url = f"{settings.API_PREFIX}/auth/register"
 
     response = client.post(url=url, json=user)
     data = response.json()
@@ -46,7 +46,7 @@ def test_user_register(client: TestClient, user: dict):
     [TEMP_USER],
 )
 def test_user_login_api(client: TestClient, data_store: DataStore, user: dict):
-    url = f"{settings.API_PREFIX}/user/access-token"
+    url = f"{settings.API_PREFIX}/auth/login"
     login_data = {
         "username": user["full_name"],
         "password": user["password"],
@@ -66,8 +66,8 @@ def test_user_login_api(client: TestClient, data_store: DataStore, user: dict):
 
 @pytest.mark.run(order=4)
 def test_user_token(client: TestClient):
-    url = f"{settings.API_PREFIX}/user/test-token"
-    response = client.post(url=url)
+    url = f"{settings.API_PREFIX}/auth/check"
+    response = client.get(url=url)
     data = response.json()
     assert response.status_code == 200
     assert data["data"]

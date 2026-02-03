@@ -60,7 +60,7 @@ def add_middleware(app: FastAPI):
         response = await call_next(request)
 
         is_not_api: bool = not request.url.path.startswith(settings.API_PREFIX)
-        is_access: bool = request.url.path.endswith("access-token")
+        is_access: bool = request.url.path.endswith("auth/login")
         is_stream: bool = request.url.path.endswith("stream")
 
         if is_access or is_not_api or is_stream:

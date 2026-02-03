@@ -28,11 +28,11 @@ class FileMeta(BaseModel):
     accessed: str
 
 
-class FileDetail(BaseModel):
+class FileContentResponse(BaseModel):
     content: str
     meta: FileMeta
 
 
-class FileContent(BaseModel):
+class SaveFileRequest(BaseModel):
     filepath: str
     content: str

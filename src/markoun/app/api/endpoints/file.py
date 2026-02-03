@@ -10,25 +10,25 @@ from markoun.common.util import aread_file, awrite_file, relative_path_to_abs_pa
 from markoun.core.db.models import UserAccount
 from markoun.core.model.file import (
     BasicNode,
-    FileContent,
-    FileDetail,
+    FileContentResponse,
     FileMeta,
     FileNode,
+    SaveFileRequest,
 )
 from markoun.core.model.user import ScopeType
 
 router = APIRouter()
 
 
-@router.get("/load", response_model=FileDetail)
+@router.get("/load", response_model=FileContentResponse)
 async def api_load_note(
     filepath: str,
     _: UserAccount = Security(get_current_user, scopes=[ScopeType.ADMIN, ScopeType.USER]),
-) -> FileDetail:
+) -> FileContentResponse:
     abs_filepath = relative_path_to_abs_path(Path(filepath))
     content = await aread_file(abs_filepath)
     meta = get_file_meta(abs_filepath)
-    return FileDetail(content=content, meta=meta)
+    return FileContentResponse(content=content, meta=meta)
 
 
 @router.post("/create", response_model=FileNode)
@@ -43,7 +43,7 @@ async def api_create_note(
 
 @router.post("/save", response_model=FileMeta)
 async def api_save_note(
-    data: FileContent,
+    data: SaveFileRequest,
     _: UserAccount = Security(get_current_user, scopes=[ScopeType.ADMIN, ScopeType.USER]),
 ):
     abs_filepath = relative_path_to_abs_path(Path(data.filepath))

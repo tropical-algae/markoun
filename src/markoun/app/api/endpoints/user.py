@@ -19,7 +19,7 @@ from markoun.core.model.user import LoginResponse, ScopeType, TokenPayload, User
 router = APIRouter()
 
 
-@router.post("/access-token", response_model=LoginResponse)
+@router.post("/login", response_model=LoginResponse)
 async def api_user_login(
     response: Response,
     db: AsyncSession = Depends(get_db),
@@ -81,8 +81,8 @@ async def api_user_logout(response: Response):
     return "Success!"
 
 
-@router.post("/test-token")
-async def api_test_token(
+@router.get("/check")
+async def api_check_token(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ) -> Any:
