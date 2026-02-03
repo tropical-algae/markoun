@@ -37,13 +37,15 @@ async def aread_file(path: Path) -> str:
         raise
 
 
-async def awrite_file(file: Path, content) -> None:
+async def awrite_file(file: Path, content: str) -> bool:
     try:
         file.parent.mkdir(parents=True, exist_ok=True)
         async with aiofiles.open(file, mode="w", encoding="utf-8") as f:
             await f.write(content)
+        return True
     except Exception as err:
         logger.error(f"Error: Failed to write file. {err}")
+        return False
 
 
 def get_static_asset_path(abs_path: Path) -> Path:

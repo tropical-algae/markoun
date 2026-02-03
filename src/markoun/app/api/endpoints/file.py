@@ -17,9 +17,16 @@ from markoun.app.services.file_service import (
 from markoun.app.utils.constant import CONSTANT
 from markoun.common.config import settings
 from markoun.common.logging import logger
-from markoun.common.util import aread_file, relative_path_to_abs_path
+from markoun.common.util import aread_file, awrite_file, relative_path_to_abs_path
 from markoun.core.db.models import UserAccount
-from markoun.core.model.file import FileDetail, FileNode, NodeAttr, PathNode
+from markoun.core.model.file import (
+    FileContent,
+    FileDetail,
+    FileMeta,
+    FileNode,
+    NodeAttr,
+    PathNode,
+)
 from markoun.core.model.user import ScopeType
 
 router = APIRouter()
@@ -105,3 +112,13 @@ async def api_remove_path(filepath: str):
     abs_path = relative_path_to_abs_path(Path(filepath))
     remove_path(abs_path)
     return "success"
+
+
+@router.post("/save", response_model=FileMeta)
+async def api_update_file(data: FileContent):
+    abs_filepath = relative_path_to_abs_path(Path(data.filepath))
+    status = await awrite_file(abs_filepath, data.content)
+    meta = get_file_meta(abs_filepath)
+    if not status:
+        raise HTTPException(**CONSTANT.SERV_FILE_SAVE_FAIL)
+    return meta

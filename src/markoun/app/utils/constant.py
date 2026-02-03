@@ -102,6 +102,10 @@ class Constant(BaseSettings):
         "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
         "detail": "文件不存在",
     }
+    SERV_FILE_SAVE_FAIL: dict = {
+        "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+        "detail": "文件保存失败",
+    }
 
 
 CONSTANT = Constant()

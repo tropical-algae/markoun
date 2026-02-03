@@ -31,3 +31,8 @@ class FileMeta(BaseModel):
 class FileDetail(BaseModel):
     content: str
     meta: FileMeta
+
+
+class FileContent(BaseModel):
+    filepath: str
+    content: str
