@@ -5,18 +5,18 @@ from pydantic import BaseModel
 from markoun.core.model.base import FsNodeType
 
 
-class NodeAttr(BaseModel):
+class BasicNode(BaseModel):
     path: str
     name: str
 
 
-class FileNode(NodeAttr):
+class FileNode(BasicNode):
     type: FsNodeType
     suffix: str
 
 
-class PathNode(FileNode):
-    children: list[Union["FileNode", "PathNode"]]
+class DirNode(FileNode):
+    children: list[Union["FileNode", "DirNode"]]
 
 
 class FileMeta(BaseModel):

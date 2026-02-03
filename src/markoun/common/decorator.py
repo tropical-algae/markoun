@@ -2,12 +2,13 @@ import asyncio
 import functools
 import inspect
 from collections.abc import Callable
-from typing import Any
+
+from fastapi import HTTPException
 
 from markoun.common.logging import logger
 
 
-def exception_handling(func: Callable | None = None):
+def exception_handling(http_response: dict):
     """异常捕获装饰器，可用于函数/类方法，支持同步和异步函数
 
     Args:
@@ -27,9 +28,11 @@ def exception_handling(func: Callable | None = None):
             )
             try:
                 return await inner_func(*args, **kwargs)
-            except Exception as err:
-                logger.error(f"{err} Failed to run {func_path}.")
+            except HTTPException:
                 raise
+            except Exception as err:
+                logger.exception(f"[Failed to run {func_path}] {err}")
+                raise HTTPException(**http_response) from err
 
         @functools.wraps(inner_func)
         def sync_wrapper(*args, **kwargs):
@@ -40,12 +43,12 @@ def exception_handling(func: Callable | None = None):
             )
             try:
                 return inner_func(*args, **kwargs)
-            except Exception as err:
-                logger.error(f"{err} Failed to run {func_path}.")
+            except HTTPException:
                 raise
+            except Exception as err:
+                logger.exception(f"[Failed to run {func_path}] {err}")
+                raise HTTPException(**http_response) from err
 
         return async_wrapper if is_coroutine else sync_wrapper
 
-    if callable(func):
-        return decorator(func)
     return decorator

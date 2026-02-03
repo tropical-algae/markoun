@@ -32,10 +32,10 @@ def verift_access_token(token: str | None, headers: dict | None = None):
         payload = TokenPayload.model_validate(decoded_token)
         return payload
     except (exceptions.JWTError, ValidationError) as err:
-        logger.error(f"Security verification failed: {err}")
+        logger.exception(f"Security verification failed: {err}")
         raise HTTPException(headers=headers, **CONSTANT.RESP_TOKEN_VERIFY_ERR) from err
     except ExpiredSignatureError as err:
-        logger.error(f"Token expired: {err}")
+        logger.exception(f"Token expired: {err}")
         raise HTTPException(headers=headers, **CONSTANT.RESP_TOKEN_EXPIRED) from err
 
 

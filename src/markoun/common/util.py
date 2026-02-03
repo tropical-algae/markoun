@@ -9,7 +9,9 @@ from typing import Any
 
 import aiofiles
 import yaml
+from fastapi import HTTPException
 
+from markoun.app.utils.constant import CONSTANT
 from markoun.common.config import settings
 from markoun.common.logging import logger
 from markoun.core.db.session import LocalSession
@@ -27,30 +29,26 @@ async def async_db_wrapper(func: Callable, *args, **kwargs) -> Any:
         return None
 
 
-async def aread_file(path: Path) -> str:
+async def aread_file(filepath: Path) -> str:
     try:
-        async with aiofiles.open(str(path), encoding="utf-8") as f:
+        async with aiofiles.open(str(filepath), encoding="utf-8") as f:
             content = await f.read()
             return content
-    except FileNotFoundError:
-        logger.error("Error: The file was not found.")
-        raise
-
-
-async def awrite_file(file: Path, content: str) -> bool:
-    try:
-        file.parent.mkdir(parents=True, exist_ok=True)
-        async with aiofiles.open(file, mode="w", encoding="utf-8") as f:
-            await f.write(content)
-        return True
     except Exception as err:
-        logger.error(f"Error: Failed to write file. {err}")
-        return False
+        logger.exception(f"[Failed to read file {filepath}] {err}")
+        raise HTTPException(**CONSTANT.SERV_READ_FILE_FAIL) from err
 
 
-def get_static_asset_path(abs_path: Path) -> Path:
-    asset_relative_path = abs_path.relative_to(DOUCMENT_ABS_ROOT)
-    return settings.DOCUMENT_STATIC_ASSET_PATH / asset_relative_path
+async def awrite_file(filepath: Path, content: str) -> None:
+    if not filepath.exists():
+        logger.error(f"[File {filepath} is not existed]")
+        raise HTTPException(**CONSTANT.SERV_FILE_NOT_EXISTED)
+    try:
+        async with aiofiles.open(filepath, mode="w", encoding="utf-8") as f:
+            await f.write(content)
+    except Exception as err:
+        logger.exception(f"[Failed to write file {filepath}] {err}")
+        raise HTTPException(**CONSTANT.SERV_FILE_SAVE_FAIL) from err
 
 
 def abs_path_to_relative_path(abs_path: Path) -> Path:
