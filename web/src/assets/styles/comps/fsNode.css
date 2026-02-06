@@ -1,14 +1,15 @@
 
 .node-wrapper {
-  padding: 3px 6px;
-  font-size: 13px;
+  /* padding: 3px 6px; */
+  margin: 0 0 4px 0;
+  font-size: 0.8rem;
   color: var(--color-text-pri);
   width: 100%; 
   box-sizing: border-box;
 }
 
 .node-content {
-  padding: 3px 6px;
+  padding: 2px 6px;
   cursor: pointer;
   border-radius: 5px;
   display: flex;
@@ -19,12 +20,6 @@
   transition: background-color 0.3s ease;
 }
 
-.node-content .icon-disclosure {
-  width: 12px;
-  flex-shrink: 0; 
-  text-align: center;
-}
-
 .node-text-wrapper {
   flex: 1;
   min-width: 0; 
@@ -33,20 +28,18 @@
 
 .node-text-wrapper .file-name, 
 .node-text-wrapper .dir-name {
+  padding: 2px 3px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   width: 100%; 
   display: block;
+  line-height: 1rem;
 }
 
 .node-text-wrapper .file-name { 
   color: var(--color-text-sec);
   transition: color 0.3s ease;
-}
-
-.node-text-wrapper .dir-name { 
-  font-weight: 500; 
 }
 
 .node-tag {
@@ -72,4 +65,23 @@
 .node-content.is-selected,
 .node-content:hover {
   background-color: var(--color-bg-selected);
+}
+
+.rename-input {
+  background-color: var(--color-bg-field);
+  width: 100%;
+  border: none;
+  outline: none;
+  padding: 2px 3px;
+  margin: 0;
+  border-radius: 2px;
+  color: var(--color-text-pri);
+  font-family: inherit;
+  line-height: 1rem;
+}
+
+.node-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
 }

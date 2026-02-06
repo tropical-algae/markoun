@@ -4,23 +4,27 @@ import type { FsNode, FileDetail } from "@/scripts/types";
 import { useNoticeStore } from "@/scripts/stores/notice";
 import { getParentPath, getMediaPath } from "@/scripts/utils/util";
 import { getFileContentApi, createNoteApi, uploadFileApi, saveNoteApi } from "@/api/file";
-import { getFileTreeApi, removeItemApi } from "@/api/item";
+import { getFileTreeApi, removeItemApi, renameItemApi } from "@/api/item";
 import { createDirApi } from "@/api/dir";
 import marked from "@/scripts/utils/markdown";
 import { Renderer } from "marked";
 
 export const useNodeStore = defineStore('note', () => {
-  const nodeTree = ref<FsNode[]>([])
-  const currentNode = ref<FsNode | null>(null)
-  const currentFile = ref<FileDetail>({
+  const defaultFileContent = {
     name: 'WELCOME',
     path: '',
     suffix: '',
     content: 'HI, THIS IS MARKOUN',
     meta: {}
-  })
+  }
+
+  const nodeTree = ref<FsNode[]>([])
+  const currentNode = ref<FsNode | null>(null)
+  const currentFile = ref<FileDetail>(defaultFileContent)
   const currentParentPath = computed(() => getParentPath(currentNode.value))
   const currrentRenderedFile = computed(() => renderCurrentFileContent())
+
+  const noticeStore = useNoticeStore()
 
   const renderCurrentFileContent = (): string => {
     const parentPath = getParentPath(currentFile.value.path);
@@ -73,7 +77,6 @@ export const useNodeStore = defineStore('note', () => {
     } else if (node.type === 'dir') {
       currentNode.value = node
     } else {
-      const noticeStore = useNoticeStore()
       noticeStore.pushNotice('warning', `WARNING: The selected object cannot be opened.`)
     }
   }
@@ -84,21 +87,17 @@ export const useNodeStore = defineStore('note', () => {
     })
     console.log(response)
     await refrestNodeTree()
-    const noticeStore = useNoticeStore()
     noticeStore.pushNotice('info', `File upload successfully.`)
     return response.data.filename
   }
 
   const saveCurrentFile = async (): Promise<void> => {
-    const noticeStore = useNoticeStore()
-
     const response = await saveNoteApi(currentFile.value.path, currentFile.value.content)
     currentFile.value.meta = response.data
     noticeStore.pushNotice('info', 'The note has been saved.')
   } 
 
   const deletedItem = async (): Promise<void> => {
-    const noticeStore = useNoticeStore()
     if (currentNode.value === null) {
       noticeStore.pushNotice('warning', 'No file / folder selected.')
       return
@@ -110,9 +109,17 @@ export const useNodeStore = defineStore('note', () => {
     }
   }
 
+  const renameNode = async (path: string, new_name: string): Promise<void> => {
+    if (currentNode?.value?.path == path) currentNode.value = null;
+    if (currentFile.value.path == path) currentFile.value = defaultFileContent
+    await renameItemApi(path, new_name)
+    noticeStore.pushNotice('info', "Rename successful!")
+    await refrestNodeTree()
+  }
+
   return { 
     nodeTree, currentNode, currentFile, currentPath: currentParentPath, currrentRenderedFile,
-    refrestNodeTree, refreshCurrentFile, addNewNode, setCurrentNode, uploadFile, saveCurrentFile, deletedItem
+    refrestNodeTree, refreshCurrentFile, addNewNode, setCurrentNode, uploadFile, saveCurrentFile, deletedItem, renameNode
   }
 });
 

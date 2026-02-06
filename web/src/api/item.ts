@@ -25,3 +25,20 @@ export const getFileTreeApi = (): Promise<ApiResponse<FsNode[]>> => {
     method: 'get',
   })
 }
+
+/**
+ * 重命名文件/文件夹
+ */
+export const renameItemApi = (
+  path: string, 
+  new_name: string
+): Promise<ApiResponse<string>> => {
+  return request({
+    url: '/api/v1/item/rename',
+    method: 'post',
+    data: {
+      path: path,
+      new_name: new_name
+    }
+  })
+}
