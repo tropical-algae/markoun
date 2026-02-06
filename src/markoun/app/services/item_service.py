@@ -35,7 +35,14 @@ async def get_file_tree(
             if child_node:
                 path_node.children.append(child_node)
 
-        path_node.children.sort(key=lambda x: (x.type != "dir", x.name))
+        path_node.children.sort(
+            key=lambda x: (
+                x.type != FsNodeType.DIR,
+                x.suffix.lower() != "md",
+                x.suffix,
+                x.name.lower(),
+            )
+        )
         return path_node
 
     return FileNode(**basic_info) if suffix in displayed_file_types else None
