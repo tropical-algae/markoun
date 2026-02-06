@@ -33,6 +33,11 @@ class FileContentResponse(BaseModel):
     meta: FileMeta
 
 
-class SaveFileRequest(BaseModel):
+class FileSaveRequest(BaseModel):
     filepath: str
     content: str
+
+
+class ItemRenameRequest(BaseModel):
+    path: str
+    new_name: str

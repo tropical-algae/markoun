@@ -51,3 +51,13 @@ def remove_item(abs_path: Path) -> None:
         abs_path.unlink()
     elif abs_path.is_dir():
         shutil.rmtree(abs_path)
+
+
+def rename_item(path: str | Path, new_name: str) -> None:
+    path = Path(path)
+    if not path.exists():
+        logger.error(f"Failed to rename {path}, file not existed!")
+        raise HTTPException(**CONSTANT.SERV_FILE_NOT_EXISTED)
+
+    new_path = path.with_stem(new_name)
+    path.rename(new_path)

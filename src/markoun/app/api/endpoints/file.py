@@ -13,7 +13,7 @@ from markoun.core.model.file import (
     FileContentResponse,
     FileMeta,
     FileNode,
-    SaveFileRequest,
+    FileSaveRequest,
 )
 from markoun.core.model.user import ScopeType
 
@@ -43,7 +43,7 @@ async def api_create_note(
 
 @router.post("/save", response_model=FileMeta)
 async def api_save_note(
-    data: SaveFileRequest,
+    data: FileSaveRequest,
     _: UserAccount = Security(get_current_user, scopes=[ScopeType.ADMIN, ScopeType.USER]),
 ):
     abs_filepath = relative_path_to_abs_path(Path(data.filepath))
