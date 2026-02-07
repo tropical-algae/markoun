@@ -25,14 +25,13 @@
   right: 0;
 }
 
-.inspector-wrapper .vertical-line {
+.vertical-line.col-drag {
   cursor: col-resize;
 }
 
-.inspector-wrapper .vertical-line:hover {
-  /* background-color: var(--color-action); */
+/* .inspector-wrapper .vertical-line:hover {
   border-color: var(--color-action); 
-}
+} */
 
 .icon-btn {
   width: 28px; 
@@ -80,4 +79,11 @@ button.confirm {
 button.cancel:hover,
 button.confirm:hover {
   opacity: 0.8;
+}
+
+/* 拉宽边线 */
+
+.is-resizing {
+  user-select: none;
+  cursor: col-resize;
 }

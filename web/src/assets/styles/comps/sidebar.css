@@ -1,22 +1,32 @@
-.sidebar-core {
+.sidebar-wrapper {
+  height: 100%;
   position: relative;
+  user-select: none; 
 }
 
 .sidebar-container {
-  position: relative;
-}
-
-.file-tree-header {
-	height: 50px;
-  flex-shrink: 0;
+  z-index: 2;
+  background-color: var(--color-bg-sec);
+  border-right: 1px solid var(--color-line);
 }
 
 .file-tree-wrapper {
-  width: 250px;
-  max-width: 300px;
+  overflow: hidden; 
+  position: relative;
 }
 
-.file-tree-container {
-  overflow-y: scroll;
-  overflow-x: hidden;
+.anim-width {
+  transition: width 0.3s ease;
+}
+
+.sub-sidebar-container {
+  overflow: hidden;
+  height: 100%;
+  position: relative;
+}
+
+.sub-sidebar-inner {
+  height: 100%;
+  min-width: 220px; 
+  white-space: nowrap;
 }

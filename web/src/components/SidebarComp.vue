@@ -1,79 +1,106 @@
 <template>
-  <aside class="sidebar-container d-flex flex-row">
-    <div class="sidebar-core d-flex flex-column gap-2 p-2">
+  <aside class="sidebar-wrapper d-flex flex-row">
+    <div class="sidebar-container d-flex flex-column gap-2 px-2">
+      <header class="container-fluid p-0">
+        <div class="row align-items-center justify-content-center flex-nowrap g-0 container-header">
+          <button @click="toggleSubSidebar()">
+            <component :is="SidebarToggleIcon" class="icon-btn"></component>
+          </button>
+        </div>
+      </header>
+      
       <button v-for="(item, _) in sideBtns" @click="item.func()">
         <component :is="item.icon" class="icon-btn"></component>
       </button>
       <div class="vertical-line turn-right"></div>
     </div>
 
-    <div class="file-tree-wrapper d-flex flex-column" style="min-width: 0;">
-      <div class="file-tree-header d-flex justify-content-center align-items-center gap-2">
-        <button v-for="(item, _) in toolBtns" @click="item.func()">
-          <component :is="item.icon" class="icon-btn"></component>
-        </button>
-      </div>
-      <div class="file-tree-container p-2 flex-grow-1">
-        <FsNodeComp v-for="item in nodeStore.nodeTree" :key="item.path" :node="item" :depth="0" />
+    <div 
+      class="sub-sidebar-container" 
+      :class="{ 'anim-width': !isSubSidebarResizing }"
+      :style="{ width: currentWidth }"
+    >
+      <div 
+        class="sub-sidebar-inner d-flex flex-column pt-2"
+        :style="{ width: subSidebarWidth + 'px' }"
+      >
+        <FileTreeComp v-if="currentMode === SidebarMode.FileTree" />
+        <div v-else></div>
       </div>
     </div>
 
-    <div class="vertical-line turn-right"></div>
-
-    <CreateNoteModal v-model="showNewNote"/>
-    <CreateDirModal v-model="showNewFolder"/>
-    <UploadFileModal v-model="showUpload"/>
-    <DeleteItemModal v-model="deleteItem"/>
+    <div 
+      class="vertical-line turn-right col-drag" 
+      @mousedown.prevent="startResizing"
+      :class="{ 'is-resizing': !showSubSidebar }"
+    ></div>
 
   </aside>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue"
-import NewNoteIcon from "@/assets/icons/add-document.svg"
-import NewFolderIcon from "@/assets/icons/folder-plus-circle.svg"
-import UploadIcon from "@/assets/icons/cloud-upload-alt.svg"
-import TrashIcon from "@/assets/icons/trash.svg"
+import { ref, computed } from "vue"
+import { SidebarMode } from "@/scripts/types"
 
+import SidebarToggleIcon from "@/assets/icons/sidebar.svg"
 import FileTreeIcon from "@/assets/icons/rectangle-list.svg"
 import SettingIcon from "@/assets/icons/settings.svg"
 
+import FileTreeComp from "./FileTreeComp.vue"
 
-import FsNodeComp from "@/components/FsNodeComp.vue";
-import CreateNoteModal from "@/components/modals/CreateNoteModal.vue"
-import CreateDirModal from "@/components/modals/CreateDirModal.vue"
-import UploadFileModal from "@/components/modals/UploadFileModal.vue"
+const subSidebarWidth = ref(250);
+const subSidebarMinWidth = 220;
+const subSidebarMaxWidth = 500;
+const isSubSidebarResizing = ref(false);
+const showSubSidebar = ref(true);
 
+const currentMode = ref<SidebarMode>(SidebarMode.FileTree)
+const currentWidth = computed(() => showSubSidebar.value ? `${subSidebarWidth.value}px` : '0px');
 
-import { useNodeStore } from "@/scripts/stores/note"
-import DeleteItemModal from "./modals/DeleteItemModal.vue"
+const toggleSubSidebar = (mode: SidebarMode | null = null) => {
+  if (mode === null) {
+    showSubSidebar.value = !showSubSidebar.value;
+    return;
+  }
 
-const nodeStore = useNodeStore()
-
-const showNewNote = ref(false);
-const showNewFolder = ref(false);
-const showUpload = ref(false);
-const deleteItem = ref(false);
-
-function runFunction() {
-  console.log('run')
-} 
+  const shouldExpand = currentMode.value !== mode || !showSubSidebar.value;
+  showSubSidebar.value = shouldExpand;
+  if (shouldExpand) {
+    currentMode.value = mode;
+  }
+};
 
 const sideBtns = [
-  { icon: FileTreeIcon, func: runFunction },
-  { icon: SettingIcon, func: runFunction }
+  { icon: FileTreeIcon, func: () => { toggleSubSidebar(SidebarMode.FileTree); } },
+  { icon: SettingIcon, func: () => { toggleSubSidebar(SidebarMode.Settings); } }
 ]
 
-const toolBtns = [
-  { icon: NewNoteIcon, func: () => { showNewNote.value = true } },
-  { icon: NewFolderIcon, func: () => { showNewFolder.value = true } },
-  { icon: UploadIcon, func: () => { showUpload.value = true } },
-  { icon: TrashIcon, func: () => { deleteItem.value = true } },
-]
+const startResizing = (e: MouseEvent) => {
+  isSubSidebarResizing.value = true;
+  const startX = e.clientX;
+  const startWidth = subSidebarWidth.value;
 
-onMounted(async () => {
-  await nodeStore.refrestNodeTree()
-})
+  const onMouseMove = (moveEvent: MouseEvent) => {
+    const deltaX = moveEvent.clientX - startX;
+    let newWidth = startWidth + deltaX;
+
+    if (newWidth < subSidebarMinWidth) newWidth = subSidebarMinWidth;
+    if (newWidth > subSidebarMaxWidth) newWidth = subSidebarMaxWidth;
+
+    subSidebarWidth.value = newWidth;
+  };
+
+  const onMouseUp = () => {
+    isSubSidebarResizing.value = false;
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+  };
+
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup', onMouseUp);
+};
+
+
 
 </script>
 

@@ -1,7 +1,7 @@
 <template>
   <div class="editor-wrapper" :class="{ 'is-resizing': isResizing }">
     <header class="container-fluid">
-      <div class="row align-items-center flex-nowrap g-0 editor-header">
+      <div class="row align-items-center flex-nowrap g-0 container-header">
 
         <div class="col-auto d-flex justify-content-start flex-shrink-0 gap-2 ps-3">
           <button v-for="item in sidebarIcons">
@@ -51,7 +51,7 @@
     :class="{ 'is-resizing': isResizing }"
   >
     <div 
-      class="vertical-line turn-left" 
+      class="vertical-line turn-left col-drag" 
       @mousedown="startResizing"
       :class="{ 'is-resizing': isResizing }"
     ></div>
@@ -108,6 +108,7 @@ const inspectorWidth = ref(0);
 const lastWidth = ref(300);
 const isResizing = ref(false);
 const uploadPercent = ref(0)
+
 
 const markdownEditorRef = ref<HTMLTextAreaElement | null>(null);
 

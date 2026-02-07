@@ -1,3 +1,9 @@
+export const SidebarMode = {
+  FileTree: 'fileTree',
+  Settings: 'settings',
+} as const;
+export type SidebarMode = typeof SidebarMode[keyof typeof SidebarMode];
+
 // API response
 export interface ApiResponse<T = any> {
   status: number;
