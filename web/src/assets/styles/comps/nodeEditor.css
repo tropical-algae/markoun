@@ -60,9 +60,6 @@
 .inspector-wrapper {
   position: relative;
   overflow: hidden; 
-  transition: background-color 0.3s, border-color 0.3s;
-	/* border-left: 1px solid var(--color-line); */
-
   flex-shrink: 0;
 }
 
@@ -86,8 +83,8 @@
 .note-meta,
 .note-preview {
   flex: 1;
-  padding-left: 24px;
-  padding-right: 24px;
+  /* padding-left: 24px;
+  padding-right: 24px; */
   margin-top: 12px;
 
   overflow-y: scroll;

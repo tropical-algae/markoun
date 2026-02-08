@@ -16,7 +16,13 @@
 }
 
 .anim-width {
-  transition: width 0.3s ease;
+  transition-property:
+    width,
+    background-color,
+    color,
+    border-color;
+  transition-duration: 0.3s;
+  transition-timing-function: ease;
 }
 
 .sub-sidebar-container {

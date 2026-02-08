@@ -1,13 +1,11 @@
 <template>
   <aside class="sidebar-wrapper d-flex flex-row">
     <div class="sidebar-container d-flex flex-column gap-2 px-2">
-      <header class="container-fluid p-0">
-        <div class="row align-items-center justify-content-center flex-nowrap g-0 container-header">
-          <button @click="toggleSubSidebar()">
-            <component :is="SidebarToggleIcon" class="icon-btn"></component>
-          </button>
-        </div>
-      </header>
+      <BaseHeader class="p-0">
+        <button @click="toggleSubSidebar()">
+          <component :is="SidebarToggleIcon" class="icon-btn"></component>
+        </button>
+      </BaseHeader>
       
       <button v-for="(item, _) in sideBtns" @click="item.func()">
         <component :is="item.icon" class="icon-btn"></component>
@@ -46,7 +44,9 @@ import SidebarToggleIcon from "@/assets/icons/sidebar.svg"
 import FileTreeIcon from "@/assets/icons/rectangle-list.svg"
 import SettingIcon from "@/assets/icons/settings.svg"
 
-import FileTreeComp from "./FileTreeComp.vue"
+import FileTreeComp from "@/components/FileTreeComp.vue"
+import BaseHeader from '@/components/common/BaseHeader.vue';
+
 
 const subSidebarWidth = ref(250);
 const subSidebarMinWidth = 220;
