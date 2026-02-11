@@ -1,10 +1,10 @@
 <template>
-  <div class="file-tree-header d-flex justify-content-center align-items-center gap-2">
+  <div class="d-flex justify-content-center align-items-center gap-2 py-2">
     <button v-for="(item, _) in toolBtns" @click="item.func()">
       <component :is="item.icon" class="icon-btn"></component>
     </button>
   </div>
-  <div class="file-tree-container p-2 flex-grow-1">
+  <div class="px-2 flex-grow-1 overflow-y-scroll">
     <FsNodeComp v-for="item in nodeStore.nodeTree" :key="item.path" :node="item" :depth="0" />
   </div>
 
