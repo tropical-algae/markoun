@@ -1,4 +1,5 @@
 import importlib
+import json
 import pkgutil
 import secrets
 import string
@@ -106,3 +107,12 @@ def generate_random_token(prefix: str = "", length: int = 32) -> str:
     key_length = length - len(prefix)
     assert key_length > 0, "The length of the token must greater than the prefix."
     return prefix + "".join(secrets.choice(TOKEN_SEQUENCE) for _ in range(key_length))
+
+
+def str_to_json(text: str) -> list:
+    try:
+        scopes = json.loads(text)
+        return scopes
+    except Exception as err:
+        logger.error(f"[Failed to trans text '{text}' to json] {err}")
+        raise HTTPException(**CONSTANT.RESP_SERVER_ERROR) from err

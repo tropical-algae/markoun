@@ -106,6 +106,18 @@ class Constant(BaseSettings):
         "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
         "detail": "文件保存失败",
     }
+    SERV_SETTING_UPDATE_FAIL: dict = {
+        "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+        "detail": "系统设置更新失败",
+    }
+    SERV_SETTING_UPDATE_PERMISSION_DENIED: dict = {
+        "status_code": status.HTTP_403_FORBIDDEN,
+        "detail": "系统设置更新失败，权限不足",
+    }
+    SERV_SETTING_NOT_EXISTED: dict = {
+        "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+        "detail": "系统设置不存在，更新失败",
+    }
 
 
 CONSTANT = Constant()

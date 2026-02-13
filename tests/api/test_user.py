@@ -2,7 +2,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from markoun.common.config import settings
-from markoun.core.model.base import SystemStatusType
+from markoun.core.model.base import SysStatusType
 from markoun.core.model.user import ScopeType
 from tests.conftest import DataStore
 
@@ -21,7 +21,7 @@ def test_system_status(client: TestClient):
     response = client.get(url=url)
 
     assert response.status_code == 200
-    assert response.json()["data"]["status"] == SystemStatusType.HEALTH.value
+    assert response.json()["data"]["status"] == SysStatusType.HEALTH.value
 
 
 @pytest.mark.run(order=2)
