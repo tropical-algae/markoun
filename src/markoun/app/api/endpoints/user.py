@@ -8,6 +8,7 @@ from fastapi.security import OAuth2PasswordRequestForm, SecurityScopes
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from markoun.app.api.deps import get_current_user, get_db
+from markoun.app.services.system_service import get_allow_user_register_setting
 from markoun.app.utils import security
 from markoun.app.utils.constant import CONSTANT
 from markoun.common.config import settings
@@ -110,6 +111,10 @@ async def api_user_register(
     """
     Register new user (This interface has not undergone login verification)
     """
+    can_user_regis = await get_allow_user_register_setting(db=db)
+    if not can_user_regis:
+        raise HTTPException(**CONSTANT.SERV_DISABLE_REGISTRATION)
+
     existed_user = await select_user_by_full_name(db, full_name=user.full_name)
     if existed_user is not None:
         raise HTTPException(**CONSTANT.RESP_USER_EXISTS)

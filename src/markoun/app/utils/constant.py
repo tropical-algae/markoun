@@ -56,19 +56,6 @@ class Constant(BaseSettings):
         "detail": "用户不存在",
     }
 
-    RESP_USER_SESSION_NOT_EXISTS: dict = {
-        "status_code": status.HTTP_404_NOT_FOUND,
-        "detail": "会话记录不存在",
-    }
-    RESP_USER_SESSION_NULL: dict = {
-        "status_code": status.HTTP_404_NOT_FOUND,
-        "detail": "请求发送了一个空会话",
-    }
-    RESP_INVALID_MODEL: dict = {
-        "status_code": status.HTTP_404_NOT_FOUND,
-        "detail": "无效的模型",
-    }
-
     # 业务
     SERV_READ_FILE_FAIL: dict = {
         "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -117,6 +104,10 @@ class Constant(BaseSettings):
     SERV_SETTING_NOT_EXISTED: dict = {
         "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
         "detail": "系统设置不存在，更新失败",
+    }
+    SERV_DISABLE_REGISTRATION: dict = {
+        "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+        "detail": "系统禁止用户注册",
     }
 
 
