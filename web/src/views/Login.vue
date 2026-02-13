@@ -72,7 +72,7 @@ const loginForm = reactive({ username: "", password: "", remember_me: false })
 
 const onLogin = async () => {
   console.log(loginForm)
-	await userStore.handleLogin(loginForm)
+	await userStore.login(loginForm)
   router.push("/")
 }
 

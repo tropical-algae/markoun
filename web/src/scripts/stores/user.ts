@@ -49,11 +49,15 @@ export const useUserStore = defineStore('user', () => {
     return checkPromise
   }
 
-  const logout = async () => {
-    await logoutApi()
-    isAuthed.value = false
-    isChecked.value = false
+  const logout = async (): Promise<boolean> => {
+    const response = await logoutApi()
+    if (response.status === 200) {
+      isAuthed.value = false
+      isChecked.value = false
+      return true
+    }
+    return false
   }
 
-  return { handleLogin: login, checkAuth, logout }
+  return { login, checkAuth, logout }
 })

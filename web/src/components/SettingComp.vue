@@ -8,7 +8,7 @@
     <div class="settings-content flex-grow-1 overflow-y-scroll p-3">
       
       <section class="mb-4">
-        <div class="text-uppercase fw-bold mb-3 f-m">Account Security</div>
+        <div class="text-uppercase fw-bold mb-3 f-m">Account</div>
 
         <div class="mb-3">
           <InputField
@@ -47,7 +47,7 @@
 
       </section>
 
-      <section class="mb-4">
+      <section class="mb-4" v-if="sysStore.currentSettings.length > 0">
         <div class="text-uppercase fw-bold mb-3 f-m">Preferences</div>
         <SettingItem
           v-for="item in sysStore.currentSettings"
@@ -55,6 +55,16 @@
           :setting="item"
           @update="handleUpdateSetting"
         />
+      </section>
+
+      <section class="mb-4">
+        <button 
+          class="btn btn-primary btn-sm w-100"
+          @click="handleLogout"
+        >
+          Logout
+        </button>
+
       </section>
 
     </div>
@@ -86,6 +96,7 @@ import TextHint from '@/components/common/TextHint.vue';
 import SettingItem from '@/components/common/SettingItem.vue';
 
 import InfoIcon from "@/assets/icons/info.svg"
+import router from '@/router';
 
 
 const sysStore = useSysStore()
@@ -115,5 +126,12 @@ const handleUpdatePassword = async () => {
 const handleUpdateSetting = async (id: string, newValue: string | boolean) => {
   await sysStore.updateSystemSetting(id, newValue);
 };
+
+const handleLogout = async () => {
+  const isDone = await uesrStore.logout()
+  if (isDone) {
+    router.push("/login")
+  }
+}
 
 </script>
