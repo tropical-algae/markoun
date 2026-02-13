@@ -10,6 +10,12 @@ export const InspectMode = {
 } as const;
 export type InspectMode = typeof InspectMode[keyof typeof InspectMode];
 
+export const SysSettingType = {
+  BOOL: 'bool',
+  STR: 'str'
+} as const;
+export type SysSettingType = typeof SysSettingType[keyof typeof SysSettingType];
+
 // API response
 export interface ApiResponse<T = any> {
   status: number;
@@ -55,6 +61,31 @@ export interface UploadResponse {
   status: string;
   filename: string;
 }
+
+export interface SysStatusResponse {
+  status: string;
+  version: string;
+}
+
+export interface BaseSysSetting {
+  id: string;
+  name: string;
+  desc: string;
+}
+
+export interface BoolSysSetting extends BaseSysSetting {
+  type: typeof SysSettingType.BOOL;
+  value: boolean;
+}
+
+export interface StrSysSetting extends BaseSysSetting {
+  type: typeof SysSettingType.STR;
+  value: string;
+}
+
+export type SysSettingResponse =
+  | BoolSysSetting
+  | StrSysSetting;
 
 // type wrapper
 export interface FileDetail {

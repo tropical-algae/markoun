@@ -9,6 +9,8 @@
 @import url('@/assets/styles/base/inputField.css');
 @import url('@/assets/styles/base/baseModal.css');
 @import url('@/assets/styles/base/baseComp.css');
+@import url('@/assets/styles/base/font.css');
+
 
 :root {
   --color-bg-pri: #ffffff;

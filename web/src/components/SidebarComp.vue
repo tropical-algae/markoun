@@ -19,11 +19,11 @@
       :style="{ width: currentWidth }"
     >
       <div 
-        class="sub-sidebar-inner d-flex flex-column pt-2"
+        class="sub-sidebar-inner d-flex flex-column"
         :style="{ width: subSidebarWidth + 'px' }"
       >
         <FileTreeComp v-if="currentMode === SidebarMode.FileTree" />
-        <div v-else></div>
+        <SettingComp v-else/>
       </div>
     </div>
 
@@ -45,8 +45,8 @@ import FileTreeIcon from "@/assets/icons/rectangle-list.svg"
 import SettingIcon from "@/assets/icons/settings.svg"
 
 import FileTreeComp from "@/components/FileTreeComp.vue"
+import SettingComp from "@/components/SettingComp.vue"
 import BaseHeader from '@/components/common/BaseHeader.vue';
-
 
 const subSidebarWidth = ref(250);
 const subSidebarMinWidth = 220;

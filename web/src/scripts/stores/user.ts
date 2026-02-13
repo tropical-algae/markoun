@@ -7,7 +7,7 @@ export const useUserStore = defineStore('user', () => {
   const isChecked = ref(false)
   let checkPromise: Promise<boolean> | null = null 
 
-  const handleLogin = async (loginForm: LoginForm) => {
+  const login = async (loginForm: LoginForm) => {
     try {
       const res = await loginApi(loginForm)
       isAuthed.value = true
@@ -55,5 +55,5 @@ export const useUserStore = defineStore('user', () => {
     isChecked.value = false
   }
 
-  return { handleLogin, checkAuth, logout }
+  return { handleLogin: login, checkAuth, logout }
 })

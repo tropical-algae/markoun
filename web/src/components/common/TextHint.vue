@@ -6,9 +6,9 @@
       fontSize: fontSize 
     }"
   >
-    <div class="hint-icon">
+    <div class="hint-icon" v-if="icon">
       <slot name="icon">
-        <component :is="icon" v-if="icon" />
+        <component :is="icon" />
       </slot>
     </div>
 
