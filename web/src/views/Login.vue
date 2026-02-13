@@ -28,7 +28,9 @@
           />
 
 					<div class="links-row">
-            <button >Create an account</button>
+            <div>
+              <button v-if="sysStore.canUserRegister">Create an account</button>
+            </div>
             <label class="d-flex gap-2">
               <input type="checkbox" v-model="loginForm.remember_me">
               <span>Remember me</span>
@@ -51,12 +53,14 @@
 </template>
 
 <script setup lang="ts">
-import { reactive } from 'vue'
+import { reactive, onMounted } from 'vue'
 import { useUserStore } from '@/scripts/stores/user'
+import { useSysStore } from '@/scripts/stores/system'
 import InputField from '@/components/common/InputField.vue'
 import router from '@/router'
 
 const userStore = useUserStore()
+const sysStore = useSysStore()
 
 const loginForm = reactive({ username: "", password: "", remember_me: false })
 // const registerForm = reactive({ 
@@ -71,6 +75,10 @@ const onLogin = async () => {
 	await userStore.handleLogin(loginForm)
   router.push("/")
 }
+
+onMounted(async () => {
+  await sysStore.refreshUserRegistrationAllowed()
+})
 
 // const onRegister = async () => {
   

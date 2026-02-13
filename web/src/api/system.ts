@@ -35,3 +35,13 @@ export const updateSettingApi = (id: string, value: string | boolean): Promise<A
     }
   })
 }
+
+/**
+ * 更新系统设置
+ */
+export const isAllowRegisterApi = (): Promise<ApiResponse<boolean>> => {
+  return request({
+    url: '/api/v1/system/settings/allow-register',
+    method: 'get',
+  })
+}
