@@ -45,7 +45,7 @@
       </div>
 
       <div class="d-flex justify-content-end">
-        <button class="cancel px-3 py-1" @click="isVisible = false">Cancel</button>
+        <GhostButton @click="isVisible = false" type="secondary">Cancel</GhostButton>
       </div>
 
     </div>
@@ -59,6 +59,7 @@ import { useNodeStore } from '@/scripts/stores/note';
 import UploadIcon from "@/assets/icons/upload.svg"
 
 import BaseModal from '@/components/common/BaseModal.vue'
+import GhostButton from '@/components/common/GhostButton.vue';
 
 const props = defineProps<{
   modelValue: boolean

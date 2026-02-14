@@ -117,7 +117,7 @@ const onLeave = (el: Element, done: () => void) => {
   border-radius: 8px;
   
   max-width: 80vw;
-  min-width: 200px;
+  /* min-width: 200px; */
   backdrop-filter: blur(2px);
 }
 </style>

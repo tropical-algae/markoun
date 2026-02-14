@@ -20,6 +20,8 @@ export const useNodeStore = defineStore('note', () => {
 
   const nodeTree = ref<FsNode[]>([])
   const currentNode = ref<FsNode | null>(null)
+  const currentFileNode = ref<FsNode | null>(null)
+
   const currentFile = ref<FileDetail>(defaultFileContent)
   const currentParentPath = computed(() => getParentPath(currentNode.value))
   const currrentRenderedFile = computed(() => renderCurrentFileContent())
@@ -49,7 +51,6 @@ export const useNodeStore = defineStore('note', () => {
   const refreshCurrentFile = async (node: FsNode) => {
     if (node.type === 'file' && node.path !== currentFile.value?.path) {
       const response = await getFileContentApi(node.path)
-      console.log(response.data)
       currentFile.value = {
         name: node.name,
         path: node.path,
@@ -73,6 +74,7 @@ export const useNodeStore = defineStore('note', () => {
   const setCurrentNode = async (node: FsNode) => {
     if (node.type === 'file' && node.suffix.toLowerCase() === 'md') {
       currentNode.value = node
+      currentFileNode.value = node
       await refreshCurrentFile(node)
     } else if (node.type === 'dir') {
       currentNode.value = node
@@ -85,13 +87,16 @@ export const useNodeStore = defineStore('note', () => {
     const response = await uploadFileApi(currentParentPath.value, file, (percent) => {
       uploadPercent.value = percent
     })
-    console.log(response)
     await refrestNodeTree()
     noticeStore.pushNotice('info', `File upload successfully.`)
     return response.data.filename
   }
 
   const saveCurrentFile = async (): Promise<void> => {
+    if (currentFile.value === defaultFileContent) {
+      noticeStore.pushNotice('warning', 'The home page cannot be changed.')
+      return
+    }
     const response = await saveNoteApi(currentFile.value.path, currentFile.value.content)
     currentFile.value.meta = response.data
     noticeStore.pushNotice('info', 'The note has been saved.')
@@ -102,16 +107,33 @@ export const useNodeStore = defineStore('note', () => {
       noticeStore.pushNotice('warning', 'No file / folder selected.')
       return
     } else {
-      await removeItemApi(currentNode.value.path)
+      const response = await removeItemApi(currentNode.value.path)
       const nodeType = currentNode.value.type === 'file' ? 'File' : 'Folder'
+      if (response.status !== 200) {
+        return
+      }
+      if (currentNode.value.path === currentFile.value.path) {
+        // 当前选中节点即为打开的文件，删除后还原初始化状态
+        currentNode.value = null;
+        currentFileNode.value = null;
+        currentFile.value = defaultFileContent;
+      } else {
+        // 当前选中节点非打开的文件，删除后设选中节点为文件
+        currentNode.value = currentFileNode.value;
+      }
       noticeStore.pushNotice('info', `${nodeType} has been deleted.`)
       await refrestNodeTree()
     }
   }
 
   const renameNode = async (path: string, new_name: string): Promise<void> => {
-    if (currentNode?.value?.path == path) currentNode.value = null;
-    if (currentFile.value.path == path) currentFile.value = defaultFileContent
+    if (currentFile.value.path.startsWith(path)) {
+      currentFileNode.value = null;
+      currentFile.value = defaultFileContent;
+    }
+    if (currentNode?.value?.path.startsWith(path)) {
+      currentNode.value = currentFileNode.value;
+    }
     await renameItemApi(path, new_name)
     noticeStore.pushNotice('info', "Rename successful!")
     await refrestNodeTree()

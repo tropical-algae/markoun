@@ -2,7 +2,7 @@
   <div class="editor-wrapper" :class="{ 'is-resizing': isInspectorResizing }">
     <BaseHeader>
       <div class="col-auto d-flex justify-content-start flex-shrink-0 gap-2 ps-1">
-        <button v-for="item in sidebarIcons">
+        <button v-for="item in sidebarIcons" @click="item.func()">
           <component :is="item.icon" class="icon-btn"></component>
         </button>
       </div>

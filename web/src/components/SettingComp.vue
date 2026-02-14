@@ -10,7 +10,7 @@
       <section class="mb-4">
         <div class="text-uppercase fw-bold mb-3 f-m">Account</div>
 
-        <div class="mb-3">
+        <div class="mb-2">
           <InputField
             v-model="pwdForm.new"
             ref="inputRef"
@@ -33,17 +33,18 @@
             :icon="InfoIcon" 
             :text="isPwdLenValid ? 'Passwords do not match.' : 'Password must be longer than 6.'" 
             color="var(--color-bg-error)"
-            v-if="(pwdForm.new && pwdForm.confirm) && (!isPwdLenValid || !isPwdConfValid)"
+            style="transition: opacity 0.2s;"
+            :style="{ opacity: (pwdForm.new && pwdForm.confirm) && (!isPwdLenValid || !isPwdConfValid) ? 1 : 0 }"
           />
         </div>
 
-        <button 
-          class="btn btn-primary btn-sm w-100" 
+        <GhostButton 
+          class="w-100 f-s"
           :disabled="!isPwdLenValid || !isPwdConfValid || isSavingPwd"
           @click="handleUpdatePassword"
         >
           Update Password
-        </button>
+        </GhostButton>
 
       </section>
 
@@ -58,12 +59,9 @@
       </section>
 
       <section class="mb-4">
-        <button 
-          class="btn btn-primary btn-sm w-100"
-          @click="handleLogout"
-        >
+        <GhostButton @click="handleLogout" class="w-100 f-s" type="danger" >
           Logout
-        </button>
+        </GhostButton>
 
       </section>
 
@@ -94,6 +92,7 @@ import { useUserStore } from '@/scripts/stores/user';
 import InputField from '@/components/common/InputField.vue';
 import TextHint from '@/components/common/TextHint.vue';
 import SettingItem from '@/components/common/SettingItem.vue';
+import GhostButton from '@/components/common/GhostButton.vue';
 
 import InfoIcon from "@/assets/icons/info.svg"
 import router from '@/router';

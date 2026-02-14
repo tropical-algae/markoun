@@ -18,8 +18,8 @@
       <TextHint :icon="InfoIcon" text="Created in the selected path." class="mb-3 mx-1"/>
       
       <div class="d-flex justify-content-end gap-2">
-        <button class="cancel px-3 py-1" @click="isVisible = false">Cancel</button>
-        <button class="confirm px-3 py-1" @click="handleConfirm">Create</button>
+        <GhostButton @click="isVisible = false" type="secondary">Cancel</GhostButton>
+        <GhostButton @click="handleConfirm">Create</GhostButton>
       </div>
     </div>
   </BaseModal>
@@ -30,6 +30,7 @@ import { ref, computed } from 'vue';
 import BaseModal from '@/components/common/BaseModal.vue';
 import InputField from '@/components/common/InputField.vue';
 import TextHint from '@/components/common/TextHint.vue';
+import GhostButton from '@/components/common/GhostButton.vue';
 
 import InfoIcon from "@/assets/icons/info.svg"
 

@@ -6,8 +6,8 @@
     <div style="width: 340px;">
       <p>Are you sure you want to delete {{ nodeStore.currentNode?.path ?? 'item' }}?</p>
       <div class="d-flex justify-content-end gap-2">
-        <button class="cancel px-3 py-1" @click="isVisible = false">Cancel</button>
-        <button class="confirm px-3 py-1" @click="handleConfirm">Delete</button>
+        <GhostButton @click="isVisible = false" type="secondary">Cancel</GhostButton>
+        <GhostButton @click="handleConfirm">Delete</GhostButton>
       </div>
     </div>
   </BaseModal>
@@ -16,6 +16,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import BaseModal from '@/components/common/BaseModal.vue';
+import GhostButton from '@/components/common/GhostButton.vue';
 
 import { useNodeStore } from "@/scripts/stores/note"
 
