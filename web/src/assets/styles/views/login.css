@@ -41,7 +41,6 @@
 
 .auth-form .links-row {
   display: flex;
-  margin-bottom: 56px;
 
   justify-content: space-between;
 }

@@ -27,7 +27,7 @@
             placeholder=""
           />
 
-					<div class="links-row">
+					<div class="links-row mb-5">
             <div>
               <button v-if="sysStore.canUserRegister">Create an account</button>
             </div>
@@ -40,9 +40,10 @@
 					<hr class="separator-line"/>
 
 					<div class="d-flex justify-content-center">
-						<button type="submit" class="confirm auth-submit">
+						<!-- <button type="submit" class="confirm auth-submit">
 							Sign in
-						</button>
+						</button> -->
+            <GhostButton class="f-l fw-bold" style="width: 220px;" type="submit">Sign in</GhostButton>
 					</div>
 
 				</form>
@@ -57,6 +58,8 @@ import { reactive, onMounted } from 'vue'
 import { useUserStore } from '@/scripts/stores/user'
 import { useSysStore } from '@/scripts/stores/system'
 import InputField from '@/components/common/InputField.vue'
+import GhostButton from '@/components/common/GhostButton.vue';
+
 import router from '@/router'
 
 const userStore = useUserStore()
@@ -71,9 +74,10 @@ const loginForm = reactive({ username: "", password: "", remember_me: false })
 // })
 
 const onLogin = async () => {
-  console.log(loginForm)
-	await userStore.login(loginForm)
-  router.push("/")
+	const response = await userStore.login(loginForm)
+  if (response !== null) {
+    router.push("/")
+  }
 }
 
 onMounted(async () => {

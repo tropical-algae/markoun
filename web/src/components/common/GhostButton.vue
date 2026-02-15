@@ -1,5 +1,5 @@
 <template>
-  <button class="ghost-btn" :class="[`type-${type}`]">
+  <button class="ghost-btn" :class="[`type-${theme}`]">
     <slot></slot>
   </button>
 </template>
@@ -7,10 +7,10 @@
 <script setup lang="ts">
 
 interface Props {
-  type?: 'primary' | 'danger' | 'secondary';
+  theme?: 'primary' | 'danger' | 'secondary' | 'submit';
 }
 
 withDefaults(defineProps<Props>(), {
-  type: 'primary'
+  theme: 'primary'
 });
 </script>

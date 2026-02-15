@@ -71,7 +71,7 @@
         <span class="node-tag">{{ sysStore.status }}</span>
       </div>
 
-      <GhostButton @click="handleLogout" class="w-100 f-s" type="danger" >
+      <GhostButton @click="handleLogout" class="w-100 f-s" theme="danger" >
         Logout
       </GhostButton>
       

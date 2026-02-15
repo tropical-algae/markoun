@@ -45,7 +45,7 @@
       </div>
 
       <div class="d-flex justify-content-end">
-        <GhostButton @click="isVisible = false" type="secondary">Cancel</GhostButton>
+        <GhostButton @click="isVisible = false" theme="secondary">Cancel</GhostButton>
       </div>
 
     </div>

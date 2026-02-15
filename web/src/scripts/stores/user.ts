@@ -1,14 +1,22 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { loginApi, checkTokenApi, logoutApi, type LoginForm } from '@/api/user'
+import { useNoticeStore } from "@/scripts/stores/notice";
 
 export const useUserStore = defineStore('user', () => {
   const isAuthed = ref(false)
   const isChecked = ref(false)
+  const noticeStore = useNoticeStore()
+
   let checkPromise: Promise<boolean> | null = null 
 
   const login = async (loginForm: LoginForm) => {
     try {
+      if (loginForm.username === '' || loginForm.password === '') {
+        noticeStore.pushNotice('error', `Null value is not allowed.`)
+        return null
+      }
+
       const res = await loginApi(loginForm)
       isAuthed.value = true
       isChecked.value = true
