@@ -112,22 +112,24 @@ const isSavingPwd = ref(false);
 const isPwdLenValid = computed(() => pwdForm.new.length >= 6 )
 const isPwdConfValid = computed(() => pwdForm.new === pwdForm.confirm )
 
-
-const handleUpdatePassword = async () => {
-  isSavingPwd.value = true;
-  console.log(pwdForm)
-  isSavingPwd.value = false;
-};
-
-const handleUpdateSetting = async (id: string, newValue: string | boolean) => {
-  await sysStore.updateSystemSetting(id, newValue);
-};
-
 const handleLogout = async () => {
   const isDone = await uesrStore.logout()
   if (isDone) {
     router.push("/login")
   }
 }
+
+const handleUpdatePassword = async () => {
+  isSavingPwd.value = true;
+  const isDone = await uesrStore.updatePassword(pwdForm.new);
+  isSavingPwd.value = false;
+  if (isDone) {
+    await handleLogout();
+  }
+};
+
+const handleUpdateSetting = async (id: string, newValue: string | boolean) => {
+  await sysStore.updateSystemSetting(id, newValue);
+};
 
 </script>

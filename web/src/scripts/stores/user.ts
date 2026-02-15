@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { loginApi, checkTokenApi, logoutApi, type LoginForm } from '@/api/user'
+import { loginApi, checkTokenApi, logoutApi, type LoginForm, updatePasswordApi } from '@/api/user'
 import { useNoticeStore } from "@/scripts/stores/notice";
 
 export const useUserStore = defineStore('user', () => {
@@ -58,14 +58,25 @@ export const useUserStore = defineStore('user', () => {
   }
 
   const logout = async (): Promise<boolean> => {
-    const response = await logoutApi()
-    if (response.status === 200) {
+    try {
+      await logoutApi();
       isAuthed.value = false
       isChecked.value = false
       return true
+    } catch (_) {
+      return false
     }
-    return false
   }
 
-  return { login, checkAuth, logout }
+  const updatePassword = async (newPasswd: string): Promise<boolean> => {
+    try {
+      await updatePasswordApi(newPasswd);
+      noticeStore.pushNotice('info', `Password updated successfully.`)
+      return true
+    } catch (_) {
+      return false
+    }
+  }
+
+  return { login, checkAuth, logout, updatePassword }
 })

@@ -51,3 +51,16 @@ export function logoutApi(): Promise<ApiResponse<string>> {
     data: {}
   })
 }
+
+/**
+ * 更新密码
+ */
+export const updatePasswordApi = (newPasswd: string): Promise<ApiResponse<string>> => {
+  return request({
+    url: '/api/v1/auth/password',
+    method: 'patch',
+    params: {
+      new_passwd: newPasswd,
+    }
+  })
+}
