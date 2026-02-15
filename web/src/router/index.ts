@@ -38,18 +38,18 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach(async (to, _from, next) => {
-  const userStore = useUserStore()
+// router.beforeEach(async (to, _from, next) => {
+//   const userStore = useUserStore()
   
-  const isAuthenticated = await userStore.checkAuth() 
+//   const isAuthenticated = await userStore.checkAuth() 
 
-  if (to.name !== 'Login' && !isAuthenticated) {
-    next({ name: 'Login' })
-  } else if (to.name === 'Login' && isAuthenticated) {
-    next({ name: 'Workspace' })
-  } else {
-    next()
-  }
-})
+//   if (to.name !== 'Login' && !isAuthenticated) {
+//     next({ name: 'Login' })
+//   } else if (to.name === 'Login' && isAuthenticated) {
+//     next({ name: 'Workspace' })
+//   } else {
+//     next()
+//   }
+// })
 
 export default router

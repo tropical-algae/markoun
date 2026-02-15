@@ -9,6 +9,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  -webkit-font-smoothing: antialiased;
 }
 
 .base-modal-card {
@@ -23,6 +24,9 @@
   max-height: 90vh;
   display: flex;
   flex-direction: column;
+
+  will-change: transform, opacity;
+  backface-visibility: hidden;
 }
 
 .base-modal-header {
@@ -35,12 +39,51 @@
 }
 
 .base-modal-title {
-  font-weight: 600;
-  font-size: 1.1rem;
+  font-weight: bold;
   color: var(--color-text-pri);
 }
 
 .base-modal-body {
   padding: 24px;
   overflow-y: auto; 
+}
+
+.modal-enter-active,
+.modal-leave-active {
+  transition: background-color 0.4s ease; 
+}
+
+.modal-enter-active .base-modal-card {
+  animation: card-enter 0.4s ease forwards;
+}
+
+.modal-leave-active .base-modal-card {
+  animation: card-leave 0.4s ease-in forwards;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  background-color: transparent;
+}
+
+@keyframes card-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes card-leave {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
 }

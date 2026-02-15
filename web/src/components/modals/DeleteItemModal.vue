@@ -3,11 +3,11 @@
     v-model="isVisible" 
     title="Delete Item"
   >
-    <div style="width: 340px;">
-      <p>Are you sure you want to delete {{ nodeStore.currentNode?.path ?? 'item' }}?</p>
+    <div style="width: 360px;">
+      <p>Are you sure you want to delete <span class="fw-bold">{{ nodeStore.currentNode?.path ?? 'Default Page' }}</span> ?</p>
       <div class="d-flex justify-content-end gap-2">
         <GhostButton @click="isVisible = false" type="secondary">Cancel</GhostButton>
-        <GhostButton @click="handleConfirm">Delete</GhostButton>
+        <GhostButton @click="handleConfirm" type="danger">Delete</GhostButton>
       </div>
     </div>
   </BaseModal>

@@ -1,6 +1,6 @@
 
 .upload-drop-zone {
-  border: 2px dashed var(--color-line);
+  border: 1.5px dashed var(--color-line);
   border-radius: 12px;
   background-color: var(--color-bg-sec);
   height: 180px;

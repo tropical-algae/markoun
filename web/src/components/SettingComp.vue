@@ -5,33 +5,32 @@
       <div class="f-l fw-bold">Settings</div>
     </BaseHeader>
 
-    <div class="settings-content flex-grow-1 overflow-y-scroll p-3">
+    <div class="container-fluid flex-grow-1 overflow-y-scroll py-2">
       
-      <section class="mb-4">
+      <section class="mb-5">
         <div class="text-uppercase fw-bold mb-3 f-m">Account</div>
 
-        <div class="mb-2">
-          <InputField
+        <div class="mb-3">
+          <InputUnderline
             v-model="pwdForm.new"
-            ref="inputRef"
             label="New password"
+            ref="inputRef"
             type="password"
-            class="mb-3"
+            class="mb-3 f-s"
             placeholder="Enter new password"
           />
-
-          <InputField
+          <InputUnderline
             v-model="pwdForm.confirm"
-            ref="inputRef"
             label="Confirm password"
+            ref="inputRef"
             type="password"
-            class="mb-1"
-            placeholder="Confirm new password"
+            class="mb-1 f-s"
+            placeholder="Confirm password"
           />
 
           <TextHint 
             :icon="InfoIcon" 
-            :text="isPwdLenValid ? 'Passwords do not match.' : 'Password must be longer than 6.'" 
+            :text="isPwdLenValid ? 'Password do not match.' : 'Password must be longer than 6.'" 
             color="var(--color-bg-error)"
             style="transition: opacity 0.2s;"
             :style="{ opacity: (pwdForm.new && pwdForm.confirm) && (!isPwdLenValid || !isPwdConfValid) ? 1 : 0 }"
@@ -48,7 +47,7 @@
 
       </section>
 
-      <section class="mb-4" v-if="sysStore.currentSettings.length > 0">
+      <section class="mb-5" v-if="sysStore.currentSettings.length > 0">
         <div class="text-uppercase fw-bold mb-3 f-m">Preferences</div>
         <SettingItem
           v-for="item in sysStore.currentSettings"
@@ -58,26 +57,23 @@
         />
       </section>
 
-      <section class="mb-4">
-        <GhostButton @click="handleLogout" class="w-100 f-s" type="danger" >
-          Logout
-        </GhostButton>
-
-      </section>
-
     </div>
 
     <div class="p-3 border-top bg-white flex-shrink-0">
       
-      <div class="d-flex justify-content-between align-items-center text-muted small">
+      <div class="d-flex justify-content-between align-items-center text-muted small mb-1">
         <span>App Version:</span>
         <span class="node-tag">v{{ sysStore.version }}</span>
       </div>
       
-      <div class="d-flex justify-content-between align-items-center text-muted small mt-1">
+      <div class="d-flex justify-content-between align-items-center text-muted small mb-3">
         <span>System Status:</span>
         <span class="node-tag">{{ sysStore.status }}</span>
       </div>
+
+      <GhostButton @click="handleLogout" class="w-100 f-s" type="danger" >
+        Logout
+      </GhostButton>
       
     </div>
 
@@ -89,7 +85,7 @@ import { ref, computed, reactive, onMounted } from 'vue';
 import BaseHeader from '@/components/common/BaseHeader.vue';
 import { useSysStore } from '@/scripts/stores/system';
 import { useUserStore } from '@/scripts/stores/user';
-import InputField from '@/components/common/InputField.vue';
+import InputUnderline from '@/components/common/InputUnderline.vue';
 import TextHint from '@/components/common/TextHint.vue';
 import SettingItem from '@/components/common/SettingItem.vue';
 import GhostButton from '@/components/common/GhostButton.vue';
@@ -119,6 +115,7 @@ const isPwdConfValid = computed(() => pwdForm.new === pwdForm.confirm )
 
 const handleUpdatePassword = async () => {
   isSavingPwd.value = true;
+  console.log(pwdForm)
   isSavingPwd.value = false;
 };
 

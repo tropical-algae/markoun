@@ -4,18 +4,18 @@
     title="New Folder"
     @opened="handleOpened"
   >
-    <div style="width: 340px;">
+    <div style="width: 360px;">
 
-      <InputField
+      <InputUnderline
         v-model="folderName"
-        ref="inputRef"
         label="Folder Name"
+        ref="inputRef"
         type="text"
-        class="mb-2"
+        class="mb-2 f-s"
         placeholder="e.g. temp_folder"
       />
 
-      <TextHint :icon="InfoIcon" text="Created in the selected path." class="mb-3 mx-1"/>
+      <TextHint :icon="InfoIcon" text="Created in the selected path." class="mb-3"/>
       
       <div class="d-flex justify-content-end gap-2">
         <GhostButton @click="isVisible = false" type="secondary">Cancel</GhostButton>
@@ -28,7 +28,8 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import BaseModal from '@/components/common/BaseModal.vue';
-import InputField from '@/components/common/InputField.vue';
+import InputUnderline from '@/components/common/InputUnderline.vue';
+
 import TextHint from '@/components/common/TextHint.vue';
 import GhostButton from '@/components/common/GhostButton.vue';
 
@@ -46,7 +47,7 @@ const isVisible = computed({
 });
 
 const folderName = ref('');
-const inputRef = ref<InstanceType<typeof InputField> | null>(null);
+const inputRef = ref<InstanceType<typeof InputUnderline> | null>(null);
 
 const handleOpened = () => {
   inputRef.value?.focus();

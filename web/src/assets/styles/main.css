@@ -6,8 +6,9 @@
 @import url('@/assets/styles/comps/nodeEditor.css');
 @import url('@/assets/styles/comps/uploadModal.css');
 @import url('@/assets/styles/comps/ghostButton.css');
+@import url('@/assets/styles/comps/inputField.css');
+@import url('@/assets/styles/comps/inputUnderline.css');
 
-@import url('@/assets/styles/base/inputField.css');
 @import url('@/assets/styles/base/baseModal.css');
 @import url('@/assets/styles/base/baseComp.css');
 @import url('@/assets/styles/base/font.css');
