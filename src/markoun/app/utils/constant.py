@@ -109,6 +109,10 @@ class Constant(BaseSettings):
         "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
         "detail": "系统禁止用户注册",
     }
+    SERV_PASSWD_UPDATE_FAIL: dict = {
+        "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+        "detail": "密码更新失败",
+    }
 
 
 CONSTANT = Constant()

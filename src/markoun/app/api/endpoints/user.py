@@ -13,7 +13,7 @@ from markoun.app.utils import security
 from markoun.app.utils.constant import CONSTANT
 from markoun.common.config import settings
 from markoun.core.db.crud import insert_user, select_user_by_full_name, verify_password
-from markoun.core.db.crud.crud_user import select_user_by_email
+from markoun.core.db.crud.crud_user import select_user_by_email, update_user
 from markoun.core.db.models import UserAccount
 from markoun.core.model.user import LoginResponse, ScopeType, TokenPayload, UserBasicInfo
 
@@ -130,3 +130,19 @@ async def api_user_register(
         return new_user
     except Exception as err:
         raise HTTPException(**CONSTANT.RESP_SERVER_ERROR) from err
+
+
+@router.patch("/password")
+async def api_update_setting(
+    new_passwd: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: UserAccount = Security(
+        get_current_user, scopes=[ScopeType.ADMIN, ScopeType.USER]
+    ),
+):
+    result = await update_user(
+        db=db, user_id=current_user.id, update_attr={"password": new_passwd}
+    )
+    if result is None:
+        raise HTTPException(**CONSTANT.SERV_PASSWD_UPDATE_FAIL)
+    return "ok"

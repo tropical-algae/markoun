@@ -43,19 +43,21 @@ async def insert_user(db: AsyncSession, user: UserAccount):
     return user
 
 
-# async def update_user(db: AsyncSession, user_id: str, update_attr: dict) -> User | None:
-#     user = await db.get(User, ident=user_id)
-#     if user:
-#         user.email = update_attr.get("email", user.email)
-#         user.password = (
-#             get_password_hash(update_attr["password"])
-#             if update_attr.get("passwd")
-#             else user.password
-#         )
-#         user.full_name = update_attr.get("full_name", user.full_name)
+async def update_user(
+    db: AsyncSession, user_id: str, update_attr: dict
+) -> UserAccount | None:
+    user = await db.get(UserAccount, ident=user_id)
+    if user:
+        user.email = update_attr.get("email", user.email)
+        user.password = (
+            get_password_hash(update_attr["password"])
+            if update_attr.get("password")
+            else user.password
+        )
+        user.full_name = update_attr.get("full_name", user.full_name)
 
-#         db.add(user)
-#         await db.commit()
-#         await db.refresh(user)
-#         return user
-#     return None
+        db.add(user)
+        await db.commit()
+        await db.refresh(user)
+        return user
+    return None
