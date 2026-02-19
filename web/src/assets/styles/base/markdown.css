@@ -1,0 +1,125 @@
+
+.note-preview h1,
+.note-preview h2,
+.note-preview h3,
+.note-preview h4,
+.note-preview h5,
+.note-preview h6 {
+  margin-top: 1.3rem;
+  color: var(--color-accent-alt);
+}
+
+/*********** 代码标 ***********/
+
+.note-preview code {
+  padding: 0 0.3rem;
+  color: var(--color-text-sec);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  background-color: var(--color-bg-dark);
+  border-radius: 4px;
+
+}
+
+/*********** 代码块 ***********/
+
+.note-preview pre {
+  padding: 0.5rem 1rem;
+  overflow-x: hidden;
+  background-color: var(--color-bg-dark);
+  border-radius: 5px;
+}
+
+.note-preview pre code {
+  padding: 0;
+  color: var(--color-text-sec);
+  white-space: pre-wrap;
+  background-color: unset;
+  border-radius: 0;
+}
+
+/*********** 引用块 ***********/
+
+.note-preview blockquote {
+  margin: 1rem 0;
+  padding: 0 1rem;
+  color: var(--color-text-sec);
+
+  /* font-style: italic; */
+  font-size: 0.875rem;
+  white-space: pre-wrap;
+
+  border-left: 4px solid var(--color-action);
+  background-color: var(--color-bg-dark);
+
+  border-radius: 5px;
+
+  /* overflow-wrap: break-word;
+  overflow-x: hidden; */
+}
+
+.note-preview blockquote p {
+  margin: 0;
+  padding: 0;
+}
+
+/*********** 链接 ***********/
+
+.note-preview a, 
+.note-preview a:visited, 
+.note-preview a:hover {
+  color: var(--color-action);
+  text-decoration: none;
+}
+
+.note-preview img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 1rem 0;
+  border-radius: 15px;
+  opacity: 0.8;
+}
+
+.note-preview del {
+  color: var(--color-bg-error);
+}
+
+.note-preview hr {
+  border-color: var(--color-line);
+  opacity: 1.0;
+}
+
+.note-preview ol {
+  display: block;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  padding-left: 2rem;
+  list-style-type: decimal;
+}
+
+.note-preview ul {
+  display: block;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  padding-left: 2rem;
+
+  /* list-style-type: circle; */
+}
+
+.note-preview li {
+  display: list-item;
+}
+
+.note-preview table {
+  width: 100%;
+  margin: 1em 0;
+  border-collapse: collapse;
+}
+
+.note-preview th,
+.note-preview td {
+  padding: 0.15rem 0.5rem;
+  text-align: left;
+  border: 1px solid var(--color-line);
+}
