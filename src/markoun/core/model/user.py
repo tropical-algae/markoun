@@ -48,12 +48,13 @@ class UserBasicInfo(BaseModel):
     )
 
     def build_user(self) -> UserAccount:
+        is_superuser = ScopeType.ADMIN in self.scopes
         return UserAccount(
             id=generate_random_token(prefix="USR", length=24),
             full_name=self.full_name,
             password=self.password,
             email=self.email,
             scopes=json.dumps([i.value for i in self.scopes]),
-            is_superuser=False,
+            is_superuser=is_superuser,
             is_active=True,
         )

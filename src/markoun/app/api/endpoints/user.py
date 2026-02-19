@@ -9,10 +9,10 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from markoun.app.api.deps import get_current_user, get_db
 from markoun.app.services.system_service import get_allow_user_register_setting
-from markoun.app.utils import security
 from markoun.app.utils.constant import CONSTANT
+from markoun.app.utils.security import get_access_token, verify_password
 from markoun.common.config import settings
-from markoun.core.db.crud import insert_user, select_user_by_full_name, verify_password
+from markoun.core.db.crud import insert_user, select_user_by_full_name
 from markoun.core.db.crud.crud_user import select_user_by_email, update_user
 from markoun.core.db.models import UserAccount
 from markoun.core.model.user import LoginResponse, ScopeType, TokenPayload, UserBasicInfo
@@ -43,7 +43,7 @@ async def api_user_login(
         if remember_me
         else settings.ACCESS_TOKEN_DEFAULT_EXPIRE_MINUTES
     )
-    access_token = security.get_access_token(
+    access_token = get_access_token(
         data=TokenPayload(userid=user.id, username=user.full_name, scopes=scopes),
         expires_delta=access_token_expires,
     )

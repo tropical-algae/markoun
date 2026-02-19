@@ -13,6 +13,7 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 
 from markoun.app.services.system_service import insert_default_system_setting
+from markoun.app.services.user_service import insert_default_user
 from markoun.app.utils.constant import CONSTANT
 from markoun.common.config import settings
 from markoun.common.logging import logger
@@ -51,6 +52,7 @@ async def lifespan(app: FastAPI):
     await init_db_models()
     async with LocalSession() as db:
         await insert_default_system_setting(db)
+        await insert_default_user(db)
 
     Path(settings.DOCUMENT_ROOT).mkdir(parents=True, exist_ok=True)
 

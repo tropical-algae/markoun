@@ -109,14 +109,14 @@ async def insert_default_system_setting(db: AsyncSession):
                 is_active=True,
             )
             new_sys_settings.append(sys_setting)
-            logger.info(
-                f"Initialize configuration: {sys_setting.name}[{sys_setting.value}]"
+            logger.warning(
+                f"Initialize system setting: {sys_setting.name}[{sys_setting.value}]"
             )
 
     if new_sys_settings:
         await insert_system_settings(db, new_sys_settings)
-        logger.info(
-            f"Initialized {len(new_sys_settings)} configuration items successfully"
+        logger.warning(
+            f"Initialized {len(new_sys_settings)} system settings successfully"
         )
     else:
-        logger.warning("Default configurations already exist. Initialization skipped.")
+        logger.info("Default system setting already exist. Initialization skipped.")
