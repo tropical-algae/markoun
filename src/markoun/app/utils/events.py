@@ -6,17 +6,16 @@ from typing import Any
 
 import pytz
 from fastapi import FastAPI
-from fastapi.concurrency import iterate_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 from starlette import status
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 
+from markoun.app.services.system_service import insert_default_system_setting
 from markoun.app.utils.constant import CONSTANT
 from markoun.common.config import settings
 from markoun.common.logging import logger
-from markoun.core.db.crud.crud_setting import insert_default_setting
 from markoun.core.db.session import LocalSession, init_db_models
 
 # ALLOW_ORIGINS = ["*"]
@@ -51,7 +50,7 @@ async def lifespan(app: FastAPI):
     _ = app
     await init_db_models()
     async with LocalSession() as db:
-        await insert_default_setting(db)
+        await insert_default_system_setting(db)
 
     Path(settings.DOCUMENT_ROOT).mkdir(parents=True, exist_ok=True)
 

@@ -4,9 +4,10 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from markoun.app.utils.constant import CONSTANT
 from markoun.common.logging import logger
 from markoun.core.db.crud.crud_setting import (
-    ALLOW_REGISTER_SETTING_ID,
     get_system_settings,
+    insert_system_settings,
     select_all_system_settings,
+    select_system_settings_by_ids,
     update_system_settings,
 )
 from markoun.core.db.models import SystemSetting
@@ -15,11 +16,24 @@ from markoun.core.model.base import (
     SysSettingType,
     SysSettingUpdateRequest,
 )
+from markoun.core.model.user import ScopeType
 
+ALLOW_REGISTER_SETTING_ID = "allow_regis"
 TYPE_CHECK_MAP = {
     SysSettingType.BOOL: bool,
     SysSettingType.STR: str,
 }
+DEFAULT_SETTING = [
+    {
+        "key": ALLOW_REGISTER_SETTING_ID,
+        "value": True,
+        "type": SysSettingType.BOOL,
+        "name": "Allow Registration",
+        "desc": "Enable or disable user self-registration.",
+        "scope": ScopeType.ADMIN,
+    },
+    # {"key": "allowed_file_exten", "value": [], "name": "Allowed File Extensions"},
+]
 
 
 async def get_system_setting_by_scopes(
@@ -75,3 +89,34 @@ async def get_allow_user_register_setting(db: AsyncSession) -> bool:
 
     result: bool = setting.value
     return result
+
+
+async def insert_default_system_setting(db: AsyncSession):
+    default_keys = [item["key"] for item in DEFAULT_SETTING]
+    existed_sys_settings = await select_system_settings_by_ids(db=db, ids=default_keys)
+    existed_keys = {es.id for es in existed_sys_settings}
+
+    new_sys_settings = []
+    for item in DEFAULT_SETTING:
+        if item["key"] not in existed_keys:
+            sys_setting = SystemSetting(
+                id=item.get("key", "none"),
+                name=item.get("name", "none"),
+                value=item.get("value", "none"),
+                type=item.get("type", SysSettingType.STR),
+                description=item.get("desc", "none"),
+                scope=item.get("scope", ScopeType.GUEST),
+                is_active=True,
+            )
+            new_sys_settings.append(sys_setting)
+            logger.info(
+                f"Initialize configuration: {sys_setting.name}[{sys_setting.value}]"
+            )
+
+    if new_sys_settings:
+        await insert_system_settings(db, new_sys_settings)
+        logger.info(
+            f"Initialized {len(new_sys_settings)} configuration items successfully"
+        )
+    else:
+        logger.warning("Default configurations already exist. Initialization skipped.")
