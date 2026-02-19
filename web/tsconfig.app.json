@@ -4,9 +4,9 @@
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "bundler", 
-    "baseUrl": ".",
+    // "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     },
     // "ignoreDeprecations": "6.0",
     
