@@ -26,6 +26,8 @@ export const useNodeStore = defineStore('note', () => {
   const currentParentPath = computed(() => getParentPath(currentNode.value))
   const currrentRenderedFile = computed(() => renderCurrentFileContent())
 
+  var isInitialized = false
+
   const noticeStore = useNoticeStore()
 
   const renderCurrentFileContent = (): string => {
@@ -73,9 +75,10 @@ export const useNodeStore = defineStore('note', () => {
 
   const setCurrentNode = async (node: FsNode) => {
     if (node.type === 'file' && node.suffix.toLowerCase() === 'md') {
+      await refreshCurrentFile(node)
       currentNode.value = node
       currentFileNode.value = node
-      await refreshCurrentFile(node)
+      isInitialized = true
     } else if (node.type === 'dir') {
       currentNode.value = node
     } else {
@@ -93,7 +96,7 @@ export const useNodeStore = defineStore('note', () => {
   }
 
   const saveCurrentFile = async (): Promise<void> => {
-    if (currentFile.value === defaultFileContent) {
+    if (!isInitialized) {
       noticeStore.pushNotice('warning', 'The home page cannot be changed.')
       return
     }
@@ -117,6 +120,7 @@ export const useNodeStore = defineStore('note', () => {
         currentNode.value = null;
         currentFileNode.value = null;
         currentFile.value = defaultFileContent;
+        isInitialized = false;
       } else {
         // 当前选中节点非打开的文件，删除后设选中节点为文件
         currentNode.value = currentFileNode.value;
@@ -130,6 +134,7 @@ export const useNodeStore = defineStore('note', () => {
     if (currentFile.value.path.startsWith(path)) {
       currentFileNode.value = null;
       currentFile.value = defaultFileContent;
+      isInitialized = false;
     }
     if (currentNode?.value?.path.startsWith(path)) {
       currentNode.value = currentFileNode.value;

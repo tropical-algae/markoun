@@ -30,7 +30,6 @@ export const useUserStore = defineStore('user', () => {
 
   const checkAuth = async () => {
     if (isChecked.value) {
-      console.log("验证过")
       return isAuthed.value
     }
 
@@ -40,9 +39,7 @@ export const useUserStore = defineStore('user', () => {
 
     checkPromise = (async () => {
       try {
-        console.log("执行后端验证...")
         const res = await checkTokenApi()
-        console.log(res)
         isAuthed.value = res.data
         return isAuthed.value
       } catch (error) {
