@@ -16,7 +16,7 @@ from starlette.responses import JSONResponse, Response
 from markoun.app.utils.constant import CONSTANT
 from markoun.common.config import settings
 from markoun.common.logging import logger
-from markoun.core.db.crud.curl_setting import insert_default_setting
+from markoun.core.db.crud.crud_setting import insert_default_setting
 from markoun.core.db.session import LocalSession, init_db_models
 
 # ALLOW_ORIGINS = ["*"]

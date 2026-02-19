@@ -3,7 +3,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from markoun.app.utils.constant import CONSTANT
 from markoun.common.logging import logger
-from markoun.core.db.crud.curl_setting import (
+from markoun.core.db.crud.crud_setting import (
     ALLOW_REGISTER_SETTING_ID,
     get_system_settings,
     select_all_system_settings,
