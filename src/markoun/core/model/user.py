@@ -44,7 +44,9 @@ class UserBasicInfo(BaseModel):
     password: str = Field(description="User password")
     email: str = Field(default="admin@test.com", description="The email of user")
     scopes: list[ScopeType] = Field(
-        default_factory=list, description="The scope for user, include ADMIN, USER, GUEST"
+        default_factory=list,
+        json_schema_extra={"readOnly": True},
+        description="The scope for user, include ADMIN, USER, GUEST",
     )
 
     def build_user(self) -> UserAccount:

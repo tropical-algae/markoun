@@ -3,7 +3,16 @@ from datetime import datetime, timedelta
 from typing import Any
 
 import pytz
-from fastapi import APIRouter, Depends, Form, HTTPException, Request, Response, Security
+from fastapi import (
+    APIRouter,
+    Body,
+    Depends,
+    Form,
+    HTTPException,
+    Request,
+    Response,
+    Security,
+)
 from fastapi.security import OAuth2PasswordRequestForm, SecurityScopes
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -124,6 +133,7 @@ async def api_user_register(
         raise HTTPException(**CONSTANT.RESP_USER_EMAIL_EXISTS)
 
     try:
+        user.scopes = [ScopeType.USER]
         new_user = user.build_user()
         new_user = await insert_user(db=db, user=new_user)
         del new_user.password
