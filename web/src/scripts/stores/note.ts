@@ -14,7 +14,7 @@ export const useNodeStore = defineStore('note', () => {
     name: 'WELCOME',
     path: '',
     suffix: '',
-    content: 'HI, THIS IS MARKOUN',
+    content: '## Hi, this is Markoun\n\nA clean and powerful online Markdown editor.',
     meta: {}
   }
 

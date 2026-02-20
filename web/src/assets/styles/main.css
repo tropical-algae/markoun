@@ -54,11 +54,18 @@ html {
 	background-color: var(--color-bg-pri) !important;
 
   overflow: hidden;
+  scrollbar-width: none; 
+  -ms-overflow-style: none; 
+
   user-select: none;
   transition: background-color 0.7s ease;
 }
 
 ::-webkit-scrollbar {
+  display: none;
+}
+
+/* ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
@@ -88,4 +95,4 @@ html {
     scrollbar-color: var(--color-bg-selected) transparent;
   }
 }
-
+*/

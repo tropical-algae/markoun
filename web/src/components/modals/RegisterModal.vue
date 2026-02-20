@@ -37,8 +37,8 @@
       />
       
       <div class="d-flex justify-content-end gap-2">
-        <GhostButton @click="isVisible = false" theme="secondary">Cancel</GhostButton>
-        <GhostButton @click="handleConfirm" :disabled="!isFormValied">Create Account</GhostButton>
+        <GhostButton class="f-s py-0" @click="isVisible = false" theme="secondary">Cancel</GhostButton>
+        <GhostButton class="f-s py-0" @click="handleConfirm" :disabled="!isFormValied">Create Account</GhostButton>
       </div>
     </div>
   </BaseModal>
