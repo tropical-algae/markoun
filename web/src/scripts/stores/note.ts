@@ -46,7 +46,6 @@ export const useNodeStore = defineStore('note', () => {
 
   const refrestNodeTree = async () => {
     const response = await getFileTreeApi()
-    console.log('tree', response.data)
     nodeTree.value = response.data
   }
 

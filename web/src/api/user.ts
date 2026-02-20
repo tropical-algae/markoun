@@ -1,11 +1,5 @@
 import request from '@/scripts/utils/request'
-import type { LoginResponse, ApiResponse } from '@/scripts/types'
-
-export interface LoginForm {
-  username: string
-  password: string
-  remember_me: boolean
-}
+import type { LoginResponse, ApiResponse, RegisterForm, LoginForm } from '@/scripts/types'
 
 /**
  * 登录接口
@@ -27,6 +21,23 @@ export const loginApi = (
     url: '/api/v1/auth/login',
     method: 'post',
     data: params
+  })
+}
+
+/**
+ * 注册接口
+ */
+export const registerApi = (
+  data: RegisterForm
+): Promise<LoginResponse> => {
+  return request({
+    url: '/api/v1/auth/register',
+    method: 'post',
+    data: {
+      "full_name": data.username,
+      "password": data.password,
+      "email": data.email
+    }
   })
 }
 

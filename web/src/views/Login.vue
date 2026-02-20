@@ -28,10 +28,12 @@
           />
 
 					<div class="links-row mb-5">
-            <div>
-              <button v-if="sysStore.canUserRegister">Create an account</button>
+            <div class="p-0 m-0 f-s">
+              <button v-if="sysStore.canUserRegister" type="button" @click="showRegisterModal = true">
+                Create an account
+              </button>
             </div>
-            <label class="d-flex gap-2">
+            <label class="d-flex gap-2 f-s">
               <input type="checkbox" v-model="loginForm.remember_me">
               <span>Remember me</span>
             </label>
@@ -40,9 +42,6 @@
 					<hr class="separator-line"/>
 
 					<div class="d-flex justify-content-center">
-						<!-- <button type="submit" class="confirm auth-submit">
-							Sign in
-						</button> -->
             <GhostButton class="f-l fw-bold" style="width: 220px;" type="submit">Sign in</GhostButton>
 					</div>
 
@@ -51,27 +50,24 @@
 			</div>
     </div>
   </div>
+  <RegisterModal v-model="showRegisterModal"/>
 </template>
 
 <script setup lang="ts">
-import { reactive, onMounted } from 'vue'
+import { reactive, onMounted, ref } from 'vue'
 import { useUserStore } from '@/scripts/stores/user'
 import { useSysStore } from '@/scripts/stores/system'
 import InputField from '@/components/common/InputField.vue'
 import GhostButton from '@/components/common/GhostButton.vue';
+import RegisterModal from '@/components/modals/RegisterModal.vue';
 
 import router from '@/router'
 
 const userStore = useUserStore()
 const sysStore = useSysStore()
 
+const showRegisterModal = ref(false);
 const loginForm = reactive({ username: "", password: "", remember_me: false })
-// const registerForm = reactive({ 
-//   email: "", 
-//   username: "", 
-//   password: "", 
-//   confirmPassword: "" 
-// })
 
 const onLogin = async () => {
 	const response = await userStore.login(loginForm)
@@ -84,7 +80,4 @@ onMounted(async () => {
   await sysStore.refreshUserRegistrationAllowed()
 })
 
-// const onRegister = async () => {
-  
-// }
 </script>

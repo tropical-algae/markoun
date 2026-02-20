@@ -57,7 +57,6 @@ const handleConfirm = async () => {
 
   if (!noteName.value.trim()) return;
   
-  console.log(noteName.value)
   await nodeStore.addNewNode(noteName.value, 'file')
   
   // 初始化状态

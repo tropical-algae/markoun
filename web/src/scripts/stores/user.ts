@@ -1,7 +1,11 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { loginApi, checkTokenApi, logoutApi, type LoginForm, updatePasswordApi } from '@/api/user'
+import { loginApi, checkTokenApi, logoutApi, updatePasswordApi, registerApi } from '@/api/user'
 import { useNoticeStore } from "@/scripts/stores/notice";
+import type { LoginForm, RegisterForm } from '@/scripts/types';
+
+const NAME_MIN_LEN = 3
+const PASSWD_MIN_LEN = 6
 
 export const useUserStore = defineStore('user', () => {
   const isAuthed = ref(false)
@@ -24,6 +28,24 @@ export const useUserStore = defineStore('user', () => {
     } catch (error) {
       isAuthed.value = false
       isChecked.value = false 
+      throw error
+    }
+  }
+
+  const register = async (registerForm: RegisterForm): Promise<boolean> => {
+    try {
+      if (registerForm.password.length < PASSWD_MIN_LEN) {
+        noticeStore.pushNotice('warning', `Password must be longer than ${PASSWD_MIN_LEN}.`)
+        return false
+      }
+      if (registerForm.username.length < NAME_MIN_LEN) {
+        noticeStore.pushNotice('warning', `Username must be longer than ${NAME_MIN_LEN}.`)
+        return false
+      }
+      await registerApi(registerForm);
+      noticeStore.pushNotice('info', `Account for “${registerForm.username}” has been created.`)
+      return true
+    } catch (error) {
       throw error
     }
   }
@@ -75,5 +97,5 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  return { login, checkAuth, logout, updatePassword }
+  return { login, register, checkAuth, logout, updatePassword }
 })

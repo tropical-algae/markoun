@@ -57,7 +57,6 @@ const handleConfirm = async () => {
 
   if (!folderName.value.trim()) return;
   
-  console.log(folderName.value)
   await nodeStore.addNewNode(folderName.value, 'dir')
   
   // 初始化状态

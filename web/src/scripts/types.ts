@@ -32,13 +32,16 @@ export interface FsNode {
   children?: FsNode[];
 }
 
+export interface LoginForm {
+  username: string
+  password: string
+  remember_me: boolean
+}
 
-export interface LoginResponse {
-  user_id: string;
-  message: string;
-  timestamp: string;
-  scopes: string[];
-  status: number;
+export interface RegisterForm {
+  username: string
+  email: string
+  password: string
 }
 
 export interface User {
@@ -50,6 +53,14 @@ export interface User {
   is_superuser: boolean | null;
   create_date: string | null;
   profile: string | null;
+}
+
+export interface LoginResponse {
+  user_id: string;
+  message: string;
+  timestamp: string;
+  scopes: string[];
+  status: number;
 }
 
 export interface FileDetailResponse {

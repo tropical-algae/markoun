@@ -118,7 +118,6 @@ const submitRename = async () => {
     cancelRename();
     return;
   }
-  console.log("===========================")
   await nodeStore.renameNode(node.value.path, editName.value)
   isRenaming.value = false;
 };
