@@ -28,7 +28,7 @@ class SysSetting(BaseSettings):
 
 class BasicSetting(BaseSettings):
     # database
-    SQL_DATABASE_URI: str = ""
+    SQL_DATABASE_URI: str = "sqlite+aiosqlite:///database.db"
     SQL_POOL_PRE_PING: bool = True
     SQL_POOL_SIZE: int = 10
     SQL_MAX_OVERFLOW: int = 20
@@ -40,8 +40,7 @@ class BasicSetting(BaseSettings):
 
     ACCESS_TOKEN_SECRET_KEY: str = secrets.token_hex(32)
 
-    DOCUMENT_ROOT: str = "./data"
-    DOCUMENT_STATIC_ASSET_PATH: str = "/static"
+    DOCUMENT_ROOT: str = "/data"
     DISPLAYED_FILE_TYPES: list = ["md", "png", "jpg", "jpeg", "bmp", "svg"]
 
 
