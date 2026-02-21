@@ -31,6 +31,7 @@ jobs:
 
   release:
     runs-on: ubuntu-latest
+    environment: release
     needs: detection
     if: github.ref == 'refs/heads/main'
     concurrency:
