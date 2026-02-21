@@ -100,7 +100,7 @@ jobs:
       - name: Docker login
         run: |
           echo "IMAGE_NAME=tropicalalgae/markoun" >> $GITHUB_ENV
-          echo "IMAGE_VERSION=v$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+          echo "IMAGE_VERSION=${{ steps.release.outputs.version }}" >> $GITHUB_ENV
           echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
       - name: Docker Release
