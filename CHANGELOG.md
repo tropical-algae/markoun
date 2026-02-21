@@ -1,5 +1,13 @@
 <!-- version list -->
 
+## v0.0.2 (2026-02-21)
+
+### Bug Fixes
+
+- Fix image version capture error in cicd
+  ([`3eef852`](https://github.com/tropical-algae/markoun/commit/3eef852bb373ebb5e6405cee837c36ef49a729ad))
+
+
 ## v0.0.1 (2026-02-21)
 
 ### Bug Fixes
