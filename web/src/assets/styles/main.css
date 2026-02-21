@@ -1,0 +1,98 @@
+@import url('@/assets/styles/views/workspace.css');
+@import url('@/assets/styles/views/login.css');
+
+@import url('@/assets/styles/comps/sidebar.css');
+@import url('@/assets/styles/comps/fsNode.css');
+@import url('@/assets/styles/comps/nodeEditor.css');
+@import url('@/assets/styles/comps/uploadModal.css');
+@import url('@/assets/styles/comps/ghostButton.css');
+@import url('@/assets/styles/comps/inputField.css');
+@import url('@/assets/styles/comps/inputUnderline.css');
+
+@import url('@/assets/styles/base/baseModal.css');
+@import url('@/assets/styles/base/baseComp.css');
+@import url('@/assets/styles/base/font.css');
+@import url('@/assets/styles/base/markdown.css');
+
+
+
+:root {
+  --color-bg-pri: #ffffff;
+  --color-bg-sec: #f9f9f9;
+  --color-bg-field: #f0f0f0;
+  --color-bg-muted: #999999;
+  --color-bg-selected: #e1e1e1;
+  --color-bg-dark: rgba(0, 0, 0, 0.08);
+
+  --color-text-pri: #242424;
+  --color-text-sec: #797979;
+
+  /* 提示文本色 */
+  --color-text-trifle: #b3b3b3;
+
+  --color-bg-error: #f46b6b;
+  --color-bg-warning: #f3a245;
+
+  --color-line: #d2d2d2;
+
+  /* 弹窗的布景色 */
+  --color-backdrop: rgba(0, 0, 0, 0.4); 
+
+  /* 阴影色 */
+  --color-bg-pri-shadow: rgba(255, 255, 255, 0.2);
+  --color-bg-error-shadow: rgba(244, 107, 107, 0.2);
+  --color-bg-warning-shadow: rgba(243, 162, 69, 0.2);
+  --color-text-pri-shaow: rgba(22, 22, 22, 0.2);
+
+  --color-action: #4b9ff4;
+  --color-action-light: #ecf5ff;
+}
+
+
+body,
+html {
+	background-color: var(--color-bg-pri) !important;
+
+  overflow: hidden;
+  scrollbar-width: none; 
+  -ms-overflow-style: none; 
+
+  user-select: none;
+  transition: background-color 0.7s ease;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-button {
+  display: none;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-bg-selected);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-bg-selected);
+}
+
+@supports (not selector(::-webkit-scrollbar)) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-bg-selected) transparent;
+  }
+}
+*/

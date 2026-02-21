@@ -1,0 +1,91 @@
+.input-underline-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  position: relative;
+}
+
+.input-underline-label {
+  text-transform: uppercase;
+  /* letter-spacing: 1.5px; */
+  color: var(--color-text-sec);
+  font-weight: 600;
+  transition: color 0.3s ease;
+  user-select: none;
+}
+
+.input-underline-wrapper.is-focused .input-underline-label {
+  color: var(--color-text-pri);
+}
+
+.input-underline-container {
+  position: relative;
+  width: 100%;
+  padding-bottom: 4px; 
+}
+
+.input-underline-content {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  
+  color: var(--color-text-pri);
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  
+  &::placeholder {
+    color: var(--color-text-sec);
+    opacity: 0.5;
+  }
+}
+
+
+.input-underline-line-base {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: var(--color-line);
+}
+
+.input-underline-line-active {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: var(--color-text-pri);
+  
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s ease;
+  
+  z-index: 1;
+}
+
+.input-underline-container:hover .input-underline-line-active,
+.input-underline-wrapper.is-focused .input-underline-line-active {
+  transform: scaleX(1);
+}
+
+.input-underline-wrapper.is-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.input-underline-wrapper.is-disabled .input-underline-content {
+  cursor: not-allowed;
+  color: var(--color-text-muted);
+}
+
+.input-underline-wrapper.is-disabled .input-underline-line-base {
+  border-bottom: 1px dashed var(--color-line);
+  background-color: transparent;
+}
+
+.input-underline-wrapper.is-disabled .input-underline-line-active {
+  display: none;
+}

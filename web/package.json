@@ -1,0 +1,32 @@
+{
+  "name": "markoun",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@types/bootstrap": "^5.2.10",
+    "@types/marked": "^5.0.2",
+    "axios": "^1.13.2",
+    "bootstrap": "^5.3.8",
+    "gsap": "^3.14.2",
+    "marked": "^17.0.1",
+    "marked-katex-extension": "^5.1.6",
+    "pinia": "^3.0.4",
+    "vue": "^3.5.24",
+    "vue-router": "^4.6.4"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@vitejs/plugin-vue": "^6.0.1",
+    "@vue/tsconfig": "^0.8.1",
+    "typescript": "~5.9.3",
+    "vite": "^7.2.4",
+    "vite-svg-loader": "^5.1.0",
+    "vue-tsc": "^3.1.4"
+  }
+}

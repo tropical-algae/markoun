@@ -1,0 +1,16 @@
+web/node_modules
+web/dist
+web/.env
+web/.env.example
+web/.git
+web/.vscode
+
+__pycache__
+*.pyc
+*.pyo
+venv/
+.env
+.env.example
+
+.git
+.gitignore
