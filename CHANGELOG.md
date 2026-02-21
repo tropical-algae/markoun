@@ -1,5 +1,13 @@
 <!-- version list -->
 
+## v0.0.3 (2026-02-21)
+
+### Bug Fixes
+
+- Fix ci env configuration in release job
+  ([`6e212ea`](https://github.com/tropical-algae/markoun/commit/6e212ea234234762e324c0311c3a603e666d97ac))
+
+
 ## v0.0.2 (2026-02-21)
 
 ### Bug Fixes

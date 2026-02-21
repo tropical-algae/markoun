@@ -1,6 +1,6 @@
 [project]
 name = "markoun"
-version = "0.0.2"
+version = "0.0.3"
 description = "A file-based Markdown editor"
 authors = [{ name = "tropicalalgae", email = "tropicalalgae@gmail.com" }]
 requires-python = ">=3.11"
