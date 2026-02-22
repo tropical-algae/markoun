@@ -1,5 +1,21 @@
 <!-- version list -->
 
+## v0.0.4 (2026-02-22)
+
+### Documentation
+
+- Update readme
+  ([`10618d4`](https://github.com/tropical-algae/markoun/commit/10618d4944e9687ca2589f55d16bbdbb046f46c4))
+
+- Update readme
+  ([`c822b55`](https://github.com/tropical-algae/markoun/commit/c822b55bcace4a547ac0fabcbf11e26cddb57723))
+
+### Features
+
+- Add license
+  ([`7c66d85`](https://github.com/tropical-algae/markoun/commit/7c66d85aa6e1e949cc9fd99beaecb8ec3edccaa9))
+
+
 ## v0.0.3 (2026-02-21)
 
 ### Bug Fixes
