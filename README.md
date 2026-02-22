@@ -1,9 +1,9 @@
-<div align="center"><img style="max-width: 180px" src="assets/logo.png"/></div>
+<div align="center"><img style="width: 180px" src="assets/logo.png"/></div>
 <p align="center"><strong><span style="font-size: 1.25em;">A self-hosted, file-based Markdown editor</span></strong></p>
 <p align="center">
   <a href="README.md"><img src="https://img.shields.io/badge/Language-English-blue.svg"></a>
 </p>
-<div align="center"><img style="border-radius: 5px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);" src="assets/preview.png"/></div>
+<div align="center"><img src="assets/preview.png"/></div>
 
 Markoun is a lightweight, self-hosted, and entirely file-based Markdown editor designed for users who prioritize privacy and simplicity.
 
@@ -66,10 +66,10 @@ By default, the sidebar displays only Markdown files and common image formats. T
 
 ## Limitations & Roadmap
 
-- [] **Image security**: static image routes currently lack authentication checks
-- [] **File system architecture**: design can be further optimized
-- [] **UI polish**: incomplete animation feedback and styling inconsistencies
-- [] **Frontend refactoring**: codebase requires further optimization
+- [ ] **Image security**: static image routes currently lack authentication checks
+- [ ] **File system architecture**: design can be further optimized
+- [ ] **UI polish**: incomplete animation feedback and styling inconsistencies
+- [ ] **Frontend refactoring**: codebase requires further optimization
 
 ## License
 
