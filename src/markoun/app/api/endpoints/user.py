@@ -93,23 +93,14 @@ async def api_user_logout(response: Response):
 
 @router.get("/check")
 async def api_check_token(
-    request: Request,
-    db: AsyncSession = Depends(get_db),
-) -> Any:
+    _: UserAccount = Security(
+        get_current_user, scopes=[ScopeType.ADMIN, ScopeType.USER, ScopeType.GUEST]
+    ),
+) -> str:
     """
     Test access token
     """
-    try:
-        await get_current_user(
-            request=request,
-            security_scopes=SecurityScopes(
-                [ScopeType.ADMIN, ScopeType.USER, ScopeType.GUEST]
-            ),
-            db=db,
-        )
-        return True
-    except Exception:
-        return False
+    return "ok"
 
 
 @router.post("/register", response_model=UserAccount)
