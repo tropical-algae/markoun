@@ -1,5 +1,13 @@
 <!-- version list -->
 
+## v0.0.7 (2026-02-27)
+
+### Bug Fixes
+
+- [site] resolve infinite recursion from incorrect import
+  ([`eaf518d`](https://github.com/tropical-algae/markoun/commit/eaf518df5effec453ac2080f561ec59485c4e02b))
+
+
 ## v0.0.6 (2026-02-27)
 
 ### Documentation
