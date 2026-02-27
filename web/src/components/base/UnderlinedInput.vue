@@ -1,11 +1,11 @@
 <template>
   <div 
-    class="input-underline-wrapper" 
+    class="underlined-input-wrapper" 
     :class="$attrs.class, { 'is-disabled': disabled, 'is-focused': modelValue || isFocused}"
   >
-    <label class="input-underline-label">{{ label }}</label>
+    <label class="underlined-input-label">{{ label }}</label>
     
-    <div class="input-underline-container">
+    <div class="underlined-input-container">
       <input
         v-bind="inputAttrs"
         ref="inputRef"
@@ -16,10 +16,10 @@
         @focus="isFocused = true"
         @blur="isFocused = false"
         @input="handleInput"
-        class="input-underline-content"
+        class="underlined-input-content"
       />
-      <div class="input-underline-line-base"></div>
-      <div class="input-underline-line-active"></div>
+      <div class="underlined-input-line-base"></div>
+      <div class="underlined-input-line-active"></div>
     </div>
   </div>
 </template>
@@ -68,3 +68,98 @@ const handleInput = (event: Event) => {
   emit('update:modelValue', target.value);
 };
 </script>
+
+
+<style scoped>
+.underlined-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  position: relative;
+}
+
+.underlined-input-label {
+  text-transform: uppercase;
+  /* letter-spacing: 1.5px; */
+  color: var(--color-text-sec);
+  font-weight: 600;
+  transition: color 0.3s ease;
+  user-select: none;
+}
+
+.underlined-input-wrapper.is-focused .underlined-input-label {
+  color: var(--color-text-pri);
+}
+
+.underlined-input-container {
+  position: relative;
+  width: 100%;
+  padding-bottom: 4px; 
+}
+
+.underlined-input-content {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  
+  color: var(--color-text-pri);
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  
+  &::placeholder {
+    color: var(--color-text-sec);
+    opacity: 0.5;
+  }
+}
+
+.underlined-input-line-base {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: var(--color-line);
+}
+
+.underlined-input-line-active {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: var(--color-text-pri);
+  
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s ease;
+  
+  z-index: 1;
+}
+
+.underlined-input-container:hover .underlined-input-line-active,
+.underlined-input-wrapper.is-focused .underlined-input-line-active {
+  transform: scaleX(1);
+}
+
+.underlined-input-wrapper.is-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.underlined-input-wrapper.is-disabled .underlined-input-content {
+  cursor: not-allowed;
+  color: var(--color-text-muted);
+}
+
+.underlined-input-wrapper.is-disabled .underlined-input-line-base {
+  border-bottom: 1px dashed var(--color-line);
+  background-color: transparent;
+}
+
+.underlined-input-wrapper.is-disabled .underlined-input-line-active {
+  display: none;
+}
+
+</style>

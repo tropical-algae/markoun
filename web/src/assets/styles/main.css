@@ -1,19 +1,8 @@
-@import url('@/assets/styles/views/workspace.css');
-@import url('@/assets/styles/views/login.css');
-
-@import url('@/assets/styles/comps/sidebar.css');
-@import url('@/assets/styles/comps/fsNode.css');
-@import url('@/assets/styles/comps/nodeEditor.css');
-@import url('@/assets/styles/comps/uploadModal.css');
-@import url('@/assets/styles/comps/ghostButton.css');
-@import url('@/assets/styles/comps/filledInput.css');
-@import url('@/assets/styles/comps/underlinedInput.css');
-
-@import url('@/assets/styles/base/baseModal.css');
-@import url('@/assets/styles/base/baseComp.css');
+@import url('@/assets/styles/base/base.css');
+@import url('@/assets/styles/base/line.css');
+@import url('@/assets/styles/base/button.css');
 @import url('@/assets/styles/base/font.css');
 @import url('@/assets/styles/base/markdown.css');
-
 
 
 :root {

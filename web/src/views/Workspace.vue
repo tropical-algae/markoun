@@ -21,5 +21,28 @@
 import Sidebar from '@/components/sidebar/Sidebar.vue';
 import NoteEditor from '@/components/editor/NoteEditor.vue';
 
-
 </script>
+
+<style scoped>
+
+.workspace-header {
+  height: 28px;
+  flex-shrink: 0;
+	border-bottom: 1px solid var(--color-line);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  /* justify-content: center; */
+}
+
+.workspace-footer {
+  height: 28px;
+  flex-shrink: 0;
+  font-size: 0.7rem;
+	border-top: 1px solid var(--color-line);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  user-select: None;
+}
+</style>

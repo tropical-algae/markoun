@@ -1,0 +1,35 @@
+.is-smooth {
+  transition-property:
+    width,
+    background-color,
+    color,
+    border-color;
+  transition-duration: 0.3s;
+  transition-timing-function: ease;
+}
+
+.is-resizing {
+  user-select: none;
+  cursor: col-resize;
+}
+
+.meta-tag {
+  flex-shrink: 0; 
+  margin-left: auto;
+  
+  background-color: var(--color-text-sec);
+  color: var(--color-bg-pri);
+  font-size: 10px;
+  font-weight: bold;
+  line-height: 10px;
+  padding: 3px 5px;
+  margin: 0;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.container-header {
+  height: 48px;
+	border-bottom: 1px solid var(--color-line);
+  box-sizing: border-box;
+}

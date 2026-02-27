@@ -33,7 +33,7 @@
           </span>
         </div>
         
-        <span v-if="node.suffix" class="node-tag">{{ node.suffix.toUpperCase() }}</span>
+        <span v-if="node.suffix" class="meta-tag">{{ node.suffix.toUpperCase() }}</span>
       </div>
     </div>
 
@@ -165,3 +165,78 @@ const onLeave = (el: Element, done: () => void) => {
   });
 };
 </script>
+
+
+<style scoped>
+
+.node-wrapper {
+  /* padding: 3px 6px; */
+  font-size: 0.8rem;
+  color: var(--color-text-pri);
+  width: 100%; 
+  box-sizing: border-box;
+}
+
+.node-content {
+  padding: 2px 6px;
+  cursor: pointer;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+
+  transition: background-color 0.3s ease;
+}
+
+.node-text-wrapper {
+  flex: 1;
+  min-width: 0; 
+  display: flex; 
+}
+
+.node-text-wrapper .file-name, 
+.node-text-wrapper .dir-name {
+  padding: 2px 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%; 
+  display: block;
+  line-height: 1rem;
+}
+
+.node-text-wrapper .file-name { 
+  color: var(--color-text-sec);
+  transition: color 0.3s ease;
+}
+
+.node-content.is-selected .node-text-wrapper span,
+.node-content:hover .node-text-wrapper span {
+  color: var(--color-text-pri);
+}
+
+.node-content.is-selected,
+.node-content:hover {
+  background-color: var(--color-bg-selected);
+}
+
+.rename-input {
+  background-color: var(--color-bg-field);
+  width: 100%;
+  border: none;
+  outline: none;
+  padding: 2px 3px;
+  margin: 0;
+  border-radius: 2px;
+  color: var(--color-text-pri);
+  font-family: inherit;
+  line-height: 1rem;
+}
+
+.node-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+</style>

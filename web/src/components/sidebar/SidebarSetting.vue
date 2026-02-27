@@ -63,12 +63,12 @@
       
       <div class="d-flex justify-content-between align-items-center text-muted small mb-1">
         <span>App Version:</span>
-        <span class="node-tag">v{{ sysStore.version }}</span>
+        <span class="meta-tag">v{{ sysStore.version }}</span>
       </div>
       
       <div class="d-flex justify-content-between align-items-center text-muted small mb-3">
         <span>System Status:</span>
-        <span class="node-tag">{{ sysStore.status }}</span>
+        <span class="meta-tag">{{ sysStore.status }}</span>
       </div>
 
       <GhostButton @click="handleLogout" class="w-100 f-s" theme="danger" >

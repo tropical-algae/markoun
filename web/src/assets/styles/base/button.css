@@ -1,0 +1,46 @@
+button {
+  padding: 0;
+  margin: 0;
+  background-color: transparent;
+  border: none;
+}
+
+button.cancel {
+  color: var(--color-bg-pri);
+  background-color: var(--color-bg-muted);
+  border-radius: 6px;
+  transition: opacity 0.3s ease;
+}
+
+button.confirm {
+  color: var(--color-bg-pri);
+  background-color: var(--color-action);
+  border-radius: 6px;
+  transition: opacity 0.3s ease;
+}
+
+button.cancel:hover,
+button.confirm:hover {
+  opacity: 0.8;
+}
+
+.icon-btn {
+  width: 28px; 
+  height: 28px;
+  padding: 6px; 
+  display: inline-flex; 
+  align-items: center; 
+  justify-content: center; 
+  overflow: visible;
+
+  user-select: none;
+  border-radius: 5px;
+
+  fill: var(--color-text-pri);
+
+  transition: background-color 0.3s ease;
+}
+
+.icon-btn:hover {
+  background-color: var(--color-bg-selected);
+}

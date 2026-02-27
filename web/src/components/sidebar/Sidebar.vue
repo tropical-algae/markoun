@@ -15,7 +15,7 @@
 
     <div 
       class="sub-sidebar-container" 
-      :class="{ 'anim-width': !isSubSidebarResizing }"
+      :class="{ 'is-smooth': !isSubSidebarResizing }"
       :style="{ width: currentWidth }"
     >
       <div 
@@ -104,4 +104,33 @@ const startResizing = (e: MouseEvent) => {
 
 </script>
 
+<style scoped>
+.sidebar-wrapper {
+  height: 100%;
+  position: relative;
+  user-select: none; 
+}
 
+.sidebar-container {
+  z-index: 2;
+  background-color: var(--color-bg-sec);
+  border-right: 1px solid var(--color-line);
+}
+
+.file-tree-wrapper {
+  overflow: hidden; 
+  position: relative;
+}
+
+.sub-sidebar-container {
+  overflow: hidden;
+  height: 100%;
+  position: relative;
+}
+
+.sub-sidebar-inner {
+  height: 100%;
+  min-width: 220px; 
+  white-space: nowrap;
+}
+</style>
