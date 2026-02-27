@@ -1,9 +1,9 @@
-<div align="center"><img style="width: 180px" src="assets/logo.png"/></div>
+<div align="center"><img style="width: 180px" src=".github/assets/logo.png"/></div>
 <p align="center"><strong><span style="font-size: 1.25em;">A self-hosted, file-based Markdown editor</span></strong></p>
 <p align="center">
   <a href="README.md"><img src="https://img.shields.io/badge/Language-English-blue.svg"></a>
 </p>
-<div align="center"><img src="assets/preview.png"/></div>
+<div align="center"><img src=".github/assets/preview.png"/></div>
 
 Markoun is a lightweight, self-hosted, and entirely file-based Markdown editor designed for users who prioritize privacy and simplicity.
 
@@ -26,14 +26,23 @@ Markoun is a lightweight, self-hosted, and entirely file-based Markdown editor d
 You can deploy Markoun using Docker:
 
 ```
+export MARKOUN_PORT=10000
+export MARKOUN_ROOT=./
+
+touch ${MARKOUN_ROOT:-./}/config.yaml
+
 docker run -itd --name markoun \
   --restart unless-stopped \
-  -p ${PORT:-80}:80 \
-  -v ${MARKOUN_DATA_DIR:-$(pwd)/data}:/app/data \
-  -v ${MARKOUN_CONFIG_FILE:-$(pwd)/config.yaml}:/app/config.yaml \
+  -p ${MARKOUN_PORT:-10000}:80 \
+  -v ${MARKOUN_ROOT:-$(pwd)}/data:/app/data \
+  -v ${MARKOUN_ROOT:-$(pwd)}/config.yaml:/app/config.yaml \
   tropicalalgae/markoun:latest
 
 ```
+
+Then run `docker logs -f markoun` to check the logs for the default administrator password.
+
+You can also create a new regular user from the homepage.
 
 ### Volume Explanation
 
@@ -53,6 +62,8 @@ Markoun is configured via a config.yaml file. Below are some important options:
 | `ACCESS_TOKEN_EXTENDED_EXPIRE_MINUTES` | **Persistent Session Lifetime**: Duration (in minutes) for users who select "Remember Me" during login.   | 43200                                      |
 | `DISPLAYED_FILE_TYPES`                 | **File Filter**: A list of file extensions that the editor is permitted to display.                       | ["md", "png", "jpg", "jpeg", "bmp", "svg"] |
 
+For more configurable options, see [config.py](src/markoun/common/config.py)
+
 ## Editor Details
 
 **Relative Image Paths**:
@@ -64,9 +75,12 @@ Long-press on a file or folder name in the sidebar to rename it.
 **File Visibility Rules**:
 By default, the sidebar displays only Markdown files and common image formats. To show additional file types, modify DISPLAYED_FILE_TYPES in config.yaml.
 
+**System configuration**:
+The administrator can enable or disable user registration in the settings section of the sidebar.
+
 ## Limitations & Roadmap
 
-- [ ] **Image security**: static image routes currently lack authentication checks
+- [x] **Image security**: static image routes currently lack authentication checks
 - [ ] **File system architecture**: design can be further optimized
 - [ ] **UI polish**: incomplete animation feedback and styling inconsistencies
 - [ ] **Frontend refactoring**: codebase requires further optimization
