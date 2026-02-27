@@ -4,8 +4,8 @@ from fastapi import APIRouter, Security
 
 from markoun.app.api.deps import get_current_user
 from markoun.app.services.dir_service import create_dir
-from markoun.common.config import settings
-from markoun.common.logging import logger
+from markoun.app.utils.constant import CONSTANT
+from markoun.common.decorator import exception_handling
 from markoun.common.util import relative_path_to_abs_path
 from markoun.core.db.models import UserAccount
 from markoun.core.model.file import BasicNode, DirNode
@@ -15,6 +15,7 @@ router = APIRouter()
 
 
 @router.post("/create", response_model=DirNode)
+@exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_create_dir(
     note: BasicNode,
     _: UserAccount = Security(get_current_user, scopes=[ScopeType.ADMIN, ScopeType.USER]),

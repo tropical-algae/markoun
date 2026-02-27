@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router"
-import { useUserStore } from '@/scripts/stores/user'
+import { useUserStore } from '@/stores/user'
 
 const Workspace = () => import("@/views/Workspace.vue")
 const Login = () => import("@/views/Login.vue")

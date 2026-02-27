@@ -5,8 +5,8 @@
     </div>
 
     <div class="d-flex flex-row flex-grow-1 overflow-auto">
-      <SidebarComp />
-      <NoteEditorComp />
+      <Sidebar />
+      <NoteEditor />
     </div>
 
     <div class="workspace-footer text-muted px-2">
@@ -18,8 +18,31 @@
 </template>
 
 <script setup lang="ts">
-import SidebarComp from '@/components/SidebarComp.vue';
-import NoteEditorComp from '@/components/NoteEditorComp.vue';
-
+import Sidebar from '@/components/sidebar/Sidebar.vue';
+import NoteEditor from '@/components/editor/NoteEditor.vue';
 
 </script>
+
+<style scoped>
+
+.workspace-header {
+  height: 28px;
+  flex-shrink: 0;
+	border-bottom: 1px solid var(--color-line);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  /* justify-content: center; */
+}
+
+.workspace-footer {
+  height: 28px;
+  flex-shrink: 0;
+  font-size: 0.7rem;
+	border-top: 1px solid var(--color-line);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  user-select: None;
+}
+</style>

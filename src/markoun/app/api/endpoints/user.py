@@ -1,35 +1,35 @@
 import json
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Any
 
 import pytz
 from fastapi import (
     APIRouter,
-    Body,
     Depends,
     Form,
-    HTTPException,
-    Request,
     Response,
     Security,
 )
-from fastapi.security import OAuth2PasswordRequestForm, SecurityScopes
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from markoun.app.api.deps import get_current_user, get_db
-from markoun.app.services.system_service import get_allow_user_register_setting
-from markoun.app.utils.constant import CONSTANT
-from markoun.app.utils.security import get_access_token, verify_password
-from markoun.common.config import settings
-from markoun.core.db.crud import insert_user, select_user_by_full_name
-from markoun.core.db.crud.crud_user import select_user_by_email, update_user
+from markoun.app.services.user_service import (
+    user_login,
+    user_logout,
+    user_register,
+    user_update_passwd,
+)
+from markoun.app.utils.constant import CONSTANT, MSG_SUCCESS
+from markoun.common.decorator import exception_handling
 from markoun.core.db.models import UserAccount
-from markoun.core.model.user import LoginResponse, ScopeType, TokenPayload, UserBasicInfo
+from markoun.core.model.user import LoginResponse, ScopeType, UserBasicInfo
 
 router = APIRouter()
 
 
 @router.post("/login", response_model=LoginResponse)
+@exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_user_login(
     response: Response,
     db: AsyncSession = Depends(get_db),
@@ -39,39 +39,13 @@ async def api_user_login(
     """
     OAuth2 compatible token login, sets HttpOnly Cookie
     """
-    user = await select_user_by_full_name(db, full_name=form_data.username)
-    if not user:
-        raise HTTPException(**CONSTANT.RESP_USER_NOT_EXISTS)
-
-    if not verify_password(form_data.password, str(user.password)):
-        raise HTTPException(**CONSTANT.RESP_USER_INCORRECT_PASSWD)
-
-    scopes = json.loads(str(user.scopes))
-    access_token_expires = timedelta(
-        minutes=settings.ACCESS_TOKEN_EXTENDED_EXPIRE_MINUTES
-        if remember_me
-        else settings.ACCESS_TOKEN_DEFAULT_EXPIRE_MINUTES
+    user = await user_login(
+        response=response, db=db, user_form=form_data, is_persistent=remember_me
     )
-    access_token = get_access_token(
-        data=TokenPayload(userid=user.id, username=user.full_name, scopes=scopes),
-        expires_delta=access_token_expires,
-    )
-
-    response.set_cookie(
-        key="access_token",
-        value=f"Bearer {access_token}",
-        httponly=True,
-        max_age=int(access_token_expires.total_seconds()),
-        expires=int(access_token_expires.total_seconds()),
-        samesite="lax",
-        secure=False,
-        path="/",
-    )
-
     return LoginResponse(
         **CONSTANT.RESP_SUCCESS,
         user_id=user.id,
-        scopes=scopes,
+        scopes=json.loads(str(user.scopes)),
         timestamp=pytz.timezone("Asia/Shanghai")
         .localize(datetime.now())
         .strftime("%Y-%m-%d %H:%M:%S"),
@@ -79,16 +53,13 @@ async def api_user_login(
 
 
 @router.post("/logout")
+@exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_user_logout(response: Response):
     """
     User logout delete cookie
     """
-    response.delete_cookie(
-        key="access_token",
-        path="/",
-        samesite="lax",
-    )
-    return "Success!"
+    user_logout(response)
+    return MSG_SUCCESS
 
 
 @router.get("/check")
@@ -100,10 +71,11 @@ async def api_check_token(
     """
     Test access token
     """
-    return "ok"
+    return MSG_SUCCESS
 
 
 @router.post("/register", response_model=UserAccount)
+@exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_user_register(
     user: UserBasicInfo,
     db: AsyncSession = Depends(get_db),
@@ -111,29 +83,12 @@ async def api_user_register(
     """
     Register new user (This interface has not undergone login verification)
     """
-    can_user_regis = await get_allow_user_register_setting(db=db)
-    if not can_user_regis:
-        raise HTTPException(**CONSTANT.SERV_DISABLE_REGISTRATION)
-
-    existed_user = await select_user_by_full_name(db, full_name=user.full_name)
-    if existed_user is not None:
-        raise HTTPException(**CONSTANT.RESP_USER_EXISTS)
-
-    existed_user = await select_user_by_email(db, email=user.email)
-    if existed_user is not None:
-        raise HTTPException(**CONSTANT.RESP_USER_EMAIL_EXISTS)
-
-    try:
-        user.scopes = [ScopeType.USER]
-        new_user = user.build_user()
-        new_user = await insert_user(db=db, user=new_user)
-        del new_user.password
-        return new_user
-    except Exception as err:
-        raise HTTPException(**CONSTANT.RESP_SERVER_ERROR) from err
+    new_user = await user_register(user=user, db=db)
+    return new_user
 
 
 @router.patch("/password")
+@exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_update_setting(
     new_passwd: str,
     db: AsyncSession = Depends(get_db),
@@ -141,9 +96,5 @@ async def api_update_setting(
         get_current_user, scopes=[ScopeType.ADMIN, ScopeType.USER]
     ),
 ):
-    result = await update_user(
-        db=db, user_id=current_user.id, update_attr={"password": new_passwd}
-    )
-    if result is None:
-        raise HTTPException(**CONSTANT.SERV_PASSWD_UPDATE_FAIL)
-    return "ok"
+    await user_update_passwd(db=db, user=current_user, new_passwd=new_passwd)
+    return MSG_SUCCESS

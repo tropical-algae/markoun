@@ -4,8 +4,8 @@ from fastapi import APIRouter, File, Security, UploadFile
 
 from markoun.app.api.deps import get_current_user
 from markoun.app.services.file_service import create_note, get_file_meta, upload_file
-from markoun.common.config import settings
-from markoun.common.logging import logger
+from markoun.app.utils.constant import CONSTANT, MSG_SUCCESS
+from markoun.common.decorator import exception_handling
 from markoun.common.util import aread_file, awrite_file, relative_path_to_abs_path
 from markoun.core.db.models import UserAccount
 from markoun.core.model.file import (
@@ -21,6 +21,7 @@ router = APIRouter()
 
 
 @router.get("/load", response_model=FileContentResponse)
+@exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_load_note(
     filepath: str,
     _: UserAccount = Security(get_current_user, scopes=[ScopeType.ADMIN, ScopeType.USER]),
@@ -32,6 +33,7 @@ async def api_load_note(
 
 
 @router.post("/create", response_model=FileNode)
+@exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_create_note(
     note: BasicNode,
     _: UserAccount = Security(get_current_user, scopes=[ScopeType.ADMIN, ScopeType.USER]),
@@ -42,6 +44,7 @@ async def api_create_note(
 
 
 @router.post("/save", response_model=FileMeta)
+@exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_save_note(
     data: FileSaveRequest,
     _: UserAccount = Security(get_current_user, scopes=[ScopeType.ADMIN, ScopeType.USER]),
@@ -53,6 +56,7 @@ async def api_save_note(
 
 
 @router.post("/upload")
+@exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_upload_file(
     path: str,
     file: UploadFile = File(...),
@@ -61,6 +65,6 @@ async def api_upload_file(
     abs_path = relative_path_to_abs_path(Path(path))
     await upload_file(abs_path, file)
     return {
-        "status": "ok",
+        "status": MSG_SUCCESS,
         "filename": file.filename,
     }

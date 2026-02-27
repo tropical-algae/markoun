@@ -1,5 +1,6 @@
-import request from '@/scripts/utils/request'
-import type { FsNode, ApiResponse } from '@/scripts/types'
+import type { ApiResponse } from '@/types/api'
+import type { FsNode } from '@/types/file-system'
+import request from '@/utils/request'
 
 /**
  * 删除文件 / 目录

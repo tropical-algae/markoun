@@ -2,10 +2,10 @@
   <RouterView v-slot="{ Component }">
     <component :is="Component" :key="$route.path" />
   </RouterView>
-  <Notification/>
+  <Toast/>
 </template>
 
 <script setup lang="ts">
 import { RouterView } from "vue-router";
-import Notification from "@/components/common/Notification.vue";
+import Toast from "@/components/overlay/toast/Toast.vue";
 </script>

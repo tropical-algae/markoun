@@ -1,0 +1,72 @@
+<template>
+  <button class="ghost-btn" :class="[`type-${theme}`]">
+    <slot></slot>
+  </button>
+</template>
+
+<script setup lang="ts">
+
+interface Props {
+  theme?: 'primary' | 'danger' | 'secondary' | 'submit';
+}
+
+withDefaults(defineProps<Props>(), {
+  theme: 'primary'
+});
+</script>
+
+<style scoped>
+.ghost-btn {
+  --btn-main-color: var(--color-text-pri); 
+  --btn-hover-text-color: var(--color-bg-pri);
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;  
+  padding: 2px 16px;
+  border-width: 6px;
+  opacity: 1;
+
+  background-color: transparent;
+  border: 1.5px solid var(--btn-main-color);
+  color: var(--btn-main-color);
+  border-radius: 6px;
+  
+  cursor: pointer;
+  will-change: background-color, color, border-color, opacity;
+  transition: 
+    background-color 0.4s ease-in-out, 
+    color 0.4s ease-in-out, 
+    border-color 0.4s ease-in-out, 
+    opacity 0.4s ease-in-out;
+  user-select: none;
+}
+
+.ghost-btn.type-danger {
+  --btn-main-color: var(--color-bg-error);
+}
+
+.ghost-btn.type-secondary {
+  --btn-main-color: var(--color-text-sec);
+}
+
+.ghost-btn:not(:disabled):hover {
+  background-color: var(--btn-main-color);
+  color: var(--btn-hover-text-color);
+}
+
+.ghost-btn:not(:disabled):active {
+  opacity: 1;
+}
+
+.ghost-btn:disabled {
+  border-style: dashed;
+  opacity: 0.7;
+  cursor: not-allowed;
+  
+  background-color: transparent;
+  color: var(--btn-main-color);
+}
+
+</style>

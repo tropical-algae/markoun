@@ -1,0 +1,135 @@
+<template>
+  <Teleport to="body">
+    <Transition name="modal" @after-enter="onAfterEnter">
+      <div 
+        v-if="modelValue" 
+        class="base-modal-backdrop"
+        @click="handleBackdropClick"
+      >
+        <div class="base-modal-card" @click.stop>
+          
+          <header v-if="title" class="base-modal-header">
+            <span class="base-modal-title f-l">{{ title }}</span>
+          </header>
+
+          <div class="base-modal-body"><slot></slot></div>
+          
+        </div>
+      </div>
+    </Transition>
+  </Teleport>
+</template>
+
+<script setup lang="ts">
+const props = defineProps<{
+  modelValue: boolean;
+  title?: string;
+}>();
+
+const emit = defineEmits(['update:modelValue', 'close', 'opened']);
+
+const close = () => {
+  emit('update:modelValue', false);
+  emit('close');
+};
+
+const handleBackdropClick = () => {
+  close();
+};
+
+const onAfterEnter = () => {
+  emit('opened');
+};
+</script>
+
+<style scoped>
+.base-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 999;
+  background-color: var(--color-backdrop); 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-font-smoothing: antialiased;
+}
+
+.base-modal-card {
+  background-color: var(--color-bg-pri);
+  box-shadow: 0 10px 40px var(--color-bg-pri-shadow);
+  border-radius: 12px;
+  overflow: hidden;
+  
+  width: fit-content;
+  height: fit-content;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+.base-modal-header {
+  padding: 10px 24px;
+  border-bottom: 1px solid var(--color-line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--color-bg-sec);
+}
+
+.base-modal-title {
+  font-weight: bold;
+  color: var(--color-text-pri);
+}
+
+.base-modal-body {
+  padding: 24px;
+  overflow-y: auto; 
+}
+
+.modal-enter-active,
+.modal-leave-active {
+  transition: background-color 0.4s ease; 
+}
+
+.modal-enter-active .base-modal-card {
+  animation: card-enter 0.4s ease forwards;
+}
+
+.modal-leave-active .base-modal-card {
+  animation: card-leave 0.4s ease-in forwards;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  background-color: transparent;
+}
+
+@keyframes card-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes card-leave {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+</style>

@@ -7,6 +7,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from markoun.app.utils.constant import CONSTANT
 from markoun.app.utils.security import verift_access_token
 from markoun.common.config import settings
+from markoun.common.decorator import exception_handling
 from markoun.common.logging import logger
 from markoun.core.db.crud import select_user_by_full_name
 from markoun.core.db.models import UserAccount
@@ -37,6 +38,7 @@ async def get_db() -> AsyncGenerator:
             await db.close()
 
 
+@exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def get_current_user(
     request: Request,
     security_scopes: SecurityScopes,

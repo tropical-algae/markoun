@@ -7,7 +7,9 @@ from markoun.app.services.system_service import (
     get_system_setting_by_scopes,
     update_system_setting,
 )
+from markoun.app.utils.constant import CONSTANT, MSG_SUCCESS
 from markoun.common.config import settings
+from markoun.common.decorator import exception_handling
 from markoun.common.util import str_to_json
 from markoun.core.db.models import UserAccount
 from markoun.core.model.base import (
@@ -27,6 +29,7 @@ async def api_check_system_status() -> SysStatus:
 
 
 @router.get("/settings")
+@exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_get_all_settings(
     db: AsyncSession = Depends(get_db),
     current_user: UserAccount = Security(
@@ -41,6 +44,7 @@ async def api_get_all_settings(
 
 
 @router.patch("/settings")
+@exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_update_setting(
     data: SysSettingUpdateRequest,
     db: AsyncSession = Depends(get_db),
@@ -50,10 +54,11 @@ async def api_update_setting(
 ):
     scopes: list[str] = str_to_json(current_user.scopes)
     await update_system_setting(db=db, scopes=scopes, data=data)
-    return "ok"
+    return MSG_SUCCESS
 
 
 @router.get("/settings/allow-register")
+@exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_allow_uesr_register(
     db: AsyncSession = Depends(get_db),
 ):

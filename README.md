@@ -53,7 +53,7 @@ You can also create a new regular user from the homepage.
 
 ## Configuration
 
-Markoun is configured via a config.yaml file. Below are some important options:
+Markoun is configured via a `config.yaml` file. Below are some important options:
 
 | **Key**                                | **Description**                                                                                           | **Default**                                |
 | -------------------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
@@ -84,6 +84,8 @@ The administrator can enable or disable user registration in the settings sectio
 - [ ] **File system architecture**: design can be further optimized
 - [ ] **UI polish**: incomplete animation feedback and styling inconsistencies
 - [ ] **Frontend refactoring**: codebase requires further optimization
+- [ ] **File synchronization**: support syncing files with a remote source
+- [ ] **Version management**: introduce file versioning with history tracking and restore capability
 
 ## License
 
