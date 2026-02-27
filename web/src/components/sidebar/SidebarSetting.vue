@@ -91,7 +91,7 @@ import BaseHeader from '@/components/base/BaseHeader.vue';
 import BaseIconText from '@/components/base/BaseIconText.vue';
 import GhostButton from '@/components/base/GhostButton.vue';
 import UnderlinedInput from '@/components/base/UnderlinedInput.vue';
-import SidebarSettingItem from '@/components/sidebar/SidebarSetting.vue';
+import SidebarSettingItem from '@/components/sidebar/SidebarSettingItem.vue';
 
 import InfoIcon from "@/assets/icons/info.svg"
 
