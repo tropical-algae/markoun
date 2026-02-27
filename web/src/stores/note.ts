@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { computed, ref, type Ref } from "vue";
 import type { FsNode, FileDetail } from "@/types/file-system";
-import { useNoticeStore } from "@/stores/notice";
+import { useToastStore } from "@/stores/toast";
 import { getParentPath, getMediaPath } from "@/utils/file-system";
 import { getFileContentApi, createNoteApi, uploadFileApi, saveNoteApi } from "@/api/file";
 import { getFileTreeApi, removeItemApi, renameItemApi } from "@/api/item";
@@ -28,7 +28,7 @@ export const useNodeStore = defineStore('note', () => {
 
   var isInitialized = false
 
-  const noticeStore = useNoticeStore()
+  const toastStore = useToastStore()
 
   const renderCurrentFileContent = (): string => {
     const parentPath = getParentPath(currentFile.value.path);
@@ -81,7 +81,7 @@ export const useNodeStore = defineStore('note', () => {
     } else if (node.type === 'dir') {
       currentNode.value = node
     } else {
-      noticeStore.pushNotice('warning', `WARNING: The selected object cannot be opened.`)
+      toastStore.pushNotice('warning', `WARNING: The selected object cannot be opened.`)
     }
   }
 
@@ -90,23 +90,23 @@ export const useNodeStore = defineStore('note', () => {
       uploadPercent.value = percent
     })
     await refrestNodeTree()
-    noticeStore.pushNotice('info', `File upload successfully.`)
+    toastStore.pushNotice('info', `File upload successfully.`)
     return response.data.filename
   }
 
   const saveCurrentFile = async (): Promise<void> => {
     if (!isInitialized) {
-      noticeStore.pushNotice('warning', 'The home page cannot be changed.')
+      toastStore.pushNotice('warning', 'The home page cannot be changed.')
       return
     }
     const response = await saveNoteApi(currentFile.value.path, currentFile.value.content)
     currentFile.value.meta = response.data
-    noticeStore.pushNotice('info', 'The note has been saved.')
+    toastStore.pushNotice('info', 'The note has been saved.')
   } 
 
   const deletedItem = async (): Promise<void> => {
     if (currentNode.value === null) {
-      noticeStore.pushNotice('warning', 'No file / folder selected.')
+      toastStore.pushNotice('warning', 'No file / folder selected.')
       return
     } else {
       const response = await removeItemApi(currentNode.value.path)
@@ -124,7 +124,7 @@ export const useNodeStore = defineStore('note', () => {
         // 当前选中节点非打开的文件，删除后设选中节点为文件
         currentNode.value = currentFileNode.value;
       }
-      noticeStore.pushNotice('info', `${nodeType} has been deleted.`)
+      toastStore.pushNotice('info', `${nodeType} has been deleted.`)
       await refrestNodeTree()
     }
   }
@@ -139,7 +139,7 @@ export const useNodeStore = defineStore('note', () => {
       currentNode.value = currentFileNode.value;
     }
     await renameItemApi(path, new_name)
-    noticeStore.pushNotice('info', "Rename successful!")
+    toastStore.pushNotice('info', "Rename successful!")
     await refrestNodeTree()
   }
 

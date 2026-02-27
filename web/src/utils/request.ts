@@ -1,5 +1,5 @@
 import axios, { type InternalAxiosRequestConfig, type AxiosResponse } from "axios"
-import { useNoticeStore } from "@/stores/notice";
+import { useToastStore } from "@/stores/toast";
 
 
 const service = axios.create({
@@ -23,10 +23,10 @@ service.interceptors.response.use(
     return res 
   },
   (error: any) => {
-    const noticeStore = useNoticeStore()
+    const toastStore = useToastStore()
     const status = error?.response?.data?.status ?? error.code
     const message = error?.response?.data?.message ?? error.message
-    noticeStore.pushNotice('error', `[ERROR]: ${message} (code: ${status})`)
+    toastStore.pushNotice('error', `[ERROR]: ${message} (code: ${status})`)
     return Promise.reject(error)
   }
 )

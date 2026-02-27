@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { loginApi, checkTokenApi, logoutApi, updatePasswordApi, registerApi } from '@/api/user'
-import { useNoticeStore } from "@/stores/notice";
+import { useToastStore } from "@/stores/toast";
 import type { LoginForm, RegisterForm } from '@/types/auth';
 
 const NAME_MIN_LEN = 3
@@ -10,14 +10,14 @@ const PASSWD_MIN_LEN = 6
 export const useUserStore = defineStore('user', () => {
   const isAuthed = ref(false)
   const isChecked = ref(false)
-  const noticeStore = useNoticeStore()
+  const toastStore = useToastStore()
 
   let checkPromise: Promise<boolean> | null = null 
 
   const login = async (loginForm: LoginForm) => {
     try {
       if (loginForm.username === '' || loginForm.password === '') {
-        noticeStore.pushNotice('error', `Null value is not allowed.`)
+        toastStore.pushNotice('error', `Null value is not allowed.`)
         return null
       }
 
@@ -35,15 +35,15 @@ export const useUserStore = defineStore('user', () => {
   const register = async (registerForm: RegisterForm): Promise<boolean> => {
     try {
       if (registerForm.password.length < PASSWD_MIN_LEN) {
-        noticeStore.pushNotice('warning', `Password must be longer than ${PASSWD_MIN_LEN}.`)
+        toastStore.pushNotice('warning', `Password must be longer than ${PASSWD_MIN_LEN}.`)
         return false
       }
       if (registerForm.username.length < NAME_MIN_LEN) {
-        noticeStore.pushNotice('warning', `Username must be longer than ${NAME_MIN_LEN}.`)
+        toastStore.pushNotice('warning', `Username must be longer than ${NAME_MIN_LEN}.`)
         return false
       }
       await registerApi(registerForm);
-      noticeStore.pushNotice('info', `Account for “${registerForm.username}” has been created.`)
+      toastStore.pushNotice('info', `Account for “${registerForm.username}” has been created.`)
       return true
     } catch (error) {
       throw error
@@ -90,7 +90,7 @@ export const useUserStore = defineStore('user', () => {
   const updatePassword = async (newPasswd: string): Promise<boolean> => {
     try {
       await updatePasswordApi(newPasswd);
-      noticeStore.pushNotice('info', `Password updated successfully.`)
+      toastStore.pushNotice('info', `Password updated successfully.`)
       return true
     } catch (_) {
       return false

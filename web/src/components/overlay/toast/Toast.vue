@@ -26,7 +26,7 @@
 <script setup lang="ts">
 import gsap from 'gsap';
 import { computed, watch } from 'vue';
-import { useNoticeStore } from '@/stores/notice';
+import { useToastStore } from '@/stores/toast';
 
 import BaseIconText from '@/components/base/BaseIconText.vue';
 
@@ -55,8 +55,8 @@ const noticeMap = {
   }
 };
 
-const noticeStore = useNoticeStore();
-const currentNotice = computed(() => noticeStore.queue[0]);
+const toastStore = useToastStore();
+const currentNotice = computed(() => toastStore.queue[0]);
 const config = computed(() => noticeMap[currentNotice.value?.type || 'info']);
 
 let timer: number | null = null;
@@ -70,8 +70,8 @@ watch(currentNotice, (val) => {
   if (!val) return;
 
   timer = setTimeout(() => {
-    if (noticeStore.queue[0]?.id === val.id) {
-      noticeStore.popNotice();
+    if (toastStore.queue[0]?.id === val.id) {
+      toastStore.popNotice();
     }
   }, 5000);
 });

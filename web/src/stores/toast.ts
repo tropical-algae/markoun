@@ -4,7 +4,7 @@ import type { SysNotice } from '@/types/system'
 
 let noticeId = 0
 
-export const useNoticeStore = defineStore('notice', () => {
+export const useToastStore = defineStore('notice', () => {
   const queue = ref<SysNotice[]>([])
 
   const pushNotice = (type: 'error' | 'warning' | 'info', message: string) => {
