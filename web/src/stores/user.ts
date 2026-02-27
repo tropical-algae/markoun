@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { loginApi, checkTokenApi, logoutApi, updatePasswordApi, registerApi } from '@/api/user'
 import { useNoticeStore } from "@/stores/notice";
-import type { LoginForm, RegisterForm } from '@/types/types';
+import type { LoginForm, RegisterForm } from '@/types/auth';
 
 const NAME_MIN_LEN = 3
 const PASSWD_MIN_LEN = 6

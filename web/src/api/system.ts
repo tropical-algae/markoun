@@ -1,5 +1,6 @@
+import type { ApiResponse } from '@/types/api'
+import type { SysSettingResponse, SysStatusResponse } from '@/types/system'
 import request from '@/utils/request'
-import type { ApiResponse, SysSettingResponse, SysStatusResponse } from '@/types/types'
 
 /**
  * 查看系统状态

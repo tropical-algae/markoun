@@ -1,4 +1,4 @@
-import type { FsNode } from "@/types/types";
+import type { FsNode } from "@/types/file-system";
 import { getLocalTime } from "@/utils/datetime";
 
 export const getParentPath = (node?: FsNode | string | null): string => {

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { SysNotice } from '@/types/types'
+import type { SysNotice } from '@/types/system'
 
 let noticeId = 0
 

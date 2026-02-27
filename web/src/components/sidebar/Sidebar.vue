@@ -38,7 +38,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue"
-import { SidebarMode } from "@/types/types"
+import { SidebarMode } from "@/types/ui"
 
 import SidebarToggleIcon from "@/assets/icons/sidebar.svg"
 import FileTreeIcon from "@/assets/icons/rectangle-list.svg"

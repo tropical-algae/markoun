@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { computed, ref, type Ref } from "vue";
-import type { FsNode, FileDetail } from "@/types/types";
+import type { FsNode, FileDetail } from "@/types/file-system";
 import { useNoticeStore } from "@/stores/notice";
 import { getParentPath, getMediaPath } from "@/utils/file-system";
 import { getFileContentApi, createNoteApi, uploadFileApi, saveNoteApi } from "@/api/file";

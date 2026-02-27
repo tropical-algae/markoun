@@ -82,7 +82,7 @@ import MetaIcon from "@/assets/icons/info.svg"
 import SaveIcon from "@/assets/icons/disk.svg"
 
 import { useNodeStore } from '@/stores/note';
-import { InspectMode } from '@/types/types';
+import { InspectMode } from '@/types/ui';
 import { insertTimeToFileName } from '@/utils/file-system';
 
 import BaseHeader from '@/components/base/BaseHeader.vue';

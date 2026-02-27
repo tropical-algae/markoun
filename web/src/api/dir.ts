@@ -1,5 +1,6 @@
+import type { ApiResponse } from '@/types/api'
+import type { FsNode } from '@/types/file-system'
 import request from '@/utils/request'
-import type { FsNode, ApiResponse } from '@/types/types'
 
 /**
  * 创建文件夹接口

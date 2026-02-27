@@ -1,5 +1,6 @@
+import type { ApiResponse } from '@/types/api'
+import type { LoginForm, LoginResponse, RegisterForm } from '@/types/auth'
 import request from '@/utils/request'
-import type { LoginResponse, ApiResponse, RegisterForm, LoginForm } from '@/types/types'
 
 /**
  * 登录接口
