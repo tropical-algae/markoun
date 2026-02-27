@@ -11,7 +11,7 @@
         <div class="text-uppercase fw-bold mb-3 f-m">Account</div>
 
         <div class="mb-3">
-          <InputUnderline
+          <UnderlinedInput
             v-model="pwdForm.new"
             label="New password"
             ref="inputRef"
@@ -19,7 +19,7 @@
             class="mb-3 f-s"
             placeholder="Enter new password"
           />
-          <InputUnderline
+          <UnderlinedInput
             v-model="pwdForm.confirm"
             label="Confirm password"
             ref="inputRef"
@@ -28,7 +28,7 @@
             placeholder="Confirm password"
           />
 
-          <TextHint 
+          <BaseIconText 
             :icon="InfoIcon" 
             :text="isPwdLenValid ? 'Password do not match.' : 'Password must be longer than 6.'" 
             color="var(--color-bg-error)"
@@ -49,7 +49,7 @@
 
       <section class="mb-5" v-if="sysStore.currentSettings.length > 0">
         <div class="text-uppercase fw-bold mb-3 f-m">Preferences</div>
-        <SettingItem
+        <SidebarSettingItem
           v-for="item in sysStore.currentSettings"
           :key="item.id"
           :setting="item"
@@ -82,16 +82,18 @@
 
 <script setup lang="ts">
 import { ref, computed, reactive, onMounted } from 'vue';
-import BaseHeader from '@/components/common/BaseHeader.vue';
 import { useSysStore } from '@/scripts/stores/system';
 import { useUserStore } from '@/scripts/stores/user';
-import InputUnderline from '@/components/common/InputUnderline.vue';
-import TextHint from '@/components/common/TextHint.vue';
-import SettingItem from '@/components/common/SettingItem.vue';
-import GhostButton from '@/components/common/GhostButton.vue';
+
+import router from '@/router';
+
+import BaseHeader from '@/components/base/BaseHeader.vue';
+import BaseIconText from '@/components/base/BaseIconText.vue';
+import GhostButton from '@/components/base/GhostButton.vue';
+import UnderlinedInput from '@/components/base/UnderlinedInput.vue';
+import SidebarSettingItem from '@/components/sidebar/SidebarSetting.vue';
 
 import InfoIcon from "@/assets/icons/info.svg"
-import router from '@/router';
 
 
 const sysStore = useSysStore()

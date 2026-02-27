@@ -6,7 +6,7 @@
   >
     <div style="width: 360px;">
       
-      <InputUnderline
+      <UnderlinedInput
         v-model="registerForm.username"
         label="Full Name"
         ref="firstInputRef"
@@ -16,7 +16,7 @@
         @keyup.enter="focusNext('emailInputRef')"
       />
 
-      <InputUnderline
+      <UnderlinedInput
         v-model="registerForm.email"
         label="Email"
         ref="emailInputRef"
@@ -26,7 +26,7 @@
         @keyup.enter="focusNext('passwordInputRef')"
       />
 
-      <InputUnderline
+      <UnderlinedInput
         v-model="registerForm.password"
         label="Password"
         ref="passwordInputRef"
@@ -46,9 +46,9 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue';
-import BaseModal from '@/components/common/BaseModal.vue';
-import InputUnderline from '@/components/common/InputUnderline.vue';
-import GhostButton from '@/components/common/GhostButton.vue';
+import BaseModal from '@/components/base/BaseModal.vue';
+import UnderlinedInput from '@/components/base/UnderlinedInput.vue';
+import GhostButton from '@/components/base/GhostButton.vue';
 
 import { useUserStore } from "@/scripts/stores/user"
 
@@ -71,9 +71,9 @@ const isFormValied = computed(() =>
   registerForm.username.length >= 1 && registerForm.email.length >= 1 && registerForm.password.length >= 1
 );
 
-const firstInputRef = ref<InstanceType<typeof InputUnderline> | null>(null);
-const emailInputRef = ref<InstanceType<typeof InputUnderline> | null>(null);
-const passwordInputRef = ref<InstanceType<typeof InputUnderline> | null>(null);
+const firstInputRef = ref<InstanceType<typeof UnderlinedInput> | null>(null);
+const emailInputRef = ref<InstanceType<typeof UnderlinedInput> | null>(null);
+const passwordInputRef = ref<InstanceType<typeof UnderlinedInput> | null>(null);
 
 const handleOpened = () => {
   firstInputRef.value?.focus();

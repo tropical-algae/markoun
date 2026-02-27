@@ -10,7 +10,7 @@
 				<h1 class="auth-title">Login</h1>
 				<form @submit.prevent="onLogin" class="auth-form">
 
-          <InputField
+          <FilledInput
             v-model="loginForm.username"
             label="Name"
             type="text"
@@ -18,7 +18,7 @@
             placeholder=""
           />
 
-          <InputField
+          <FilledInput
             v-model="loginForm.password"
             ref="inputRef"
             label="Password"
@@ -57,9 +57,9 @@
 import { reactive, onMounted, ref } from 'vue'
 import { useUserStore } from '@/scripts/stores/user'
 import { useSysStore } from '@/scripts/stores/system'
-import InputField from '@/components/common/InputField.vue'
-import GhostButton from '@/components/common/GhostButton.vue';
-import RegisterModal from '@/components/modals/RegisterModal.vue';
+import FilledInput from '@/components/base/FilledInput.vue'
+import GhostButton from '@/components/base/GhostButton.vue';
+import RegisterModal from '@/components/overlay/modals/RegisterModal.vue';
 
 import router from '@/router'
 

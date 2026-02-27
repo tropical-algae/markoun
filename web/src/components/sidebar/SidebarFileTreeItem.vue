@@ -44,7 +44,7 @@
       :css="false"
     >
       <div v-if="isDir && isOpened" class="overflow-hidden">
-        <FsNodeComp 
+        <SidebarFileTreeItem 
           v-for="(child, _index) in normalizedChildren" 
           :key="child.path" 
           :node="child" 

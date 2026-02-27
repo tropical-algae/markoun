@@ -85,7 +85,7 @@ import { useNodeStore } from '@/scripts/stores/note';
 import { InspectMode } from '@/scripts/types';
 import { insertTimeToFileName } from '@/scripts/utils/util';
 
-import BaseHeader from '@/components/common/BaseHeader.vue';
+import BaseHeader from '@/components/base/BaseHeader.vue';
 
 const nodeStore = useNodeStore()
 

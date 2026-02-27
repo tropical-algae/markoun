@@ -15,8 +15,8 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import BaseModal from '@/components/common/BaseModal.vue';
-import GhostButton from '@/components/common/GhostButton.vue';
+import BaseModal from '@/components/base/BaseModal.vue';
+import GhostButton from '@/components/base/GhostButton.vue';
 
 import { useNodeStore } from "@/scripts/stores/note"
 

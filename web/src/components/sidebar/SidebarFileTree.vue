@@ -5,7 +5,7 @@
     </button>
   </div>
   <div class="px-2 flex-grow-1 overflow-y-scroll">
-    <FsNodeComp v-for="item in nodeStore.nodeTree" :key="item.path" :node="item" :depth="0" />
+    <SidebarFileTreeItem v-for="item in nodeStore.nodeTree" :key="item.path" :node="item" :depth="0" />
   </div>
 
   <CreateNoteModal v-model="showNewNote"/>
@@ -17,12 +17,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue"
 
-import CreateNoteModal from "@/components/modals/CreateNoteModal.vue"
-import CreateDirModal from "@/components/modals/CreateDirModal.vue"
-import UploadFileModal from "@/components/modals/UploadFileModal.vue"
-import DeleteItemModal from "./modals/DeleteItemModal.vue"
+import CreateNoteModal from "@/components/overlay/modals/CreateNoteModal.vue"
+import CreateDirModal from "@/components/overlay/modals/CreateDirModal.vue"
+import UploadFileModal from "@/components/overlay/modals/UploadFileModal.vue"
+import DeleteItemModal from "@/components/overlay/modals/DeleteItemModal.vue"
 
-import FsNodeComp from "@/components/FsNodeComp.vue";
+import SidebarFileTreeItem from "@/components/sidebar/SidebarFileTreeItem.vue"
 
 import NewNoteIcon from "@/assets/icons/add-document.svg"
 import NewFolderIcon from "@/assets/icons/folder-plus-circle.svg"

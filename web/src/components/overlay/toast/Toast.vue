@@ -12,7 +12,7 @@
         class="notice-toast"
         :style="{ backgroundColor: config.bgColor, boxShadow: `0 0 15px ${config.shadowColor}` }"
       >
-        <TextHint 
+        <BaseIconText 
           :text="currentNotice.message" 
           :icon="config.icon"
           :color="config.textColor"
@@ -27,7 +27,8 @@
 import gsap from 'gsap';
 import { computed, watch } from 'vue';
 import { useNoticeStore } from '@/scripts/stores/notice';
-import TextHint from '@/components/common/TextHint.vue';
+
+import BaseIconText from '@/components/base/BaseIconText.vue';
 
 import ErrorIcon from '@/assets/icons/octagon-xmark.svg';
 import WarningIcon from '@/assets/icons/triangle-warning.svg';

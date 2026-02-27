@@ -58,8 +58,8 @@ import { useNodeStore } from '@/scripts/stores/note';
 
 import UploadIcon from "@/assets/icons/upload.svg"
 
-import BaseModal from '@/components/common/BaseModal.vue'
-import GhostButton from '@/components/common/GhostButton.vue';
+import BaseModal from '@/components/base/BaseModal.vue'
+import GhostButton from '@/components/base/GhostButton.vue';
 
 const props = defineProps<{
   modelValue: boolean

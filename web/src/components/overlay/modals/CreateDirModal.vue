@@ -6,7 +6,7 @@
   >
     <div style="width: 360px;">
 
-      <InputUnderline
+      <UnderlinedInput
         v-model="folderName"
         label="Folder Name"
         ref="inputRef"
@@ -15,7 +15,7 @@
         placeholder="e.g. temp_folder"
       />
 
-      <TextHint :icon="InfoIcon" text="Created in the selected path." class="mb-3"/>
+      <BaseIconText :icon="InfoIcon" text="Created in the selected path." class="mb-3"/>
       
       <div class="d-flex justify-content-end gap-2">
         <GhostButton class="f-s py-0" @click="isVisible = false" theme="secondary">Cancel</GhostButton>
@@ -27,11 +27,11 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import BaseModal from '@/components/common/BaseModal.vue';
-import InputUnderline from '@/components/common/InputUnderline.vue';
+import BaseModal from '@/components/base/BaseModal.vue';
+import UnderlinedInput from '@/components/base/UnderlinedInput.vue';
 
-import TextHint from '@/components/common/TextHint.vue';
-import GhostButton from '@/components/common/GhostButton.vue';
+import BaseIconText from '@/components/base/BaseIconText.vue';
+import GhostButton from '@/components/base/GhostButton.vue';
 
 import InfoIcon from "@/assets/icons/info.svg"
 
@@ -47,7 +47,7 @@ const isVisible = computed({
 });
 
 const folderName = ref('');
-const inputRef = ref<InstanceType<typeof InputUnderline> | null>(null);
+const inputRef = ref<InstanceType<typeof UnderlinedInput> | null>(null);
 
 const handleOpened = () => {
   inputRef.value?.focus();
