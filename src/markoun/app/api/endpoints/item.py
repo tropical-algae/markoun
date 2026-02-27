@@ -7,6 +7,7 @@ from markoun.app.api.deps import get_current_user
 from markoun.app.services.item_service import get_file_tree, remove_item, rename_item
 from markoun.app.utils.constant import CONSTANT
 from markoun.common.config import settings
+from markoun.common.decorator import exception_handling
 from markoun.common.logging import logger
 from markoun.common.util import relative_path_to_abs_path
 from markoun.core.db.models import UserAccount
@@ -21,6 +22,7 @@ DISPLAYED_FILE_TYPES = set(settings.DISPLAYED_FILE_TYPES)
 
 
 @router.get("/tree")
+@exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_load_tree(
     _: UserAccount = Security(get_current_user, scopes=[ScopeType.ADMIN, ScopeType.USER]),
 ) -> list[FileNode | DirNode]:
@@ -32,6 +34,7 @@ async def api_load_tree(
 
 
 @router.post("/remove")
+@exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_remove_path(
     filepath: str,
     _: UserAccount = Security(get_current_user, scopes=[ScopeType.ADMIN, ScopeType.USER]),
@@ -42,6 +45,7 @@ async def api_remove_path(
 
 
 @router.post("/rename")
+@exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_item_rename(
     data: ItemRenameRequest,
     _: UserAccount = Security(get_current_user, scopes=[ScopeType.ADMIN, ScopeType.USER]),
