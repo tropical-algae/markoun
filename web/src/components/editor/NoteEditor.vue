@@ -81,9 +81,9 @@ import PreviewIcon from "@/assets/icons/overview.svg"
 import MetaIcon from "@/assets/icons/info.svg"
 import SaveIcon from "@/assets/icons/disk.svg"
 
-import { useNodeStore } from '@/scripts/stores/note';
-import { InspectMode } from '@/scripts/types';
-import { insertTimeToFileName } from '@/scripts/utils/util';
+import { useNodeStore } from '@/stores/note';
+import { InspectMode } from '@/types/types';
+import { insertTimeToFileName } from '@/utils/file-system';
 
 import BaseHeader from '@/components/base/BaseHeader.vue';
 

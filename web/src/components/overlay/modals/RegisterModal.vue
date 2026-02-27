@@ -50,7 +50,7 @@ import BaseModal from '@/components/base/BaseModal.vue';
 import UnderlinedInput from '@/components/base/UnderlinedInput.vue';
 import GhostButton from '@/components/base/GhostButton.vue';
 
-import { useUserStore } from "@/scripts/stores/user"
+import { useUserStore } from "@/stores/user"
 
 const userStore = useUserStore()
 const props = defineProps<{ modelValue: boolean }>();

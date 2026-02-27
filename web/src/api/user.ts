@@ -1,5 +1,5 @@
-import request from '@/scripts/utils/request'
-import type { LoginResponse, ApiResponse, RegisterForm, LoginForm } from '@/scripts/types'
+import request from '@/utils/request'
+import type { LoginResponse, ApiResponse, RegisterForm, LoginForm } from '@/types/types'
 
 /**
  * 登录接口

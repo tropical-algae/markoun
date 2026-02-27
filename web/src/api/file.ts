@@ -1,5 +1,5 @@
-import request from '@/scripts/utils/request'
-import type { FsNode, FileDetailResponse, UploadResponse, ApiResponse } from '@/scripts/types'
+import request from '@/utils/request'
+import type { FsNode, FileDetailResponse, UploadResponse, ApiResponse } from '@/types/types'
 
 /**
  * 获取文件信息接口

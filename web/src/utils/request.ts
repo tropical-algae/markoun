@@ -1,5 +1,5 @@
 import axios, { type InternalAxiosRequestConfig, type AxiosResponse } from "axios"
-import { useNoticeStore } from "@/scripts/stores/notice";
+import { useNoticeStore } from "@/stores/notice";
 
 
 const service = axios.create({

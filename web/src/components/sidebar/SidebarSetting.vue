@@ -82,8 +82,8 @@
 
 <script setup lang="ts">
 import { ref, computed, reactive, onMounted } from 'vue';
-import { useSysStore } from '@/scripts/stores/system';
-import { useUserStore } from '@/scripts/stores/user';
+import { useSysStore } from '@/stores/system';
+import { useUserStore } from '@/stores/user';
 
 import router from '@/router';
 

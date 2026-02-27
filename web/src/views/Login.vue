@@ -55,8 +55,8 @@
 
 <script setup lang="ts">
 import { reactive, onMounted, ref } from 'vue'
-import { useUserStore } from '@/scripts/stores/user'
-import { useSysStore } from '@/scripts/stores/system'
+import { useUserStore } from '@/stores/user'
+import { useSysStore } from '@/stores/system'
 import FilledInput from '@/components/base/FilledInput.vue'
 import GhostButton from '@/components/base/GhostButton.vue';
 import RegisterModal from '@/components/overlay/modals/RegisterModal.vue';

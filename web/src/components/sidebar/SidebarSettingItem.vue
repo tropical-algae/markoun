@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { SysSettingType, type SysSettingResponse, type BoolSysSetting, type StrSysSetting } from '@/scripts/types';
+import { SysSettingType, type SysSettingResponse, type BoolSysSetting, type StrSysSetting } from '@/types/types';
 
 
 const props = defineProps<{

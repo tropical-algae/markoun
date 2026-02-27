@@ -1,5 +1,5 @@
-import request from '@/scripts/utils/request'
-import type { ApiResponse, SysSettingResponse, SysStatusResponse } from '@/scripts/types'
+import request from '@/utils/request'
+import type { ApiResponse, SysSettingResponse, SysStatusResponse } from '@/types/types'
 
 /**
  * 查看系统状态

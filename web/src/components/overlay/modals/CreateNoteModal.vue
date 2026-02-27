@@ -36,7 +36,7 @@ import GhostButton from '@/components/base/GhostButton.vue';
 
 import InfoIcon from "@/assets/icons/info.svg"
 
-import { useNodeStore } from "@/scripts/stores/note"
+import { useNodeStore } from "@/stores/note"
 
 const nodeStore = useNodeStore()
 const props = defineProps<{ modelValue: boolean }>();

@@ -58,8 +58,8 @@
 <script setup lang="ts">
 import gsap from 'gsap';
 import { ref, computed, nextTick } from 'vue';
-import type { FsNode } from '@/scripts/types';
-import { useNodeStore } from '@/scripts/stores/note';
+import type { FsNode } from '@/types/types';
+import { useNodeStore } from '@/stores/note';
 
 import FolderOpenIcon from "@/assets/icons/folder-open.svg"
 import FolderIcon from "@/assets/icons/folder.svg"

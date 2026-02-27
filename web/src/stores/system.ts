@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { checkSystemStatusApi, getAvailableSettingApi, isAllowRegisterApi, updateSettingApi } from '@/api/system'
-import type { SysSettingResponse } from '@/scripts/types'
+import type { SysSettingResponse } from '@/types/types'
 
 
 export const useSysStore = defineStore('sys', () => {

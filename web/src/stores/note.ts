@@ -1,12 +1,12 @@
 import { defineStore } from "pinia";
 import { computed, ref, type Ref } from "vue";
-import type { FsNode, FileDetail } from "@/scripts/types";
-import { useNoticeStore } from "@/scripts/stores/notice";
-import { getParentPath, getMediaPath } from "@/scripts/utils/util";
+import type { FsNode, FileDetail } from "@/types/types";
+import { useNoticeStore } from "@/stores/notice";
+import { getParentPath, getMediaPath } from "@/utils/file-system";
 import { getFileContentApi, createNoteApi, uploadFileApi, saveNoteApi } from "@/api/file";
 import { getFileTreeApi, removeItemApi, renameItemApi } from "@/api/item";
 import { createDirApi } from "@/api/dir";
-import marked from "@/scripts/utils/markdown";
+import marked from "@/utils/markdown";
 import { Renderer } from "marked";
 
 export const useNodeStore = defineStore('note', () => {

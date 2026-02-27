@@ -26,7 +26,7 @@
 <script setup lang="ts">
 import gsap from 'gsap';
 import { computed, watch } from 'vue';
-import { useNoticeStore } from '@/scripts/stores/notice';
+import { useNoticeStore } from '@/stores/notice';
 
 import BaseIconText from '@/components/base/BaseIconText.vue';
 

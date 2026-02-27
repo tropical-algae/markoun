@@ -1,4 +1,5 @@
-import type { FsNode } from "@/scripts/types";
+import type { FsNode } from "@/types/types";
+import { getLocalTime } from "@/utils/datetime";
 
 export const getParentPath = (node?: FsNode | string | null): string => {
   if (!node) return './';
@@ -10,21 +11,6 @@ export const getParentPath = (node?: FsNode | string | null): string => {
   const lastSlashIndex = fullPath.lastIndexOf('/');
   return lastSlashIndex > -1 ? fullPath.slice(0, lastSlashIndex) : './';
 };
-
-export const getLocalTime = () => {
-  const now = new Date();
-
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  const seconds = String(now.getSeconds()).padStart(2, '0');
-  const milliSeconds = String(now.getMilliseconds()).padStart(2, '0');
-
-  return `${year}-${month}-${day}_${hours}-${minutes}-${seconds}-${milliSeconds}`;
-}
 
 export const insertTimeToFileName = (filename: string) => {
   const lastDotIndex = filename.lastIndexOf('.');

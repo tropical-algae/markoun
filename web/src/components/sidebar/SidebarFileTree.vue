@@ -29,7 +29,7 @@ import NewFolderIcon from "@/assets/icons/folder-plus-circle.svg"
 import UploadIcon from "@/assets/icons/cloud-upload-alt.svg"
 import TrashIcon from "@/assets/icons/trash.svg"
 
-import { useNodeStore } from "@/scripts/stores/note"
+import { useNodeStore } from "@/stores/note"
 
 const showNewNote = ref(false);
 const showNewFolder = ref(false);

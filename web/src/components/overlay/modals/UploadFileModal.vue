@@ -54,7 +54,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useNodeStore } from '@/scripts/stores/note';
+import { useNodeStore } from '@/stores/note';
 
 import UploadIcon from "@/assets/icons/upload.svg"
 
