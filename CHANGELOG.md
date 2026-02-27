@@ -1,5 +1,39 @@
 <!-- version list -->
 
+## v0.0.6 (2026-02-27)
+
+### Documentation
+
+- Update readme
+  ([`2df30b6`](https://github.com/tropical-algae/markoun/commit/2df30b639e1b2650beb23fbe0e804afeac61ff8c))
+
+### Refactoring
+
+- [site] move utils, stores and types out of scripts for better project structure
+  ([`8bf8fc3`](https://github.com/tropical-algae/markoun/commit/8bf8fc314b333c29604d3a5ce78a15e3ee86c366))
+
+- [site] optimize the architecture of CSS file
+  ([`959836a`](https://github.com/tropical-algae/markoun/commit/959836a0fd86d8fafa2b7fd20e39cc4c5c59d0a2))
+
+- [site] rename NoticeStore to ToastStore for better semantics
+  ([`f550866`](https://github.com/tropical-algae/markoun/commit/f5508664609ad8d2d5a45d25104caf6311f36c69))
+
+- [site] reorganize and refine types structure
+  ([`5f926e9`](https://github.com/tropical-algae/markoun/commit/5f926e99176cc624853c33bd47de11b966dbaf73))
+
+- [site] standardize component structure and naming
+  ([`bede7c7`](https://github.com/tropical-algae/markoun/commit/bede7c70a6e77870ae87f56935dd247f1296f450))
+
+- Clean up auth module and improve robustness
+  ([`86d73da`](https://github.com/tropical-algae/markoun/commit/86d73da75816c2f294b64d7059aa6bee2a1c358f))
+
+- Translate system response messages to english
+  ([`d13be33`](https://github.com/tropical-algae/markoun/commit/d13be33984fd834b75b7994048a536ab402e690c))
+
+- Unify default success response message
+  ([`e8505c8`](https://github.com/tropical-algae/markoun/commit/e8505c863abf6078f08218339f198ce59c57e09b))
+
+
 ## v0.0.5 (2026-02-27)
 
 ### Bug Fixes
