@@ -1,5 +1,18 @@
 <!-- version list -->
 
+## v0.0.5 (2026-02-27)
+
+### Bug Fixes
+
+- Add authentication check for static image routes
+  ([`eccd1c4`](https://github.com/tropical-algae/markoun/commit/eccd1c4016f348033d934fd5fef9345ef1ec9d26))
+
+### Documentation
+
+- Update readme and move assets to .github
+  ([`d76cd0c`](https://github.com/tropical-algae/markoun/commit/d76cd0c5522cf677cc365a332e897ef91c7e3f77))
+
+
 ## v0.0.4 (2026-02-22)
 
 ### Documentation
