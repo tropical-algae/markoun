@@ -1,6 +1,8 @@
 from fastapi import status
 from pydantic_settings import BaseSettings
 
+MSG_SUCCESS = "success"
+
 
 class Constant(BaseSettings):
     # 权限
@@ -9,7 +11,7 @@ class Constant(BaseSettings):
     ROLE_GUEST_DESCRIPTION: str = "Guest, can view public data"
 
     # 返回值
-    RESP_SUCCESS: dict = {"status": status.HTTP_200_OK, "message": "success"}
+    RESP_SUCCESS: dict = {"status": status.HTTP_200_OK, "message": MSG_SUCCESS}
     RESP_SERVER_ERROR: dict = {
         "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
         "detail": "Internal server error",

@@ -4,10 +4,8 @@ from fastapi import APIRouter, File, Security, UploadFile
 
 from markoun.app.api.deps import get_current_user
 from markoun.app.services.file_service import create_note, get_file_meta, upload_file
-from markoun.app.utils.constant import CONSTANT
-from markoun.common.config import settings
+from markoun.app.utils.constant import CONSTANT, MSG_SUCCESS
 from markoun.common.decorator import exception_handling
-from markoun.common.logging import logger
 from markoun.common.util import aread_file, awrite_file, relative_path_to_abs_path
 from markoun.core.db.models import UserAccount
 from markoun.core.model.file import (
@@ -67,6 +65,6 @@ async def api_upload_file(
     abs_path = relative_path_to_abs_path(Path(path))
     await upload_file(abs_path, file)
     return {
-        "status": "ok",
+        "status": MSG_SUCCESS,
         "filename": file.filename,
     }

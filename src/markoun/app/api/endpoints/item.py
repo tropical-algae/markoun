@@ -5,10 +5,9 @@ from fastapi import APIRouter, HTTPException, Security
 
 from markoun.app.api.deps import get_current_user
 from markoun.app.services.item_service import get_file_tree, remove_item, rename_item
-from markoun.app.utils.constant import CONSTANT
+from markoun.app.utils.constant import CONSTANT, MSG_SUCCESS
 from markoun.common.config import settings
 from markoun.common.decorator import exception_handling
-from markoun.common.logging import logger
 from markoun.common.util import relative_path_to_abs_path
 from markoun.core.db.models import UserAccount
 from markoun.core.model.file import DirNode, FileNode, ItemRenameRequest
@@ -41,7 +40,7 @@ async def api_remove_path(
 ):
     abs_path = relative_path_to_abs_path(Path(filepath))
     remove_item(abs_path)
-    return "ok"
+    return MSG_SUCCESS
 
 
 @router.post("/rename")
@@ -52,4 +51,4 @@ async def api_item_rename(
 ):
     abs_path = relative_path_to_abs_path(Path(data.path))
     rename_item(abs_path, data.new_name)
-    return "ok"
+    return MSG_SUCCESS

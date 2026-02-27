@@ -20,7 +20,7 @@ from markoun.app.services.user_service import (
     user_register,
     user_update_passwd,
 )
-from markoun.app.utils.constant import CONSTANT
+from markoun.app.utils.constant import CONSTANT, MSG_SUCCESS
 from markoun.common.decorator import exception_handling
 from markoun.core.db.models import UserAccount
 from markoun.core.model.user import LoginResponse, ScopeType, UserBasicInfo
@@ -59,7 +59,7 @@ async def api_user_logout(response: Response):
     User logout delete cookie
     """
     user_logout(response)
-    return "ok"
+    return MSG_SUCCESS
 
 
 @router.get("/check")
@@ -71,7 +71,7 @@ async def api_check_token(
     """
     Test access token
     """
-    return "ok"
+    return MSG_SUCCESS
 
 
 @router.post("/register", response_model=UserAccount)
@@ -97,4 +97,4 @@ async def api_update_setting(
     ),
 ):
     await user_update_passwd(db=db, user=current_user, new_passwd=new_passwd)
-    return "ok"
+    return MSG_SUCCESS

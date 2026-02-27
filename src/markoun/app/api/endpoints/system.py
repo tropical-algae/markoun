@@ -7,7 +7,7 @@ from markoun.app.services.system_service import (
     get_system_setting_by_scopes,
     update_system_setting,
 )
-from markoun.app.utils.constant import CONSTANT
+from markoun.app.utils.constant import CONSTANT, MSG_SUCCESS
 from markoun.common.config import settings
 from markoun.common.decorator import exception_handling
 from markoun.common.util import str_to_json
@@ -54,7 +54,7 @@ async def api_update_setting(
 ):
     scopes: list[str] = str_to_json(current_user.scopes)
     await update_system_setting(db=db, scopes=scopes, data=data)
-    return "ok"
+    return MSG_SUCCESS
 
 
 @router.get("/settings/allow-register")

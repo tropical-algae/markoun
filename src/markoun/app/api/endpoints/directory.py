@@ -5,9 +5,7 @@ from fastapi import APIRouter, Security
 from markoun.app.api.deps import get_current_user
 from markoun.app.services.dir_service import create_dir
 from markoun.app.utils.constant import CONSTANT
-from markoun.common.config import settings
 from markoun.common.decorator import exception_handling
-from markoun.common.logging import logger
 from markoun.common.util import relative_path_to_abs_path
 from markoun.core.db.models import UserAccount
 from markoun.core.model.file import BasicNode, DirNode
