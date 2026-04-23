@@ -4,7 +4,7 @@ from fastapi import APIRouter, File, Security, UploadFile
 
 from markoun.app.api.deps import get_current_user
 from markoun.app.services.file_service import create_note, get_file_meta, upload_file
-from markoun.app.utils.constant import CONSTANT, MSG_SUCCESS
+from markoun.app.utils.constant import CONSTANT
 from markoun.common.decorator import exception_handling
 from markoun.common.util import aread_file, awrite_file, relative_path_to_abs_path
 from markoun.core.db.models import UserAccount
@@ -14,6 +14,7 @@ from markoun.core.model.file import (
     FileMeta,
     FileNode,
     FileSaveRequest,
+    UploadedFileResponse,
 )
 from markoun.core.model.user import ScopeType
 
@@ -55,7 +56,7 @@ async def api_save_note(
     return meta
 
 
-@router.post("/upload")
+@router.post("/upload", response_model=UploadedFileResponse)
 @exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_upload_file(
     path: str,
@@ -63,8 +64,4 @@ async def api_upload_file(
     _: UserAccount = Security(get_current_user, scopes=[ScopeType.ADMIN, ScopeType.USER]),
 ):
     abs_path = relative_path_to_abs_path(Path(path))
-    await upload_file(abs_path, file)
-    return {
-        "status": MSG_SUCCESS,
-        "filename": file.filename,
-    }
+    return await upload_file(abs_path, file)
