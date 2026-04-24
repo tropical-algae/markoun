@@ -78,6 +78,7 @@
 
 <script setup lang="ts">
 import { reactive, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { useSysStore } from '@/stores/system'
 import FilledInput from '@/components/base/FilledInput.vue'
@@ -86,9 +87,11 @@ import BaseSkeleton from '@/components/base/BaseSkeleton.vue';
 import RegisterModal from '@/components/overlay/modals/RegisterModal.vue';
 
 import router from '@/router'
+import { resolvePostAuthRedirect } from '@/router/auth'
 
 const userStore = useUserStore()
 const sysStore = useSysStore()
+const route = useRoute()
 
 const showRegisterModal = ref(false);
 const loginForm = reactive({ username: "", password: "", remember_me: false })
@@ -96,7 +99,7 @@ const loginForm = reactive({ username: "", password: "", remember_me: false })
 const onLogin = async () => {
 	const response = await userStore.login(loginForm)
   if (response !== null) {
-    router.push("/")
+    await router.replace(resolvePostAuthRedirect(route.query.redirect))
   }
 }
 

@@ -162,7 +162,7 @@ const isPwdConfValid = computed(() => pwdForm.new === pwdForm.confirm )
 const handleLogout = async () => {
   const isDone = await uesrStore.logout()
   if (isDone) {
-    router.push("/login")
+    await router.replace({ name: 'Login' })
   }
 }
 

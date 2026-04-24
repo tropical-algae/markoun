@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useActionLedger } from '@/composables/useActionLedger'
 import { loginApi, checkTokenApi, logoutApi, updatePasswordApi, registerApi } from '@/api/user'
 import { useToastStore } from "@/stores/toast";
@@ -8,15 +8,29 @@ import type { LoginForm, RegisterForm } from '@/types/auth';
 
 const NAME_MIN_LEN = 3
 const PASSWD_MIN_LEN = 6
+type AuthState = 'unknown' | 'authenticated' | 'anonymous'
 
 export const useUserStore = defineStore('user', () => {
-  const isAuthed = ref(false)
-  const isChecked = ref(false)
-  const authCheckStatus = ref<AsyncStatus>('idle')
+  const authState = ref<AuthState>('unknown')
+  const authBootstrapStatus = ref<AsyncStatus>('idle')
   const toastStore = useToastStore()
   const actionLedger = useActionLedger()
 
-  let checkPromise: Promise<boolean> | null = null 
+  let bootstrapPromise: Promise<AuthState> | null = null
+
+  const isAuthenticated = computed(() => authState.value === 'authenticated')
+  const isAnonymous = computed(() => authState.value === 'anonymous')
+  const isAuthKnown = computed(() => authState.value !== 'unknown')
+
+  const markAuthenticated = () => {
+    authState.value = 'authenticated'
+    authBootstrapStatus.value = 'ready'
+  }
+
+  const markAnonymous = () => {
+    authState.value = 'anonymous'
+    authBootstrapStatus.value = 'ready'
+  }
 
   const login = async (loginForm: LoginForm) => {
     try {
@@ -27,14 +41,11 @@ export const useUserStore = defineStore('user', () => {
 
       return await actionLedger.runAction('login', async () => {
         const res = await loginApi(loginForm)
-        isAuthed.value = true
-        isChecked.value = true
-        authCheckStatus.value = 'ready'
+        markAuthenticated()
         return res
       })
     } catch (error) {
-      isAuthed.value = false
-      isChecked.value = false 
+      markAnonymous()
       throw error
     }
   }
@@ -59,33 +70,30 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  const checkAuth = async () => {
-    if (isChecked.value) {
-      return isAuthed.value
+  const ensureAuthKnown = async (): Promise<AuthState> => {
+    if (isAuthKnown.value) {
+      return authState.value
     }
 
-    if (checkPromise) {
-      return checkPromise
+    if (bootstrapPromise) {
+      return bootstrapPromise
     }
 
-    checkPromise = (async () => {
-      authCheckStatus.value = 'loading'
+    bootstrapPromise = (async () => {
+      authBootstrapStatus.value = 'loading'
       try {
-        const res = await checkTokenApi()
-        isAuthed.value = res.data
-        authCheckStatus.value = 'ready'
-        return isAuthed.value
-      } catch (error) {
-        isAuthed.value = false
-        authCheckStatus.value = 'error'
-        return false
+        await checkTokenApi()
+        markAuthenticated()
+      } catch (_) {
+        markAnonymous()
       } finally {
-        isChecked.value = true
-        checkPromise = null
+        bootstrapPromise = null
       }
+
+      return authState.value
     })()
 
-    return checkPromise
+    return bootstrapPromise
   }
 
   const logout = async (): Promise<boolean> => {
@@ -93,9 +101,7 @@ export const useUserStore = defineStore('user', () => {
       await actionLedger.runAction('logout', async () => {
         await logoutApi();
       })
-      isAuthed.value = false
-      isChecked.value = false
-      authCheckStatus.value = 'idle'
+      markAnonymous()
       return true
     } catch (_) {
       return false
@@ -115,17 +121,19 @@ export const useUserStore = defineStore('user', () => {
   }
 
   return {
-    isAuthed,
-    isChecked,
-    authCheckStatus,
-    isCheckingAuth: () => authCheckStatus.value === 'loading',
+    authState,
+    authBootstrapStatus,
+    isAuthenticated,
+    isAnonymous,
+    isAuthKnown,
+    isBootstrappingAuth: () => authBootstrapStatus.value === 'loading',
     isLoginPending: () => actionLedger.isActionPending('login'),
     isRegisterPending: () => actionLedger.isActionPending('register'),
     isLogoutPending: () => actionLedger.isActionPending('logout'),
     isUpdatePasswordPending: () => actionLedger.isActionPending('update-password'),
     login,
     register,
-    checkAuth,
+    ensureAuthKnown,
     logout,
     updatePassword,
   }

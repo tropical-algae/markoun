@@ -45,11 +45,12 @@ export const registerApi = (
 /**
  * 测试接口
  */
-export function checkTokenApi(): Promise<ApiResponse<boolean>> {
+export function checkTokenApi(): Promise<ApiResponse<string>> {
   return request({
     url: '/api/v1/auth/check',
     method: 'get',
-    data: {}
+    data: {},
+    suppressErrorToast: true,
   })
 }
 
