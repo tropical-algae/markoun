@@ -39,6 +39,7 @@ export const useNodeStore = defineStore('note', () => {
   const currentFile = ref<FileDetail>(defaultFileContent)
   const fileDetailsByPath = ref<Record<string, FileDetail>>({})
   const currentParentPath = computed(() => getParentPath(currentNode.value ?? currentFileNode.value))
+  const currentFileParentPath = computed(() => getParentPath(currentFileNode.value ?? currentFile.value.path))
   const currentPathLabel = computed(() => currentParentPath.value === ROOT_DIRECTORY_PATH ? '/' : currentParentPath.value)
   const rootNodes = computed(() => directoryChildrenByPath.value[ROOT_DIRECTORY_PATH] || [])
   const currentFileDisplayName = computed(() => currentFileNode.value?.name || currentFile.value.name)
@@ -491,8 +492,12 @@ export const useNodeStore = defineStore('note', () => {
     }
   }
 
-  const uploadFile = async (file: File, uploadPercent: Ref<number, number>): Promise<string> => {
-    const parentPath = currentParentPath.value
+  const uploadFile = async (
+    file: File,
+    uploadPercent: Ref<number, number>,
+    destinationPath: string = currentParentPath.value,
+  ): Promise<string> => {
+    const parentPath = normalizeNodePath(destinationPath)
     const response = await actionLedger.runAction('upload-file', async () => {
       return await uploadFileApi(parentPath, file, (percent) => {
         uploadPercent.value = percent
@@ -576,6 +581,7 @@ export const useNodeStore = defineStore('note', () => {
     currentFileStatus,
     currentFileDisplayName,
     currentPath: currentParentPath,
+    currentFileParentPath,
     currentPathLabel,
     canEditCurrentFile,
     isCurrentFileLoading,

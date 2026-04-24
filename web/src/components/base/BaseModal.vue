@@ -69,9 +69,6 @@ const onAfterEnter = () => {
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-
-  will-change: transform, opacity;
-  backface-visibility: hidden;
 }
 
 .base-modal-header {

@@ -308,7 +308,7 @@ const onLeave = (el: Element, done: () => void) => {
   gap: 6px;
   width: 100%;
 
-  transition: background-color 0.3s ease;
+  transition: background-color var(--motion-soft-duration) var(--motion-soft-ease);
 }
 
 .node-text-wrapper {
@@ -326,10 +326,6 @@ const onLeave = (el: Element, done: () => void) => {
 
 .dir-icon {
   transition: fill 0.2s ease;
-}
-
-.dir-icon:hover {
-  fill: var(--color-action);
 }
 
 .node-toggle-btn,
@@ -387,12 +383,17 @@ const onLeave = (el: Element, done: () => void) => {
 
 .node-text-wrapper .file-name { 
   color: var(--color-text-sec);
-  transition: color 0.3s ease;
+  transition: color var(--motion-soft-duration) var(--motion-soft-ease);
 }
 
 .node-content.is-selected .node-text-wrapper span,
 .node-content:hover .node-text-wrapper span {
   color: var(--color-text-pri);
+}
+
+.node-content.is-selected .dir-icon,
+.node-content:hover .dir-icon {
+  fill: var(--color-action);
 }
 
 .node-content.is-selected,
@@ -419,6 +420,7 @@ const onLeave = (el: Element, done: () => void) => {
   width: 1rem;
   height: 1rem;
   flex-shrink: 0;
+  pointer-events: none;
 }
 
 .node-placeholder {
@@ -435,7 +437,6 @@ const onLeave = (el: Element, done: () => void) => {
 
 .node-placeholder-text {
   max-width: 260px;
-  /* height: var(--node-text-height); */
 }
 
 .node-children-content {

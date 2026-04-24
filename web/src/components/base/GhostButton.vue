@@ -47,12 +47,11 @@ withDefaults(defineProps<Props>(), {
   border-radius: 6px;
   
   cursor: pointer;
-  will-change: background-color, color, border-color, opacity;
   transition: 
-    background-color 0.4s ease-in-out, 
-    color 0.4s ease-in-out, 
-    border-color 0.4s ease-in-out, 
-    opacity 0.4s ease-in-out;
+    background-color var(--motion-soft-duration) var(--motion-soft-ease),
+    color var(--motion-soft-duration) var(--motion-soft-ease),
+    border-color var(--motion-soft-duration) var(--motion-soft-ease),
+    opacity var(--motion-soft-duration) var(--motion-soft-ease);
   user-select: none;
 }
 

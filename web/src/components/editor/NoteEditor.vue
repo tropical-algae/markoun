@@ -189,7 +189,11 @@ const handlePaste = async (event: ClipboardEvent) => {
           const newFile = new File(
             [file], insertTimeToFileName(file.name), { type: file.type }
           );
-          const filename = await nodeStore.uploadFile(newFile, fileUploadPercent)
+          const filename = await nodeStore.uploadFile(
+            newFile,
+            fileUploadPercent,
+            nodeStore.currentFileParentPath,
+          )
           insertText(`![${filename}](${filename})`);
         } catch (e) {
           console.log(`Failed to paste the file: ${e}`)

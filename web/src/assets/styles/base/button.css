@@ -35,12 +35,14 @@ button.confirm:hover {
 
   user-select: none;
   border-radius: 5px;
+  pointer-events: none;
 
   fill: var(--color-text-pri);
 
-  transition: background-color 0.3s ease;
+  transition: background-color var(--motion-soft-duration) var(--motion-soft-ease);
 }
 
-.icon-btn:hover {
+button:hover > .icon-btn,
+button:focus-visible > .icon-btn {
   background-color: var(--color-bg-selected);
 }
