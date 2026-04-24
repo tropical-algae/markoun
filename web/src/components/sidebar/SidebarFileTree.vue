@@ -5,7 +5,8 @@
     </button>
   </div>
   <div class="px-2 flex-grow-1 overflow-y-scroll">
-    <SidebarFileTreeItem v-for="item in nodeStore.nodeTree" :key="item.path" :node="item" :depth="0" />
+    <div v-if="isRootLoading" class="tree-state py-2">Loading...</div>
+    <SidebarFileTreeItem v-for="item in nodeStore.rootNodes" :key="item.path" :node="item" :depth="0" />
   </div>
 
   <CreateNoteModal v-model="showNewNote"/>
@@ -15,7 +16,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue"
+import { computed, onMounted, ref } from "vue"
 
 import CreateNoteModal from "@/components/overlay/modals/CreateNoteModal.vue"
 import CreateDirModal from "@/components/overlay/modals/CreateDirModal.vue"
@@ -36,6 +37,7 @@ const showNewFolder = ref(false);
 const showUpload = ref(false);
 const deleteItem = ref(false);
 const nodeStore = useNodeStore()
+const isRootLoading = computed(() => nodeStore.getDirectoryLoadState('.') === 'loading' && nodeStore.rootNodes.length === 0)
 
 const toolBtns = [
   { icon: NewNoteIcon, func: () => { showNewNote.value = true } },
@@ -47,6 +49,13 @@ const toolBtns = [
 
 
 onMounted(async () => {
-  await nodeStore.refrestNodeTree()
+  await nodeStore.loadDirectory()
 })
 </script>
+
+<style scoped>
+.tree-state {
+  color: var(--color-text-sec);
+  font-size: 0.8rem;
+}
+</style>

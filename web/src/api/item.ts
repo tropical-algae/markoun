@@ -1,5 +1,5 @@
 import type { ApiResponse } from '@/types/api'
-import type { FsNode } from '@/types/file-system'
+import type { DirectoryChildrenResponse } from '@/types/file-system'
 import request from '@/utils/request'
 
 /**
@@ -18,12 +18,17 @@ export const removeItemApi = (
 }
 
 /**
- * 获取文件树接口
+ * 获取目录直接子项
  */
-export const getFileTreeApi = (): Promise<ApiResponse<FsNode[]>> => {
+export const getDirectoryChildrenApi = (
+  path: string = '.'
+): Promise<ApiResponse<DirectoryChildrenResponse>> => {
   return request({
-    url: '/api/v1/item/tree',
+    url: '/api/v1/item/children',
     method: 'get',
+    params: {
+      path
+    }
   })
 }
 

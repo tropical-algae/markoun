@@ -1,36 +1,49 @@
 <template>
   <div>
-    <div 
-      class="node-wrapper" 
+    <div
+      class="node-wrapper"
       :style="{ paddingLeft: depth * 12 + 'px' }"
-      @click="handleClickNode"
     >
-      <div class="node-content" :class="{ 'is-selected': isActive }">
-        <component v-if="isDir" :is="currentIcon" class="node-icon"></component>
+      <div class="node-content" :class="{ 'is-selected': isActive }" @click="handleClickNode">
+        <button
+          v-if="isDir"
+          class="node-toggle-btn"
+          :class="{ 'is-opened': isOpened, 'is-disabled': !canExpand }"
+          @click.stop="handleToggleDirectory"
+        >
+          <!-- <span class="disclosure-caret" :class="{ 'is-hidden': !canExpand }"></span> -->
+          <component
+            :is="currentIcon"
+            class="node-icon dir-icon"
+          ></component>
+        </button>
+        <span v-else class="node-leading-spacer"></span>
         
         <div class="node-text-wrapper">
-           <input
-            v-if="isRenaming"
-            ref="renameInputRef"
-            v-model="editName"
-            class="rename-input"
-            @click.stop 
-            @blur="submitRename" 
-            @keydown.enter="($event.target as HTMLInputElement).blur()" 
-            @keydown.esc="cancelRename"
-          />
+          <div class="node-text-slot">
+            <input
+              v-if="isRenaming"
+              ref="renameInputRef"
+              v-model="editName"
+              class="rename-input"
+              @click.stop 
+              @blur="submitRename" 
+              @keydown.enter="($event.target as HTMLInputElement).blur()" 
+              @keydown.esc="cancelRename"
+            />
 
-          <span 
-            v-else
-            :class="{ 'file-name': !isDir, 'dir-name': isDir }"
-            @mousedown="onLongPress"
-            @touchstart="onLongPress"
-            @mouseup="cancelLongPress"
-            @mouseleave="cancelLongPress"
-            @touchend="cancelLongPress"
-          >
-            {{ node.name }}
-          </span>
+            <span 
+              v-else
+              :class="{ 'file-name': !isDir, 'dir-name': isDir }"
+              @mousedown="onLongPress"
+              @touchstart="onLongPress"
+              @mouseup="cancelLongPress"
+              @mouseleave="cancelLongPress"
+              @touchend="cancelLongPress"
+            >
+              {{ node.name }}
+            </span>
+          </div>
         </div>
         
         <span v-if="node.suffix" class="meta-tag">{{ node.suffix.toUpperCase() }}</span>
@@ -44,6 +57,13 @@
       :css="false"
     >
       <div v-if="isDir && isOpened" class="overflow-hidden">
+        <div
+          v-if="isLoading"
+          class="node-placeholder"
+          :style="{ paddingLeft: (depth + 1) * 12 + 'px' }"
+        >
+          Loading...
+        </div>
         <SidebarFileTreeItem 
           v-for="(child, _index) in normalizedChildren" 
           :key="child.path" 
@@ -66,21 +86,20 @@ import FolderIcon from "@/assets/icons/folder.svg"
 
 
 const nodeStore = useNodeStore()
-const props = defineProps<{ node: FsNode | string, depth: number }>();
+const props = defineProps<{ node: FsNode, depth: number }>();
 
-const node = computed(() => {
-  if (typeof props.node === 'string') {
-    return { name: props.node, path: props.node, type: 'file' } as FsNode;
-  }
-  return props.node;
-});
+const node = computed(() => props.node);
 
 const editName = ref('');
-const isOpened = ref(false);
 const isRenaming = ref(false);
 const isDir = computed(() => node.value.type === 'dir');
 const isActive = computed(() => nodeStore.currentNode?.path === node.value.path);
-const normalizedChildren = computed(() => (node.value.children || []));
+const isOpened = computed(() => isDir.value && nodeStore.isDirectoryExpanded(node.value.path));
+const isLoading = computed(() => isDir.value && nodeStore.getDirectoryLoadState(node.value.path) === 'loading');
+const normalizedChildren = computed(() => nodeStore.getDirectoryChildren(node.value.path));
+const canExpand = computed(() => {
+  return isDir.value && (node.value.has_children !== false || normalizedChildren.value.length > 0);
+});
 const currentIcon = computed(() => isOpened.value ? FolderOpenIcon : FolderIcon)
 
 const renameInputRef = ref<HTMLInputElement | null>(null);
@@ -118,7 +137,7 @@ const submitRename = async () => {
     cancelRename();
     return;
   }
-  await nodeStore.renameNode(node.value.path, editName.value)
+  await nodeStore.renameNode(node.value, editName.value)
   isRenaming.value = false;
 };
 
@@ -134,9 +153,14 @@ const handleClickNode = () => {
   if (isRenaming.value) return;
 
   nodeStore.setCurrentNode(node.value);
-  if (isDir.value) {
-    isOpened.value = !isOpened.value;
+};
+
+const handleToggleDirectory = async () => {
+  if (!canExpand.value) {
+    return;
   }
+
+  await nodeStore.toggleDirectory(node.value);
 };
 
 const onEnter = (el: Element, done: () => void) => {
@@ -170,7 +194,10 @@ const onLeave = (el: Element, done: () => void) => {
 <style scoped>
 
 .node-wrapper {
-  /* padding: 3px 6px; */
+  --node-text-line-height: 1rem;
+  --node-text-padding-y: 2px;
+  --node-text-padding-x: 3px;
+  --node-text-height: calc(var(--node-text-line-height) + var(--node-text-padding-y) * 2);
   font-size: 0.8rem;
   color: var(--color-text-pri);
   width: 100%; 
@@ -193,17 +220,74 @@ const onLeave = (el: Element, done: () => void) => {
   flex: 1;
   min-width: 0; 
   display: flex; 
+  align-items: stretch;
+}
+
+.node-text-slot {
+  width: 100%;
+  padding: 1px 0;
+  min-height: var(--node-text-height);
+}
+
+.dir-icon {
+  transition: fill 0.2s ease;
+}
+
+.dir-icon:hover {
+  fill: var(--color-action);
+}
+
+.node-toggle-btn,
+.node-leading-spacer {
+  /* width: 2rem; */
+  /* min-width: 2rem; */
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.node-toggle-btn {
+  border: none;
+  background: transparent;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.node-toggle-btn.is-disabled {
+  cursor: default;
+}
+
+.disclosure-caret {
+  width: 0;
+  height: 0;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-left: 5px solid var(--color-text-sec);
+  transition: transform 0.2s ease;
+}
+
+.disclosure-caret.is-hidden {
+  visibility: hidden;
+}
+
+.node-toggle-btn.is-opened .disclosure-caret {
+  transform: rotate(90deg);
 }
 
 .node-text-wrapper .file-name, 
 .node-text-wrapper .dir-name {
-  padding: 2px 3px;
+  padding: var(--node-text-padding-y) var(--node-text-padding-x);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   width: 100%; 
-  display: block;
-  line-height: 1rem;
+  min-height: var(--node-text-height);
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  line-height: var(--node-text-line-height);
 }
 
 .node-text-wrapper .file-name { 
@@ -222,21 +306,30 @@ const onLeave = (el: Element, done: () => void) => {
 }
 
 .rename-input {
-  background-color: var(--color-bg-field);
+  background-color: var(--color-bg-pri);
   width: 100%;
+  min-height: var(--node-text-height);
   border: none;
   outline: none;
-  padding: 2px 3px;
+  padding: 0 var(--node-text-padding-x);
   margin: 0;
-  border-radius: 2px;
+  border-radius: 5px;
   color: var(--color-text-pri);
   font-family: inherit;
-  line-height: 1rem;
+  box-sizing: border-box;
+  line-height: var(--node-text-line-height);
 }
 
 .node-icon {
   width: 1rem;
   height: 1rem;
   flex-shrink: 0;
+}
+
+.node-placeholder {
+  color: var(--color-text-sec);
+  font-size: 0.78rem;
+  padding-top: 2px;
+  padding-bottom: 2px;
 }
 </style>

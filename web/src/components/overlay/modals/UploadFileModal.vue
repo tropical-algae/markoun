@@ -23,7 +23,7 @@
       >
         <component :is="UploadIcon" class="upload-icon mb-3"></component>
         <p class="upload-title mb-1">Click or Drag file to this area</p>
-        <p class="upload-subtitle m-0">Upload to: {{ nodeStore.currentPath }}</p>
+        <p class="upload-subtitle m-0">Upload to: {{ nodeStore.currentPathLabel }}</p>
       </div>
 
       <div v-else class="upload-state mb-3">
