@@ -80,9 +80,12 @@ The administrator can enable or disable user registration in the settings sectio
 
 ## Limitations & Roadmap
 
-- [x] **Image security**: static image routes currently lack authentication checks
-- [ ] **File system architecture**: design can be further optimized
+- [x] **Image security**: ~~static image routes currently lack authentication checks~~
+- [x] **File system architecture**: ~~design can be further optimized~~
 - [ ] **UI polish**: incomplete animation feedback and styling inconsistencies
+- [ ] **Settings expansion**: add more configurable options for personalization and workflow control
+- [ ] **Improved usability**: provide a smoother and more comfortable operation experience
+- [ ] **Enhanced previews**: support richer previews, including image preview and Gantt chart rendering in Markdown files
 - [ ] **Frontend refactoring**: codebase requires further optimization
 - [ ] **File synchronization**: support syncing files with a remote source
 - [ ] **Version management**: introduce file versioning with history tracking and restore capability
