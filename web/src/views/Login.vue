@@ -15,6 +15,7 @@
             label="Name"
             type="text"
             class="mb-3"
+            :disabled="userStore.isLoginPending()"
             placeholder=""
           />
 
@@ -24,17 +25,31 @@
             label="Password"
             type="password"
             class="mb-3"
+            :disabled="userStore.isLoginPending()"
             placeholder=""
           />
 
 					<div class="links-row mb-5">
             <div class="p-0 m-0 f-s">
-              <button v-if="sysStore.canUserRegister" type="button" @click="showRegisterModal = true">
-                Create an account
-              </button>
+              <Transition name="soft-swap" mode="out-in">
+                <BaseSkeleton
+                  v-if="sysStore.registrationAllowedState === 'loading'"
+                  key="register-link-skeleton"
+                  width="116px"
+                  height="0.9rem"
+                />
+                <button
+                  v-else-if="sysStore.canUserRegister"
+                  key="register-link-button"
+                  type="button"
+                  @click="showRegisterModal = true"
+                >
+                  Create an account
+                </button>
+              </Transition>
             </div>
             <label class="d-flex gap-2 f-s">
-              <input type="checkbox" v-model="loginForm.remember_me">
+              <input type="checkbox" v-model="loginForm.remember_me" :disabled="userStore.isLoginPending()">
               <span>Remember me</span>
             </label>
 					</div>
@@ -42,7 +57,15 @@
 					<hr class="separator-line"/>
 
 					<div class="d-flex justify-content-center">
-            <GhostButton class="f-l fw-bold" style="width: 220px;" type="submit">Sign in</GhostButton>
+            <GhostButton
+              class="f-l fw-bold"
+              style="width: 220px;"
+              type="submit"
+              :loading="userStore.isLoginPending()"
+              :disabled="userStore.isLoginPending()"
+            >
+              Sign in
+            </GhostButton>
 					</div>
 
 				</form>
@@ -59,6 +82,7 @@ import { useUserStore } from '@/stores/user'
 import { useSysStore } from '@/stores/system'
 import FilledInput from '@/components/base/FilledInput.vue'
 import GhostButton from '@/components/base/GhostButton.vue';
+import BaseSkeleton from '@/components/base/BaseSkeleton.vue';
 import RegisterModal from '@/components/overlay/modals/RegisterModal.vue';
 
 import router from '@/router'
@@ -77,7 +101,7 @@ const onLogin = async () => {
 }
 
 onMounted(async () => {
-  await sysStore.refreshUserRegistrationAllowed()
+  await sysStore.refreshUserRegistrationAllowed().catch(() => null)
 })
 
 </script>

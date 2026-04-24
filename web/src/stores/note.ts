@@ -1,6 +1,8 @@
 import { defineStore } from "pinia";
 import { computed, ref, type Ref } from "vue";
+import { useActionLedger } from "@/composables/useActionLedger";
 import type { DirectoryLoadState, FileDetail, FsNode } from "@/types/file-system";
+import type { AsyncStatus } from "@/types/async";
 import { useToastStore } from "@/stores/toast";
 import {
   getMediaPath,
@@ -18,6 +20,7 @@ import marked from "@/utils/markdown";
 import { Renderer } from "marked";
 
 export const useNodeStore = defineStore('note', () => {
+  const MIN_FILE_SKELETON_MS = 500
   const defaultFileContent = {
     name: 'WELCOME',
     path: '',
@@ -32,21 +35,35 @@ export const useNodeStore = defineStore('note', () => {
   const currentNode = ref<FsNode | null>(null)
   const currentFileNode = ref<FsNode | null>(null)
 
+  const currentFileStatus = ref<AsyncStatus>('ready')
   const currentFile = ref<FileDetail>(defaultFileContent)
+  const fileDetailsByPath = ref<Record<string, FileDetail>>({})
   const currentParentPath = computed(() => getParentPath(currentNode.value ?? currentFileNode.value))
   const currentPathLabel = computed(() => currentParentPath.value === ROOT_DIRECTORY_PATH ? '/' : currentParentPath.value)
   const rootNodes = computed(() => directoryChildrenByPath.value[ROOT_DIRECTORY_PATH] || [])
+  const currentFileDisplayName = computed(() => currentFileNode.value?.name || currentFile.value.name)
+  const canEditCurrentFile = computed(() => currentFileStatus.value === 'ready' && Boolean(currentFileNode.value))
+  const isCurrentFileLoading = computed(() => currentFileStatus.value === 'loading')
+  const isCurrentFileRefreshing = computed(() => currentFileStatus.value === 'refreshing')
   const currrentRenderedFile = computed(() => renderCurrentFileContent())
 
   var isInitialized = false
   const directoryRequests = new Map<string, Promise<FsNode[]>>()
+  let currentFileRequestId = 0
 
   const toastStore = useToastStore()
+  const actionLedger = useActionLedger()
 
   const normalizeFsNode = (node: FsNode): FsNode => ({
     ...node,
     path: normalizeNodePath(node.path),
   })
+
+  const sleep = (ms: number): Promise<void> => {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms)
+    })
+  }
 
   const sortNodes = (nodes: FsNode[]): FsNode[] => {
     return [...nodes].sort((left, right) => {
@@ -96,9 +113,18 @@ export const useNodeStore = defineStore('note', () => {
     return normalizedPath === ROOT_DIRECTORY_PATH || Boolean(expandedDirPaths.value[normalizedPath])
   }
 
+  const buildFileDetailShell = (node: FsNode): FileDetail => ({
+    name: node.name,
+    path: node.path,
+    suffix: node.suffix,
+    content: '',
+    meta: {},
+  })
+
   const resetCurrentFileState = () => {
     currentFileNode.value = null
     currentFile.value = { ...defaultFileContent }
+    currentFileStatus.value = 'ready'
     isInitialized = false
   }
 
@@ -160,6 +186,21 @@ export const useNodeStore = defineStore('note', () => {
     currentNode.value = remapReferencedNode(currentNode.value, oldPath, newPath, exactName)
     currentFileNode.value = remapReferencedNode(currentFileNode.value, oldPath, newPath, exactName)
 
+    const nextFileDetailsByPath: Record<string, FileDetail> = {}
+    for (const [path, fileDetail] of Object.entries(fileDetailsByPath.value)) {
+      const nextPath = replacePathPrefix(path, oldPath, newPath)
+      nextFileDetailsByPath[nextPath] = {
+        ...fileDetail,
+        path: nextPath,
+        name: path === oldPath ? exactName : fileDetail.name,
+        meta: {
+          ...fileDetail.meta,
+          path: replacePathPrefix(fileDetail.meta.path || '', oldPath, newPath),
+        }
+      }
+    }
+    fileDetailsByPath.value = nextFileDetailsByPath
+
     const nextCurrentFilePath = replacePathPrefix(currentFile.value.path, oldPath, newPath)
     if (nextCurrentFilePath !== currentFile.value.path) {
       currentFile.value = {
@@ -203,6 +244,14 @@ export const useNodeStore = defineStore('note', () => {
       }
     }
     expandedDirPaths.value = nextExpandedDirPaths
+
+    const nextFileDetailsByPath: Record<string, FileDetail> = {}
+    for (const [filePath, fileDetail] of Object.entries(fileDetailsByPath.value)) {
+      if (!isPathInside(filePath, normalizedPath)) {
+        nextFileDetailsByPath[filePath] = fileDetail
+      }
+    }
+    fileDetailsByPath.value = nextFileDetailsByPath
   }
 
   const buildRenamedPath = (node: FsNode, newName: string): string => {
@@ -338,48 +387,116 @@ export const useNodeStore = defineStore('note', () => {
   }
 
   const refreshCurrentFile = async (node: FsNode) => {
-    if (node.type === 'file' && node.path !== currentFile.value?.path) {
-      const response = await getFileContentApi(node.path)
-      currentFile.value = {
-        name: node.name,
-        path: node.path,
-        suffix: node.suffix,
+    if (node.type !== 'file' || node.suffix.toLowerCase() !== 'md') {
+      return
+    }
+
+    const normalizedNode = normalizeFsNode(node)
+    if (currentFileNode.value?.path === normalizedNode.path) {
+      if (currentFileStatus.value === 'ready') {
+        currentNode.value = normalizedNode
+        return
+      }
+      if (currentFileStatus.value === 'loading' || currentFileStatus.value === 'refreshing') {
+        currentNode.value = normalizedNode
+        return
+      }
+    }
+
+    const cachedFile = fileDetailsByPath.value[normalizedNode.path]
+    const requestId = ++currentFileRequestId
+
+    currentNode.value = normalizedNode
+    currentFileNode.value = normalizedNode
+    currentFile.value = cachedFile
+      ? {
+          ...cachedFile,
+          name: normalizedNode.name,
+          path: normalizedNode.path,
+          suffix: normalizedNode.suffix,
+        }
+      : buildFileDetailShell(normalizedNode)
+    currentFileStatus.value = cachedFile ? 'refreshing' : 'loading'
+    isInitialized = false
+    const minimumSkeletonDelay = sleep(MIN_FILE_SKELETON_MS)
+
+    try {
+      const response = await getFileContentApi(normalizedNode.path)
+      await minimumSkeletonDelay
+      if (
+        requestId !== currentFileRequestId
+        || currentFileNode.value?.path !== normalizedNode.path
+      ) {
+        return
+      }
+
+      const nextFile = {
+        name: normalizedNode.name,
+        path: normalizedNode.path,
+        suffix: normalizedNode.suffix,
         content: response.data.content,
         meta: response.data.meta
       }
+      currentFile.value = nextFile
+      fileDetailsByPath.value = {
+        ...fileDetailsByPath.value,
+        [normalizedNode.path]: nextFile,
+      }
+      currentFileStatus.value = 'ready'
+      isInitialized = true
+    } catch (error) {
+      await minimumSkeletonDelay
+      if (
+        requestId !== currentFileRequestId
+        || currentFileNode.value?.path !== normalizedNode.path
+      ) {
+        return
+      }
+
+      currentFileStatus.value = 'error'
+      currentFile.value = cachedFile
+        ? {
+            ...cachedFile,
+            name: normalizedNode.name,
+            path: normalizedNode.path,
+            suffix: normalizedNode.suffix,
+          }
+        : buildFileDetailShell(normalizedNode)
     }
   }
 
   const addNewNode = async (noteName: string, type: 'file' | 'dir') => {
     const parentPath = currentParentPath.value
-    const response =
-      type === 'file'
+    const actionKey = type === 'file' ? 'create-file' : 'create-dir'
+    const response = await actionLedger.runAction(actionKey, async () => {
+      return type === 'file'
         ? await createNoteApi(parentPath, noteName)
         : await createDirApi(parentPath, noteName)
+    })
 
     await ensureDirectoryVisible(parentPath)
     upsertNode(parentPath, response.data)
-    await setCurrentNode(response.data)
+    setCurrentNode(response.data)
   }
 
-  const setCurrentNode = async (node: FsNode) => {
-    if (node.type === 'file' && node.suffix.toLowerCase() === 'md') {
-      await refreshCurrentFile(node)
-      currentNode.value = node
-      currentFileNode.value = node
-      isInitialized = true
+  const setCurrentNode = (node: FsNode) => {
+    const normalizedNode = normalizeFsNode(node)
+    if (normalizedNode.type === 'file' && normalizedNode.suffix.toLowerCase() === 'md') {
+      void refreshCurrentFile(normalizedNode)
     } else if (node.type === 'dir') {
-      currentNode.value = node
+      currentNode.value = normalizedNode
     } else {
-      currentNode.value = node
+      currentNode.value = normalizedNode
       toastStore.pushNotice('warning', `WARNING: The selected object cannot be opened.`)
     }
   }
 
   const uploadFile = async (file: File, uploadPercent: Ref<number, number>): Promise<string> => {
     const parentPath = currentParentPath.value
-    const response = await uploadFileApi(parentPath, file, (percent) => {
-      uploadPercent.value = percent
+    const response = await actionLedger.runAction('upload-file', async () => {
+      return await uploadFileApi(parentPath, file, (percent) => {
+        uploadPercent.value = percent
+      })
     })
     if (response.data.node) {
       await ensureDirectoryVisible(parentPath)
@@ -394,8 +511,16 @@ export const useNodeStore = defineStore('note', () => {
       toastStore.pushNotice('warning', 'The home page cannot be changed.')
       return
     }
-    const response = await saveNoteApi(currentFile.value.path, currentFile.value.content)
+    const response = await actionLedger.runAction('save-current-file', async () => {
+      return await saveNoteApi(currentFile.value.path, currentFile.value.content)
+    })
     currentFile.value.meta = response.data
+    fileDetailsByPath.value = {
+      ...fileDetailsByPath.value,
+      [currentFile.value.path]: {
+        ...currentFile.value,
+      }
+    }
     toastStore.pushNotice('info', 'The note has been saved.')
   } 
 
@@ -407,7 +532,9 @@ export const useNodeStore = defineStore('note', () => {
 
     const targetNode = currentNode.value
     const targetPath = normalizeNodePath(targetNode.path)
-    const response = await removeItemApi(targetPath)
+    const response = await actionLedger.runAction('delete-item', async () => {
+      return await removeItemApi(targetPath)
+    })
     const nodeType = targetNode.type === 'file' ? 'File' : 'Folder'
     if (response.status !== 200) {
       return
@@ -435,7 +562,9 @@ export const useNodeStore = defineStore('note', () => {
   const renameNode = async (node: FsNode, newName: string): Promise<void> => {
     const normalizedOldPath = normalizeNodePath(node.path)
     const normalizedNewPath = buildRenamedPath(node, newName)
-    await renameItemApi(normalizedOldPath, newName)
+    await actionLedger.runAction(`rename:${normalizedOldPath}`, async () => {
+      return await renameItemApi(normalizedOldPath, newName)
+    })
     remapCachedPathPrefix(normalizedOldPath, normalizedNewPath, newName)
     toastStore.pushNotice('info', "Rename successful!")
   }
@@ -444,8 +573,17 @@ export const useNodeStore = defineStore('note', () => {
     rootNodes,
     currentNode,
     currentFile,
+    currentFileStatus,
+    currentFileDisplayName,
     currentPath: currentParentPath,
     currentPathLabel,
+    canEditCurrentFile,
+    isCurrentFileLoading,
+    isCurrentFileRefreshing,
+    isCreatePending: (type: 'file' | 'dir') => actionLedger.isActionPending(type === 'file' ? 'create-file' : 'create-dir'),
+    isDeletePending: () => actionLedger.isActionPending('delete-item'),
+    isUploadPending: () => actionLedger.isActionPending('upload-file'),
+    isSavePending: () => actionLedger.isActionPending('save-current-file'),
     currrentRenderedFile,
     loadDirectory,
     getDirectoryChildren,

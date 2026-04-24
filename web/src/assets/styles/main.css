@@ -23,6 +23,7 @@
   --color-bg-warning: #f3a245;
 
   --color-line: #d2d2d2;
+  --color-skeleton: #dddddd;
 
   /* 弹窗的布景色 */
   --color-backdrop: rgba(0, 0, 0, 0.4); 
@@ -35,6 +36,9 @@
 
   --color-action: #4b9ff4;
   --color-action-light: #ecf5ff;
+
+  --motion-soft-duration: 0.18s;
+  --motion-soft-ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 
@@ -52,6 +56,19 @@ html {
 
 ::-webkit-scrollbar {
   display: none;
+}
+
+.soft-swap-enter-active,
+.soft-swap-leave-active {
+  transition:
+    opacity var(--motion-soft-duration) var(--motion-soft-ease),
+    transform var(--motion-soft-duration) var(--motion-soft-ease);
+}
+
+.soft-swap-enter-from,
+.soft-swap-leave-to {
+  opacity: 0;
+  transform: translateY(4px);
 }
 
 /* ::-webkit-scrollbar {

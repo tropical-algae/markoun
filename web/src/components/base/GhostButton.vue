@@ -1,6 +1,16 @@
 <template>
-  <button class="ghost-btn" :class="[`type-${theme}`]">
-    <slot></slot>
+  <button
+    class="ghost-btn"
+    :class="[`type-${theme}`, { 'is-loading': loading }]"
+    :disabled="disabled || loading"
+    :aria-busy="loading"
+  >
+    <span class="ghost-btn-content">
+      <span class="ghost-btn-label" :class="{ 'is-hidden': loading }">
+        <slot></slot>
+      </span>
+      <span v-if="loading" class="ghost-btn-spinner" aria-hidden="true"></span>
+    </span>
   </button>
 </template>
 
@@ -8,10 +18,14 @@
 
 interface Props {
   theme?: 'primary' | 'danger' | 'secondary' | 'submit';
+  disabled?: boolean;
+  loading?: boolean;
 }
 
 withDefaults(defineProps<Props>(), {
-  theme: 'primary'
+  theme: 'primary',
+  disabled: false,
+  loading: false,
 });
 </script>
 
@@ -20,10 +34,9 @@ withDefaults(defineProps<Props>(), {
   --btn-main-color: var(--color-text-pri); 
   --btn-hover-text-color: var(--color-bg-pri);
   
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;  
   padding: 2px 16px;
   border-width: 6px;
   opacity: 1;
@@ -41,6 +54,29 @@ withDefaults(defineProps<Props>(), {
     border-color 0.4s ease-in-out, 
     opacity 0.4s ease-in-out;
   user-select: none;
+}
+
+.ghost-btn-content {
+  display: grid;
+  place-items: center;
+}
+
+.ghost-btn-label {
+  grid-area: 1 / 1;
+}
+
+.ghost-btn-label.is-hidden {
+  visibility: hidden;
+}
+
+.ghost-btn-spinner {
+  grid-area: 1 / 1;
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 999px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: ghost-btn-spin 0.7s linear infinite;
 }
 
 .ghost-btn.type-danger {
@@ -67,6 +103,21 @@ withDefaults(defineProps<Props>(), {
   
   background-color: transparent;
   color: var(--btn-main-color);
+}
+
+.ghost-btn.is-loading:disabled {
+  border-style: solid;
+  opacity: 1;
+  cursor: wait;
+}
+
+@keyframes ghost-btn-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 </style>

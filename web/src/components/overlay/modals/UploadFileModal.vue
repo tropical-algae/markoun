@@ -45,7 +45,14 @@
       </div>
 
       <div class="d-flex justify-content-end">
-        <GhostButton class="f-s py-0" @click="isVisible = false" theme="secondary">Cancel</GhostButton>
+        <GhostButton
+          class="f-s py-0"
+          @click="isVisible = false"
+          theme="secondary"
+          :disabled="nodeStore.isUploadPending()"
+        >
+          Cancel
+        </GhostButton>
       </div>
 
     </div>

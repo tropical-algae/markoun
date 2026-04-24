@@ -5,8 +5,21 @@
     </button>
   </div>
   <div class="px-2 flex-grow-1 overflow-y-scroll">
-    <div v-if="isRootLoading" class="tree-state py-2">Loading...</div>
-    <SidebarFileTreeItem v-for="item in nodeStore.rootNodes" :key="item.path" :node="item" :depth="0" />
+    <Transition name="soft-swap" mode="out-in">
+      <div v-if="isRootLoading" key="tree-loading" class="tree-loading-state py-2">
+        <div v-for="index in 6" :key="index" class="tree-skeleton-row">
+          <BaseSkeleton width="1rem" height="1rem" radius="4px" />
+          <BaseSkeleton
+            :width="index % 2 === 0 ? '68%' : '54%'"
+            height="1.2rem"
+            radius="6px"
+          />
+        </div>
+      </div>
+      <div v-else key="tree-ready">
+        <SidebarFileTreeItem v-for="item in nodeStore.rootNodes" :key="item.path" :node="item" :depth="0" />
+      </div>
+    </Transition>
   </div>
 
   <CreateNoteModal v-model="showNewNote"/>
@@ -24,6 +37,7 @@ import UploadFileModal from "@/components/overlay/modals/UploadFileModal.vue"
 import DeleteItemModal from "@/components/overlay/modals/DeleteItemModal.vue"
 
 import SidebarFileTreeItem from "@/components/sidebar/SidebarFileTreeItem.vue"
+import BaseSkeleton from "@/components/base/BaseSkeleton.vue"
 
 import NewNoteIcon from "@/assets/icons/add-document.svg"
 import NewFolderIcon from "@/assets/icons/folder-plus-circle.svg"
@@ -54,8 +68,16 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.tree-state {
-  color: var(--color-text-sec);
-  font-size: 0.8rem;
+.tree-loading-state {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tree-skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 6px;
 }
 </style>

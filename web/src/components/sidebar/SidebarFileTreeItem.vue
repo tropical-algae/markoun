@@ -61,19 +61,33 @@
         class="node-children-panel overflow-hidden"
       >
         <div ref="childrenContentRef" class="node-children-content">
-          <div
-            v-if="isLoading"
-            class="node-placeholder"
-            :style="{ paddingLeft: (depth + 1) * 12 + 'px' }"
-          >
-            Loading...
-          </div>
-          <SidebarFileTreeItem 
-            v-for="(child, _index) in normalizedChildren" 
-            :key="child.path" 
-            :node="child" 
-            :depth="depth + 1"
-          />
+          <Transition name="soft-swap" mode="out-in">
+            <div
+              v-if="isLoading"
+              key="loading"
+              class="node-placeholder"
+              :style="{ paddingLeft: (depth + 1) * 12 + 'px' }"
+            >
+              <div class="node-placeholder-content">
+                <span class="node-leading-spacer"></span>
+                <BaseSkeleton width="1rem" height="1rem" radius="4px" />
+                <BaseSkeleton
+                  class="node-placeholder-text"
+                  height="1rem"
+                  width="58%"
+                  radius="6px"
+                />
+              </div>
+            </div>
+            <div v-else key="children" class="node-children-list">
+              <SidebarFileTreeItem 
+                v-for="(child, _index) in normalizedChildren" 
+                :key="child.path" 
+                :node="child" 
+                :depth="depth + 1"
+              />
+            </div>
+          </Transition>
         </div>
       </div>
     </Transition>
@@ -88,6 +102,7 @@ import { useNodeStore } from '@/stores/note';
 
 import FolderOpenIcon from "@/assets/icons/folder-open.svg"
 import FolderIcon from "@/assets/icons/folder.svg"
+import BaseSkeleton from '@/components/base/BaseSkeleton.vue';
 
 
 const nodeStore = useNodeStore()
@@ -407,10 +422,20 @@ const onLeave = (el: Element, done: () => void) => {
 }
 
 .node-placeholder {
-  color: var(--color-text-sec);
-  font-size: 0.78rem;
   padding-top: 2px;
   padding-bottom: 2px;
+}
+
+.node-placeholder-content {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 6px;
+}
+
+.node-placeholder-text {
+  max-width: 260px;
+  /* height: var(--node-text-height); */
 }
 
 .node-children-content {
