@@ -52,24 +52,29 @@
 
     <Transition
       @enter="onEnter"
-      @after-enter="onAfterEnter"
       @leave="onLeave"
       :css="false"
     >
-      <div v-if="isDir && isOpened" class="overflow-hidden">
-        <div
-          v-if="isLoading"
-          class="node-placeholder"
-          :style="{ paddingLeft: (depth + 1) * 12 + 'px' }"
-        >
-          Loading...
+      <div
+        v-if="isDir && isOpened"
+        ref="childrenPanelRef"
+        class="node-children-panel overflow-hidden"
+      >
+        <div ref="childrenContentRef" class="node-children-content">
+          <div
+            v-if="isLoading"
+            class="node-placeholder"
+            :style="{ paddingLeft: (depth + 1) * 12 + 'px' }"
+          >
+            Loading...
+          </div>
+          <SidebarFileTreeItem 
+            v-for="(child, _index) in normalizedChildren" 
+            :key="child.path" 
+            :node="child" 
+            :depth="depth + 1"
+          />
         </div>
-        <SidebarFileTreeItem 
-          v-for="(child, _index) in normalizedChildren" 
-          :key="child.path" 
-          :node="child" 
-          :depth="depth + 1"
-        />
       </div>
     </Transition>
   </div>
@@ -77,7 +82,7 @@
 
 <script setup lang="ts">
 import gsap from 'gsap';
-import { ref, computed, nextTick } from 'vue';
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import type { FsNode } from '@/types/file-system';
 import { useNodeStore } from '@/stores/note';
 
@@ -103,7 +108,10 @@ const canExpand = computed(() => {
 const currentIcon = computed(() => isOpened.value ? FolderOpenIcon : FolderIcon)
 
 const renameInputRef = ref<HTMLInputElement | null>(null);
+const childrenPanelRef = ref<HTMLElement | null>(null);
+const childrenContentRef = ref<HTMLElement | null>(null);
 let pressTimer: number | null = null;
+let panelResizeObserver: ResizeObserver | null = null;
 const isLongPressed = ref(false);
 
 const onLongPress = () => {
@@ -163,28 +171,100 @@ const handleToggleDirectory = async () => {
   await nodeStore.toggleDirectory(node.value);
 };
 
-const onEnter = (el: Element, done: () => void) => {
-  gsap.set(el, { height: 0 });
-  
-  gsap.to(el, {
-    height: (el as HTMLElement).scrollHeight,
+const disconnectPanelResizeObserver = () => {
+  panelResizeObserver?.disconnect();
+  panelResizeObserver = null;
+};
+
+const animatePanelHeightToContent = () => {
+  const panel = childrenPanelRef.value;
+  const content = childrenContentRef.value;
+  if (!panel || !content) {
+    return;
+  }
+
+  const nextHeight = content.scrollHeight;
+  const currentHeight = panel.offsetHeight;
+  if (Math.abs(currentHeight - nextHeight) < 1) {
+    panel.style.height = `${nextHeight}px`;
+    return;
+  }
+
+  gsap.killTweensOf(panel);
+  gsap.set(panel, { height: currentHeight });
+  gsap.to(panel, {
+    height: nextHeight,
     duration: 0.4,
     ease: 'power2.out',
-    onComplete: done
+    overwrite: 'auto',
   });
 };
 
-const onAfterEnter = (el: Element) => {
-  (el as HTMLElement).style.height = ''; 
+const connectPanelResizeObserver = () => {
+  disconnectPanelResizeObserver();
+  if (!childrenContentRef.value) {
+    return;
+  }
+
+  panelResizeObserver = new ResizeObserver(() => {
+    if (!isOpened.value) {
+      return;
+    }
+    animatePanelHeightToContent();
+  });
+  panelResizeObserver.observe(childrenContentRef.value);
+};
+
+watch(
+  isOpened,
+  async (opened) => {
+    disconnectPanelResizeObserver();
+    if (!opened) {
+      return;
+    }
+
+    await nextTick();
+    connectPanelResizeObserver();
+  },
+  { flush: 'post' }
+);
+
+onBeforeUnmount(() => {
+  disconnectPanelResizeObserver();
+});
+
+const onEnter = (el: Element, done: () => void) => {
+  const panel = el as HTMLElement;
+  const content = panel.firstElementChild as HTMLElement | null;
+  const nextHeight = content?.scrollHeight ?? panel.scrollHeight;
+
+  gsap.killTweensOf(panel);
+  gsap.set(panel, { height: 0 });
+  
+  gsap.to(panel, {
+    height: nextHeight,
+    duration: 0.4,
+    ease: 'power2.out',
+    overwrite: 'auto',
+    onComplete: () => {
+      panel.style.height = `${content?.scrollHeight ?? nextHeight}px`;
+      done();
+    }
+  });
 };
 
 const onLeave = (el: Element, done: () => void) => {
-  gsap.set(el, { height: (el as HTMLElement).offsetHeight });
+  const panel = el as HTMLElement;
+  disconnectPanelResizeObserver();
+
+  gsap.killTweensOf(panel);
+  gsap.set(panel, { height: panel.offsetHeight });
   
-  gsap.to(el, {
+  gsap.to(panel, {
     height: 0,
     duration: 0.4,
     ease: 'power2.inOut',
+    overwrite: 'auto',
     onComplete: done
   });
 };
@@ -331,5 +411,9 @@ const onLeave = (el: Element, done: () => void) => {
   font-size: 0.78rem;
   padding-top: 2px;
   padding-bottom: 2px;
+}
+
+.node-children-content {
+  width: 100%;
 }
 </style>
