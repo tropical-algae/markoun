@@ -15,6 +15,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from markoun.app.api.deps import get_current_user, get_db
 from markoun.app.services.user_service import (
+    get_current_user_profile,
     user_login,
     user_logout,
     user_register,
@@ -23,7 +24,12 @@ from markoun.app.services.user_service import (
 from markoun.app.utils.constant import CONSTANT, MSG_SUCCESS
 from markoun.common.decorator import exception_handling
 from markoun.core.db.models import UserAccount
-from markoun.core.model.user import LoginResponse, ScopeType, UserBasicInfo
+from markoun.core.model.user import (
+    CurrentUserProfile,
+    LoginResponse,
+    ScopeType,
+    UserBasicInfo,
+)
 
 router = APIRouter()
 
@@ -72,6 +78,15 @@ async def api_check_token(
     Test access token
     """
     return MSG_SUCCESS
+
+
+@router.get("/me", response_model=CurrentUserProfile)
+async def api_get_current_user_profile(
+    current_user: UserAccount = Security(
+        get_current_user, scopes=[ScopeType.ADMIN, ScopeType.USER, ScopeType.GUEST]
+    ),
+) -> CurrentUserProfile:
+    return get_current_user_profile(current_user)
 
 
 @router.post("/register", response_model=UserAccount)

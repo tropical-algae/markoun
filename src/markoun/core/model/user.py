@@ -22,6 +22,14 @@ class LoginResponse(BaseModel):
     timestamp: str
 
 
+class CurrentUserProfile(BaseModel):
+    full_name: str | None
+    email: str
+    scopes: list[str]
+    is_active: bool | None
+    joined_at: str | None
+
+
 class TokenPayload(BaseModel):
     userid: str
     username: str
