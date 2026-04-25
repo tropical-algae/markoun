@@ -4,7 +4,15 @@
       class="node-wrapper"
       :style="{ paddingLeft: depth * 12 + 'px' }"
     >
-      <div class="node-content" :class="{ 'is-selected': isActive }" @click="handleClickNode">
+      <div
+        class="node-content"
+        :class="{ 'is-selected': isActive, 'is-dragover': isDirectoryDragOver }"
+        @click="handleClickNode"
+        @dragenter.prevent="handleDirectoryDragEnter"
+        @dragover.prevent="handleDirectoryDragOver"
+        @dragleave.prevent="handleDirectoryDragLeave"
+        @drop.prevent="handleDirectoryDrop"
+      >
         <button
           v-if="isDir"
           class="node-toggle-btn"
@@ -128,6 +136,8 @@ const childrenContentRef = ref<HTMLElement | null>(null);
 let pressTimer: number | null = null;
 let panelResizeObserver: ResizeObserver | null = null;
 const isLongPressed = ref(false);
+const isDirectoryDragOver = ref(false);
+let dragDepth = 0;
 
 const onLongPress = () => {
   isLongPressed.value = false;
@@ -193,11 +203,67 @@ const handleClickDirectoryIcon = () => {
 
   if (isActive.value) {
     nodeStore.clearCurrentNode();
-    console.log(nodeStore.currentNode);
     return;
   }
 
   nodeStore.setCurrentNode(node.value);
+};
+
+const resetDirectoryDragState = () => {
+  dragDepth = 0;
+  isDirectoryDragOver.value = false;
+};
+
+const hasDraggedFiles = (event: DragEvent): boolean => {
+  const types = event.dataTransfer?.types;
+  return Boolean(types && Array.from(types).includes('Files'));
+};
+
+const handleDirectoryDragEnter = (event: DragEvent) => {
+  if (!isDir.value || !hasDraggedFiles(event)) {
+    return;
+  }
+
+  dragDepth += 1;
+  isDirectoryDragOver.value = true;
+};
+
+const handleDirectoryDragOver = (event: DragEvent) => {
+  if (!isDir.value || !hasDraggedFiles(event)) {
+    return;
+  }
+
+  event.dataTransfer!.dropEffect = 'copy';
+  isDirectoryDragOver.value = true;
+};
+
+const handleDirectoryDragLeave = (event: DragEvent) => {
+  if (!isDir.value || !hasDraggedFiles(event)) {
+    return;
+  }
+
+  dragDepth = Math.max(0, dragDepth - 1);
+  if (dragDepth === 0) {
+    isDirectoryDragOver.value = false;
+  }
+};
+
+const handleDirectoryDrop = async (event: DragEvent) => {
+  if (!isDir.value || !hasDraggedFiles(event) || nodeStore.isUploadPending()) {
+    resetDirectoryDragState();
+    return;
+  }
+
+  const file = event.dataTransfer?.files?.[0];
+  resetDirectoryDragState();
+
+  if (!file) {
+    return;
+  }
+
+  const uploadPercent = ref(0);
+  nodeStore.setCurrentNode(node.value);
+  await nodeStore.uploadFile(file, uploadPercent, node.value.path);
 };
 
 const disconnectPanelResizeObserver = () => {
@@ -413,6 +479,20 @@ const onLeave = (el: Element, done: () => void) => {
 .node-content.is-selected,
 .node-content:hover {
   background-color: var(--color-bg-selected);
+}
+
+.node-content.is-dragover {
+  background-color: var(--color-action-light);
+  /* border: 1.5px dashed var(--color-action); */
+  box-shadow: inset 0 0 0 1px var(--color-action);
+}
+
+.node-content.is-dragover .node-text-wrapper span {
+  color: var(--color-text-pri);
+}
+
+.node-content.is-dragover .dir-icon {
+  fill: var(--color-action);
 }
 
 .rename-input {
