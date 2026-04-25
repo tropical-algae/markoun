@@ -9,7 +9,7 @@
           v-if="isDir"
           class="node-toggle-btn"
           :class="{ 'is-opened': isOpened, 'is-disabled': !canExpand }"
-          @click.stop="handleToggleDirectory"
+          @click.stop="handleClickDirectoryIcon"
         >
           <!-- <span class="disclosure-caret" :class="{ 'is-hidden': !canExpand }"></span> -->
           <component
@@ -168,22 +168,36 @@ const cancelRename = () => {
   isRenaming.value = false;
 };
 
-const handleClickNode = () => {
+const handleClickNode = async () => {
   if (isLongPressed.value) {
     isLongPressed.value = false;
     return;
   }
   if (isRenaming.value) return;
 
-  nodeStore.setCurrentNode(node.value);
-};
-
-const handleToggleDirectory = async () => {
-  if (!canExpand.value) {
+  if (isDir.value) {
+    nodeStore.setCurrentNode(node.value);
+    if (canExpand.value) {
+      await nodeStore.toggleDirectory(node.value);
+    }
     return;
   }
 
-  await nodeStore.toggleDirectory(node.value);
+  nodeStore.setCurrentNode(node.value);
+};
+
+const handleClickDirectoryIcon = () => {
+  if (isRenaming.value) {
+    return;
+  }
+
+  if (isActive.value) {
+    nodeStore.clearCurrentNode();
+    console.log(nodeStore.currentNode);
+    return;
+  }
+
+  nodeStore.setCurrentNode(node.value);
 };
 
 const disconnectPanelResizeObserver = () => {

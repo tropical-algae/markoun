@@ -492,6 +492,10 @@ export const useNodeStore = defineStore('note', () => {
     }
   }
 
+  const clearCurrentNode = () => {
+    currentNode.value = null
+  }
+
   const uploadFile = async (
     file: File,
     uploadPercent: Ref<number, number>,
@@ -602,6 +606,7 @@ export const useNodeStore = defineStore('note', () => {
     refreshCurrentFile,
     addNewNode,
     setCurrentNode,
+    clearCurrentNode,
     uploadFile,
     saveCurrentFile,
     deletedItem,
