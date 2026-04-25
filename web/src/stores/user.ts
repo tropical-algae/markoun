@@ -1,10 +1,17 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { useActionLedger } from '@/composables/useActionLedger'
-import { loginApi, checkTokenApi, logoutApi, updatePasswordApi, registerApi } from '@/api/user'
+import {
+  checkTokenApi,
+  getCurrentUserProfileApi,
+  loginApi,
+  logoutApi,
+  registerApi,
+  updatePasswordApi,
+} from '@/api/user'
 import { useToastStore } from "@/stores/toast";
 import type { AsyncStatus } from '@/types/async';
-import type { LoginForm, RegisterForm } from '@/types/auth';
+import type { CurrentUserProfile, LoginForm, RegisterForm } from '@/types/auth';
 
 const NAME_MIN_LEN = 3
 const PASSWD_MIN_LEN = 6
@@ -13,10 +20,13 @@ type AuthState = 'unknown' | 'authenticated' | 'anonymous'
 export const useUserStore = defineStore('user', () => {
   const authState = ref<AuthState>('unknown')
   const authBootstrapStatus = ref<AsyncStatus>('idle')
+  const currentUserProfile = ref<CurrentUserProfile | null>(null)
+  const currentUserProfileState = ref<AsyncStatus>('idle')
   const toastStore = useToastStore()
   const actionLedger = useActionLedger()
 
   let bootstrapPromise: Promise<AuthState> | null = null
+  let currentUserProfilePromise: Promise<CurrentUserProfile | null> | null = null
 
   const isAuthenticated = computed(() => authState.value === 'authenticated')
   const isAnonymous = computed(() => authState.value === 'anonymous')
@@ -30,6 +40,8 @@ export const useUserStore = defineStore('user', () => {
   const markAnonymous = () => {
     authState.value = 'anonymous'
     authBootstrapStatus.value = 'ready'
+    currentUserProfile.value = null
+    currentUserProfileState.value = 'idle'
   }
 
   const login = async (loginForm: LoginForm) => {
@@ -108,6 +120,43 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  const refreshCurrentUserProfile = async (
+    force = false
+  ): Promise<CurrentUserProfile | null> => {
+    if (!isAuthenticated.value) {
+      currentUserProfile.value = null
+      currentUserProfileState.value = 'idle'
+      return null
+    }
+
+    if (!force && currentUserProfile.value && currentUserProfileState.value === 'ready') {
+      return currentUserProfile.value
+    }
+
+    if (!force && currentUserProfilePromise) {
+      return currentUserProfilePromise
+    }
+
+    currentUserProfileState.value = currentUserProfile.value ? 'refreshing' : 'loading'
+    currentUserProfilePromise = (async () => {
+      try {
+        const profile = await getCurrentUserProfileApi()
+
+        currentUserProfile.value = profile.data
+        currentUserProfileState.value = 'ready'
+        return profile.data
+      } catch (error) {
+        currentUserProfileState.value = 'error'
+        throw error
+      } finally {
+        currentUserProfilePromise = null
+      }
+    })()
+
+
+    return currentUserProfilePromise
+  }
+
   const updatePassword = async (newPasswd: string): Promise<boolean> => {
     try {
       await actionLedger.runAction('update-password', async () => {
@@ -123,6 +172,8 @@ export const useUserStore = defineStore('user', () => {
   return {
     authState,
     authBootstrapStatus,
+    currentUserProfile,
+    currentUserProfileState,
     isAuthenticated,
     isAnonymous,
     isAuthKnown,
@@ -135,6 +186,7 @@ export const useUserStore = defineStore('user', () => {
     register,
     ensureAuthKnown,
     logout,
+    refreshCurrentUserProfile,
     updatePassword,
   }
 })

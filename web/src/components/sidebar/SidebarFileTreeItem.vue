@@ -391,6 +391,10 @@ const onLeave = (el: Element, done: () => void) => {
   transition: background-color var(--motion-soft-duration) var(--motion-soft-ease);
 }
 
+.node-content > .meta-tag {
+  flex-shrink: 0;
+}
+
 .node-text-wrapper {
   flex: 1;
   min-width: 0; 
