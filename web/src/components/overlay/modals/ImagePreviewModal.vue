@@ -8,7 +8,7 @@
           :src="imageUrl"
           :alt="previewTitle"
           class="image-preview-image"
-          :class="{ 'is-ready': !isLoading && !hasError }"
+          :class="{ 'is-ready': previewLoadState === 'ready' }"
           :style="imageStyle"
           @load="handleImageLoad"
           @error="handleImageError"
@@ -16,7 +16,7 @@
         />
 
         <Transition name="soft-swap" mode="out-in">
-          <div v-if="isLoading" key="loading" class="image-preview-overlay">
+          <div v-if="previewGate.showLoading.value" key="loading" class="image-preview-overlay">
             <BaseSkeleton
               class="image-preview-skeleton"
               :width="`${displaySize.width}px`"
@@ -25,7 +25,11 @@
             />
           </div>
 
-          <div v-else-if="hasError" key="error" class="image-preview-overlay image-preview-error">
+          <div
+            v-else-if="previewGate.showError.value"
+            key="error"
+            class="image-preview-overlay image-preview-error"
+          >
             <span class="f-s">Unable to load this image.</span>
           </div>
         </Transition>
@@ -40,7 +44,9 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import BaseModal from '@/components/base/BaseModal.vue';
 import BaseSkeleton from '@/components/base/BaseSkeleton.vue';
 
+import { useAsyncGate } from '@/composables/useAsyncGate';
 import { useNodeStore } from '@/stores/note';
+import type { AsyncStatus } from '@/types/async';
 
 const DEFAULT_WIDTH = 640
 const DEFAULT_HEIGHT = 420
@@ -55,8 +61,7 @@ const viewportWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 14
 const viewportHeight = ref(typeof window !== 'undefined' ? window.innerHeight : 900)
 const naturalWidth = ref(0)
 const naturalHeight = ref(0)
-const isLoading = ref(false)
-const hasError = ref(false)
+const previewLoadState = ref<AsyncStatus>('idle')
 
 const isVisible = computed({
   get: () => Boolean(nodeStore.currentPreviewImageNode),
@@ -69,6 +74,9 @@ const isVisible = computed({
 
 const imageUrl = computed(() => nodeStore.currentPreviewImageUrl)
 const previewTitle = computed(() => nodeStore.currentPreviewImageNode?.name || 'Image Preview')
+const previewGate = useAsyncGate({
+  status: previewLoadState,
+})
 
 const updateViewport = () => {
   viewportWidth.value = window.innerWidth
@@ -78,8 +86,7 @@ const updateViewport = () => {
 const resetPreviewState = () => {
   naturalWidth.value = 0
   naturalHeight.value = 0
-  hasError.value = false
-  isLoading.value = Boolean(imageUrl.value)
+  previewLoadState.value = imageUrl.value ? 'loading' : 'idle'
 }
 
 const fitImageSize = (width: number, height: number) => {
@@ -136,13 +143,11 @@ const handleImageLoad = (event: Event) => {
   const image = event.target as HTMLImageElement
   naturalWidth.value = image.naturalWidth || DEFAULT_WIDTH
   naturalHeight.value = image.naturalHeight || DEFAULT_HEIGHT
-  hasError.value = false
-  isLoading.value = false
+  previewLoadState.value = 'ready'
 }
 
 const handleImageError = () => {
-  hasError.value = true
-  isLoading.value = false
+  previewLoadState.value = 'error'
 }
 
 watch(imageUrl, () => {

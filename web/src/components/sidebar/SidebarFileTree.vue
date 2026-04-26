@@ -5,21 +5,29 @@
     </button>
   </div>
   <div class="px-2 flex-grow-1 overflow-y-scroll">
-    <Transition name="soft-swap" mode="out-in">
-      <div v-if="isRootLoading" key="tree-loading" class="tree-loading-state py-2">
-        <div v-for="index in 6" :key="index" class="tree-skeleton-row">
-          <BaseSkeleton width="1rem" height="1rem" radius="4px" />
-          <BaseSkeleton
-            :width="index % 2 === 0 ? '68%' : '54%'"
-            height="1.2rem"
-            radius="6px"
-          />
+    <AsyncGate :status="rootLoadStatus">
+      <template #loading>
+        <div class="tree-loading-state py-2">
+          <div v-for="index in 6" :key="index" class="tree-skeleton-row">
+            <BaseSkeleton width="1rem" height="1rem" radius="4px" />
+            <BaseSkeleton
+              :width="index % 2 === 0 ? '68%' : '54%'"
+              height="1.2rem"
+              radius="6px"
+            />
+          </div>
         </div>
+      </template>
+
+      <div>
+        <SidebarFileTreeItem
+          v-for="item in nodeStore.rootNodes"
+          :key="item.path"
+          :node="item"
+          :depth="0"
+        />
       </div>
-      <div v-else key="tree-ready">
-        <SidebarFileTreeItem v-for="item in nodeStore.rootNodes" :key="item.path" :node="item" :depth="0" />
-      </div>
-    </Transition>
+    </AsyncGate>
   </div>
 
   <CreateNoteModal v-model="showNewNote"/>
@@ -39,6 +47,7 @@ import DeleteItemModal from "@/components/overlay/modals/DeleteItemModal.vue"
 import ImagePreviewModal from "@/components/overlay/modals/ImagePreviewModal.vue"
 
 import SidebarFileTreeItem from "@/components/sidebar/SidebarFileTreeItem.vue"
+import AsyncGate from "@/components/base/AsyncGate.vue"
 import BaseSkeleton from "@/components/base/BaseSkeleton.vue"
 
 import NewNoteIcon from "@/assets/icons/add-document.svg"
@@ -47,13 +56,20 @@ import UploadIcon from "@/assets/icons/cloud-upload-alt.svg"
 import TrashIcon from "@/assets/icons/trash.svg"
 
 import { useNodeStore } from "@/stores/note"
+import type { AsyncStatus } from "@/types/async"
 
 const showNewNote = ref(false);
 const showNewFolder = ref(false);
 const showUpload = ref(false);
 const deleteItem = ref(false);
 const nodeStore = useNodeStore()
-const isRootLoading = computed(() => nodeStore.getDirectoryLoadState('.') === 'loading' && nodeStore.rootNodes.length === 0)
+const rootLoadStatus = computed<AsyncStatus>(() => {
+  const state = nodeStore.getDirectoryLoadState('.')
+  if (state === 'loaded') {
+    return 'ready'
+  }
+  return state
+})
 
 const toolBtns = [
   { icon: NewNoteIcon, func: () => { showNewNote.value = true } },

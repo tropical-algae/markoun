@@ -8,37 +8,48 @@
       <section class="mb-5">
         <div class="text-uppercase fw-bold mb-3 f-m">Profile</div>
 
-        <Transition name="soft-swap" mode="out-in">
-          <div v-if="showProfileSkeleton" key="profile-skeleton" class="user-profile-shell">
-            <BaseSkeleton width="52%" height="1.1rem" />
-            <BaseSkeleton width="68%" height="0.85rem" />
+        <AsyncGate
+          :status="userStore.currentUserProfileState"
+          :is-empty="!userStore.currentUserProfile"
+        >
+          <template #loading>
+            <div class="user-profile-shell">
+              <BaseSkeleton width="52%" height="1.1rem" />
+              <BaseSkeleton width="68%" height="0.85rem" />
 
-            <div class="user-tag-shell">
-              <BaseSkeleton width="56px" height="1.2rem" radius="4px" />
-              <BaseSkeleton width="44px" height="1.2rem" radius="4px" />
-            </div>
+              <div class="user-tag-shell">
+                <BaseSkeleton width="56px" height="1.2rem" radius="4px" />
+                <BaseSkeleton width="44px" height="1.2rem" radius="4px" />
+              </div>
 
-            <div class="user-meta-shell">
-              <div v-for="index in 2" :key="index" class="user-meta-shell-row">
-                <BaseSkeleton width="60px" height="0.7rem" />
-                <BaseSkeleton width="110px" height="0.8rem" />
+              <div class="user-meta-shell">
+                <div v-for="index in 2" :key="index" class="user-meta-shell-row">
+                  <BaseSkeleton width="60px" height="0.7rem" />
+                  <BaseSkeleton width="110px" height="0.8rem" />
+                </div>
               </div>
             </div>
-          </div>
+          </template>
 
-          <div v-else-if="userStore.currentUserProfile" key="profile-card" class="user-profile-card">
+          <template #empty>
+            <div class="user-profile-empty f-s">
+              User information is temporarily unavailable.
+            </div>
+          </template>
+
+          <div class="user-profile-card">
             <div class="user-name f-m fw-bold">
-              {{ userStore.currentUserProfile.full_name || 'Unnamed user' }}
+              {{ userStore.currentUserProfile?.full_name || 'Unnamed user' }}
             </div>
             <div class="user-email f-s">
-              {{ userStore.currentUserProfile.email }}
+              {{ userStore.currentUserProfile?.email }}
             </div>
 
             <div class="user-meta-grid mt-3">
               <span class="user-meta-label f-s">Scopes</span>
               <div class="user-scopes">
                 <span
-                  v-for="scope in userStore.currentUserProfile.scopes"
+                  v-for="scope in userStore.currentUserProfile?.scopes || []"
                   :key="scope"
                   class="meta-tag"
                 >
@@ -48,20 +59,16 @@
 
               <span class="user-meta-label f-s">Status</span>
               <span class="user-meta-value f-s">
-                {{ userStore.currentUserProfile.is_active ? 'Active' : 'Inactive' }}
+                {{ userStore.currentUserProfile?.is_active ? 'Active' : 'Inactive' }}
               </span>
 
               <span class="user-meta-label f-s">Joined</span>
               <span class="user-meta-value f-s">
-                {{ userStore.currentUserProfile.joined_at || 'Unknown' }}
+                {{ userStore.currentUserProfile?.joined_at || 'Unknown' }}
               </span>
             </div>
           </div>
-
-          <div v-else key="profile-empty" class="user-profile-empty f-s">
-            User information is temporarily unavailable.
-          </div>
-        </Transition>
+        </AsyncGate>
       </section>
 
       <section class="mb-5">
@@ -122,6 +129,7 @@ import { computed, onMounted, reactive } from 'vue';
 import router from '@/router';
 import { useUserStore } from '@/stores/user';
 
+import AsyncGate from '@/components/base/AsyncGate.vue';
 import BaseHeader from '@/components/base/BaseHeader.vue';
 import BaseIconText from '@/components/base/BaseIconText.vue';
 import BaseSkeleton from '@/components/base/BaseSkeleton.vue';
@@ -137,12 +145,6 @@ const pwdForm = reactive({
   confirm: '',
 })
 
-const showProfileSkeleton = computed(() => {
-  return (
-    userStore.currentUserProfileState === 'loading' &&
-    userStore.currentUserProfile === null
-  )
-})
 const isPwdLenValid = computed(() => pwdForm.new.length >= 6)
 const isPwdConfValid = computed(() => pwdForm.new === pwdForm.confirm)
 const showPasswordHint = computed(() => {

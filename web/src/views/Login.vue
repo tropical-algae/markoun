@@ -31,22 +31,26 @@
 
 					<div class="links-row mb-5">
             <div class="p-0 m-0 f-s">
-              <Transition name="soft-swap" mode="out-in">
-                <BaseSkeleton
-                  v-if="sysStore.registrationAllowedState === 'loading'"
-                  key="register-link-skeleton"
-                  width="116px"
-                  height="0.9rem"
-                />
+              <AsyncGate
+                tag="span"
+                :status="sysStore.registrationAllowedState"
+                :is-empty="!sysStore.canUserRegister"
+              >
+                <template #loading>
+                  <BaseSkeleton width="116px" height="0.9rem" />
+                </template>
+
+                <template #empty>
+                  <span class="register-link-placeholder"></span>
+                </template>
+
                 <button
-                  v-else-if="sysStore.canUserRegister"
-                  key="register-link-button"
                   type="button"
                   @click="showRegisterModal = true"
                 >
                   Create an account
                 </button>
-              </Transition>
+              </AsyncGate>
             </div>
             <label class="d-flex gap-2 f-s">
               <input type="checkbox" v-model="loginForm.remember_me" :disabled="userStore.isLoginPending()">
@@ -81,6 +85,7 @@ import { reactive, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { useSysStore } from '@/stores/system'
+import AsyncGate from '@/components/base/AsyncGate.vue'
 import FilledInput from '@/components/base/FilledInput.vue'
 import GhostButton from '@/components/base/GhostButton.vue';
 import BaseSkeleton from '@/components/base/BaseSkeleton.vue';
@@ -184,6 +189,12 @@ onMounted(async () => {
 
 .auth-form .links-row button:hover::after {
   transform: scaleX(1);
+}
+
+.register-link-placeholder {
+  display: inline-block;
+  width: 116px;
+  height: 0.9rem;
 }
 
 .btn-container {

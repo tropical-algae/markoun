@@ -6,27 +6,115 @@
     :aria-busy="loading"
   >
     <span class="ghost-btn-content">
-      <span class="ghost-btn-label" :class="{ 'is-hidden': loading }">
+      <span class="ghost-btn-label" :class="{ 'is-hidden': visibleLoading }">
         <slot></slot>
       </span>
-      <span v-if="loading" class="ghost-btn-spinner" aria-hidden="true"></span>
+      <span v-if="visibleLoading" class="ghost-btn-spinner" aria-hidden="true"></span>
     </span>
   </button>
 </template>
 
 <script setup lang="ts">
+import { onBeforeUnmount, ref, watch } from 'vue';
 
 interface Props {
   theme?: 'primary' | 'danger' | 'secondary' | 'submit';
   disabled?: boolean;
   loading?: boolean;
+  loadingDelayMs?: number;
+  loadingMinDurationMs?: number;
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   theme: 'primary',
   disabled: false,
   loading: false,
+  loadingDelayMs: 150,
+  loadingMinDurationMs: 400,
 });
+
+const visibleLoading = ref(false)
+let loadingVisibleAt = 0
+let showTimer: number | null = null
+let hideTimer: number | null = null
+
+const clearShowTimer = () => {
+  if (showTimer !== null) {
+    window.clearTimeout(showTimer)
+    showTimer = null
+  }
+}
+
+const clearHideTimer = () => {
+  if (hideTimer !== null) {
+    window.clearTimeout(hideTimer)
+    hideTimer = null
+  }
+}
+
+const showLoading = () => {
+  if (visibleLoading.value) {
+    return
+  }
+
+  visibleLoading.value = true
+  loadingVisibleAt = Date.now()
+}
+
+const hideLoading = () => {
+  visibleLoading.value = false
+  loadingVisibleAt = 0
+}
+
+watch(
+  () => props.loading,
+  (loading) => {
+    if (loading) {
+      clearHideTimer()
+
+      if (visibleLoading.value) {
+        return
+      }
+
+      clearShowTimer()
+      showTimer = window.setTimeout(() => {
+        showTimer = null
+        if (props.loading) {
+          showLoading()
+        }
+      }, props.loadingDelayMs)
+      return
+    }
+
+    clearShowTimer()
+
+    if (!visibleLoading.value) {
+      return
+    }
+
+    const elapsed = Date.now() - loadingVisibleAt
+    const remaining = Math.max(0, props.loadingMinDurationMs - elapsed)
+
+    clearHideTimer()
+    if (remaining === 0) {
+      hideLoading()
+      return
+    }
+
+    hideTimer = window.setTimeout(() => {
+      hideTimer = null
+      if (!props.loading) {
+        hideLoading()
+      }
+    }, remaining)
+  },
+  { immediate: true },
+)
+
+onBeforeUnmount(() => {
+  clearShowTimer()
+  clearHideTimer()
+})
 </script>
 
 <style scoped>
@@ -107,7 +195,6 @@ withDefaults(defineProps<Props>(), {
 .ghost-btn.is-loading:disabled {
   border-style: solid;
   opacity: 1;
-  cursor: wait;
 }
 
 @keyframes ghost-btn-spin {

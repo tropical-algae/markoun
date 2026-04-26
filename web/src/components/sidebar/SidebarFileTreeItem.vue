@@ -69,25 +69,26 @@
         class="node-children-panel overflow-hidden"
       >
         <div ref="childrenContentRef" class="node-children-content">
-          <Transition name="soft-swap" mode="out-in">
-            <div
-              v-if="isLoading"
-              key="loading"
-              class="node-placeholder"
-              :style="{ paddingLeft: (depth + 1) * 12 + 'px' }"
-            >
-              <div class="node-placeholder-content">
-                <span class="node-leading-spacer"></span>
-                <BaseSkeleton width="1rem" height="1rem" radius="4px" />
-                <BaseSkeleton
-                  class="node-placeholder-text"
-                  height="1rem"
-                  width="58%"
-                  radius="6px"
-                />
+          <AsyncGate :status="childLoadStatus">
+            <template #loading>
+              <div
+                class="node-placeholder"
+                :style="{ paddingLeft: (depth + 1) * 12 + 'px' }"
+              >
+                <div class="node-placeholder-content">
+                  <span class="node-leading-spacer"></span>
+                  <BaseSkeleton width="1rem" height="1rem" radius="4px" />
+                  <BaseSkeleton
+                    class="node-placeholder-text"
+                    height="1rem"
+                    width="58%"
+                    radius="6px"
+                  />
+                </div>
               </div>
-            </div>
-            <div v-else key="children" class="node-children-list">
+            </template>
+
+            <div class="node-children-list">
               <SidebarFileTreeItem 
                 v-for="(child, _index) in normalizedChildren" 
                 :key="child.path" 
@@ -95,7 +96,7 @@
                 :depth="depth + 1"
               />
             </div>
-          </Transition>
+          </AsyncGate>
         </div>
       </div>
     </Transition>
@@ -107,9 +108,11 @@ import gsap from 'gsap';
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import type { FsNode } from '@/types/file-system';
 import { useNodeStore } from '@/stores/note';
+import type { AsyncStatus } from '@/types/async';
 
 import FolderOpenIcon from "@/assets/icons/folder-open.svg"
 import FolderIcon from "@/assets/icons/folder.svg"
+import AsyncGate from '@/components/base/AsyncGate.vue';
 import BaseSkeleton from '@/components/base/BaseSkeleton.vue';
 
 
@@ -123,8 +126,14 @@ const isRenaming = ref(false);
 const isDir = computed(() => node.value.type === 'dir');
 const isActive = computed(() => nodeStore.currentNode?.path === node.value.path);
 const isOpened = computed(() => isDir.value && nodeStore.isDirectoryExpanded(node.value.path));
-const isLoading = computed(() => isDir.value && nodeStore.getDirectoryLoadState(node.value.path) === 'loading');
 const normalizedChildren = computed(() => nodeStore.getDirectoryChildren(node.value.path));
+const childLoadStatus = computed<AsyncStatus>(() => {
+  const state = nodeStore.getDirectoryLoadState(node.value.path)
+  if (state === 'loaded') {
+    return 'ready'
+  }
+  return state
+});
 const canExpand = computed(() => {
   return isDir.value && (node.value.has_children !== false || normalizedChildren.value.length > 0);
 });

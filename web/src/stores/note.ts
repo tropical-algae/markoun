@@ -22,7 +22,6 @@ import { Renderer } from "marked";
 const PREVIEWABLE_IMAGE_SUFFIXES = new Set(['png', 'jpg', 'jpeg', 'bmp', 'svg'])
 
 export const useNodeStore = defineStore('note', () => {
-  const MIN_FILE_SKELETON_MS = 500
   const defaultFileContent = {
     name: 'WELCOME',
     path: '',
@@ -70,12 +69,6 @@ export const useNodeStore = defineStore('note', () => {
 
   const isPreviewableImageNode = (node: FsNode): boolean => {
     return node.type === 'file' && PREVIEWABLE_IMAGE_SUFFIXES.has(node.suffix.toLowerCase())
-  }
-
-  const sleep = (ms: number): Promise<void> => {
-    return new Promise((resolve) => {
-      setTimeout(resolve, ms)
-    })
   }
 
   const sortNodes = (nodes: FsNode[]): FsNode[] => {
@@ -449,11 +442,9 @@ export const useNodeStore = defineStore('note', () => {
       : buildFileDetailShell(normalizedNode)
     currentFileStatus.value = cachedFile ? 'refreshing' : 'loading'
     isInitialized = false
-    const minimumSkeletonDelay = sleep(MIN_FILE_SKELETON_MS)
 
     try {
       const response = await getFileContentApi(normalizedNode.path)
-      await minimumSkeletonDelay
       if (
         requestId !== currentFileRequestId
         || currentFileNode.value?.path !== normalizedNode.path
@@ -476,7 +467,6 @@ export const useNodeStore = defineStore('note', () => {
       currentFileStatus.value = 'ready'
       isInitialized = true
     } catch (error) {
-      await minimumSkeletonDelay
       if (
         requestId !== currentFileRequestId
         || currentFileNode.value?.path !== normalizedNode.path

@@ -109,6 +109,7 @@ import MetaIcon from "@/assets/icons/info.svg"
 import SaveIcon from "@/assets/icons/disk.svg"
 
 import { useNodeStore } from '@/stores/note';
+import { useAsyncGate } from '@/composables/useAsyncGate';
 import { InspectMode } from '@/types/ui';
 import { insertTimeToFileName } from '@/utils/file-system';
 
@@ -128,9 +129,10 @@ const currentWidth = computed(() => showInspector.value ? `${inspectorWidth.valu
 
 const fileUploadPercent = ref(0);
 const markdownEditorRef = ref<HTMLTextAreaElement | null>(null);
-const showEditorSkeleton = computed(() => {
-  return nodeStore.isCurrentFileLoading || nodeStore.isCurrentFileRefreshing
-});
+const editorGate = useAsyncGate({
+  status: computed(() => nodeStore.currentFileStatus),
+})
+const showEditorSkeleton = computed(() => editorGate.showLoading.value);
 
 const inspectIcons = [
   { icon: MetaIcon, mode: InspectMode.Meta },

@@ -5,24 +5,20 @@
     </BaseHeader>
 
     <div class="container-fluid flex-grow-1 overflow-y-scroll py-2 settings-body">
-      <Transition name="soft-swap" mode="out-in">
-        <section v-if="showSettingsSkeleton" key="settings-skeleton" class="mb-5">
-          <!-- <div class="text-uppercase fw-bold mb-3 f-m">Preferences</div> -->
-          <div v-for="index in 4" :key="index" class="setting-skeleton-row">
-            <div class="setting-skeleton-text">
-              <BaseSkeleton width="46%" height="0.85rem" class="setting-skeleton-line" />
-              <BaseSkeleton height="0.7rem" class="setting-skeleton-line" />
+      <AsyncGate :status="sysStore.settingsState">
+        <template #loading>
+          <section class="mb-5">
+            <div v-for="index in 4" :key="index" class="setting-skeleton-row">
+              <div class="setting-skeleton-text">
+                <BaseSkeleton width="46%" height="0.85rem" class="setting-skeleton-line" />
+                <BaseSkeleton height="0.7rem" class="setting-skeleton-line" />
+              </div>
+              <BaseSkeleton width="120px" height="1.8rem" radius="6px" />
             </div>
-            <BaseSkeleton width="120px" height="1.8rem" radius="6px" />
-          </div>
-        </section>
+          </section>
+        </template>
 
-        <section
-          v-else-if="sysStore.currentSettings.length > 0"
-          key="settings-list"
-          class="mb-5"
-        >
-          <!-- <div class="text-uppercase fw-bold mb-3 f-m">Preferences</div> -->
+        <section v-if="sysStore.currentSettings.length > 0" class="mb-5">
           <SidebarSettingItem
             v-for="item in sysStore.currentSettings"
             :key="item.id"
@@ -31,37 +27,33 @@
             @update="handleUpdateSetting"
           />
         </section>
-      </Transition>
+      </AsyncGate>
     </div>
 
     <div class="p-3 border-top bg-white flex-shrink-0 settings-footer">
       <div class="d-flex justify-content-between align-items-center text-muted small mb-1">
         <span class="text-uppercase f-s">App Version:</span>
         <div class="settings-footer-value-slot">
-          <Transition name="soft-swap" mode="out-in">
-            <BaseSkeleton
-              v-if="sysStore.sysStatusState === 'loading'"
-              key="version-skeleton"
-              width="72px"
-              height="1rem"
-            />
-            <span v-else key="version-value" class="meta-tag">v{{ sysStore.version }}</span>
-          </Transition>
+          <AsyncGate tag="span" :status="sysStore.sysStatusState">
+            <template #loading>
+              <BaseSkeleton width="72px" height="1rem" />
+            </template>
+
+            <span class="meta-tag">v{{ sysStore.version }}</span>
+          </AsyncGate>
         </div>
       </div>
 
       <div class="d-flex justify-content-between align-items-center text-muted small">
         <span class="text-uppercase f-s">System Status:</span>
         <div class="settings-footer-value-slot">
-          <Transition name="soft-swap" mode="out-in">
-            <BaseSkeleton
-              v-if="sysStore.sysStatusState === 'loading'"
-              key="status-skeleton"
-              width="88px"
-              height="1rem"
-            />
-            <span v-else key="status-value" class="meta-tag">{{ sysStore.status }}</span>
-          </Transition>
+          <AsyncGate tag="span" :status="sysStore.sysStatusState">
+            <template #loading>
+              <BaseSkeleton width="88px" height="1rem" />
+            </template>
+
+            <span class="meta-tag">{{ sysStore.status }}</span>
+          </AsyncGate>
         </div>
       </div>
     </div>
@@ -69,17 +61,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { onMounted } from 'vue';
 import { useSysStore } from '@/stores/system';
 
+import AsyncGate from '@/components/base/AsyncGate.vue';
 import BaseHeader from '@/components/base/BaseHeader.vue';
 import BaseSkeleton from '@/components/base/BaseSkeleton.vue';
 import SidebarSettingItem from '@/components/sidebar/SidebarSettingItem.vue';
 
 const sysStore = useSysStore()
-const showSettingsSkeleton = computed(() => {
-  return sysStore.settingsState === 'loading' && sysStore.currentSettings.length === 0
-})
 
 onMounted(async () => {
   await Promise.allSettled([
