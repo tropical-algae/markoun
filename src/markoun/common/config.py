@@ -41,6 +41,7 @@ class BasicSetting(BaseSettings):
     ACCESS_TOKEN_SECRET_KEY: str = secrets.token_hex(32)
 
     DOCUMENT_ROOT: str = "./data"
+    WELCOME_NOTE_PATH: str = "./welcome.md"
     DISPLAYED_FILE_TYPES: list = ["md", "png", "jpg", "jpeg", "bmp", "svg"]
 
 

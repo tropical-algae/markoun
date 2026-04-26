@@ -28,6 +28,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml uv.lock poe_tasks.toml README.md ./
+COPY welcome.md ./
 
 RUN pip install --upgrade pip && \
     pip install uv==0.9.7 && \

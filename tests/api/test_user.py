@@ -77,7 +77,7 @@ def test_user_token(client: TestClient):
 def test_current_user_profile(client: TestClient):
     url = f"{settings.API_PREFIX}/auth/me"
     response = client.get(url=url)
-    data = response.json()
+    data = response.json().get("data")
 
     assert response.status_code == 200
     assert data["full_name"] == TEMP_USER["full_name"]
