@@ -19,6 +19,8 @@ import { createDirApi } from "@/api/dir";
 import marked from "@/utils/markdown";
 import { Renderer } from "marked";
 
+const PREVIEWABLE_IMAGE_SUFFIXES = new Set(['png', 'jpg', 'jpeg', 'bmp', 'svg'])
+
 export const useNodeStore = defineStore('note', () => {
   const MIN_FILE_SKELETON_MS = 500
   const defaultFileContent = {
@@ -34,6 +36,7 @@ export const useNodeStore = defineStore('note', () => {
   const expandedDirPaths = ref<Record<string, boolean>>({})
   const currentNode = ref<FsNode | null>(null)
   const currentFileNode = ref<FsNode | null>(null)
+  const currentPreviewImageNode = ref<FsNode | null>(null)
 
   const currentFileStatus = ref<AsyncStatus>('ready')
   const currentFile = ref<FileDetail>(defaultFileContent)
@@ -47,6 +50,11 @@ export const useNodeStore = defineStore('note', () => {
   const isCurrentFileLoading = computed(() => currentFileStatus.value === 'loading')
   const isCurrentFileRefreshing = computed(() => currentFileStatus.value === 'refreshing')
   const currrentRenderedFile = computed(() => renderCurrentFileContent())
+  const currentPreviewImageUrl = computed(() => {
+    return currentPreviewImageNode.value
+      ? getMediaPath(ROOT_DIRECTORY_PATH, currentPreviewImageNode.value.path)
+      : ''
+  })
 
   var isInitialized = false
   const directoryRequests = new Map<string, Promise<FsNode[]>>()
@@ -59,6 +67,10 @@ export const useNodeStore = defineStore('note', () => {
     ...node,
     path: normalizeNodePath(node.path),
   })
+
+  const isPreviewableImageNode = (node: FsNode): boolean => {
+    return node.type === 'file' && PREVIEWABLE_IMAGE_SUFFIXES.has(node.suffix.toLowerCase())
+  }
 
   const sleep = (ms: number): Promise<void> => {
     return new Promise((resolve) => {
@@ -186,6 +198,12 @@ export const useNodeStore = defineStore('note', () => {
 
     currentNode.value = remapReferencedNode(currentNode.value, oldPath, newPath, exactName)
     currentFileNode.value = remapReferencedNode(currentFileNode.value, oldPath, newPath, exactName)
+    currentPreviewImageNode.value = remapReferencedNode(
+      currentPreviewImageNode.value,
+      oldPath,
+      newPath,
+      exactName,
+    )
 
     const nextFileDetailsByPath: Record<string, FileDetail> = {}
     for (const [path, fileDetail] of Object.entries(fileDetailsByPath.value)) {
@@ -253,6 +271,10 @@ export const useNodeStore = defineStore('note', () => {
       }
     }
     fileDetailsByPath.value = nextFileDetailsByPath
+
+    if (currentPreviewImageNode.value && isPathInside(currentPreviewImageNode.value.path, normalizedPath)) {
+      currentPreviewImageNode.value = null
+    }
   }
 
   const buildRenamedPath = (node: FsNode, newName: string): string => {
@@ -370,6 +392,14 @@ export const useNodeStore = defineStore('note', () => {
     await loadDirectory(normalizedPath)
   }
 
+  const openImagePreview = (node: FsNode) => {
+    currentPreviewImageNode.value = normalizeFsNode(node)
+  }
+
+  const closeImagePreview = () => {
+    currentPreviewImageNode.value = null
+  }
+
   const upsertNode = (parentPath: string, node: FsNode) => {
     const normalizedParentPath = normalizeNodePath(parentPath)
     const normalizedNode = normalizeFsNode(node)
@@ -483,10 +513,16 @@ export const useNodeStore = defineStore('note', () => {
   const setCurrentNode = (node: FsNode) => {
     const normalizedNode = normalizeFsNode(node)
     if (normalizedNode.type === 'file' && normalizedNode.suffix.toLowerCase() === 'md') {
+      closeImagePreview()
       void refreshCurrentFile(normalizedNode)
+    } else if (isPreviewableImageNode(normalizedNode)) {
+      currentNode.value = normalizedNode
+      openImagePreview(normalizedNode)
     } else if (node.type === 'dir') {
+      closeImagePreview()
       currentNode.value = normalizedNode
     } else {
+      closeImagePreview()
       currentNode.value = normalizedNode
       toastStore.pushNotice('warning', `WARNING: The selected object cannot be opened.`)
     }
@@ -494,6 +530,7 @@ export const useNodeStore = defineStore('note', () => {
 
   const clearCurrentNode = () => {
     currentNode.value = null
+    closeImagePreview()
   }
 
   const uploadFile = async (
@@ -582,6 +619,8 @@ export const useNodeStore = defineStore('note', () => {
     rootNodes,
     currentNode,
     currentFile,
+    currentPreviewImageNode,
+    currentPreviewImageUrl,
     currentFileStatus,
     currentFileDisplayName,
     currentPath: currentParentPath,
@@ -607,6 +646,8 @@ export const useNodeStore = defineStore('note', () => {
     addNewNode,
     setCurrentNode,
     clearCurrentNode,
+    openImagePreview,
+    closeImagePreview,
     uploadFile,
     saveCurrentFile,
     deletedItem,

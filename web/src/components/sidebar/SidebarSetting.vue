@@ -36,7 +36,7 @@
 
     <div class="p-3 border-top bg-white flex-shrink-0 settings-footer">
       <div class="d-flex justify-content-between align-items-center text-muted small mb-1">
-        <span>App Version:</span>
+        <span class="text-uppercase f-s">App Version:</span>
         <div class="settings-footer-value-slot">
           <Transition name="soft-swap" mode="out-in">
             <BaseSkeleton
@@ -51,7 +51,7 @@
       </div>
 
       <div class="d-flex justify-content-between align-items-center text-muted small">
-        <span>System Status:</span>
+        <span class="text-uppercase f-s">System Status:</span>
         <div class="settings-footer-value-slot">
           <Transition name="soft-swap" mode="out-in">
             <BaseSkeleton

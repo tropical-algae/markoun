@@ -137,7 +137,7 @@ const inspectIcons = [
   { icon: PreviewIcon, mode: InspectMode.Preview },
 ] as const
 const sidebarIcons = [
-  { icon: SaveIcon, func: async () => { await nodeStore.saveCurrentFile() } },
+  { icon: SaveIcon, func: async () => { await nodeStore.saveCurrentFile(); } },
 ] as const
 
 const toggleInspector = (mode: InspectMode) => {

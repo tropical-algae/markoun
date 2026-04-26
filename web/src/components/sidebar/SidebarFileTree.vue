@@ -26,6 +26,7 @@
   <CreateDirModal v-model="showNewFolder"/>
   <UploadFileModal v-model="showUpload"/>
   <DeleteItemModal v-model="deleteItem"/>
+  <ImagePreviewModal />
 </template>
 
 <script setup lang="ts">
@@ -35,6 +36,7 @@ import CreateNoteModal from "@/components/overlay/modals/CreateNoteModal.vue"
 import CreateDirModal from "@/components/overlay/modals/CreateDirModal.vue"
 import UploadFileModal from "@/components/overlay/modals/UploadFileModal.vue"
 import DeleteItemModal from "@/components/overlay/modals/DeleteItemModal.vue"
+import ImagePreviewModal from "@/components/overlay/modals/ImagePreviewModal.vue"
 
 import SidebarFileTreeItem from "@/components/sidebar/SidebarFileTreeItem.vue"
 import BaseSkeleton from "@/components/base/BaseSkeleton.vue"
