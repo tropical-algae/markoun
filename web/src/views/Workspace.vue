@@ -18,8 +18,17 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted } from 'vue';
+
 import Sidebar from '@/components/sidebar/Sidebar.vue';
 import NoteEditor from '@/components/editor/NoteEditor.vue';
+import { useNodeStore } from '@/stores/note';
+
+const nodeStore = useNodeStore()
+
+onMounted(() => {
+  void nodeStore.ensureWelcomeNoteLoaded().catch(() => null)
+})
 
 </script>
 

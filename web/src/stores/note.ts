@@ -16,19 +16,58 @@ import {
 import { getFileContentApi, createNoteApi, uploadFileApi, saveNoteApi } from "@/api/file";
 import { getDirectoryChildrenApi, removeItemApi, renameItemApi } from "@/api/item";
 import { createDirApi } from "@/api/dir";
+import { getWelcomeNoteApi } from "@/api/system";
 import marked from "@/utils/markdown";
 import { Renderer } from "marked";
 
 const PREVIEWABLE_IMAGE_SUFFIXES = new Set(['png', 'jpg', 'jpeg', 'bmp', 'svg'])
+const DEFAULT_WELCOME_NOTE_CONTENT = `# Welcome to Markoun
+
+Markoun is a lightweight, self-hosted, and entirely file-based Markdown editor designed for users who prioritize privacy and simplicity.
+
+> The UI layout of Markoun is inspired by [Haptic](https://github.com/chroxify/haptic) and [Obsidian](https://github.com/obsidianmd) — both excellent Markdown editing tools.
+
+---
+
+**Useful shortcuts and gestures**
+
+| Action | How |
+| --- | --- |
+| Rename a file or folder | Long-press its name |
+| Upload into a folder | Drag a file onto the folder |
+| Paste an image into a note | Press \`Ctrl+V\` in the editor |
+
+Only Markdown files and supported image files appear in the file tree by default.  
+To expose more file types, update \`DISPLAYED_FILE_TYPES\` in your configuration.
+
+**LaTeX support**
+
+\`\`\`md
+# Example
+
+Inline math: $E = mc^2$
+
+$$
+\\int_0^1 x^2\\,dx = \\frac{1}{3}
+$$
+\`\`\`
+
+---
+
+If you deploy with Docker, this page can be replaced by mounting your own \`welcome.md\`.
+
+Maintained by: **tropical algae**  
+Repository: [tropical-algae/markoun](https://github.com/tropical-algae/markoun.git)
+`
 
 export const useNodeStore = defineStore('note', () => {
-  const defaultFileContent = {
+  const createDefaultFileContent = (content: string = DEFAULT_WELCOME_NOTE_CONTENT): FileDetail => ({
     name: 'WELCOME',
     path: '',
     suffix: '',
-    content: '## Hi, this is Markoun\n\nA clean and powerful online Markdown editor.',
+    content,
     meta: {}
-  }
+  })
 
   const directoryChildrenByPath = ref<Record<string, FsNode[]>>({})
   const directoryLoadStateByPath = ref<Record<string, DirectoryLoadState>>({})
@@ -36,9 +75,11 @@ export const useNodeStore = defineStore('note', () => {
   const currentNode = ref<FsNode | null>(null)
   const currentFileNode = ref<FsNode | null>(null)
   const currentPreviewImageNode = ref<FsNode | null>(null)
+  const welcomeNoteContent = ref(DEFAULT_WELCOME_NOTE_CONTENT)
+  const welcomeNoteState = ref<AsyncStatus>('idle')
 
-  const currentFileStatus = ref<AsyncStatus>('ready')
-  const currentFile = ref<FileDetail>(defaultFileContent)
+  const currentFileStatus = ref<AsyncStatus>('idle')
+  const currentFile = ref<FileDetail>(createDefaultFileContent())
   const fileDetailsByPath = ref<Record<string, FileDetail>>({})
   const currentParentPath = computed(() => getParentPath(currentNode.value ?? currentFileNode.value))
   const currentFileParentPath = computed(() => getParentPath(currentFileNode.value ?? currentFile.value.path))
@@ -58,6 +99,7 @@ export const useNodeStore = defineStore('note', () => {
   var isInitialized = false
   const directoryRequests = new Map<string, Promise<FsNode[]>>()
   let currentFileRequestId = 0
+  let welcomeNoteRequest: Promise<string> | null = null
 
   const toastStore = useToastStore()
   const actionLedger = useActionLedger()
@@ -127,10 +169,26 @@ export const useNodeStore = defineStore('note', () => {
     meta: {},
   })
 
+  const resolveDefaultFileStatus = (): AsyncStatus => {
+    return welcomeNoteState.value === 'idle'
+      || welcomeNoteState.value === 'loading'
+      || welcomeNoteState.value === 'refreshing'
+      ? 'idle'
+      : 'ready'
+  }
+
+  const syncDefaultWelcomeFile = () => {
+    if (currentFileNode.value || isInitialized) {
+      return
+    }
+
+    currentFile.value = createDefaultFileContent(welcomeNoteContent.value)
+  }
+
   const resetCurrentFileState = () => {
     currentFileNode.value = null
-    currentFile.value = { ...defaultFileContent }
-    currentFileStatus.value = 'ready'
+    currentFile.value = createDefaultFileContent(welcomeNoteContent.value)
+    currentFileStatus.value = resolveDefaultFileStatus()
     isInitialized = false
   }
 
@@ -291,6 +349,46 @@ export const useNodeStore = defineStore('note', () => {
       async: false 
     });
   };
+
+  const ensureWelcomeNoteLoaded = async (force: boolean = false): Promise<string> => {
+    if (!force && welcomeNoteState.value === 'ready') {
+      return welcomeNoteContent.value
+    }
+
+    if (!force && welcomeNoteRequest) {
+      return welcomeNoteRequest
+    }
+
+    welcomeNoteState.value = welcomeNoteState.value === 'ready' ? 'refreshing' : 'loading'
+    if (!currentFileNode.value && !isInitialized) {
+      currentFileStatus.value = 'loading'
+    }
+
+    welcomeNoteRequest = getWelcomeNoteApi()
+      .then((response) => {
+        welcomeNoteContent.value = response.data || DEFAULT_WELCOME_NOTE_CONTENT
+        welcomeNoteState.value = 'ready'
+        syncDefaultWelcomeFile()
+        if (!currentFileNode.value && !isInitialized) {
+          currentFileStatus.value = 'ready'
+        }
+        return welcomeNoteContent.value
+      })
+      .catch((error) => {
+        welcomeNoteState.value = 'error'
+        welcomeNoteContent.value = DEFAULT_WELCOME_NOTE_CONTENT
+        syncDefaultWelcomeFile()
+        if (!currentFileNode.value && !isInitialized) {
+          currentFileStatus.value = 'ready'
+        }
+        throw error
+      })
+      .finally(() => {
+        welcomeNoteRequest = null
+      })
+
+    return welcomeNoteRequest
+  }
 
   const loadDirectory = async (
     path: string = ROOT_DIRECTORY_PATH,
@@ -607,6 +705,7 @@ export const useNodeStore = defineStore('note', () => {
 
   return { 
     rootNodes,
+    welcomeNoteState,
     currentNode,
     currentFile,
     currentPreviewImageNode,
@@ -624,6 +723,7 @@ export const useNodeStore = defineStore('note', () => {
     isUploadPending: () => actionLedger.isActionPending('upload-file'),
     isSavePending: () => actionLedger.isActionPending('save-current-file'),
     currrentRenderedFile,
+    ensureWelcomeNoteLoaded,
     loadDirectory,
     getDirectoryChildren,
     getDirectoryLoadState,

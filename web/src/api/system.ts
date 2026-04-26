@@ -13,6 +13,13 @@ export const checkSystemStatusApi = (
   })
 }
 
+export const getWelcomeNoteApi = (): Promise<ApiResponse<string>> => {
+  return request({
+    url: '/api/v1/system/welcome-note',
+    method: 'get',
+  })
+}
+
 /**
  * 获取可编辑的系统设置
  */
