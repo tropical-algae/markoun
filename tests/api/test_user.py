@@ -71,3 +71,16 @@ def test_user_token(client: TestClient):
     data = response.json()
     assert response.status_code == 200
     assert data["data"]
+
+
+@pytest.mark.run(order=5)
+def test_current_user_profile(client: TestClient):
+    url = f"{settings.API_PREFIX}/auth/me"
+    response = client.get(url=url)
+    data = response.json().get("data")
+
+    assert response.status_code == 200
+    assert data["full_name"] == TEMP_USER["full_name"]
+    assert data["email"] == TEMP_USER["email"]
+    assert ScopeType.USER.value in data["scopes"]
+    assert "password" not in data

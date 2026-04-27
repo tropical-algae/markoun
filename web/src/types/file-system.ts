@@ -1,9 +1,17 @@
+export type DirectoryLoadState = 'idle' | 'loading' | 'loaded' | 'error';
+
 export interface FsNode {
   name: string;
   path: string;
   type: 'file' | 'dir';
   suffix: string;
+  has_children?: boolean | null;
   children?: FsNode[];
+}
+
+export interface DirectoryChildrenResponse {
+  path: string;
+  children: FsNode[];
 }
 
 export interface FileDetail {
@@ -20,6 +28,6 @@ export interface FileDetailResponse {
 }
 
 export interface UploadResponse {
-  status: string;
   filename: string;
+  node: FsNode | null;
 }

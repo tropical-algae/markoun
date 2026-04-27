@@ -115,6 +115,14 @@ class Constant(BaseSettings):
         "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
         "detail": "Failed to update password",
     }
+    SERV_WELCOME_NOTE_NOT_EXISTED: dict = {
+        "status_code": status.HTTP_404_NOT_FOUND,
+        "detail": "Welcome note file does not exist",
+    }
+    SERV_WELCOME_NOTE_READ_FAIL: dict = {
+        "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+        "detail": "Failed to read welcome note file",
+    }
 
 
 CONSTANT = Constant()

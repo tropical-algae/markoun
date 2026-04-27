@@ -1,5 +1,10 @@
 import type { ApiResponse } from '@/types/api'
-import type { LoginForm, LoginResponse, RegisterForm } from '@/types/auth'
+import type {
+  CurrentUserProfile,
+  LoginForm,
+  LoginResponse,
+  RegisterForm,
+} from '@/types/auth'
 import request from '@/utils/request'
 
 /**
@@ -45,11 +50,12 @@ export const registerApi = (
 /**
  * 测试接口
  */
-export function checkTokenApi(): Promise<ApiResponse<boolean>> {
+export function checkTokenApi(): Promise<ApiResponse<string>> {
   return request({
     url: '/api/v1/auth/check',
     method: 'get',
-    data: {}
+    data: {},
+    suppressErrorToast: true,
   })
 }
 
@@ -74,5 +80,12 @@ export const updatePasswordApi = (newPasswd: string): Promise<ApiResponse<string
     params: {
       new_passwd: newPasswd,
     }
+  })
+}
+
+export function getCurrentUserProfileApi(): Promise<ApiResponse<CurrentUserProfile>> {
+  return request({
+    url: '/api/v1/auth/me',
+    method: 'get',
   })
 }

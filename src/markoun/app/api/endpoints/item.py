@@ -1,16 +1,26 @@
 from pathlib import Path
 from typing import cast
 
-from fastapi import APIRouter, HTTPException, Security
+from fastapi import APIRouter, Security
 
 from markoun.app.api.deps import get_current_user
-from markoun.app.services.item_service import get_file_tree, remove_item, rename_item
+from markoun.app.services.item_service import (
+    get_directory_children,
+    get_file_tree,
+    remove_item,
+    rename_item,
+)
 from markoun.app.utils.constant import CONSTANT, MSG_SUCCESS
 from markoun.common.config import settings
 from markoun.common.decorator import exception_handling
-from markoun.common.util import relative_path_to_abs_path
+from markoun.common.util import abs_path_to_relative_path, relative_path_to_abs_path
 from markoun.core.db.models import UserAccount
-from markoun.core.model.file import DirNode, FileNode, ItemRenameRequest
+from markoun.core.model.file import (
+    DirectoryChildrenResponse,
+    DirNode,
+    FileNode,
+    ItemRenameRequest,
+)
 from markoun.core.model.user import ScopeType
 
 router = APIRouter()
@@ -30,6 +40,20 @@ async def api_load_tree(
         await get_file_tree(DOUCMENT_ABS_ROOT, DISPLAYED_FILE_TYPES),
     )
     return file_tree.children
+
+
+@router.get("/children", response_model=DirectoryChildrenResponse)
+@exception_handling(CONSTANT.RESP_SERVER_ERROR)
+async def api_load_directory_children(
+    path: str = ".",
+    _: UserAccount = Security(get_current_user, scopes=[ScopeType.ADMIN, ScopeType.USER]),
+) -> DirectoryChildrenResponse:
+    abs_path = relative_path_to_abs_path(Path(path))
+    children = await get_directory_children(abs_path, DISPLAYED_FILE_TYPES)
+    return DirectoryChildrenResponse(
+        path=str(abs_path_to_relative_path(abs_path)),
+        children=children,
+    )
 
 
 @router.post("/remove")

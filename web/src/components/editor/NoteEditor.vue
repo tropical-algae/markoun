@@ -2,14 +2,14 @@
   <div class="editor-wrapper" :class="{ 'is-resizing': isInspectorResizing }">
     <BaseHeader>
       <div class="col-auto d-flex justify-content-start flex-shrink-0 gap-2 ps-1">
-        <button v-for="item in sidebarIcons" @click="item.func()">
-          <component :is="item.icon" class="icon-btn"></component>
+        <button v-for="item in sidebarIcons" @click="item.func()" :disabled="nodeStore.isSavePending()">
+          <component :is="item.icon" class="icon-btn" :class="{ 'is-pending': nodeStore.isSavePending() }"></component>
         </button>
       </div>
 
       <div class="col px-3" style="min-width: 0;">
         <span class="d-block text-truncate text-muted text-center">
-          {{ nodeStore.currentFile.name }}
+          {{ nodeStore.currentFileDisplayName }}
         </span>
       </div>
 
@@ -25,14 +25,26 @@
     </BaseHeader>
     
     <div class="editor-container">
-      <textarea 
-        v-model="nodeStore.currentFile.content" 
-        ref="markdownEditorRef"
-        class="markdown-editor"
-        placeholder="Start typing..."
-        spellcheck="false"
-        @paste="handlePaste" 
-      ></textarea>
+      <Transition name="soft-swap" mode="out-in">
+        <div v-if="showEditorSkeleton" key="editor-skeleton" class="editor-loading-state">
+          <BaseSkeleton width="48%" height="1.15rem" class="editor-skeleton-line" />
+          <BaseSkeleton height="0.95rem" class="editor-skeleton-line" />
+          <BaseSkeleton width="62%" height="0.95rem" class="editor-skeleton-line" />
+          <BaseSkeleton height="0.95rem" class="editor-skeleton-line" />
+          <BaseSkeleton width="78%" height="0.95rem" class="editor-skeleton-line" />
+        </div>
+        <div v-else key="editor-content" class="editor-ready-state">
+          <textarea 
+            v-model="nodeStore.currentFile.content" 
+            ref="markdownEditorRef"
+            class="markdown-editor"
+            :disabled="!nodeStore.canEditCurrentFile"
+            placeholder="Start typing..."
+            spellcheck="false"
+            @paste="handlePaste" 
+          ></textarea>
+        </div>
+      </Transition>
     </div>
   </div>
 
@@ -47,26 +59,41 @@
         <BaseHeader class="px-3">
           <div class="small text-muted uppercase">File Meta</div>
         </BaseHeader>
-        <div class="note-meta px-3">
-          <div class="meta-grid">
-            <div class="meta-key">characters:</div>
-            <div class="meta-value">{{ nodeStore.currentFile.content.length }}</div>
-            <template
-              v-for="(value, key) in nodeStore.currentFile.meta"
-              :key="key"
-            >
-              <div class="meta-key">{{ key }}:</div>
-              <div class="meta-value">{{ value }}</div>
-            </template> 
+        <Transition name="soft-swap" mode="out-in">
+          <div v-if="showEditorSkeleton" key="meta-skeleton" class="note-meta inspector-skeleton px-3">
+            <BaseSkeleton width="46%" height="0.85rem" />
+            <BaseSkeleton width="68%" height="0.85rem" />
+            <BaseSkeleton width="52%" height="0.85rem" />
           </div>
-        </div>
+          <div v-else key="meta-grid" class="note-meta px-3">
+            <div class="meta-grid">
+              <div class="meta-key">characters:</div>
+              <div class="meta-value">{{ nodeStore.currentFile.content.length }}</div>
+              <template
+                v-for="(value, key) in nodeStore.currentFile.meta"
+                :key="key"
+              >
+                <div class="meta-key">{{ key }}:</div>
+                <div class="meta-value">{{ value }}</div>
+              </template> 
+            </div>
+          </div>
+        </Transition>
       </div>
 
       <div v-else-if="currentMode === InspectMode.Preview" class="d-flex flex-column h-100 overflow-hidden p-0">
         <BaseHeader class="px-3">
           <div class="small text-muted uppercase">Preview</div>
         </BaseHeader>
-        <div class="note-preview px-3" v-html="nodeStore.currrentRenderedFile"></div>
+        <Transition name="soft-swap" mode="out-in">
+          <div v-if="showEditorSkeleton" key="preview-skeleton" class="note-preview preview-skeleton px-3">
+            <BaseSkeleton width="42%" height="0.9rem" />
+            <BaseSkeleton height="0.85rem" />
+            <BaseSkeleton width="74%" height="0.85rem" />
+            <BaseSkeleton height="180px" radius="12px" />
+          </div>
+          <div v-else key="preview-content" class="note-preview px-3" v-html="nodeStore.currrentRenderedFile"></div>
+        </Transition>
       </div>
     </div>
     <div class="vertical-line turn-left col-drag" @mousedown="startResizing" :class="{ 'is-resizing': isInspectorResizing }"></div>
@@ -82,10 +109,12 @@ import MetaIcon from "@/assets/icons/info.svg"
 import SaveIcon from "@/assets/icons/disk.svg"
 
 import { useNodeStore } from '@/stores/note';
+import { useAsyncGate } from '@/composables/useAsyncGate';
 import { InspectMode } from '@/types/ui';
 import { insertTimeToFileName } from '@/utils/file-system';
 
 import BaseHeader from '@/components/base/BaseHeader.vue';
+import BaseSkeleton from '@/components/base/BaseSkeleton.vue';
 
 const nodeStore = useNodeStore()
 
@@ -100,13 +129,17 @@ const currentWidth = computed(() => showInspector.value ? `${inspectorWidth.valu
 
 const fileUploadPercent = ref(0);
 const markdownEditorRef = ref<HTMLTextAreaElement | null>(null);
+const editorGate = useAsyncGate({
+  status: computed(() => nodeStore.currentFileStatus),
+})
+const showEditorSkeleton = computed(() => editorGate.showLoading.value);
 
 const inspectIcons = [
   { icon: MetaIcon, mode: InspectMode.Meta },
   { icon: PreviewIcon, mode: InspectMode.Preview },
 ] as const
 const sidebarIcons = [
-  { icon: SaveIcon, func: async () => { await nodeStore.saveCurrentFile() } },
+  { icon: SaveIcon, func: async () => { await nodeStore.saveCurrentFile(); } },
 ] as const
 
 const toggleInspector = (mode: InspectMode) => {
@@ -158,7 +191,11 @@ const handlePaste = async (event: ClipboardEvent) => {
           const newFile = new File(
             [file], insertTimeToFileName(file.name), { type: file.type }
           );
-          const filename = await nodeStore.uploadFile(newFile, fileUploadPercent)
+          const filename = await nodeStore.uploadFile(
+            newFile,
+            fileUploadPercent,
+            nodeStore.currentFileParentPath,
+          )
           insertText(`![${filename}](${filename})`);
         } catch (e) {
           console.log(`Failed to paste the file: ${e}`)
@@ -222,6 +259,13 @@ const insertText = (text: string) => {
   display: flex;
   justify-content: center;
   overflow: hidden; 
+  position: relative;
+}
+
+.editor-ready-state,
+.editor-loading-state {
+  width: 100%;
+  height: 100%;
 }
 
 .markdown-editor {
@@ -240,6 +284,21 @@ const insertText = (text: string) => {
   box-sizing: border-box;
   
 	overflow-y: scroll;
+}
+
+.editor-loading-state {
+  padding: 30px calc(max(20px, (100% - 800px) / 2));
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.editor-skeleton-line {
+  flex-shrink: 0;
+}
+
+.icon-btn.is-pending {
+  opacity: 0.55;
 }
 
 /* 侧边栏信息部分 */
@@ -280,6 +339,13 @@ const insertText = (text: string) => {
   white-space: normal;
 }
 
+.inspector-skeleton,
+.preview-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .note-meta .meta-grid {
   display: grid;
   grid-template-columns: max-content 1fr;
@@ -301,17 +367,5 @@ const insertText = (text: string) => {
   word-break: break-word;
   overflow-wrap: break-word;
   text-align: left;
-}
-
-/* 淡入淡出动画 */
-
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.15s;
-}
-.fade-enter-from, .fade-leave-to {
-  opacity: 0;
-}
-.fade-enter-to, .fade-leave-from {
-  opacity: 1;
 }
 </style>

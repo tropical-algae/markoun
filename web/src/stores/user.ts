@@ -1,18 +1,48 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
-import { loginApi, checkTokenApi, logoutApi, updatePasswordApi, registerApi } from '@/api/user'
+import { computed, ref } from 'vue'
+import { useActionLedger } from '@/composables/useActionLedger'
+import {
+  checkTokenApi,
+  getCurrentUserProfileApi,
+  loginApi,
+  logoutApi,
+  registerApi,
+  updatePasswordApi,
+} from '@/api/user'
 import { useToastStore } from "@/stores/toast";
-import type { LoginForm, RegisterForm } from '@/types/auth';
+import type { AsyncStatus } from '@/types/async';
+import type { CurrentUserProfile, LoginForm, RegisterForm } from '@/types/auth';
 
 const NAME_MIN_LEN = 3
 const PASSWD_MIN_LEN = 6
+type AuthState = 'unknown' | 'authenticated' | 'anonymous'
 
 export const useUserStore = defineStore('user', () => {
-  const isAuthed = ref(false)
-  const isChecked = ref(false)
+  const authState = ref<AuthState>('unknown')
+  const authBootstrapStatus = ref<AsyncStatus>('idle')
+  const currentUserProfile = ref<CurrentUserProfile | null>(null)
+  const currentUserProfileState = ref<AsyncStatus>('idle')
   const toastStore = useToastStore()
+  const actionLedger = useActionLedger()
 
-  let checkPromise: Promise<boolean> | null = null 
+  let bootstrapPromise: Promise<AuthState> | null = null
+  let currentUserProfilePromise: Promise<CurrentUserProfile | null> | null = null
+
+  const isAuthenticated = computed(() => authState.value === 'authenticated')
+  const isAnonymous = computed(() => authState.value === 'anonymous')
+  const isAuthKnown = computed(() => authState.value !== 'unknown')
+
+  const markAuthenticated = () => {
+    authState.value = 'authenticated'
+    authBootstrapStatus.value = 'ready'
+  }
+
+  const markAnonymous = () => {
+    authState.value = 'anonymous'
+    authBootstrapStatus.value = 'ready'
+    currentUserProfile.value = null
+    currentUserProfileState.value = 'idle'
+  }
 
   const login = async (loginForm: LoginForm) => {
     try {
@@ -21,13 +51,13 @@ export const useUserStore = defineStore('user', () => {
         return null
       }
 
-      const res = await loginApi(loginForm)
-      isAuthed.value = true
-      isChecked.value = true
-      return res
+      return await actionLedger.runAction('login', async () => {
+        const res = await loginApi(loginForm)
+        markAuthenticated()
+        return res
+      })
     } catch (error) {
-      isAuthed.value = false
-      isChecked.value = false 
+      markAnonymous()
       throw error
     }
   }
@@ -42,7 +72,9 @@ export const useUserStore = defineStore('user', () => {
         toastStore.pushNotice('warning', `Username must be longer than ${NAME_MIN_LEN}.`)
         return false
       }
-      await registerApi(registerForm);
+      await actionLedger.runAction('register', async () => {
+        await registerApi(registerForm);
+      })
       toastStore.pushNotice('info', `Account for “${registerForm.username}” has been created.`)
       return true
     } catch (error) {
@@ -50,46 +82,86 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  const checkAuth = async () => {
-    if (isChecked.value) {
-      return isAuthed.value
+  const ensureAuthKnown = async (): Promise<AuthState> => {
+    if (isAuthKnown.value) {
+      return authState.value
     }
 
-    if (checkPromise) {
-      return checkPromise
+    if (bootstrapPromise) {
+      return bootstrapPromise
     }
 
-    checkPromise = (async () => {
+    bootstrapPromise = (async () => {
+      authBootstrapStatus.value = 'loading'
       try {
-        const res = await checkTokenApi()
-        isAuthed.value = res.data
-        return isAuthed.value
-      } catch (error) {
-        isAuthed.value = false
-        return false
+        await checkTokenApi()
+        markAuthenticated()
+      } catch (_) {
+        markAnonymous()
       } finally {
-        isChecked.value = true
-        checkPromise = null
+        bootstrapPromise = null
       }
+
+      return authState.value
     })()
 
-    return checkPromise
+    return bootstrapPromise
   }
 
   const logout = async (): Promise<boolean> => {
     try {
-      await logoutApi();
-      isAuthed.value = false
-      isChecked.value = false
+      await actionLedger.runAction('logout', async () => {
+        await logoutApi();
+      })
+      markAnonymous()
       return true
     } catch (_) {
       return false
     }
   }
 
+  const refreshCurrentUserProfile = async (
+    force = false
+  ): Promise<CurrentUserProfile | null> => {
+    if (!isAuthenticated.value) {
+      currentUserProfile.value = null
+      currentUserProfileState.value = 'idle'
+      return null
+    }
+
+    if (!force && currentUserProfile.value && currentUserProfileState.value === 'ready') {
+      return currentUserProfile.value
+    }
+
+    if (!force && currentUserProfilePromise) {
+      return currentUserProfilePromise
+    }
+
+    currentUserProfileState.value = currentUserProfile.value ? 'refreshing' : 'loading'
+    currentUserProfilePromise = (async () => {
+      try {
+        const profile = await getCurrentUserProfileApi()
+
+        currentUserProfile.value = profile.data
+        currentUserProfileState.value = 'ready'
+        return profile.data
+      } catch (error) {
+        currentUserProfileState.value = 'error'
+        throw error
+      } finally {
+        currentUserProfilePromise = null
+      }
+    })()
+
+
+    return currentUserProfilePromise
+  }
+
   const updatePassword = async (newPasswd: string): Promise<boolean> => {
     try {
-      await updatePasswordApi(newPasswd);
+      await actionLedger.runAction('update-password', async () => {
+        await updatePasswordApi(newPasswd);
+      })
       toastStore.pushNotice('info', `Password updated successfully.`)
       return true
     } catch (_) {
@@ -97,5 +169,24 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  return { login, register, checkAuth, logout, updatePassword }
+  return {
+    authState,
+    authBootstrapStatus,
+    currentUserProfile,
+    currentUserProfileState,
+    isAuthenticated,
+    isAnonymous,
+    isAuthKnown,
+    isBootstrappingAuth: () => authBootstrapStatus.value === 'loading',
+    isLoginPending: () => actionLedger.isActionPending('login'),
+    isRegisterPending: () => actionLedger.isActionPending('register'),
+    isLogoutPending: () => actionLedger.isActionPending('logout'),
+    isUpdatePasswordPending: () => actionLedger.isActionPending('update-password'),
+    login,
+    register,
+    ensureAuthKnown,
+    logout,
+    refreshCurrentUserProfile,
+    updatePassword,
+  }
 })

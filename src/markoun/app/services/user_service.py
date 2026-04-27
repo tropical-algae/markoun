@@ -19,7 +19,12 @@ from markoun.core.db.crud.crud_user import (
     update_user,
 )
 from markoun.core.db.models import UserAccount
-from markoun.core.model.user import ScopeType, TokenPayload, UserBasicInfo
+from markoun.core.model.user import (
+    CurrentUserProfile,
+    ScopeType,
+    TokenPayload,
+    UserBasicInfo,
+)
 
 DEFAULT_USER = {
     "email": "admin@admin.com",
@@ -110,3 +115,16 @@ async def user_update_passwd(
     )
     if result is None:
         raise HTTPException(**CONSTANT.SERV_PASSWD_UPDATE_FAIL)
+
+
+def get_current_user_profile(user: UserAccount) -> CurrentUserProfile:
+    joined_at = (
+        user.create_date.strftime("%Y-%m-%d %H:%M:%S") if user.create_date else None
+    )
+    return CurrentUserProfile(
+        full_name=user.full_name,
+        email=user.email,
+        scopes=json.loads(str(user.scopes)),
+        is_active=user.is_active,
+        joined_at=joined_at,
+    )

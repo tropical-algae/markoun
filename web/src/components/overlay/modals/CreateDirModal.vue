@@ -12,14 +12,29 @@
         ref="inputRef"
         type="text"
         class="mb-2 f-s"
+        :disabled="nodeStore.isCreatePending('dir')"
         placeholder="e.g. temp_folder"
       />
 
       <BaseIconText :icon="InfoIcon" text="Created in the selected path." class="mb-3"/>
       
       <div class="d-flex justify-content-end gap-2">
-        <GhostButton class="f-s py-0" @click="isVisible = false" theme="secondary">Cancel</GhostButton>
-        <GhostButton class="f-s py-0" @click="handleConfirm">Create</GhostButton>
+        <GhostButton
+          class="f-s py-0"
+          @click="isVisible = false"
+          theme="secondary"
+          :disabled="nodeStore.isCreatePending('dir')"
+        >
+          Cancel
+        </GhostButton>
+        <GhostButton
+          class="f-s py-0"
+          @click="handleConfirm"
+          :disabled="!folderName.trim() || nodeStore.isCreatePending('dir')"
+          :loading="nodeStore.isCreatePending('dir')"
+        >
+          Create
+        </GhostButton>
       </div>
     </div>
   </BaseModal>

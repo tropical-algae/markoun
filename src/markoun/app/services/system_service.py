@@ -1,7 +1,10 @@
+from pathlib import Path
+
 from fastapi import HTTPException
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from markoun.app.utils.constant import CONSTANT
+from markoun.common.config import settings
 from markoun.common.logging import logger
 from markoun.core.db.crud.crud_setting import (
     get_system_settings,
@@ -89,6 +92,18 @@ async def get_allow_user_register_setting(db: AsyncSession) -> bool:
 
     result: bool = setting.value
     return result
+
+
+def get_welcome_note_content() -> str:
+    path = Path(settings.WELCOME_NOTE_PATH)
+    if not path.is_file():
+        raise HTTPException(**CONSTANT.SERV_WELCOME_NOTE_NOT_EXISTED)
+
+    try:
+        return path.read_text(encoding="utf-8")
+    except OSError as err:
+        logger.warning(f"[Failed to read welcome note from {path}] {err}")
+        raise HTTPException(**CONSTANT.SERV_WELCOME_NOTE_READ_FAIL) from err
 
 
 async def insert_default_system_setting(db: AsyncSession):

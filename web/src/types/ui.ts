@@ -1,5 +1,6 @@
 export const SidebarMode = {
   FileTree: 'fileTree',
+  User: 'user',
   Settings: 'settings',
 } as const;
 export type SidebarMode = typeof SidebarMode[keyof typeof SidebarMode];

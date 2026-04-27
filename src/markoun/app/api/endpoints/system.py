@@ -5,6 +5,7 @@ from markoun.app.api.deps import get_current_user, get_db
 from markoun.app.services.system_service import (
     get_allow_user_register_setting,
     get_system_setting_by_scopes,
+    get_welcome_note_content,
     update_system_setting,
 )
 from markoun.app.utils.constant import CONSTANT, MSG_SUCCESS
@@ -63,3 +64,9 @@ async def api_allow_uesr_register(
     db: AsyncSession = Depends(get_db),
 ):
     return await get_allow_user_register_setting(db=db)
+
+
+@router.get("/welcome-note")
+@exception_handling(CONSTANT.RESP_SERVER_ERROR)
+async def api_get_welcome_note() -> str:
+    return get_welcome_note_content()

@@ -12,14 +12,29 @@
         ref="inputRef"
         type="text"
         class="mb-2 f-s"
+        :disabled="nodeStore.isCreatePending('file')"
         placeholder="e.g. my_note"
       />
 
       <BaseIconText :icon="InfoIcon" text="Created in the selected path. No extension needed." class="mb-3"/>
       
       <div class="d-flex justify-content-end gap-2">
-        <GhostButton class="f-s py-0" @click="isVisible = false" theme="secondary">Cancel</GhostButton>
-        <GhostButton class="f-s py-0" @click="handleConfirm">Create</GhostButton>
+        <GhostButton
+          class="f-s py-0"
+          @click="isVisible = false"
+          theme="secondary"
+          :disabled="nodeStore.isCreatePending('file')"
+        >
+          Cancel
+        </GhostButton>
+        <GhostButton
+          class="f-s py-0"
+          @click="handleConfirm"
+          :disabled="!noteName.trim() || nodeStore.isCreatePending('file')"
+          :loading="nodeStore.isCreatePending('file')"
+        >
+          Create
+        </GhostButton>
       </div>
     </div>
   </BaseModal>

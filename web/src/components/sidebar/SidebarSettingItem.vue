@@ -14,6 +14,7 @@
           type="checkbox" 
           :id="setting.id"
           :checked="(setting as BoolSysSetting).value"
+          :disabled="pending"
           @change="handleChange($event)"
           style="cursor: pointer;"
         >
@@ -23,8 +24,11 @@
         <input 
           type="text" 
           class="form-control form-control-sm text-end"
-          :value="(setting as StrSysSetting).value"
-          @input="handleChange($event)"
+          :value="draftValue"
+          :disabled="pending"
+          @input="handleInput($event)"
+          @blur="commitDraft"
+          @keydown.enter.prevent="commitDraft"
           placeholder="Enter value"
           style="width: 120px;"
         >
@@ -35,11 +39,13 @@
 </template>
 
 <script setup lang="ts">
-import { SysSettingType, type BoolSysSetting, type StrSysSetting, type SysSettingResponse } from '@/types/system';
+import { ref, watch } from 'vue';
+import { SysSettingType, type BoolSysSetting, type SysSettingResponse } from '@/types/system';
 
 
 const props = defineProps<{
   setting: SysSettingResponse
+  pending?: boolean
 }>();
 
 const emit = defineEmits<{
@@ -51,8 +57,34 @@ const handleChange = (event: Event) => {
   
   if (props.setting.type === SysSettingType.BOOL) {
     emit('update', props.setting.id, target.checked);
-  } else {
-    emit('update', props.setting.id, target.value);
   }
 };
+
+const draftValue = ref(props.setting.type === SysSettingType.STR ? props.setting.value : '')
+
+watch(
+  () => props.setting,
+  (setting) => {
+    if (setting.type === SysSettingType.STR) {
+      draftValue.value = setting.value
+    }
+  },
+  { deep: true, immediate: true }
+)
+
+const handleInput = (event: Event) => {
+  draftValue.value = (event.target as HTMLInputElement).value
+}
+
+const commitDraft = () => {
+  if (props.setting.type !== SysSettingType.STR) {
+    return
+  }
+
+  if (draftValue.value === props.setting.value) {
+    return
+  }
+
+  emit('update', props.setting.id, draftValue.value)
+}
 </script>

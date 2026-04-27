@@ -14,18 +14,21 @@
 }
 
 .meta-tag {
-  flex-shrink: 0; 
-  margin-left: auto;
-  
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background-color: var(--color-text-sec);
   color: var(--color-bg-pri);
-  font-size: 10px;
-  font-weight: bold;
-  line-height: 10px;
-  padding: 3px 5px;
+  font-size: 0.55rem;
+  font-weight: 700;
+  line-height: 0.9;
+  min-height: var(--meta-tag-height);
+  padding: 0 5px;
   margin: 0;
   border-radius: 4px;
   white-space: nowrap;
+  vertical-align: middle;
+  box-sizing: border-box;
 }
 
 .container-header {

@@ -1,6 +1,9 @@
-import axios, { type InternalAxiosRequestConfig, type AxiosResponse } from "axios"
+import axios, { type AxiosRequestConfig, type AxiosResponse, type InternalAxiosRequestConfig } from "axios"
 import { useToastStore } from "@/stores/toast";
 
+export interface RequestConfig extends AxiosRequestConfig {
+  suppressErrorToast?: boolean;
+}
 
 const service = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -23,12 +26,19 @@ service.interceptors.response.use(
     return res 
   },
   (error: any) => {
+    const requestConfig = (error?.config ?? {}) as RequestConfig
     const toastStore = useToastStore()
     const status = error?.response?.data?.status ?? error.code
     const message = error?.response?.data?.message ?? error.message
-    toastStore.pushNotice('error', `[ERROR]: ${message} (code: ${status})`)
+    if (!requestConfig.suppressErrorToast) {
+      toastStore.pushNotice('error', `[ERROR]: ${message} (code: ${status})`)
+    }
     return Promise.reject(error)
   }
 )
 
-export default service
+const request = <T = any>(config: RequestConfig): Promise<T> => {
+  return service.request<any, T>(config)
+}
+
+export default request

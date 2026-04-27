@@ -15,10 +15,11 @@ from markoun.common.util import (
     formated_file_size,
 )
 from markoun.core.model.base import FsNodeType
-from markoun.core.model.file import FileMeta, FileNode
+from markoun.core.model.file import FileMeta, FileNode, UploadedFileResponse
 
 TIME_FORMAT = "%Y-%m-%d %H:%M"
 NOTE_SUFFIX = "md"
+DISPLAYED_FILE_TYPES = set(settings.DISPLAYED_FILE_TYPES)
 
 
 # async def get_format_markdown(abs_filepath: Path) -> str:
@@ -85,8 +86,9 @@ def create_note(abs_filepath: Path, file_name: str) -> FileNode:
     )
 
 
-async def upload_file(abs_path: Path, file: UploadFile) -> None:
-    filepath = abs_path / (file.filename or f"file_{uuid.uuid4().hex[:8]}.unknown")
+async def upload_file(abs_path: Path, file: UploadFile) -> UploadedFileResponse:
+    filename = file.filename or f"file_{uuid.uuid4().hex[:8]}.unknown"
+    filepath = abs_path / filename
     try:
         async with aiofiles.open(filepath, "wb") as f:
             while content := await file.read(1024 * 1024):
@@ -96,3 +98,15 @@ async def upload_file(abs_path: Path, file: UploadFile) -> None:
         raise HTTPException(**CONSTANT.SERV_FILE_UPLOAD_FAIL) from err
     finally:
         await file.close()
+
+    suffix = file_suffix(filepath)
+    node = None
+    if suffix in DISPLAYED_FILE_TYPES:
+        node = FileNode(
+            name=filepath.stem,
+            path=str(abs_path_to_relative_path(filepath)),
+            type=FsNodeType.FILE,
+            suffix=suffix,
+        )
+
+    return UploadedFileResponse(filename=filename, node=node)

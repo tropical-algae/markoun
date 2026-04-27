@@ -6,50 +6,52 @@
           <component :is="SidebarToggleIcon" class="icon-btn"></component>
         </button>
       </BaseHeader>
-      
+
       <button v-for="(item, _) in sideBtns" @click="item.func()">
         <component :is="item.icon" class="icon-btn"></component>
       </button>
       <div class="vertical-line turn-right"></div>
     </div>
 
-    <div 
-      class="sub-sidebar-container" 
+    <div
+      class="sub-sidebar-container"
       :class="{ 'is-smooth': !isSubSidebarResizing }"
       :style="{ width: currentWidth }"
     >
-      <div 
+      <div
         class="sub-sidebar-inner d-flex flex-column"
         :style="{ width: subSidebarWidth + 'px' }"
       >
         <SidebarFileTree v-if="currentMode === SidebarMode.FileTree" />
-        <SidebarSetting v-else/>
+        <SidebarUser v-else-if="currentMode === SidebarMode.User" />
+        <SidebarSetting v-else />
       </div>
     </div>
 
-    <div 
-      class="vertical-line turn-right col-drag" 
+    <div
+      class="vertical-line turn-right col-drag"
       @mousedown.prevent="startResizing"
       :class="{ 'is-resizing': !showSubSidebar }"
     ></div>
-
   </aside>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue"
+import { computed, ref } from "vue"
 import { SidebarMode } from "@/types/ui"
 
 import SidebarToggleIcon from "@/assets/icons/sidebar.svg"
 import FileTreeIcon from "@/assets/icons/rectangle-list.svg"
 import SettingIcon from "@/assets/icons/settings.svg"
+import UserIcon from "@/assets/icons/user-pen.svg"
 
 import SidebarFileTree from "@/components/sidebar/SidebarFileTree.vue"
 import SidebarSetting from "@/components/sidebar/SidebarSetting.vue"
+import SidebarUser from "@/components/sidebar/SidebarUser.vue"
 import BaseHeader from '@/components/base/BaseHeader.vue';
 
 const subSidebarWidth = ref(250);
-const subSidebarMinWidth = 220;
+const subSidebarMinWidth = 240;
 const subSidebarMaxWidth = 500;
 const isSubSidebarResizing = ref(false);
 const showSubSidebar = ref(true);
@@ -72,6 +74,7 @@ const toggleSubSidebar = (mode: SidebarMode | null = null) => {
 
 const sideBtns = [
   { icon: FileTreeIcon, func: () => { toggleSubSidebar(SidebarMode.FileTree); } },
+  { icon: UserIcon, func: () => { toggleSubSidebar(SidebarMode.User); } },
   { icon: SettingIcon, func: () => { toggleSubSidebar(SidebarMode.Settings); } }
 ]
 
@@ -99,16 +102,13 @@ const startResizing = (e: MouseEvent) => {
   document.addEventListener('mousemove', onMouseMove);
   document.addEventListener('mouseup', onMouseUp);
 };
-
-
-
 </script>
 
 <style scoped>
 .sidebar-wrapper {
   height: 100%;
   position: relative;
-  user-select: none; 
+  user-select: none;
 }
 
 .sidebar-container {
@@ -118,7 +118,7 @@ const startResizing = (e: MouseEvent) => {
 }
 
 .file-tree-wrapper {
-  overflow: hidden; 
+  overflow: hidden;
   position: relative;
 }
 
@@ -130,7 +130,7 @@ const startResizing = (e: MouseEvent) => {
 
 .sub-sidebar-inner {
   height: 100%;
-  min-width: 220px; 
+  min-width: 220px;
   white-space: nowrap;
 }
 </style>

@@ -22,6 +22,14 @@ export interface User {
   profile: string | null;
 }
 
+export interface CurrentUserProfile {
+  full_name: string | null;
+  email: string;
+  scopes: string[];
+  is_active: boolean | null;
+  joined_at: string | null;
+}
+
 export interface LoginResponse {
   user_id: string;
   message: string;

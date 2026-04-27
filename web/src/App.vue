@@ -1,6 +1,6 @@
 <template>
   <RouterView v-slot="{ Component }">
-    <component :is="Component" :key="$route.path" />
+    <component :is="Component" :key="$route.fullPath" />
   </RouterView>
   <Toast/>
 </template>

@@ -6,8 +6,23 @@
     <div style="width: 360px;">
       <p>Are you sure you want to delete <span class="fw-bold">{{ targetPath }}</span> ?</p>
       <div class="d-flex justify-content-end gap-2">
-        <GhostButton class="f-s py-0" @click="isVisible = false" theme="secondary">Cancel</GhostButton>
-        <GhostButton class="f-s py-0" @click="handleConfirm" type="danger">Delete</GhostButton>
+        <GhostButton
+          class="f-s py-0"
+          @click="isVisible = false"
+          theme="secondary"
+          :disabled="nodeStore.isDeletePending()"
+        >
+          Cancel
+        </GhostButton>
+        <GhostButton
+          class="f-s py-0"
+          @click="handleConfirm"
+          theme="danger"
+          :disabled="nodeStore.isDeletePending()"
+          :loading="nodeStore.isDeletePending()"
+        >
+          Delete
+        </GhostButton>
       </div>
     </div>
   </BaseModal>
