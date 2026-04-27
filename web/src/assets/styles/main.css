@@ -39,6 +39,8 @@
 
   --motion-soft-duration: 0.18s;
   --motion-soft-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --meta-tag-height: 1rem;
 }
 
 

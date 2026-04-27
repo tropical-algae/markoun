@@ -31,28 +31,28 @@
     </div>
 
     <div class="p-3 border-top bg-white flex-shrink-0 settings-footer">
-      <div class="d-flex justify-content-between align-items-center text-muted small mb-1">
+      <div class="settings-footer-row d-flex justify-content-between align-items-center text-muted small mb-1">
         <span class="text-uppercase f-s">App Version:</span>
         <div class="settings-footer-value-slot">
-          <AsyncGate tag="span" :status="sysStore.sysStatusState">
+          <AsyncGate :status="sysStore.sysStatusState" class="settings-footer-gate">
             <template #loading>
-              <BaseSkeleton width="72px" height="1rem" />
+              <BaseSkeleton width="72px" height="var(--meta-tag-height)" radius="4px" />
             </template>
 
-            <span class="meta-tag">v{{ sysStore.version }}</span>
+            <span class="meta-tag settings-footer-tag">v{{ sysStore.version }}</span>
           </AsyncGate>
         </div>
       </div>
 
-      <div class="d-flex justify-content-between align-items-center text-muted small">
+      <div class="settings-footer-row d-flex justify-content-between align-items-center text-muted small">
         <span class="text-uppercase f-s">System Status:</span>
         <div class="settings-footer-value-slot">
-          <AsyncGate tag="span" :status="sysStore.sysStatusState">
+          <AsyncGate :status="sysStore.sysStatusState" class="settings-footer-gate">
             <template #loading>
-              <BaseSkeleton width="88px" height="1rem" />
+              <BaseSkeleton width="88px" height="var(--meta-tag-height)" radius="4px" />
             </template>
 
-            <span class="meta-tag">{{ sysStore.status }}</span>
+            <span class="meta-tag settings-footer-tag">{{ sysStore.status }}</span>
           </AsyncGate>
         </div>
       </div>
@@ -92,13 +92,29 @@ const handleUpdateSetting = async (id: string, newValue: string | boolean) => {
   margin-top: auto;
 }
 
+.settings-footer-row {
+  min-height: var(--meta-tag-height);
+}
+
 .settings-footer-value-slot {
   min-width: 88px;
-  min-height: 1rem;
+  min-height: var(--meta-tag-height);
   display: inline-flex;
   align-items: center;
   justify-content: flex-end;
   flex-shrink: 0;
+}
+
+.settings-footer-gate {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: var(--meta-tag-height);
+}
+
+.settings-footer-tag {
+  min-height: var(--meta-tag-height);
+  height: var(--meta-tag-height);
 }
 
 .setting-skeleton-row {
