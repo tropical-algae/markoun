@@ -1,5 +1,79 @@
 <!-- version list -->
 
+## v0.1.0 (2026-04-27)
+
+### Bug Fixes
+
+- [site] fix image upload path error
+  ([`0ca089e`](https://github.com/tropical-algae/markoun/commit/0ca089e2875eeab71c4fbf3a2ca0fa432dfd5e65))
+
+- [site] stabilize sidebar skeleton sizing and profile layout transitions
+  ([`77bdb6c`](https://github.com/tropical-algae/markoun/commit/77bdb6cad2d27309758c4bfa22185d4711bfee3d))
+
+### Chores
+
+- [site] improve file tree interaction logic
+  ([`a91c7b3`](https://github.com/tropical-algae/markoun/commit/a91c7b3f4294b3c414f2d3024c1b52df41c9a12a))
+
+- Add test for item_children_api
+  ([`8cf47cf`](https://github.com/tropical-algae/markoun/commit/8cf47cf6b2f14cacdf5a856eb1c3c7b815c05f86))
+
+- Update website logo
+  ([`62b34e5`](https://github.com/tropical-algae/markoun/commit/62b34e50353f427005f5cc4591c13dbf2ad76d5a))
+
+### Documentation
+
+- Update Roadmap
+  ([`8dc5f48`](https://github.com/tropical-algae/markoun/commit/8dc5f48b921e77e4b26cff0fbf6d6f212f42674c))
+
+### Features
+
+- [site] build profile sidebar with UI improvements
+  ([`4d725e2`](https://github.com/tropical-algae/markoun/commit/4d725e21ef20af97124609959e108145770a61ed))
+
+- [site] feat: implement lazy loading for file tree nodes
+  ([`929cd59`](https://github.com/tropical-algae/markoun/commit/929cd59b941f7cadf10d3b000fb1129e765fd78e))
+
+- [site] improve perceived performance with loading placeholders
+  ([`2085cb6`](https://github.com/tropical-algae/markoun/commit/2085cb607843fc8409d51373c451652ba39c3a6f))
+
+- [site] optimize file tree nodes slide animation
+  ([`4283de6`](https://github.com/tropical-algae/markoun/commit/4283de60d3c4f2facade0cf2ee4b03bebfed46eb))
+
+- [site] support drag and drop file upload to file tree node
+  ([`d31b203`](https://github.com/tropical-algae/markoun/commit/d31b203f563e9be6635a6acab633b01061aaf442))
+
+- [site] support preview image files
+  ([`f3e0f81`](https://github.com/tropical-algae/markoun/commit/f3e0f81b5a7bc56940f2a48c71ef9b843809ea58))
+
+- Add API endpoint for retrieving user profile information
+  ([`af70234`](https://github.com/tropical-algae/markoun/commit/af70234102237a11c890734fdda2413373641798))
+
+- Add configurable welcome note endpoint
+  ([`196c723`](https://github.com/tropical-algae/markoun/commit/196c723b210cd9990b3419f9239003cfc248769b))
+
+- Support on-demand fetching for file tree structure
+  ([`a813e14`](https://github.com/tropical-algae/markoun/commit/a813e1442728d0d6df7b77285ded99a9392d7068))
+
+### Performance Improvements
+
+- [site] optimize router and auth check
+  ([`8092c0c`](https://github.com/tropical-algae/markoun/commit/8092c0c86b32d376590f73f484e62a640c91e53a))
+
+### Refactoring
+
+- [site] load welcome note from system API with client fallback
+  ([`a00c05f`](https://github.com/tropical-algae/markoun/commit/a00c05f86e659ddd8871cafe2c9c31361efdb8ee))
+
+- [site] unify async skeleton gating across read-only views
+  ([`9ccafb9`](https://github.com/tropical-algae/markoun/commit/9ccafb9c67276da6c53973f79150f8d875a1b615))
+
+### Update
+
+- Update README and project logo
+  ([`fdf356a`](https://github.com/tropical-algae/markoun/commit/fdf356a8c67464b2e7ad5b8c60f13f440e2ccab0))
+
+
 ## v0.0.7 (2026-02-27)
 
 ### Bug Fixes
