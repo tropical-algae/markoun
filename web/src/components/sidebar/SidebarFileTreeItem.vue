@@ -31,7 +31,7 @@
           <div class="node-text-slot">
             <input
               v-if="isRenaming"
-              ref="renameInputRef"
+              :ref="setRenameInputRef"
               v-model="editName"
               class="rename-input"
               @click.stop 
@@ -104,12 +104,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, ref } from 'vue';
+import { computed, ref } from 'vue';
 import type { FsNode } from '@/types/file-system';
 import { useNodeStore } from '@/stores/note';
 import type { AsyncStatus } from '@/types/async';
 import { useHeightMotion } from '@/composables/useHeightMotion';
-import { TREE_LONG_PRESS_DELAY_MS } from '@/constants/ui';
+import { useFileTreeItemRename } from '@/composables/useFileTreeItemRename';
+import { useDirectoryFileDrop } from '@/composables/useDirectoryFileDrop';
 
 import FolderOpenIcon from "@/assets/icons/folder-open.svg"
 import FolderIcon from "@/assets/icons/folder.svg"
@@ -128,8 +129,6 @@ const placeholderIndentStyle = computed(() => ({
   '--tree-depth': props.depth + 1,
 }));
 
-const editName = ref('');
-const isRenaming = ref(false);
 const isDir = computed(() => node.value.type === 'dir');
 const isActive = computed(() => nodeStore.currentNode?.path === node.value.path);
 const isOpened = computed(() => isDir.value && nodeStore.isDirectoryExpanded(node.value.path));
@@ -146,53 +145,19 @@ const canExpand = computed(() => {
 });
 const currentIcon = computed(() => isOpened.value ? FolderOpenIcon : FolderIcon)
 
-const renameInputRef = ref<HTMLInputElement | null>(null);
 const childrenPanelRef = ref<HTMLElement | null>(null);
 const childrenContentRef = ref<HTMLElement | null>(null);
-let pressTimer: number | null = null;
-const isLongPressed = ref(false);
-const isDirectoryDragOver = ref(false);
-let dragDepth = 0;
 const childrenMotion = useHeightMotion(childrenPanelRef, childrenContentRef)
-
-const onLongPress = () => {
-  isLongPressed.value = false;
-  pressTimer = window.setTimeout(() => {
-    isLongPressed.value = true;
-    enterRenameMode();
-  }, TREE_LONG_PRESS_DELAY_MS);
-};
-
-const cancelLongPress = () => {
-  if (pressTimer) {
-    clearTimeout(pressTimer);
-    pressTimer = null;
-  }
-};
-
-const enterRenameMode = async () => {
-  editName.value = node.value.name;
-  isRenaming.value = true;
-  
-  await nextTick();
-  if (renameInputRef.value) {
-    renameInputRef.value.focus();
-    renameInputRef.value.select();
-  }
-};
-
-const submitRename = async () => {
-  if (!editName.value.trim() || editName.value === node.value.name) {
-    cancelRename();
-    return;
-  }
-  await nodeStore.renameNode(node.value, editName.value)
-  isRenaming.value = false;
-};
-
-const cancelRename = () => {
-  isRenaming.value = false;
-};
+const {
+  editName,
+  isRenaming,
+  isLongPressed,
+  setRenameInputRef,
+  onLongPress,
+  cancelLongPress,
+  submitRename,
+  cancelRename,
+} = useFileTreeItemRename(node, nodeStore.renameNode)
 
 const handleClickNode = async () => {
   if (isLongPressed.value) {
@@ -225,66 +190,19 @@ const handleClickDirectoryIcon = async () => {
   await nodeStore.setCurrentNode(node.value);
 };
 
-const resetDirectoryDragState = () => {
-  dragDepth = 0;
-  isDirectoryDragOver.value = false;
-};
-
-const hasDraggedFiles = (event: DragEvent): boolean => {
-  const types = event.dataTransfer?.types;
-  return Boolean(types && Array.from(types).includes('Files'));
-};
-
-const handleDirectoryDragEnter = (event: DragEvent) => {
-  if (!isDir.value || !hasDraggedFiles(event)) {
-    return;
-  }
-
-  dragDepth += 1;
-  isDirectoryDragOver.value = true;
-};
-
-const handleDirectoryDragOver = (event: DragEvent) => {
-  if (!isDir.value || !hasDraggedFiles(event)) {
-    return;
-  }
-
-  event.dataTransfer!.dropEffect = 'copy';
-  isDirectoryDragOver.value = true;
-};
-
-const handleDirectoryDragLeave = (event: DragEvent) => {
-  if (!isDir.value || !hasDraggedFiles(event)) {
-    return;
-  }
-
-  dragDepth = Math.max(0, dragDepth - 1);
-  if (dragDepth === 0) {
-    isDirectoryDragOver.value = false;
-  }
-};
-
-const handleDirectoryDrop = async (event: DragEvent) => {
-  if (!isDir.value || !hasDraggedFiles(event) || nodeStore.isUploadPending()) {
-    resetDirectoryDragState();
-    return;
-  }
-
-  const file = event.dataTransfer?.files?.[0];
-  resetDirectoryDragState();
-
-  if (!file) {
-    return;
-  }
-
-  const uploadPercent = ref(0);
-  await nodeStore.setCurrentNode(node.value);
-  await nodeStore.uploadFile(file, uploadPercent, node.value.path);
-};
-
-onBeforeUnmount(() => {
-  cancelLongPress();
-});
+const {
+  isDirectoryDragOver,
+  handleDirectoryDragEnter,
+  handleDirectoryDragOver,
+  handleDirectoryDragLeave,
+  handleDirectoryDrop,
+} = useDirectoryFileDrop({
+  isDirectory: isDir,
+  isUploadPending: nodeStore.isUploadPending,
+  getDestinationPath: () => node.value.path,
+  selectDirectory: () => nodeStore.setCurrentNode(node.value),
+  uploadFile: nodeStore.uploadFile,
+})
 
 const onEnter = (element: Element, done: () => void) => {
   childrenMotion.enter(element, () => {
