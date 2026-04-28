@@ -21,7 +21,13 @@ import {
   sortFsNodes,
 } from "@/utils/file-node";
 import { renderMarkdownFile } from "@/utils/markdown";
-import { getFileContentApi, createNoteApi, uploadFileApi, saveNoteApi } from "@/api/file";
+import {
+  getFileContentApi,
+  createNoteApi,
+  uploadFileApi,
+  saveNoteApi,
+  saveNoteKeepalive,
+} from "@/api/file";
 import { getDirectoryChildrenApi, removeItemApi, renameItemApi } from "@/api/item";
 import { createDirApi } from "@/api/dir";
 import { getWelcomeNoteApi } from "@/api/system";
@@ -91,6 +97,9 @@ export const useNodeStore = defineStore('note', () => {
   const rootNodes = computed(() => directoryChildrenByPath.value[ROOT_DIRECTORY_PATH] || [])
   const currentFileDisplayName = computed(() => currentFileNode.value?.name || currentFile.value.name)
   const canEditCurrentFile = computed(() => currentFileStatus.value === 'ready' && Boolean(currentFileNode.value))
+  const isCurrentFileDirty = computed(() => {
+    return canEditCurrentFile.value && currentFile.value.content !== lastSavedContent.value
+  })
   const currentRenderedFile = computed(() => {
     return renderMarkdownFile(currentFile.value.path, currentFile.value.content)
   })
@@ -103,6 +112,7 @@ export const useNodeStore = defineStore('note', () => {
   let isInitialized = false
   let currentFileRequestId = 0
   const directoryRequests = new Map<string, Promise<FsNode[]>>()
+  const lastSavedContent = ref(createDefaultFileContent().content)
 
   const toastStore = useToastStore()
   const actionLedger = useActionLedger()
@@ -147,6 +157,7 @@ export const useNodeStore = defineStore('note', () => {
   const resetCurrentFileState = () => {
     currentFileNode.value = null
     currentFile.value = createDefaultFileContent(welcomeNoteContent.value)
+    lastSavedContent.value = currentFile.value.content
     currentFileStatus.value = resolveDefaultFileStatus()
     isInitialized = false
   }
@@ -443,6 +454,7 @@ export const useNodeStore = defineStore('note', () => {
         meta: response.data.meta
       }
       currentFile.value = nextFile
+      lastSavedContent.value = nextFile.content
       currentFileStatus.value = 'ready'
       isInitialized = true
     } catch (error) {
@@ -469,12 +481,19 @@ export const useNodeStore = defineStore('note', () => {
 
     await ensureDirectoryVisible(parentPath)
     upsertNode(parentPath, response.data)
-    setCurrentNode(response.data)
+    await setCurrentNode(response.data)
   }
 
-  const setCurrentNode = (node: FsNode) => {
+  const setCurrentNode = async (node: FsNode): Promise<void> => {
     const normalizedNode = normalizeFsNode(node)
     if (isMarkdownNode(normalizedNode)) {
+      if (currentFileNode.value?.path !== normalizedNode.path) {
+        try {
+          await saveCurrentFileIfDirty()
+        } catch (_) {
+          return
+        }
+      }
       closeImagePreview()
       void loadCurrentFile(normalizedNode)
     } else if (isPreviewableImageNode(normalizedNode)) {
@@ -514,17 +533,45 @@ export const useNodeStore = defineStore('note', () => {
     return response.data.filename
   }
 
-  const saveCurrentFile = async (): Promise<void> => {
+  const saveCurrentFile = async (options: { silent?: boolean } = {}): Promise<void> => {
     if (!isInitialized) {
       toastStore.pushNotice('warning', 'The home page cannot be changed.')
       return
     }
+    const savedPath = currentFile.value.path
     const response = await actionLedger.runAction('save-current-file', async () => {
-      return await saveNoteApi(currentFile.value.path, currentFile.value.content)
+      const path = savedPath
+      const content = currentFile.value.content
+      const saveResponse = await saveNoteApi(path, content)
+      if (currentFile.value.path === path) {
+        lastSavedContent.value = content
+      }
+      return saveResponse
     })
-    currentFile.value.meta = response.data
-    toastStore.pushNotice('info', 'The note has been saved.')
+    if (currentFile.value.path === savedPath) {
+      currentFile.value.meta = response.data
+    }
+    if (!options.silent) {
+      toastStore.pushNotice('info', 'The note has been saved.')
+    }
   } 
+
+  const saveCurrentFileIfDirty = async (): Promise<void> => {
+    if (!isCurrentFileDirty.value) {
+      return
+    }
+
+    await saveCurrentFile({ silent: true })
+  }
+
+  const saveCurrentFileBeforeUnload = () => {
+    if (!isCurrentFileDirty.value) {
+      return
+    }
+
+    saveNoteKeepalive(currentFile.value.path, currentFile.value.content)
+    lastSavedContent.value = currentFile.value.content
+  }
 
   const deletedItem = async (): Promise<void> => {
     if (currentNode.value === null) {
@@ -584,6 +631,7 @@ export const useNodeStore = defineStore('note', () => {
     currentFileParentPath,
     currentPathLabel,
     canEditCurrentFile,
+    isCurrentFileDirty,
     isCreatePending: (type: 'file' | 'dir') => actionLedger.isActionPending(type === 'file' ? 'create-file' : 'create-dir'),
     isDeletePending: () => actionLedger.isActionPending('delete-item'),
     isUploadPending: () => actionLedger.isActionPending('upload-file'),
@@ -605,6 +653,8 @@ export const useNodeStore = defineStore('note', () => {
     closeImagePreview,
     uploadFile,
     saveCurrentFile,
+    saveCurrentFileIfDirty,
+    saveCurrentFileBeforeUnload,
     deletedItem,
     renameNode,
   }

@@ -203,17 +203,17 @@ const handleClickNode = async () => {
   if (isRenaming.value) return;
 
   if (isDir.value) {
-    nodeStore.setCurrentNode(node.value);
+    await nodeStore.setCurrentNode(node.value);
     if (canExpand.value) {
       await nodeStore.toggleDirectory(node.value);
     }
     return;
   }
 
-  nodeStore.setCurrentNode(node.value);
+  await nodeStore.setCurrentNode(node.value);
 };
 
-const handleClickDirectoryIcon = () => {
+const handleClickDirectoryIcon = async () => {
   if (isRenaming.value) {
     return;
   }
@@ -223,7 +223,7 @@ const handleClickDirectoryIcon = () => {
     return;
   }
 
-  nodeStore.setCurrentNode(node.value);
+  await nodeStore.setCurrentNode(node.value);
 };
 
 const resetDirectoryDragState = () => {
@@ -279,7 +279,7 @@ const handleDirectoryDrop = async (event: DragEvent) => {
   }
 
   const uploadPercent = ref(0);
-  nodeStore.setCurrentNode(node.value);
+  await nodeStore.setCurrentNode(node.value);
   await nodeStore.uploadFile(file, uploadPercent, node.value.path);
 };
 

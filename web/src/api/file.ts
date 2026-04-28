@@ -2,6 +2,11 @@ import type { ApiResponse } from '@/types/api'
 import type { FileDetailResponse, FsNode, UploadResponse } from '@/types/file-system'
 import request from '@/utils/request'
 
+const resolveApiUrl = (path: string): string => {
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || ''
+  return baseUrl ? `${baseUrl.replace(/\/$/, '')}${path}` : path
+}
+
 /**
  * 获取文件信息接口
  */
@@ -79,5 +84,24 @@ export const saveNoteApi = (
       filepath: path,
       content: content
     }
+  })
+}
+
+export const saveNoteKeepalive = (path: string, content: string): void => {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  void fetch(resolveApiUrl('/api/v1/file/save'), {
+    method: 'post',
+    credentials: 'include',
+    keepalive: true,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      filepath: path,
+      content,
+    }),
   })
 }
