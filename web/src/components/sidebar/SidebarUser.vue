@@ -135,7 +135,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } 
 import router from '@/router';
 import { useUserStore } from '@/stores/user';
 import { useHeightMotion } from '@/composables/useHeightMotion';
-import { readRootCssNumber } from '@/utils/css-vars';
+import { USER_PROFILE_HEIGHT_MOTION_DURATION } from '@/constants/ui';
 
 import AsyncGate from '@/components/base/AsyncGate.vue';
 import BaseHeader from '@/components/base/BaseHeader.vue';
@@ -150,7 +150,7 @@ const userStore = useUserStore()
 const profileMotionShellRef = ref<HTMLElement | null>(null)
 const profileMotionContentRef = ref<HTMLElement | null>(null)
 const profileMotion = useHeightMotion(profileMotionShellRef, profileMotionContentRef, {
-  duration: readRootCssNumber('--motion-height-user-duration', 0.35),
+  duration: USER_PROFILE_HEIGHT_MOTION_DURATION,
   enterEase: 'power2.out',
 })
 

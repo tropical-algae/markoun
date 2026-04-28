@@ -27,7 +27,7 @@
 import gsap from 'gsap';
 import { computed, watch } from 'vue';
 import { useToastStore } from '@/stores/toast';
-import { readRootCssNumber } from '@/utils/css-vars';
+import { TOAST_MOTION } from '@/constants/ui';
 
 import BaseIconText from '@/components/base/BaseIconText.vue';
 
@@ -74,14 +74,14 @@ watch(currentNotice, (val) => {
     if (toastStore.queue[0]?.id === val.id) {
       toastStore.popNotice();
     }
-  }, readRootCssNumber('--toast-life-ms', 5000));
+  }, TOAST_MOTION.lifeMs);
 });
 
 const onEnter = (el: Element, done: () => void) => {
   gsap.set(el, { xPercent: -50, x: 0 }); 
   gsap.fromTo(el, 
     { 
-      y: readRootCssNumber('--toast-enter-y', 20),
+      y: TOAST_MOTION.enterY,
       opacity: 0,
       scale: 0.95
     },
@@ -89,7 +89,7 @@ const onEnter = (el: Element, done: () => void) => {
       y: 0,
       opacity: 0.95, 
       scale: 1,
-      duration: readRootCssNumber('--motion-toast-enter-duration', 0.4),
+      duration: TOAST_MOTION.enterDuration,
       ease: 'back.out(1.6)',
       onComplete: done 
     }
@@ -98,10 +98,10 @@ const onEnter = (el: Element, done: () => void) => {
 
 const onLeave = (el: Element, done: () => void) => {
   gsap.to(el, { 
-    y: readRootCssNumber('--toast-leave-y', -20),
+    y: TOAST_MOTION.leaveY,
     opacity: 0, 
     scale: 0.95,
-    duration: readRootCssNumber('--motion-toast-leave-duration', 0.25),
+    duration: TOAST_MOTION.leaveDuration,
     ease: 'power2.in',
     onComplete: done 
   });

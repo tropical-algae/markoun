@@ -109,7 +109,7 @@ import type { FsNode } from '@/types/file-system';
 import { useNodeStore } from '@/stores/note';
 import type { AsyncStatus } from '@/types/async';
 import { useHeightMotion } from '@/composables/useHeightMotion';
-import { readRootCssNumber } from '@/utils/css-vars';
+import { TREE_LONG_PRESS_DELAY_MS } from '@/constants/ui';
 
 import FolderOpenIcon from "@/assets/icons/folder-open.svg"
 import FolderIcon from "@/assets/icons/folder.svg"
@@ -121,12 +121,11 @@ const nodeStore = useNodeStore()
 const props = defineProps<{ node: FsNode, depth: number }>();
 
 const node = computed(() => props.node);
-const treeIndentStep = readRootCssNumber('--tree-indent-step', 12);
 const nodeIndentStyle = computed(() => ({
-  paddingLeft: `${props.depth * treeIndentStep}px`,
+  '--tree-depth': props.depth,
 }));
 const placeholderIndentStyle = computed(() => ({
-  paddingLeft: `${(props.depth + 1) * treeIndentStep}px`,
+  '--tree-depth': props.depth + 1,
 }));
 
 const editName = ref('');
@@ -161,7 +160,7 @@ const onLongPress = () => {
   pressTimer = window.setTimeout(() => {
     isLongPressed.value = true;
     enterRenameMode();
-  }, 600);
+  }, TREE_LONG_PRESS_DELAY_MS);
 };
 
 const cancelLongPress = () => {
@@ -308,6 +307,7 @@ const onLeave = childrenMotion.leave;
   color: var(--color-text-pri);
   width: 100%; 
   box-sizing: border-box;
+  padding-left: calc(var(--tree-depth) * var(--tree-indent-step));
 }
 
 .node-content {
@@ -455,6 +455,7 @@ const onLeave = childrenMotion.leave;
 .node-placeholder {
   padding-top: 2px;
   padding-bottom: 2px;
+  padding-left: calc(var(--tree-depth) * var(--tree-indent-step));
 }
 
 .node-placeholder-content {

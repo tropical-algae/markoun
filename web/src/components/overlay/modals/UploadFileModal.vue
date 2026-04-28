@@ -62,7 +62,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref } from 'vue'
 import { useNodeStore } from '@/stores/note';
-import { readRootCssNumber } from '@/utils/css-vars';
+import { UPLOAD_RESET_DELAY_MS } from '@/constants/ui';
 
 import UploadIcon from "@/assets/icons/upload.svg"
 
@@ -135,7 +135,7 @@ const handleUpload = async (file: File) => {
 
   resetTimer = window.setTimeout(
     resetUploadState,
-    readRootCssNumber('--upload-reset-delay-ms', 5000),
+    UPLOAD_RESET_DELAY_MS,
   )
 }
 

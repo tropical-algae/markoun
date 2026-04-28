@@ -40,7 +40,7 @@
 import { ref } from "vue"
 import { SidebarMode } from "@/types/ui"
 import { useResizablePane } from "@/composables/useResizablePane"
-import { readRootCssNumber } from "@/utils/css-vars"
+import { SIDEBAR_PANE_WIDTH } from "@/constants/ui"
 
 import SidebarToggleIcon from "@/assets/icons/sidebar.svg"
 import FileTreeIcon from "@/assets/icons/rectangle-list.svg"
@@ -59,9 +59,9 @@ const {
   startResizing,
   visibleWidth,
 } = useResizablePane({
-  initialWidth: readRootCssNumber('--layout-sidebar-width-default', 250),
-  minWidth: readRootCssNumber('--layout-sidebar-width-min', 240),
-  maxWidth: readRootCssNumber('--layout-sidebar-width-max', 500),
+  initialWidth: SIDEBAR_PANE_WIDTH.initial,
+  minWidth: SIDEBAR_PANE_WIDTH.min,
+  maxWidth: SIDEBAR_PANE_WIDTH.max,
   direction: 'right',
 })
 

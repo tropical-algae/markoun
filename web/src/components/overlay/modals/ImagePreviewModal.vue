@@ -47,16 +47,18 @@ import AsyncGate from '@/components/base/AsyncGate.vue';
 
 import { useNodeStore } from '@/stores/note';
 import type { AsyncStatus } from '@/types/async';
-import { readRootCssNumber } from '@/utils/css-vars';
+import { IMAGE_PREVIEW_SIZE } from '@/constants/ui';
 
-const DEFAULT_WIDTH = readRootCssNumber('--image-preview-default-width', 640)
-const DEFAULT_HEIGHT = readRootCssNumber('--image-preview-default-height', 420)
-const MIN_WIDTH = readRootCssNumber('--image-preview-min-width', 280)
-const MAX_WIDTH = readRootCssNumber('--image-preview-max-width', 720)
-const VIEWPORT_WIDTH_RATIO = readRootCssNumber('--image-preview-viewport-width-ratio', 0.82)
-const VIEWPORT_HEIGHT_RATIO = readRootCssNumber('--image-preview-viewport-height-ratio', 0.72)
-const MIN_STAGE_WIDTH = readRootCssNumber('--image-preview-min-stage-width', 220)
-const MIN_STAGE_HEIGHT = readRootCssNumber('--image-preview-min-stage-height', 180)
+const {
+  defaultWidth: DEFAULT_WIDTH,
+  defaultHeight: DEFAULT_HEIGHT,
+  minWidth: MIN_WIDTH,
+  maxWidth: MAX_WIDTH,
+  viewportWidthRatio: VIEWPORT_WIDTH_RATIO,
+  viewportHeightRatio: VIEWPORT_HEIGHT_RATIO,
+  minStageWidth: MIN_STAGE_WIDTH,
+  minStageHeight: MIN_STAGE_HEIGHT,
+} = IMAGE_PREVIEW_SIZE
 
 const nodeStore = useNodeStore()
 

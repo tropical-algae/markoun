@@ -16,7 +16,7 @@
 
 <script setup lang="ts">
 import { onBeforeUnmount, ref, watch } from 'vue';
-import { readRootCssNumber } from '@/utils/css-vars';
+import { ASYNC_GATE_DELAY_MS, ASYNC_GATE_MIN_VISIBLE_MS } from '@/constants/ui';
 
 interface Props {
   theme?: 'primary' | 'danger' | 'secondary' | 'submit';
@@ -83,7 +83,7 @@ watch(
         if (props.loading) {
           showLoading()
         }
-      }, props.loadingDelayMs ?? readRootCssNumber('--async-gate-delay-ms', 150))
+      }, props.loadingDelayMs ?? ASYNC_GATE_DELAY_MS)
       return
     }
 
@@ -94,8 +94,7 @@ watch(
     }
 
     const elapsed = Date.now() - loadingVisibleAt
-    const minDuration = props.loadingMinDurationMs ??
-      readRootCssNumber('--async-gate-min-visible-ms', 400)
+    const minDuration = props.loadingMinDurationMs ?? ASYNC_GATE_MIN_VISIBLE_MS
     const remaining = Math.max(0, minDuration - elapsed)
 
     clearHideTimer()

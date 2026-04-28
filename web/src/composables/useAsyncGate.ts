@@ -7,7 +7,7 @@ import {
   type MaybeRefOrGetter,
 } from 'vue'
 import type { AsyncStatus } from '@/types/async'
-import { readRootCssNumber } from '@/utils/css-vars'
+import { ASYNC_GATE_DELAY_MS, ASYNC_GATE_MIN_VISIBLE_MS } from '@/constants/ui'
 
 export type AsyncGateDisplayState = 'loading' | 'content' | 'empty' | 'error'
 
@@ -19,8 +19,8 @@ export interface UseAsyncGateOptions {
   loadingOnRefreshing?: MaybeRefOrGetter<boolean | undefined>
 }
 
-export const DEFAULT_ASYNC_GATE_DELAY_MS = 150
-export const DEFAULT_ASYNC_GATE_MIN_VISIBLE_MS = 400
+export const DEFAULT_ASYNC_GATE_DELAY_MS = ASYNC_GATE_DELAY_MS
+export const DEFAULT_ASYNC_GATE_MIN_VISIBLE_MS = ASYNC_GATE_MIN_VISIBLE_MS
 
 export const useAsyncGate = (options: UseAsyncGateOptions) => {
   const isLoadingState = () => {
@@ -71,12 +71,10 @@ export const useAsyncGate = (options: UseAsyncGateOptions) => {
 
   const syncDisplayState = () => {
     const showDelayMs = Number(
-      toValue(options.showDelayMs) ??
-        readRootCssNumber('--async-gate-delay-ms', DEFAULT_ASYNC_GATE_DELAY_MS)
+      toValue(options.showDelayMs) ?? DEFAULT_ASYNC_GATE_DELAY_MS
     )
     const minVisibleMs = Number(
-      toValue(options.minVisibleMs) ??
-        readRootCssNumber('--async-gate-min-visible-ms', DEFAULT_ASYNC_GATE_MIN_VISIBLE_MS)
+      toValue(options.minVisibleMs) ?? DEFAULT_ASYNC_GATE_MIN_VISIBLE_MS
     )
 
     if (isLoadingState()) {
@@ -137,12 +135,10 @@ export const useAsyncGate = (options: UseAsyncGateOptions) => {
       () => toValue(options.status),
       () => Boolean(toValue(options.isEmpty)),
       () => Number(
-        toValue(options.showDelayMs) ??
-          readRootCssNumber('--async-gate-delay-ms', DEFAULT_ASYNC_GATE_DELAY_MS),
+        toValue(options.showDelayMs) ?? DEFAULT_ASYNC_GATE_DELAY_MS,
       ),
       () => Number(
-        toValue(options.minVisibleMs) ??
-          readRootCssNumber('--async-gate-min-visible-ms', DEFAULT_ASYNC_GATE_MIN_VISIBLE_MS),
+        toValue(options.minVisibleMs) ?? DEFAULT_ASYNC_GATE_MIN_VISIBLE_MS,
       ),
       () => Boolean(toValue(options.loadingOnRefreshing) ?? true),
     ],

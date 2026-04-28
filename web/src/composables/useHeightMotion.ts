@@ -1,6 +1,5 @@
 import gsap from 'gsap'
 import { onBeforeUnmount, type Ref } from 'vue'
-import { readRootCssNumber } from '@/utils/css-vars'
 
 export interface UseHeightMotionOptions {
   duration?: number
@@ -13,7 +12,7 @@ export const useHeightMotion = (
   contentRef: Ref<HTMLElement | null>,
   options: UseHeightMotionOptions = {},
 ) => {
-  const duration = options.duration ?? readRootCssNumber('--motion-height-duration', 0.4)
+  const duration = options.duration ?? 0.4
   const enterEase = options.enterEase ?? 'power2.out'
   const leaveEase = options.leaveEase ?? 'power2.inOut'
   let resizeObserver: ResizeObserver | null = null

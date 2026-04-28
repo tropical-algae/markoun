@@ -133,7 +133,7 @@ import SaveIcon from "@/assets/icons/disk.svg"
 import { useNodeStore } from '@/stores/note';
 import { useResizablePane } from '@/composables/useResizablePane';
 import { InspectMode } from '@/types/ui';
-import { readRootCssNumber } from '@/utils/css-vars';
+import { EDITOR_ASYNC_GATE_DELAY_MS, INSPECTOR_PANE_WIDTH } from '@/constants/ui';
 import { insertTimeToFileName } from '@/utils/file-system';
 
 import BaseHeader from '@/components/base/BaseHeader.vue';
@@ -149,9 +149,9 @@ const {
   startResizing,
   visibleWidth,
 } = useResizablePane({
-  initialWidth: readRootCssNumber('--layout-inspector-width-default', 250),
-  minWidth: readRootCssNumber('--layout-inspector-width-min', 200),
-  maxWidth: readRootCssNumber('--layout-inspector-width-max', 600),
+  initialWidth: INSPECTOR_PANE_WIDTH.initial,
+  minWidth: INSPECTOR_PANE_WIDTH.min,
+  maxWidth: INSPECTOR_PANE_WIDTH.max,
   direction: 'left',
 })
 
@@ -160,7 +160,7 @@ const currentWidth = visibleWidth(showInspector);
 
 const fileUploadPercent = ref(0);
 const markdownEditorRef = ref<HTMLTextAreaElement | null>(null);
-const editorAsyncGateDelayMs = readRootCssNumber('--editor-async-gate-delay-ms', 0);
+const editorAsyncGateDelayMs = EDITOR_ASYNC_GATE_DELAY_MS;
 
 const inspectIcons = [
   { icon: MetaIcon, mode: InspectMode.Meta },
