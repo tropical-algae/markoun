@@ -34,9 +34,10 @@ async def _get_node_summary(
     current_path: Path, displayed_file_types: set[str]
 ) -> FileNode | None:
     is_dir = current_path.is_dir()
-    suffix = file_suffix(current_path)
+    suffix = "" if is_dir else file_suffix(current_path)
+    node_name = current_path.name if is_dir else current_path.stem
     basic_info = {
-        "name": current_path.stem,
+        "name": node_name,
         "path": str(abs_path_to_relative_path(current_path.resolve())),
         "type": FsNodeType.DIR if is_dir else FsNodeType.FILE,
         "suffix": suffix,
