@@ -1,11 +1,11 @@
 import { ref, type Ref } from 'vue'
+import { useNodeStore } from '@/stores/note'
+import { useFileUploadTask } from '@/composables/useFileUploadTask'
 
 interface UseDirectoryFileDropOptions {
   isDirectory: Readonly<Ref<boolean>>;
-  isUploadPending: () => boolean;
   getDestinationPath: () => string;
   selectDirectory: () => Promise<void>;
-  uploadFile: (file: File, uploadPercent: Ref<number>, destinationPath: string) => Promise<unknown>;
 }
 
 const hasDraggedFiles = (event: DragEvent): boolean => {
@@ -14,6 +14,8 @@ const hasDraggedFiles = (event: DragEvent): boolean => {
 }
 
 export const useDirectoryFileDrop = (options: UseDirectoryFileDropOptions) => {
+  const nodeStore = useNodeStore()
+  const uploadTask = useFileUploadTask()
   const isDirectoryDragOver = ref(false)
   let dragDepth = 0
 
@@ -54,7 +56,7 @@ export const useDirectoryFileDrop = (options: UseDirectoryFileDropOptions) => {
   }
 
   const handleDirectoryDrop = async (event: DragEvent) => {
-    if (!options.isDirectory.value || !hasDraggedFiles(event) || options.isUploadPending()) {
+    if (!options.isDirectory.value || !hasDraggedFiles(event) || nodeStore.isUploadPending()) {
       resetDirectoryDragState()
       return
     }
@@ -65,12 +67,12 @@ export const useDirectoryFileDrop = (options: UseDirectoryFileDropOptions) => {
       return
     }
 
-    const uploadPercent = ref(0)
     await options.selectDirectory()
-    await options.uploadFile(file, uploadPercent, options.getDestinationPath())
+    await uploadTask.uploadFile(file, options.getDestinationPath())
   }
 
   return {
+    ...uploadTask,
     isDirectoryDragOver,
     resetDirectoryDragState,
     handleDirectoryDragEnter,

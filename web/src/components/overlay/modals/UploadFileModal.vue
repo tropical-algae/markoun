@@ -60,9 +60,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useNodeStore } from '@/stores/note';
-import { UPLOAD_RESET_DELAY_MS } from '@/constants/ui';
+import { useFileUploadTask } from '@/composables/useFileUploadTask';
 
 import UploadIcon from "@/assets/icons/upload.svg"
 
@@ -78,15 +78,17 @@ const emit = defineEmits<{
 }>()
 
 const nodeStore = useNodeStore()
+const {
+  isUploading,
+  uploadPercent,
+  currentFileName,
+  uploadedFileName,
+  uploadFile,
+} = useFileUploadTask()
 
 // 状态管理
 const fileInputRef = ref<HTMLInputElement | null>(null)
 const isDragOver = ref(false)
-const isUploading = ref(false)
-const uploadPercent = ref(0)
-const currentFileName = ref('')
-const uploadedFileName = ref('')
-let resetTimer: number | null = null
 
 const isVisible = computed({
   get: () => props.modelValue,
@@ -118,40 +120,8 @@ const handleDrop = async (e: DragEvent) => {
 }
 
 const handleUpload = async (file: File) => {
-  if (resetTimer !== null) {
-    window.clearTimeout(resetTimer)
-    resetTimer = null
-  }
-
-  isUploading.value = true
-  uploadPercent.value = 0
-  currentFileName.value = file.name
-  try {
-    uploadedFileName.value = await nodeStore.uploadFile(file, uploadPercent)
-  } catch (error) {
-    resetUploadState()
-    throw error
-  }
-
-  resetTimer = window.setTimeout(
-    resetUploadState,
-    UPLOAD_RESET_DELAY_MS,
-  )
+  await uploadFile(file)
 }
-
-const resetUploadState = () => {
-  isUploading.value = false
-  uploadPercent.value = 0
-  currentFileName.value = ''
-  uploadedFileName.value = ''
-  resetTimer = null
-}
-
-onBeforeUnmount(() => {
-  if (resetTimer !== null) {
-    window.clearTimeout(resetTimer)
-  }
-})
 </script>
 
 

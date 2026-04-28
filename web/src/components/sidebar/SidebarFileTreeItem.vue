@@ -198,10 +198,8 @@ const {
   handleDirectoryDrop,
 } = useDirectoryFileDrop({
   isDirectory: isDir,
-  isUploadPending: nodeStore.isUploadPending,
   getDestinationPath: () => node.value.path,
   selectDirectory: () => nodeStore.setCurrentNode(node.value),
-  uploadFile: nodeStore.uploadFile,
 })
 
 const onEnter = (element: Element, done: () => void) => {
