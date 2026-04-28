@@ -27,7 +27,7 @@ withDefaults(defineProps<{
   fontSize?: string;
   color?: string;
 }>(), {
-  fontSize: '0.7rem',
+  fontSize: 'var(--hint-font-size)',
   color: 'var(--color-text-trifle)'
 });
 </script>
@@ -37,17 +37,17 @@ withDefaults(defineProps<{
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  gap: 6px;
+  gap: var(--hint-gap);
   
-  font-size: 0.7rem;
-  line-height: 0.7rem;
+  font-size: var(--hint-font-size);
+  line-height: var(--hint-font-size);
   width: 100%;
 }
 
 .hint-icon {
   flex-shrink: 0;
-  width: 0.7rem; 
-  height: 0.7rem;
+  width: var(--hint-icon-size);
+  height: var(--hint-icon-size);
   display: flex;
   align-items: center;
   justify-content: center;

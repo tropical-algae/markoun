@@ -7,6 +7,7 @@ import {
   type MaybeRefOrGetter,
 } from 'vue'
 import type { AsyncStatus } from '@/types/async'
+import { readRootCssNumber } from '@/utils/css-vars'
 
 export type AsyncGateDisplayState = 'loading' | 'content' | 'empty' | 'error'
 
@@ -70,10 +71,12 @@ export const useAsyncGate = (options: UseAsyncGateOptions) => {
 
   const syncDisplayState = () => {
     const showDelayMs = Number(
-      toValue(options.showDelayMs) ?? DEFAULT_ASYNC_GATE_DELAY_MS
+      toValue(options.showDelayMs) ??
+        readRootCssNumber('--async-gate-delay-ms', DEFAULT_ASYNC_GATE_DELAY_MS)
     )
     const minVisibleMs = Number(
-      toValue(options.minVisibleMs) ?? DEFAULT_ASYNC_GATE_MIN_VISIBLE_MS
+      toValue(options.minVisibleMs) ??
+        readRootCssNumber('--async-gate-min-visible-ms', DEFAULT_ASYNC_GATE_MIN_VISIBLE_MS)
     )
 
     if (isLoadingState()) {
@@ -84,6 +87,11 @@ export const useAsyncGate = (options: UseAsyncGateOptions) => {
       }
 
       clearShowTimer()
+      if (showDelayMs <= 0) {
+        showLoading()
+        return
+      }
+
       showTimer = window.setTimeout(() => {
         showTimer = null
         if (isLoadingState()) {
@@ -128,8 +136,14 @@ export const useAsyncGate = (options: UseAsyncGateOptions) => {
     [
       () => toValue(options.status),
       () => Boolean(toValue(options.isEmpty)),
-      () => Number(toValue(options.showDelayMs) ?? DEFAULT_ASYNC_GATE_DELAY_MS),
-      () => Number(toValue(options.minVisibleMs) ?? DEFAULT_ASYNC_GATE_MIN_VISIBLE_MS),
+      () => Number(
+        toValue(options.showDelayMs) ??
+          readRootCssNumber('--async-gate-delay-ms', DEFAULT_ASYNC_GATE_DELAY_MS),
+      ),
+      () => Number(
+        toValue(options.minVisibleMs) ??
+          readRootCssNumber('--async-gate-min-visible-ms', DEFAULT_ASYNC_GATE_MIN_VISIBLE_MS),
+      ),
       () => Boolean(toValue(options.loadingOnRefreshing) ?? true),
     ],
     syncDisplayState,

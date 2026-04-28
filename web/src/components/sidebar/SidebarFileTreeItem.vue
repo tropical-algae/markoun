@@ -2,7 +2,7 @@
   <div>
     <div
       class="node-wrapper"
-      :style="{ paddingLeft: depth * 12 + 'px' }"
+      :style="nodeIndentStyle"
     >
       <div
         class="node-content"
@@ -73,7 +73,7 @@
             <template #loading>
               <div
                 class="node-placeholder"
-                :style="{ paddingLeft: (depth + 1) * 12 + 'px' }"
+                :style="placeholderIndentStyle"
               >
                 <div class="node-placeholder-content">
                   <span class="node-leading-spacer"></span>
@@ -104,11 +104,12 @@
 </template>
 
 <script setup lang="ts">
-import gsap from 'gsap';
-import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, ref } from 'vue';
 import type { FsNode } from '@/types/file-system';
 import { useNodeStore } from '@/stores/note';
 import type { AsyncStatus } from '@/types/async';
+import { useHeightMotion } from '@/composables/useHeightMotion';
+import { readRootCssNumber } from '@/utils/css-vars';
 
 import FolderOpenIcon from "@/assets/icons/folder-open.svg"
 import FolderIcon from "@/assets/icons/folder.svg"
@@ -120,6 +121,13 @@ const nodeStore = useNodeStore()
 const props = defineProps<{ node: FsNode, depth: number }>();
 
 const node = computed(() => props.node);
+const treeIndentStep = readRootCssNumber('--tree-indent-step', 12);
+const nodeIndentStyle = computed(() => ({
+  paddingLeft: `${props.depth * treeIndentStep}px`,
+}));
+const placeholderIndentStyle = computed(() => ({
+  paddingLeft: `${(props.depth + 1) * treeIndentStep}px`,
+}));
 
 const editName = ref('');
 const isRenaming = ref(false);
@@ -143,10 +151,10 @@ const renameInputRef = ref<HTMLInputElement | null>(null);
 const childrenPanelRef = ref<HTMLElement | null>(null);
 const childrenContentRef = ref<HTMLElement | null>(null);
 let pressTimer: number | null = null;
-let panelResizeObserver: ResizeObserver | null = null;
 const isLongPressed = ref(false);
 const isDirectoryDragOver = ref(false);
 let dragDepth = 0;
+const childrenMotion = useHeightMotion(childrenPanelRef, childrenContentRef)
 
 const onLongPress = () => {
   isLongPressed.value = false;
@@ -275,103 +283,17 @@ const handleDirectoryDrop = async (event: DragEvent) => {
   await nodeStore.uploadFile(file, uploadPercent, node.value.path);
 };
 
-const disconnectPanelResizeObserver = () => {
-  panelResizeObserver?.disconnect();
-  panelResizeObserver = null;
-};
-
-const animatePanelHeightToContent = () => {
-  const panel = childrenPanelRef.value;
-  const content = childrenContentRef.value;
-  if (!panel || !content) {
-    return;
-  }
-
-  const nextHeight = content.scrollHeight;
-  const currentHeight = panel.offsetHeight;
-  if (Math.abs(currentHeight - nextHeight) < 1) {
-    panel.style.height = `${nextHeight}px`;
-    return;
-  }
-
-  gsap.killTweensOf(panel);
-  gsap.set(panel, { height: currentHeight });
-  gsap.to(panel, {
-    height: nextHeight,
-    duration: 0.4,
-    ease: 'power2.out',
-    overwrite: 'auto',
-  });
-};
-
-const connectPanelResizeObserver = () => {
-  disconnectPanelResizeObserver();
-  if (!childrenContentRef.value) {
-    return;
-  }
-
-  panelResizeObserver = new ResizeObserver(() => {
-    if (!isOpened.value) {
-      return;
-    }
-    animatePanelHeightToContent();
-  });
-  panelResizeObserver.observe(childrenContentRef.value);
-};
-
-watch(
-  isOpened,
-  async (opened) => {
-    disconnectPanelResizeObserver();
-    if (!opened) {
-      return;
-    }
-
-    await nextTick();
-    connectPanelResizeObserver();
-  },
-  { flush: 'post' }
-);
-
 onBeforeUnmount(() => {
-  disconnectPanelResizeObserver();
+  cancelLongPress();
 });
 
-const onEnter = (el: Element, done: () => void) => {
-  const panel = el as HTMLElement;
-  const content = panel.firstElementChild as HTMLElement | null;
-  const nextHeight = content?.scrollHeight ?? panel.scrollHeight;
-
-  gsap.killTweensOf(panel);
-  gsap.set(panel, { height: 0 });
-  
-  gsap.to(panel, {
-    height: nextHeight,
-    duration: 0.4,
-    ease: 'power2.out',
-    overwrite: 'auto',
-    onComplete: () => {
-      panel.style.height = `${content?.scrollHeight ?? nextHeight}px`;
-      done();
-    }
+const onEnter = (element: Element, done: () => void) => {
+  childrenMotion.enter(element, () => {
+    childrenMotion.connectResizeObserver(() => isOpened.value);
+    done();
   });
 };
-
-const onLeave = (el: Element, done: () => void) => {
-  const panel = el as HTMLElement;
-  disconnectPanelResizeObserver();
-
-  gsap.killTweensOf(panel);
-  gsap.set(panel, { height: panel.offsetHeight });
-  
-  gsap.to(panel, {
-    height: 0,
-    duration: 0.4,
-    ease: 'power2.inOut',
-    overwrite: 'auto',
-    onComplete: done
-  });
-};
+const onLeave = childrenMotion.leave;
 </script>
 
 
@@ -389,12 +311,12 @@ const onLeave = (el: Element, done: () => void) => {
 }
 
 .node-content {
-  padding: 2px 6px;
+  padding: var(--tree-row-padding);
   cursor: pointer;
-  border-radius: 5px;
+  border-radius: var(--tree-row-radius);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--hint-gap);
   width: 100%;
 
   transition: background-color var(--motion-soft-duration) var(--motion-soft-ease);
@@ -418,14 +340,14 @@ const onLeave = (el: Element, done: () => void) => {
 }
 
 .dir-icon {
-  transition: fill 0.2s ease;
+  transition: fill var(--motion-soft-duration) var(--motion-soft-ease);
 }
 
 .node-toggle-btn,
 .node-leading-spacer {
   /* width: 2rem; */
   /* min-width: 2rem; */
-  height: 1rem;
+  height: var(--tree-icon-size);
   flex-shrink: 0;
 }
 
@@ -446,10 +368,10 @@ const onLeave = (el: Element, done: () => void) => {
 .disclosure-caret {
   width: 0;
   height: 0;
-  border-top: 4px solid transparent;
-  border-bottom: 4px solid transparent;
-  border-left: 5px solid var(--color-text-sec);
-  transition: transform 0.2s ease;
+  border-top: var(--tree-caret-height) solid transparent;
+  border-bottom: var(--tree-caret-height) solid transparent;
+  border-left: var(--tree-caret-width) solid var(--color-text-sec);
+  transition: transform var(--motion-soft-duration) var(--motion-soft-ease);
 }
 
 .disclosure-caret.is-hidden {
@@ -516,7 +438,7 @@ const onLeave = (el: Element, done: () => void) => {
   outline: none;
   padding: 0 var(--node-text-padding-x);
   margin: 0;
-  border-radius: 5px;
+  border-radius: var(--tree-row-radius);
   color: var(--color-text-pri);
   font-family: inherit;
   box-sizing: border-box;
@@ -524,8 +446,8 @@ const onLeave = (el: Element, done: () => void) => {
 }
 
 .node-icon {
-  width: 1rem;
-  height: 1rem;
+  width: var(--tree-icon-size);
+  height: var(--tree-icon-size);
   flex-shrink: 0;
   pointer-events: none;
 }
@@ -538,12 +460,12 @@ const onLeave = (el: Element, done: () => void) => {
 .node-placeholder-content {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 2px 6px;
+  gap: var(--hint-gap);
+  padding: var(--tree-row-padding);
 }
 
 .node-placeholder-text {
-  max-width: 260px;
+  max-width: var(--tree-rename-max-width);
 }
 
 .node-children-content {

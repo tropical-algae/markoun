@@ -23,7 +23,7 @@
     </component>
 
     <component
-      v-else-if="gate.showContent.value"
+      v-else-if="gate.showContent.value && hasDefaultSlot"
       :is="tag"
       key="content"
       v-bind="attrs"
@@ -65,6 +65,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const attrs = useAttrs()
 const slots = useSlots()
+const hasDefaultSlot = computed(() => Boolean(slots.default))
 const hasEmptySlot = computed(() => Boolean(slots.empty))
 const hasErrorSlot = computed(() => Boolean(slots.error))
 

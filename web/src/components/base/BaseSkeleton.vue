@@ -21,8 +21,8 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   width: '100%',
-  height: '1rem',
-  radius: '999px',
+  height: 'var(--skeleton-height-default)',
+  radius: 'var(--skeleton-radius-default)',
   tag: 'div',
   inline: false,
 });
@@ -45,7 +45,7 @@ const skeletonStyle = computed(() => ({
   height: var(--skeleton-height);
   border-radius: var(--skeleton-radius);
   background-color: var(--color-skeleton);
-  animation: skeleton-breathe 1.35s ease-in-out infinite;
+  animation: skeleton-breathe var(--motion-skeleton-duration) ease-in-out infinite;
 }
 
 .base-skeleton.is-inline {

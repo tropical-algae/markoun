@@ -1,4 +1,10 @@
-import axios, { type AxiosRequestConfig, type AxiosResponse, type InternalAxiosRequestConfig } from "axios"
+import axios, {
+  type AxiosError,
+  type AxiosRequestConfig,
+  type AxiosResponse,
+  type InternalAxiosRequestConfig,
+} from "axios"
+import type { ApiResponse } from '@/types/api'
 import { useToastStore } from "@/stores/toast";
 
 export interface RequestConfig extends AxiosRequestConfig {
@@ -15,7 +21,7 @@ service.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     return config
   },
-  (error: any) => {
+  (error: unknown) => {
     return Promise.reject(error)
   }
 )
@@ -25,11 +31,12 @@ service.interceptors.response.use(
     const res = response.data
     return res 
   },
-  (error: any) => {
-    const requestConfig = (error?.config ?? {}) as RequestConfig
+  (error: unknown) => {
+    const axiosError = error as AxiosError<ApiResponse>
+    const requestConfig = (axiosError.config ?? {}) as RequestConfig
     const toastStore = useToastStore()
-    const status = error?.response?.data?.status ?? error.code
-    const message = error?.response?.data?.message ?? error.message
+    const status = axiosError.response?.data?.status ?? axiosError.code
+    const message = axiosError.response?.data?.message ?? axiosError.message
     if (!requestConfig.suppressErrorToast) {
       toastStore.pushNotice('error', `[ERROR]: ${message} (code: ${status})`)
     }
@@ -37,8 +44,8 @@ service.interceptors.response.use(
   }
 )
 
-const request = <T = any>(config: RequestConfig): Promise<T> => {
-  return service.request<any, T>(config)
+const request = <T = unknown>(config: RequestConfig): Promise<T> => {
+  return service.request<unknown, T>(config)
 }
 
 export default request

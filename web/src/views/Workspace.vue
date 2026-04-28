@@ -35,7 +35,7 @@ onMounted(() => {
 <style scoped>
 
 .workspace-header {
-  height: 28px;
+  height: var(--icon-button-size);
   flex-shrink: 0;
 	border-bottom: 1px solid var(--color-line);
   box-sizing: border-box;
@@ -45,13 +45,13 @@ onMounted(() => {
 }
 
 .workspace-footer {
-  height: 28px;
+  height: var(--icon-button-size);
   flex-shrink: 0;
   font-size: 0.7rem;
 	border-top: 1px solid var(--color-line);
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  user-select: None;
+  user-select: none;
 }
 </style>

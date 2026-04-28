@@ -7,7 +7,7 @@
         </button>
       </div>
 
-      <div class="col px-3" style="min-width: 0;">
+      <div class="editor-title-slot col px-3">
         <span class="d-block text-truncate text-muted text-center">
           {{ nodeStore.currentFileDisplayName }}
         </span>
@@ -25,26 +25,34 @@
     </BaseHeader>
     
     <div class="editor-container">
-      <Transition name="soft-swap" mode="out-in">
-        <div v-if="showEditorSkeleton" key="editor-skeleton" class="editor-loading-state">
-          <BaseSkeleton width="48%" height="1.15rem" class="editor-skeleton-line" />
-          <BaseSkeleton height="0.95rem" class="editor-skeleton-line" />
-          <BaseSkeleton width="62%" height="0.95rem" class="editor-skeleton-line" />
-          <BaseSkeleton height="0.95rem" class="editor-skeleton-line" />
-          <BaseSkeleton width="78%" height="0.95rem" class="editor-skeleton-line" />
-        </div>
-        <div v-else key="editor-content" class="editor-ready-state">
-          <textarea 
-            v-model="nodeStore.currentFile.content" 
+      <AsyncGate
+        :status="nodeStore.currentFileStatus"
+        :show-delay-ms="editorAsyncGateDelayMs"
+        tag="div"
+        class="editor-gate"
+      >
+        <template #loading>
+          <div class="editor-loading-state">
+            <BaseSkeleton width="48%" height="1.15rem" class="editor-skeleton-line" />
+            <BaseSkeleton height="0.95rem" class="editor-skeleton-line" />
+            <BaseSkeleton width="62%" height="0.95rem" class="editor-skeleton-line" />
+            <BaseSkeleton height="0.95rem" class="editor-skeleton-line" />
+            <BaseSkeleton width="78%" height="0.95rem" class="editor-skeleton-line" />
+          </div>
+        </template>
+
+        <div class="editor-ready-state">
+          <textarea
+            v-model="nodeStore.currentFile.content"
             ref="markdownEditorRef"
             class="markdown-editor"
             :disabled="!nodeStore.canEditCurrentFile"
             placeholder="Start typing..."
             spellcheck="false"
-            @paste="handlePaste" 
+            @paste="handlePaste"
           ></textarea>
         </div>
-      </Transition>
+      </AsyncGate>
     </div>
   </div>
 
@@ -59,41 +67,55 @@
         <BaseHeader class="px-3">
           <div class="small text-muted uppercase">File Meta</div>
         </BaseHeader>
-        <Transition name="soft-swap" mode="out-in">
-          <div v-if="showEditorSkeleton" key="meta-skeleton" class="note-meta inspector-skeleton px-3">
-            <BaseSkeleton width="46%" height="0.85rem" />
-            <BaseSkeleton width="68%" height="0.85rem" />
-            <BaseSkeleton width="52%" height="0.85rem" />
-          </div>
-          <div v-else key="meta-grid" class="note-meta px-3">
-            <div class="meta-grid">
-              <div class="meta-key">characters:</div>
-              <div class="meta-value">{{ nodeStore.currentFile.content.length }}</div>
-              <template
-                v-for="(value, key) in nodeStore.currentFile.meta"
-                :key="key"
-              >
-                <div class="meta-key">{{ key }}:</div>
-                <div class="meta-value">{{ value }}</div>
-              </template> 
+        <AsyncGate
+          :status="nodeStore.currentFileStatus"
+          :show-delay-ms="editorAsyncGateDelayMs"
+          tag="div"
+          class="note-meta px-3"
+        >
+          <template #loading>
+            <div class="inspector-skeleton">
+              <BaseSkeleton width="46%" height="0.85rem" />
+              <BaseSkeleton width="68%" height="0.85rem" />
+              <BaseSkeleton width="52%" height="0.85rem" />
             </div>
+          </template>
+
+          <div class="meta-grid">
+            <div class="meta-key">characters:</div>
+            <div class="meta-value">{{ nodeStore.currentFile.content.length }}</div>
+            <template
+              v-for="(value, key) in nodeStore.currentFile.meta"
+              :key="key"
+            >
+              <div class="meta-key">{{ key }}:</div>
+              <div class="meta-value">{{ value }}</div>
+            </template>
           </div>
-        </Transition>
+        </AsyncGate>
       </div>
 
       <div v-else-if="currentMode === InspectMode.Preview" class="d-flex flex-column h-100 overflow-hidden p-0">
         <BaseHeader class="px-3">
           <div class="small text-muted uppercase">Preview</div>
         </BaseHeader>
-        <Transition name="soft-swap" mode="out-in">
-          <div v-if="showEditorSkeleton" key="preview-skeleton" class="note-preview preview-skeleton px-3">
-            <BaseSkeleton width="42%" height="0.9rem" />
-            <BaseSkeleton height="0.85rem" />
-            <BaseSkeleton width="74%" height="0.85rem" />
-            <BaseSkeleton height="180px" radius="12px" />
-          </div>
-          <div v-else key="preview-content" class="note-preview px-3" v-html="nodeStore.currrentRenderedFile"></div>
-        </Transition>
+        <AsyncGate
+          :status="nodeStore.currentFileStatus"
+          :show-delay-ms="editorAsyncGateDelayMs"
+          tag="div"
+          class="note-preview px-3"
+        >
+          <template #loading>
+            <div class="preview-skeleton">
+              <BaseSkeleton width="42%" height="0.9rem" />
+              <BaseSkeleton height="0.85rem" />
+              <BaseSkeleton width="74%" height="0.85rem" />
+              <BaseSkeleton height="180px" radius="12px" />
+            </div>
+          </template>
+
+          <div v-html="nodeStore.currentRenderedFile"></div>
+        </AsyncGate>
       </div>
     </div>
     <div class="vertical-line turn-left col-drag" @mousedown="startResizing" :class="{ 'is-resizing': isInspectorResizing }"></div>
@@ -102,37 +124,43 @@
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick, computed } from 'vue';
+import { ref, nextTick } from 'vue';
 
 import PreviewIcon from "@/assets/icons/overview.svg"
 import MetaIcon from "@/assets/icons/info.svg"
 import SaveIcon from "@/assets/icons/disk.svg"
 
 import { useNodeStore } from '@/stores/note';
-import { useAsyncGate } from '@/composables/useAsyncGate';
+import { useResizablePane } from '@/composables/useResizablePane';
 import { InspectMode } from '@/types/ui';
+import { readRootCssNumber } from '@/utils/css-vars';
 import { insertTimeToFileName } from '@/utils/file-system';
 
 import BaseHeader from '@/components/base/BaseHeader.vue';
 import BaseSkeleton from '@/components/base/BaseSkeleton.vue';
+import AsyncGate from '@/components/base/AsyncGate.vue';
 
 const nodeStore = useNodeStore()
 
-const inspectorWidth = ref(250);
-const inspectorMaxWidth = 200;
-const inspectorMinWidth = 600;
 const showInspector = ref(false);
-const isInspectorResizing = ref(false);
+const {
+  width: inspectorWidth,
+  isResizing: isInspectorResizing,
+  startResizing,
+  visibleWidth,
+} = useResizablePane({
+  initialWidth: readRootCssNumber('--layout-inspector-width-default', 250),
+  minWidth: readRootCssNumber('--layout-inspector-width-min', 200),
+  maxWidth: readRootCssNumber('--layout-inspector-width-max', 600),
+  direction: 'left',
+})
 
 const currentMode = ref<InspectMode>(InspectMode.Meta);
-const currentWidth = computed(() => showInspector.value ? `${inspectorWidth.value}px` : '0px');
+const currentWidth = visibleWidth(showInspector);
 
 const fileUploadPercent = ref(0);
 const markdownEditorRef = ref<HTMLTextAreaElement | null>(null);
-const editorGate = useAsyncGate({
-  status: computed(() => nodeStore.currentFileStatus),
-})
-const showEditorSkeleton = computed(() => editorGate.showLoading.value);
+const editorAsyncGateDelayMs = readRootCssNumber('--editor-async-gate-delay-ms', 0);
 
 const inspectIcons = [
   { icon: MetaIcon, mode: InspectMode.Meta },
@@ -148,33 +176,6 @@ const toggleInspector = (mode: InspectMode) => {
   if (shouldExpand) {
     currentMode.value = mode;
   }
-};
-
-const startResizing = (e: MouseEvent) => {
-  isInspectorResizing.value = true;
-  const startX = e.clientX;
-  const startWidth = inspectorWidth.value;
-
-  const onMouseMove = (moveEvent: MouseEvent) => {
-    if (!isInspectorResizing.value) return;
-
-    const deltaX = startX - moveEvent.clientX;
-    let newWidth = startWidth + deltaX;
-
-    if (newWidth < inspectorMaxWidth) newWidth = inspectorMaxWidth;
-    if (newWidth > inspectorMinWidth) newWidth = inspectorMinWidth;
-
-    inspectorWidth.value = newWidth;
-  };
-
-  const onMouseUp = () => {
-    isInspectorResizing.value = false;
-    document.removeEventListener('mousemove', onMouseMove);
-    document.removeEventListener('mouseup', onMouseUp);
-  };
-
-  document.addEventListener('mousemove', onMouseMove);
-  document.addEventListener('mouseup', onMouseUp);
 };
 
 const handlePaste = async (event: ClipboardEvent) => {
@@ -197,9 +198,7 @@ const handlePaste = async (event: ClipboardEvent) => {
             nodeStore.currentFileParentPath,
           )
           insertText(`![${filename}](${filename})`);
-        } catch (e) {
-          console.log(`Failed to paste the file: ${e}`)
-        }
+        } catch (_) {}
       }
       return; 
     }
@@ -262,6 +261,15 @@ const insertText = (text: string) => {
   position: relative;
 }
 
+.editor-title-slot {
+  min-width: 0;
+}
+
+.editor-gate {
+  width: 100%;
+  height: 100%;
+}
+
 .editor-ready-state,
 .editor-loading-state {
   width: 100%;
@@ -272,14 +280,15 @@ const insertText = (text: string) => {
   width: 100%;
   height: 100%;
 
-  padding: 30px calc(max(20px, (100% - 800px) / 2));
+  padding: var(--editor-content-padding-y)
+    calc(max(var(--editor-content-padding-x-min), (100% - var(--editor-content-max-width)) / 2));
 
   border: none;
   outline: none;
   background: transparent;
   color: var(--text-main);
   font-size: 16px;
-  line-height: 1.6;
+  line-height: var(--editor-line-height);
   resize: none;
   box-sizing: border-box;
   
@@ -287,7 +296,8 @@ const insertText = (text: string) => {
 }
 
 .editor-loading-state {
-  padding: 30px calc(max(20px, (100% - 800px) / 2));
+  padding: var(--editor-content-padding-y)
+    calc(max(var(--editor-content-padding-x-min), (100% - var(--editor-content-max-width)) / 2));
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -319,11 +329,11 @@ const insertText = (text: string) => {
 }
 
 .inspector-title {
-  height: 48px;
+  height: var(--layout-header-height);
   display: flex;
   align-items: center;
 	border-bottom: 1px solid var(--color-line);
-  margin: 0 24px;
+  margin: 0 var(--editor-inspector-title-margin-x);
 }
 
 .note-meta,
@@ -362,7 +372,7 @@ const insertText = (text: string) => {
 }
 
 .note-meta .meta-value {
-  min-width: 40px;
+  min-width: var(--editor-meta-value-min-width);
   white-space: normal;
   word-break: break-word;
   overflow-wrap: break-word;

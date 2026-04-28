@@ -1,83 +1,25 @@
 <template>
-  <BaseModal 
-    v-model="isVisible" 
+  <CreateNodeModal
+    v-model="isVisible"
     title="New Note"
-    @opened="handleOpened"
-  >
-    <div style="width: 360px;">
-
-      <UnderlinedInput
-        v-model="noteName"
-        label="Note Name"
-        ref="inputRef"
-        type="text"
-        class="mb-2 f-s"
-        :disabled="nodeStore.isCreatePending('file')"
-        placeholder="e.g. my_note"
-      />
-
-      <BaseIconText :icon="InfoIcon" text="Created in the selected path. No extension needed." class="mb-3"/>
-      
-      <div class="d-flex justify-content-end gap-2">
-        <GhostButton
-          class="f-s py-0"
-          @click="isVisible = false"
-          theme="secondary"
-          :disabled="nodeStore.isCreatePending('file')"
-        >
-          Cancel
-        </GhostButton>
-        <GhostButton
-          class="f-s py-0"
-          @click="handleConfirm"
-          :disabled="!noteName.trim() || nodeStore.isCreatePending('file')"
-          :loading="nodeStore.isCreatePending('file')"
-        >
-          Create
-        </GhostButton>
-      </div>
-    </div>
-  </BaseModal>
+    input-label="Note Name"
+    placeholder="e.g. my_note"
+    hint="Created in the selected path. No extension needed."
+    node-type="file"
+  />
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import BaseModal from '@/components/base/BaseModal.vue';
-import UnderlinedInput from '@/components/base/UnderlinedInput.vue';
+import { computed } from 'vue'
+import CreateNodeModal from '@/components/overlay/modals/CreateNodeModal.vue'
 
-import BaseIconText from '@/components/base/BaseIconText.vue';
-
-import GhostButton from '@/components/base/GhostButton.vue';
-
-import InfoIcon from "@/assets/icons/info.svg"
-
-import { useNodeStore } from "@/stores/note"
-
-const nodeStore = useNodeStore()
-const props = defineProps<{ modelValue: boolean }>();
-const emit = defineEmits(['update:modelValue']);
+const props = defineProps<{ modelValue: boolean }>()
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: boolean): void
+}>()
 
 const isVisible = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
-});
-
-const noteName = ref('');
-const inputRef = ref<InstanceType<typeof UnderlinedInput> | null>(null);
-
-const handleOpened = () => {
-  inputRef.value?.focus();
-}
-
-const handleConfirm = async () => {
-
-  if (!noteName.value.trim()) return;
-  
-  await nodeStore.addNewNode(noteName.value, 'file')
-  
-  // 初始化状态
-  isVisible.value = false;
-  noteName.value = '';
-};
-
+  set: (value: boolean) => emit('update:modelValue', value),
+})
 </script>

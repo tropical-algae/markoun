@@ -37,8 +37,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue"
+import { ref } from "vue"
 import { SidebarMode } from "@/types/ui"
+import { useResizablePane } from "@/composables/useResizablePane"
+import { readRootCssNumber } from "@/utils/css-vars"
 
 import SidebarToggleIcon from "@/assets/icons/sidebar.svg"
 import FileTreeIcon from "@/assets/icons/rectangle-list.svg"
@@ -50,14 +52,21 @@ import SidebarSetting from "@/components/sidebar/SidebarSetting.vue"
 import SidebarUser from "@/components/sidebar/SidebarUser.vue"
 import BaseHeader from '@/components/base/BaseHeader.vue';
 
-const subSidebarWidth = ref(250);
-const subSidebarMinWidth = 240;
-const subSidebarMaxWidth = 500;
-const isSubSidebarResizing = ref(false);
 const showSubSidebar = ref(true);
+const {
+  width: subSidebarWidth,
+  isResizing: isSubSidebarResizing,
+  startResizing,
+  visibleWidth,
+} = useResizablePane({
+  initialWidth: readRootCssNumber('--layout-sidebar-width-default', 250),
+  minWidth: readRootCssNumber('--layout-sidebar-width-min', 240),
+  maxWidth: readRootCssNumber('--layout-sidebar-width-max', 500),
+  direction: 'right',
+})
 
 const currentMode = ref<SidebarMode>(SidebarMode.FileTree)
-const currentWidth = computed(() => showSubSidebar.value ? `${subSidebarWidth.value}px` : '0px');
+const currentWidth = visibleWidth(showSubSidebar);
 
 const toggleSubSidebar = (mode: SidebarMode | null = null) => {
   if (mode === null) {
@@ -78,30 +87,6 @@ const sideBtns = [
   { icon: SettingIcon, func: () => { toggleSubSidebar(SidebarMode.Settings); } }
 ]
 
-const startResizing = (e: MouseEvent) => {
-  isSubSidebarResizing.value = true;
-  const startX = e.clientX;
-  const startWidth = subSidebarWidth.value;
-
-  const onMouseMove = (moveEvent: MouseEvent) => {
-    const deltaX = moveEvent.clientX - startX;
-    let newWidth = startWidth + deltaX;
-
-    if (newWidth < subSidebarMinWidth) newWidth = subSidebarMinWidth;
-    if (newWidth > subSidebarMaxWidth) newWidth = subSidebarMaxWidth;
-
-    subSidebarWidth.value = newWidth;
-  };
-
-  const onMouseUp = () => {
-    isSubSidebarResizing.value = false;
-    document.removeEventListener('mousemove', onMouseMove);
-    document.removeEventListener('mouseup', onMouseUp);
-  };
-
-  document.addEventListener('mousemove', onMouseMove);
-  document.addEventListener('mouseup', onMouseUp);
-};
 </script>
 
 <style scoped>
@@ -130,7 +115,7 @@ const startResizing = (e: MouseEvent) => {
 
 .sub-sidebar-inner {
   height: 100%;
-  min-width: 220px;
+  min-width: var(--layout-sidebar-inner-min-width);
   white-space: nowrap;
 }
 </style>

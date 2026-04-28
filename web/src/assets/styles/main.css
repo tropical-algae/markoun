@@ -15,6 +15,8 @@
 
   --color-text-pri: #242424;
   --color-text-sec: #797979;
+  --color-text-muted: var(--color-text-sec);
+  --color-text-inverse: #ffffff;
 
   /* 提示文本色 */
   --color-text-trifle: #b3b3b3;
@@ -32,15 +34,149 @@
   --color-bg-pri-shadow: rgba(255, 255, 255, 0.2);
   --color-bg-error-shadow: rgba(244, 107, 107, 0.2);
   --color-bg-warning-shadow: rgba(243, 162, 69, 0.2);
-  --color-text-pri-shaow: rgba(22, 22, 22, 0.2);
+  --color-text-pri-shadow: rgba(22, 22, 22, 0.2);
 
   --color-action: #4b9ff4;
   --color-action-light: #ecf5ff;
+  --color-accent-alt: var(--color-action);
+
+  --radius-xs: 4px;
+  --radius-sm: 5px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-2xl: 12px;
+  --radius-image: 15px;
+  --radius-pill: 999px;
 
   --motion-soft-duration: 0.18s;
   --motion-soft-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-medium-duration: 0.3s;
+  --motion-modal-duration: 0.4s;
+  --motion-height-duration: 0.4;
+  --motion-height-user-duration: 0.35;
+  --motion-toast-enter-duration: 0.4;
+  --motion-toast-leave-duration: 0.25;
+  --motion-spinner-duration: 0.7s;
+  --motion-theme-duration: 0.7s;
+  --motion-skeleton-duration: 1.35s;
+  --async-gate-delay-ms: 150;
+  --async-gate-min-visible-ms: 400;
+
+  --layout-header-height: 48px;
+  --layout-sidebar-width-default: 250;
+  --layout-sidebar-width-min: 240;
+  --layout-sidebar-width-max: 500;
+  --layout-sidebar-inner-min-width: 220px;
+  --layout-inspector-width-default: 250;
+  --layout-inspector-width-min: 200;
+  --layout-inspector-width-max: 600;
+
+  --editor-content-max-width: 800px;
+  --editor-content-padding-y: 30px;
+  --editor-content-padding-x-min: 20px;
+  --editor-line-height: 1.6;
+  --editor-async-gate-delay-ms: 0;
+  --editor-inspector-title-margin-x: 24px;
+  --editor-meta-value-min-width: 40px;
+
+  --modal-width-sm: 360px;
+  --modal-width-md: 420px;
+  --modal-max-width: 90vw;
+  --modal-max-height: 90vh;
+  --modal-radius: var(--radius-2xl);
+  --modal-card-shadow-y: 10px;
+  --modal-card-shadow-blur: 40px;
+  --modal-header-padding: 10px 24px;
+  --modal-body-padding: 24px;
+
+  --icon-button-size: 28px;
+  --icon-button-padding: 6px;
+  --icon-button-radius: var(--radius-sm);
+  --skeleton-height-default: 1rem;
+  --skeleton-radius-default: var(--radius-pill);
 
   --meta-tag-height: 1rem;
+  --meta-tag-padding-x: 5px;
+  --meta-tag-radius: var(--radius-xs);
+  --meta-tag-font-size: 0.55rem;
+
+  --tree-indent-step: 12px;
+  --tree-row-padding: 2px 6px;
+  --tree-row-radius: var(--radius-sm);
+  --tree-icon-size: 1rem;
+  --tree-rename-max-width: 260px;
+
+  --hint-icon-size: 0.7rem;
+  --hint-font-size: 0.7rem;
+  --hint-gap: 6px;
+
+  --input-radius: var(--radius-lg);
+  --filled-input-shell-padding-top: 14px;
+  --filled-input-padding: 7px 12px;
+  --filled-input-label-padding-x: 14px;
+  --filled-input-label-top: -14px;
+  --filled-input-label-height: 28px;
+  --underlined-input-gap: 6px;
+  --underlined-input-line-height: 1px;
+  --divider-line-width: 1px;
+  --resize-line-width: 2px;
+  --tree-caret-height: 4px;
+  --tree-caret-width: 5px;
+  --password-hint-opacity-duration: 0.2s;
+
+  --button-radius: var(--radius-md);
+  --ghost-button-padding: 2px 16px;
+  --ghost-button-border-width: 1.5px;
+  --ghost-button-spinner-size: 0.85rem;
+  --ghost-button-spinner-border-width: 2px;
+
+  --toast-bottom: 42px;
+  --toast-z-index: 9999;
+  --toast-padding: 10px 16px;
+  --toast-radius: var(--radius-lg);
+  --toast-shadow-blur: 15px;
+  --toast-max-width: 80vw;
+  --toast-life-ms: 5000;
+  --toast-enter-y: 20px;
+  --toast-leave-y: -20px;
+
+  --upload-dropzone-height: 180px;
+  --upload-icon-size: 42px;
+  --upload-state-padding-x: 20px;
+  --progress-track-height: 6px;
+  --progress-track-radius: 3px;
+  --progress-transition-duration: 0.2s;
+  --upload-reset-delay-ms: 5000;
+
+  --auth-wrapper-padding: 0 80px 80px 80px;
+  --auth-brand-height: 80px;
+  --auth-container-padding: 20px;
+  --auth-panel-max-width: 480px;
+  --auth-panel-min-width: 300px;
+  --auth-title-margin-bottom: 50px;
+  --auth-submit-width: 220px;
+  --auth-register-placeholder-width: 116px;
+  --setting-text-input-width: 120px;
+  --settings-footer-value-min-width: 88px;
+  --settings-skeleton-gap: 16px;
+  --settings-skeleton-padding-bottom: 14px;
+
+  --profile-card-padding: 14px;
+  --profile-card-gap: 10px;
+  --profile-meta-gap-x: 12px;
+  --profile-meta-gap-y: 8px;
+
+  --image-preview-default-width: 640;
+  --image-preview-default-height: 420;
+  --image-preview-min-width: 280;
+  --image-preview-max-width: 720;
+  --image-preview-viewport-width-ratio: 0.82;
+  --image-preview-viewport-height-ratio: 0.72;
+  --image-preview-shell-min-width: min(82vw, 320px);
+  --image-preview-min-stage-width: 220;
+  --image-preview-min-stage-height: 180;
+  --image-preview-radius: var(--radius-xl);
 }
 
 
@@ -53,7 +189,7 @@ html {
   -ms-overflow-style: none; 
 
   user-select: none;
-  transition: background-color 0.7s ease;
+  transition: background-color var(--motion-theme-duration) ease;
 }
 
 ::-webkit-scrollbar {

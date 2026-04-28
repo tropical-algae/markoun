@@ -100,7 +100,7 @@
             :icon="InfoIcon"
             :text="passwordHint"
             color="var(--color-bg-error)"
-            style="transition: opacity 0.2s;"
+            class="password-hint"
             :style="{ opacity: showPasswordHint ? 1 : 0 }"
           />
         </div>
@@ -131,10 +131,11 @@
 </template>
 
 <script setup lang="ts">
-import gsap from 'gsap';
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import router from '@/router';
 import { useUserStore } from '@/stores/user';
+import { useHeightMotion } from '@/composables/useHeightMotion';
+import { readRootCssNumber } from '@/utils/css-vars';
 
 import AsyncGate from '@/components/base/AsyncGate.vue';
 import BaseHeader from '@/components/base/BaseHeader.vue';
@@ -148,7 +149,10 @@ import InfoIcon from '@/assets/icons/info.svg';
 const userStore = useUserStore()
 const profileMotionShellRef = ref<HTMLElement | null>(null)
 const profileMotionContentRef = ref<HTMLElement | null>(null)
-let profileResizeObserver: ResizeObserver | null = null
+const profileMotion = useHeightMotion(profileMotionShellRef, profileMotionContentRef, {
+  duration: readRootCssNumber('--motion-height-user-duration', 0.35),
+  enterEase: 'power2.out',
+})
 
 const pwdForm = reactive({
   new: '',
@@ -164,52 +168,9 @@ const passwordHint = computed(() => {
   return !isPwdLenValid.value ? 'Password must be longer than 6.' : 'Passwords do not match.'
 })
 
-const disconnectProfileResizeObserver = () => {
-  profileResizeObserver?.disconnect()
-  profileResizeObserver = null
-}
-
-const animateProfileShellHeightToContent = () => {
-  const shell = profileMotionShellRef.value
-  const content = profileMotionContentRef.value
-  if (!shell || !content) {
-    return
-  }
-
-  const nextHeight = content.scrollHeight
-  const currentHeight = shell.offsetHeight || nextHeight
-  if (Math.abs(currentHeight - nextHeight) < 1) {
-    shell.style.height = `${nextHeight}px`
-    return
-  }
-
-  gsap.killTweensOf(shell)
-  gsap.set(shell, { height: currentHeight })
-  gsap.to(shell, {
-    height: nextHeight,
-    duration: 0.35,
-    ease: 'power2.out',
-    overwrite: 'auto',
-  })
-}
-
-const connectProfileResizeObserver = () => {
-  disconnectProfileResizeObserver()
-
-  if (!profileMotionContentRef.value || !profileMotionShellRef.value) {
-    return
-  }
-
-  profileMotionShellRef.value.style.height = `${profileMotionContentRef.value.scrollHeight}px`
-  profileResizeObserver = new ResizeObserver(() => {
-    animateProfileShellHeightToContent()
-  })
-  profileResizeObserver.observe(profileMotionContentRef.value)
-}
-
 onMounted(async () => {
   await nextTick()
-  connectProfileResizeObserver()
+  profileMotion.connectResizeObserver()
   void userStore.refreshCurrentUserProfile().catch(() => null)
 })
 
@@ -220,16 +181,13 @@ watch(
   ],
   async () => {
     await nextTick()
-    animateProfileShellHeightToContent()
+    profileMotion.animateHeightToContent()
   },
   { flush: 'post' }
 )
 
 onBeforeUnmount(() => {
-  disconnectProfileResizeObserver()
-  if (profileMotionShellRef.value) {
-    gsap.killTweensOf(profileMotionShellRef.value)
-  }
+  profileMotion.disconnectResizeObserver()
 })
 
 const handleLogout = async () => {
@@ -264,16 +222,16 @@ const handleUpdatePassword = async () => {
 .user-profile-shell,
 .user-profile-empty {
   border: 1px solid var(--color-line);
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
   white-space: normal;
   background-color: var(--color-bg-sec);
-  padding: 14px;
+  padding: var(--profile-card-padding);
 }
 
 .user-profile-shell {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--profile-card-gap);
 }
 
 .user-profile-empty {
@@ -291,7 +249,7 @@ const handleUpdatePassword = async () => {
 
 .user-scopes {
   display: flex;
-  gap: 6px;
+  gap: var(--hint-gap);
 }
 
 
@@ -299,7 +257,7 @@ const handleUpdatePassword = async () => {
 .user-meta-shell {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 8px 12px;
+  gap: var(--profile-meta-gap-y) var(--profile-meta-gap-x);
   align-items: center;
 }
 
@@ -318,10 +276,14 @@ const handleUpdatePassword = async () => {
 
 .user-tag-shell {
   display: flex;
-  gap: 6px;
+  gap: var(--hint-gap);
 }
 
 .user-meta-shell-loading {
   margin-top: 1rem;
+}
+
+.password-hint {
+  transition: opacity var(--password-hint-opacity-duration) ease;
 }
 </style>

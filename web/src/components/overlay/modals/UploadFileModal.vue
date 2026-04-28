@@ -3,12 +3,12 @@
     v-model="isVisible" 
     title="Upload File"
   >
-    <div style="width: 420px;">
+    <div class="upload-modal">
       
       <input 
         type="file" 
         ref="fileInputRef" 
-        style="display: none;"
+        class="upload-file-input"
         @change="handleFileSelect"
       />
 
@@ -60,8 +60,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { computed, onBeforeUnmount, ref } from 'vue'
 import { useNodeStore } from '@/stores/note';
+import { readRootCssNumber } from '@/utils/css-vars';
 
 import UploadIcon from "@/assets/icons/upload.svg"
 
@@ -72,7 +73,9 @@ const props = defineProps<{
   modelValue: boolean
 }>()
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: boolean): void
+}>()
 
 const nodeStore = useNodeStore()
 
@@ -83,12 +86,13 @@ const isUploading = ref(false)
 const uploadPercent = ref(0)
 const currentFileName = ref('')
 const uploadedFileName = ref('')
+let resetTimer: number | null = null
 
 const isVisible = computed({
   get: () => props.modelValue,
-  set: (val) => {
-    if (isUploading.value && !val) return 
-    emit('update:modelValue', val)
+  set: (value: boolean) => {
+    if (isUploading.value && !value) return
+    emit('update:modelValue', value)
   }
 })
 
@@ -114,33 +118,66 @@ const handleDrop = async (e: DragEvent) => {
 }
 
 const handleUpload = async (file: File) => {
+  if (resetTimer !== null) {
+    window.clearTimeout(resetTimer)
+    resetTimer = null
+  }
+
   isUploading.value = true
   uploadPercent.value = 0
   currentFileName.value = file.name
-  uploadedFileName.value = await nodeStore.uploadFile(file, uploadPercent)
-  setTimeout(() => {
-    isUploading.value = false
-    uploadPercent.value = 0
-    currentFileName.value = ''
-    uploadedFileName.value = ''
-  }, 5000)
+  try {
+    uploadedFileName.value = await nodeStore.uploadFile(file, uploadPercent)
+  } catch (error) {
+    resetUploadState()
+    throw error
+  }
+
+  resetTimer = window.setTimeout(
+    resetUploadState,
+    readRootCssNumber('--upload-reset-delay-ms', 5000),
+  )
 }
+
+const resetUploadState = () => {
+  isUploading.value = false
+  uploadPercent.value = 0
+  currentFileName.value = ''
+  uploadedFileName.value = ''
+  resetTimer = null
+}
+
+onBeforeUnmount(() => {
+  if (resetTimer !== null) {
+    window.clearTimeout(resetTimer)
+  }
+})
 </script>
 
 
 <style scoped>
 
+.upload-modal {
+  width: var(--modal-width-md);
+}
+
+.upload-file-input {
+  display: none;
+}
+
 .upload-drop-zone {
   border: 1.5px dashed var(--color-line);
-  border-radius: 12px;
+  border-radius: var(--radius-2xl);
   background-color: var(--color-bg-sec);
-  height: 180px;
+  height: var(--upload-dropzone-height);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: border-color 0.3s ease, background-color 0.3s ease;
+  transition:
+    border-color var(--motion-medium-duration) ease,
+    background-color var(--motion-medium-duration) ease;
 }
 
 .upload-drop-zone:hover, .upload-drop-zone.is-dragover {
@@ -149,8 +186,8 @@ const handleUpload = async (file: File) => {
 }
 
 .upload-drop-zone .upload-icon {
-  width: 42px;
-  height: 42px;
+  width: var(--upload-icon-size);
+  height: var(--upload-icon-size);
   fill: var(--color-text-sec);
 }
 
@@ -166,11 +203,11 @@ const handleUpload = async (file: File) => {
 }
 
 .upload-state {
-  height: 180px;
+  height: var(--upload-dropzone-height);
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 0 20px;
+  padding: 0 var(--upload-state-padding-x);
 }
 
 .upload-file-text {
@@ -187,15 +224,15 @@ const handleUpload = async (file: File) => {
 }
 
 .progress-track {
-  height: 6px;
+  height: var(--progress-track-height);
   background-color: var(--color-bg-field);
-  border-radius: 3px;
+  border-radius: var(--progress-track-radius);
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
   background-color: var(--color-action);
-  transition: width 0.2s linear;
+  transition: width var(--progress-transition-duration) linear;
 }
 </style>

@@ -16,6 +16,7 @@
 
 <script setup lang="ts">
 import { onBeforeUnmount, ref, watch } from 'vue';
+import { readRootCssNumber } from '@/utils/css-vars';
 
 interface Props {
   theme?: 'primary' | 'danger' | 'secondary' | 'submit';
@@ -29,8 +30,8 @@ const props = withDefaults(defineProps<Props>(), {
   theme: 'primary',
   disabled: false,
   loading: false,
-  loadingDelayMs: 150,
-  loadingMinDurationMs: 400,
+  loadingDelayMs: undefined,
+  loadingMinDurationMs: undefined,
 });
 
 const visibleLoading = ref(false)
@@ -82,7 +83,7 @@ watch(
         if (props.loading) {
           showLoading()
         }
-      }, props.loadingDelayMs)
+      }, props.loadingDelayMs ?? readRootCssNumber('--async-gate-delay-ms', 150))
       return
     }
 
@@ -93,7 +94,9 @@ watch(
     }
 
     const elapsed = Date.now() - loadingVisibleAt
-    const remaining = Math.max(0, props.loadingMinDurationMs - elapsed)
+    const minDuration = props.loadingMinDurationMs ??
+      readRootCssNumber('--async-gate-min-visible-ms', 400)
+    const remaining = Math.max(0, minDuration - elapsed)
 
     clearHideTimer()
     if (remaining === 0) {
@@ -125,14 +128,14 @@ onBeforeUnmount(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 2px 16px;
-  border-width: 6px;
+  padding: var(--ghost-button-padding);
+  border-width: var(--ghost-button-border-width);
   opacity: 1;
 
   background-color: transparent;
-  border: 1.5px solid var(--btn-main-color);
+  border: var(--ghost-button-border-width) solid var(--btn-main-color);
   color: var(--btn-main-color);
-  border-radius: 6px;
+  border-radius: var(--button-radius);
   
   cursor: pointer;
   transition: 
@@ -158,12 +161,12 @@ onBeforeUnmount(() => {
 
 .ghost-btn-spinner {
   grid-area: 1 / 1;
-  width: 0.85rem;
-  height: 0.85rem;
-  border-radius: 999px;
-  border: 2px solid currentColor;
+  width: var(--ghost-button-spinner-size);
+  height: var(--ghost-button-spinner-size);
+  border-radius: var(--radius-pill);
+  border: var(--ghost-button-spinner-border-width) solid currentColor;
   border-right-color: transparent;
-  animation: ghost-btn-spin 0.7s linear infinite;
+  animation: ghost-btn-spin var(--motion-spinner-duration) linear infinite;
 }
 
 .ghost-btn.type-danger {

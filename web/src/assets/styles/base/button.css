@@ -6,17 +6,17 @@ button {
 }
 
 button.cancel {
-  color: var(--color-bg-pri);
+  color: var(--color-text-inverse);
   background-color: var(--color-bg-muted);
-  border-radius: 6px;
-  transition: opacity 0.3s ease;
+  border-radius: var(--button-radius);
+  transition: opacity var(--motion-medium-duration) ease;
 }
 
 button.confirm {
-  color: var(--color-bg-pri);
+  color: var(--color-text-inverse);
   background-color: var(--color-action);
-  border-radius: 6px;
-  transition: opacity 0.3s ease;
+  border-radius: var(--button-radius);
+  transition: opacity var(--motion-medium-duration) ease;
 }
 
 button.cancel:hover,
@@ -25,16 +25,16 @@ button.confirm:hover {
 }
 
 .icon-btn {
-  width: 28px; 
-  height: 28px;
-  padding: 6px; 
+  width: var(--icon-button-size);
+  height: var(--icon-button-size);
+  padding: var(--icon-button-padding);
   display: inline-flex; 
   align-items: center; 
   justify-content: center; 
   overflow: visible;
 
   user-select: none;
-  border-radius: 5px;
+  border-radius: var(--icon-button-radius);
   pointer-events: none;
 
   fill: var(--color-text-pri);
