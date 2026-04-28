@@ -6,10 +6,18 @@
         class="base-modal-backdrop"
         @click="handleBackdropClick"
       >
-        <div class="base-modal-card" @click.stop>
+        <div
+          ref="modalCardRef"
+          class="base-modal-card"
+          role="dialog"
+          aria-modal="true"
+          :aria-labelledby="title ? titleId : undefined"
+          tabindex="-1"
+          @click.stop
+        >
           
           <header v-if="title" class="base-modal-header">
-            <span class="base-modal-title f-l">{{ title }}</span>
+            <span :id="titleId" class="base-modal-title f-l">{{ title }}</span>
           </header>
 
           <div class="base-modal-body"><slot></slot></div>
@@ -21,10 +29,17 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{
+import { nextTick, onBeforeUnmount, ref, useId, watch } from 'vue'
+
+const props = withDefaults(defineProps<{
   modelValue: boolean;
   title?: string;
-}>();
+  closeOnBackdrop?: boolean;
+  closeOnEscape?: boolean;
+}>(), {
+  closeOnBackdrop: true,
+  closeOnEscape: true,
+});
 
 const emit = defineEmits<{
   (event: 'update:modelValue', value: boolean): void
@@ -32,18 +47,70 @@ const emit = defineEmits<{
   (event: 'opened'): void
 }>();
 
+const titleId = useId()
+const modalCardRef = ref<HTMLElement | null>(null)
+let previousActiveElement: HTMLElement | null = null
+
 const close = () => {
+  if (!props.modelValue) {
+    return
+  }
+
   emit('update:modelValue', false);
   emit('close');
 };
 
 const handleBackdropClick = () => {
+  if (!props.closeOnBackdrop) {
+    return
+  }
+
   close();
 };
 
+const focusModalCard = async () => {
+  await nextTick()
+  modalCardRef.value?.focus({ preventScroll: true })
+}
+
+const restorePreviousFocus = () => {
+  previousActiveElement?.focus({ preventScroll: true })
+  previousActiveElement = null
+}
+
+const handleKeydown = (event: KeyboardEvent) => {
+  if (!props.closeOnEscape || event.key !== 'Escape') {
+    return
+  }
+
+  event.stopPropagation()
+  close()
+}
+
+watch(
+  () => props.modelValue,
+  (isOpen) => {
+    if (isOpen) {
+      previousActiveElement = document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null
+      window.addEventListener('keydown', handleKeydown)
+      return
+    }
+
+    window.removeEventListener('keydown', handleKeydown)
+    restorePreviousFocus()
+  },
+)
+
 const onAfterEnter = () => {
+  void focusModalCard()
   emit('opened');
 };
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', handleKeydown)
+})
 </script>
 
 <style scoped>
@@ -75,6 +142,10 @@ const onAfterEnter = () => {
   flex-direction: column;
 }
 
+.base-modal-card:focus {
+  outline: none;
+}
+
 .base-modal-header {
   padding: var(--modal-header-padding);
   border-bottom: 1px solid var(--color-line);
@@ -96,7 +167,7 @@ const onAfterEnter = () => {
 
 .modal-enter-active,
 .modal-leave-active {
-  transition: background-color var(--motion-modal-duration) ease;
+  transition: opacity var(--motion-modal-duration) ease;
 }
 
 .modal-enter-active .base-modal-card {
@@ -109,7 +180,7 @@ const onAfterEnter = () => {
 
 .modal-enter-from,
 .modal-leave-to {
-  background-color: transparent;
+  opacity: 0;
 }
 
 @keyframes card-enter {
