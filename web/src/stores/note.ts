@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { computed, ref, type Ref } from "vue";
 import { useActionLedger } from "@/composables/useActionLedger";
-import type { DirectoryLoadState, FileDetail, FsNode } from "@/types/file-system";
+import type { FileDetail, FsNode } from "@/types/file-system";
 import type { AsyncStatus } from "@/types/async";
 import { useToastStore } from "@/stores/toast";
 import {
@@ -18,7 +18,6 @@ import {
   isMarkdownNode,
   isPreviewableImageNode,
   normalizeFsNode,
-  sortFsNodes,
 } from "@/utils/file-node";
 import { renderMarkdownFile } from "@/utils/markdown";
 import {
@@ -28,9 +27,10 @@ import {
   saveNoteApi,
   saveNoteKeepalive,
 } from "@/api/file";
-import { getDirectoryChildrenApi, removeItemApi, renameItemApi } from "@/api/item";
+import { removeItemApi, renameItemApi } from "@/api/item";
 import { createDirApi } from "@/api/dir";
 import { getWelcomeNoteApi } from "@/api/system";
+import { useFileTreeState } from "@/stores/note/file-tree-state";
 
 const DEFAULT_WELCOME_NOTE_CONTENT = `# Welcome to Markoun
 
@@ -80,9 +80,7 @@ export const useNodeStore = defineStore('note', () => {
     meta: {}
   })
 
-  const directoryChildrenByPath = ref<Record<string, FsNode[]>>({})
-  const directoryLoadStateByPath = ref<Record<string, DirectoryLoadState>>({})
-  const expandedDirPaths = ref<Record<string, boolean>>({})
+  const fileTree = useFileTreeState()
   const currentNode = ref<FsNode | null>(null)
   const currentFileNode = ref<FsNode | null>(null)
   const currentPreviewImageNode = ref<FsNode | null>(null)
@@ -94,7 +92,7 @@ export const useNodeStore = defineStore('note', () => {
   const currentParentPath = computed(() => getParentPath(currentNode.value ?? currentFileNode.value))
   const currentFileParentPath = computed(() => getParentPath(currentFileNode.value ?? currentFile.value.path))
   const currentPathLabel = computed(() => currentParentPath.value === ROOT_DIRECTORY_PATH ? '/' : currentParentPath.value)
-  const rootNodes = computed(() => directoryChildrenByPath.value[ROOT_DIRECTORY_PATH] || [])
+  const rootNodes = fileTree.rootNodes
   const currentFileDisplayName = computed(() => currentFileNode.value?.name || currentFile.value.name)
   const canEditCurrentFile = computed(() => currentFileStatus.value === 'ready' && Boolean(currentFileNode.value))
   const isCurrentFileDirty = computed(() => {
@@ -111,34 +109,19 @@ export const useNodeStore = defineStore('note', () => {
 
   let isInitialized = false
   let currentFileRequestId = 0
-  const directoryRequests = new Map<string, Promise<FsNode[]>>()
   const lastSavedContent = ref(createDefaultFileContent().content)
 
   const toastStore = useToastStore()
   const actionLedger = useActionLedger()
-
-  const replaceDirectoryChildren = (path: string, children: FsNode[]): FsNode[] => {
-    const normalizedPath = normalizeNodePath(path)
-    const normalizedChildren = sortFsNodes(children.map((node) => normalizeFsNode(node)))
-    directoryChildrenByPath.value = {
-      ...directoryChildrenByPath.value,
-      [normalizedPath]: normalizedChildren,
-    }
-    return normalizedChildren
-  }
-
-  const getDirectoryChildren = (path: string): FsNode[] => {
-    return directoryChildrenByPath.value[normalizeNodePath(path)] || []
-  }
-
-  const getDirectoryLoadState = (path: string): DirectoryLoadState => {
-    return directoryLoadStateByPath.value[normalizeNodePath(path)] || 'idle'
-  }
-
-  const isDirectoryExpanded = (path: string): boolean => {
-    const normalizedPath = normalizeNodePath(path)
-    return normalizedPath === ROOT_DIRECTORY_PATH || Boolean(expandedDirPaths.value[normalizedPath])
-  }
+  const {
+    loadDirectory,
+    getDirectoryChildren,
+    getDirectoryLoadState,
+    isDirectoryExpanded,
+    expandDirectory,
+    collapseDirectory,
+    toggleDirectory,
+  } = fileTree
 
   const resolveDefaultFileStatus = (): AsyncStatus => {
     return welcomeNoteState.value === 'ready' || welcomeNoteState.value === 'error'
@@ -185,25 +168,7 @@ export const useNodeStore = defineStore('note', () => {
   }
 
   const remapDirectoryTreePathPrefix = (oldPath: string, newPath: string, exactName: string) => {
-    const nextDirectoryChildrenByPath: Record<string, FsNode[]> = {}
-    for (const [directoryPath, children] of Object.entries(directoryChildrenByPath.value)) {
-      nextDirectoryChildrenByPath[replacePathPrefix(directoryPath, oldPath, newPath)] = sortFsNodes(
-        children.map((child) => remapReferencedNode(child, oldPath, newPath, exactName) ?? child),
-      )
-    }
-    directoryChildrenByPath.value = nextDirectoryChildrenByPath
-
-    const nextDirectoryLoadStateByPath: Record<string, DirectoryLoadState> = {}
-    for (const [directoryPath, state] of Object.entries(directoryLoadStateByPath.value)) {
-      nextDirectoryLoadStateByPath[replacePathPrefix(directoryPath, oldPath, newPath)] = state
-    }
-    directoryLoadStateByPath.value = nextDirectoryLoadStateByPath
-
-    const nextExpandedDirPaths: Record<string, boolean> = {}
-    for (const [directoryPath, expanded] of Object.entries(expandedDirPaths.value)) {
-      nextExpandedDirPaths[replacePathPrefix(directoryPath, oldPath, newPath)] = expanded
-    }
-    expandedDirPaths.value = nextExpandedDirPaths
+    fileTree.remapDirectoryTreePathPrefix(oldPath, newPath, exactName)
 
     currentNode.value = remapReferencedNode(currentNode.value, oldPath, newPath, exactName)
     currentFileNode.value = remapReferencedNode(currentFileNode.value, oldPath, newPath, exactName)
@@ -230,34 +195,7 @@ export const useNodeStore = defineStore('note', () => {
 
   const removeNodeFromDirectoryTree = (path: string) => {
     const normalizedPath = normalizeNodePath(path)
-
-    const nextDirectoryChildrenByPath: Record<string, FsNode[]> = {}
-    for (const [directoryPath, children] of Object.entries(directoryChildrenByPath.value)) {
-      if (isPathInside(directoryPath, normalizedPath)) {
-        continue
-      }
-
-      nextDirectoryChildrenByPath[directoryPath] = children.filter((child) => {
-        return !isPathInside(child.path, normalizedPath)
-      })
-    }
-    directoryChildrenByPath.value = nextDirectoryChildrenByPath
-
-    const nextDirectoryLoadStateByPath: Record<string, DirectoryLoadState> = {}
-    for (const [directoryPath, state] of Object.entries(directoryLoadStateByPath.value)) {
-      if (!isPathInside(directoryPath, normalizedPath)) {
-        nextDirectoryLoadStateByPath[directoryPath] = state
-      }
-    }
-    directoryLoadStateByPath.value = nextDirectoryLoadStateByPath
-
-    const nextExpandedDirPaths: Record<string, boolean> = {}
-    for (const [directoryPath, expanded] of Object.entries(expandedDirPaths.value)) {
-      if (!isPathInside(directoryPath, normalizedPath)) {
-        nextExpandedDirPaths[directoryPath] = expanded
-      }
-    }
-    expandedDirPaths.value = nextExpandedDirPaths
+    fileTree.removeNodeFromDirectoryTree(normalizedPath)
 
     if (currentPreviewImageNode.value && isPathInside(currentPreviewImageNode.value.path, normalizedPath)) {
       currentPreviewImageNode.value = null
@@ -294,99 +232,6 @@ export const useNodeStore = defineStore('note', () => {
     }
   }
 
-  const loadDirectory = async (
-    path: string = ROOT_DIRECTORY_PATH,
-    force: boolean = false,
-  ): Promise<FsNode[]> => {
-    const normalizedPath = normalizeNodePath(path)
-    if (!force && getDirectoryLoadState(normalizedPath) === 'loaded') {
-      return getDirectoryChildren(normalizedPath)
-    }
-
-    if (!force) {
-      const pendingRequest = directoryRequests.get(normalizedPath)
-      if (pendingRequest) {
-        return pendingRequest
-      }
-    }
-
-    directoryLoadStateByPath.value = {
-      ...directoryLoadStateByPath.value,
-      [normalizedPath]: 'loading',
-    }
-
-    const request = getDirectoryChildrenApi(normalizedPath)
-      .then((response) => {
-        const responsePath = normalizeNodePath(response.data.path)
-        const children = replaceDirectoryChildren(responsePath, response.data.children)
-        directoryLoadStateByPath.value = {
-          ...directoryLoadStateByPath.value,
-          [responsePath]: 'loaded',
-        }
-        return children
-      })
-      .catch((error) => {
-        directoryLoadStateByPath.value = {
-          ...directoryLoadStateByPath.value,
-          [normalizedPath]: 'error',
-        }
-        throw error
-      })
-      .finally(() => {
-        directoryRequests.delete(normalizedPath)
-      })
-
-    directoryRequests.set(normalizedPath, request)
-    return request
-  }
-
-  const expandDirectory = async (path: string): Promise<FsNode[]> => {
-    const normalizedPath = normalizeNodePath(path)
-    if (normalizedPath !== ROOT_DIRECTORY_PATH) {
-      expandedDirPaths.value = {
-        ...expandedDirPaths.value,
-        [normalizedPath]: true,
-      }
-    }
-
-    return await loadDirectory(normalizedPath)
-  }
-
-  const collapseDirectory = (path: string) => {
-    const normalizedPath = normalizeNodePath(path)
-    if (normalizedPath === ROOT_DIRECTORY_PATH) {
-      return
-    }
-
-    const nextExpandedDirPaths = { ...expandedDirPaths.value }
-    delete nextExpandedDirPaths[normalizedPath]
-    expandedDirPaths.value = nextExpandedDirPaths
-  }
-
-  const toggleDirectory = async (node: FsNode) => {
-    if (node.type !== 'dir') {
-      return
-    }
-
-    if (isDirectoryExpanded(node.path)) {
-      collapseDirectory(node.path)
-      return
-    }
-
-    await expandDirectory(node.path)
-  }
-
-  const ensureDirectoryVisible = async (path: string) => {
-    const normalizedPath = normalizeNodePath(path)
-    if (normalizedPath !== ROOT_DIRECTORY_PATH) {
-      expandedDirPaths.value = {
-        ...expandedDirPaths.value,
-        [normalizedPath]: true,
-      }
-    }
-    await loadDirectory(normalizedPath)
-  }
-
   const openImagePreview = (node: FsNode) => {
     currentPreviewImageNode.value = normalizeFsNode(node)
   }
@@ -396,13 +241,7 @@ export const useNodeStore = defineStore('note', () => {
   }
 
   const upsertNode = (parentPath: string, node: FsNode) => {
-    const normalizedParentPath = normalizeNodePath(parentPath)
-    const normalizedNode = normalizeFsNode(node)
-    const nextChildren = getDirectoryChildren(normalizedParentPath).filter(
-      (child) => child.path !== normalizedNode.path
-    )
-    nextChildren.push(normalizedNode)
-    replaceDirectoryChildren(normalizedParentPath, nextChildren)
+    const normalizedNode = fileTree.upsertNode(parentPath, node)
 
     if (currentNode.value?.path === normalizedNode.path) {
       currentNode.value = normalizedNode
@@ -479,7 +318,7 @@ export const useNodeStore = defineStore('note', () => {
         : await createDirApi(parentPath, noteName)
     })
 
-    await ensureDirectoryVisible(parentPath)
+    await fileTree.ensureDirectoryVisible(parentPath)
     upsertNode(parentPath, response.data)
     await setCurrentNode(response.data)
   }
@@ -526,7 +365,7 @@ export const useNodeStore = defineStore('note', () => {
       })
     })
     if (response.data.node) {
-      await ensureDirectoryVisible(parentPath)
+      await fileTree.ensureDirectoryVisible(parentPath)
       upsertNode(parentPath, response.data.node)
     }
     toastStore.pushNotice('info', `File upload successfully.`)
