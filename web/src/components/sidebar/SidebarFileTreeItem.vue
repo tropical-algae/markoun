@@ -2,7 +2,7 @@
   <div>
     <div
       class="node-wrapper"
-      :style="{ paddingLeft: depth * 12 + 'px' }"
+      :style="nodeIndentStyle"
     >
       <div
         class="node-content"
@@ -31,7 +31,7 @@
           <div class="node-text-slot">
             <input
               v-if="isRenaming"
-              ref="renameInputRef"
+              :ref="setRenameInputRef"
               v-model="editName"
               class="rename-input"
               @click.stop 
@@ -73,7 +73,7 @@
             <template #loading>
               <div
                 class="node-placeholder"
-                :style="{ paddingLeft: (depth + 1) * 12 + 'px' }"
+                :style="placeholderIndentStyle"
               >
                 <div class="node-placeholder-content">
                   <span class="node-leading-spacer"></span>
@@ -104,11 +104,13 @@
 </template>
 
 <script setup lang="ts">
-import gsap from 'gsap';
-import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 import type { FsNode } from '@/types/file-system';
 import { useNodeStore } from '@/stores/note';
 import type { AsyncStatus } from '@/types/async';
+import { useHeightMotion } from '@/composables/useHeightMotion';
+import { useFileTreeItemRename } from '@/composables/useFileTreeItemRename';
+import { useDirectoryFileDrop } from '@/composables/useDirectoryFileDrop';
 
 import FolderOpenIcon from "@/assets/icons/folder-open.svg"
 import FolderIcon from "@/assets/icons/folder.svg"
@@ -120,9 +122,13 @@ const nodeStore = useNodeStore()
 const props = defineProps<{ node: FsNode, depth: number }>();
 
 const node = computed(() => props.node);
+const nodeIndentStyle = computed(() => ({
+  '--tree-depth': props.depth,
+}));
+const placeholderIndentStyle = computed(() => ({
+  '--tree-depth': props.depth + 1,
+}));
 
-const editName = ref('');
-const isRenaming = ref(false);
 const isDir = computed(() => node.value.type === 'dir');
 const isActive = computed(() => nodeStore.currentNode?.path === node.value.path);
 const isOpened = computed(() => isDir.value && nodeStore.isDirectoryExpanded(node.value.path));
@@ -139,53 +145,19 @@ const canExpand = computed(() => {
 });
 const currentIcon = computed(() => isOpened.value ? FolderOpenIcon : FolderIcon)
 
-const renameInputRef = ref<HTMLInputElement | null>(null);
 const childrenPanelRef = ref<HTMLElement | null>(null);
 const childrenContentRef = ref<HTMLElement | null>(null);
-let pressTimer: number | null = null;
-let panelResizeObserver: ResizeObserver | null = null;
-const isLongPressed = ref(false);
-const isDirectoryDragOver = ref(false);
-let dragDepth = 0;
-
-const onLongPress = () => {
-  isLongPressed.value = false;
-  pressTimer = window.setTimeout(() => {
-    isLongPressed.value = true;
-    enterRenameMode();
-  }, 600);
-};
-
-const cancelLongPress = () => {
-  if (pressTimer) {
-    clearTimeout(pressTimer);
-    pressTimer = null;
-  }
-};
-
-const enterRenameMode = async () => {
-  editName.value = node.value.name;
-  isRenaming.value = true;
-  
-  await nextTick();
-  if (renameInputRef.value) {
-    renameInputRef.value.focus();
-    renameInputRef.value.select();
-  }
-};
-
-const submitRename = async () => {
-  if (!editName.value.trim() || editName.value === node.value.name) {
-    cancelRename();
-    return;
-  }
-  await nodeStore.renameNode(node.value, editName.value)
-  isRenaming.value = false;
-};
-
-const cancelRename = () => {
-  isRenaming.value = false;
-};
+const childrenMotion = useHeightMotion(childrenPanelRef, childrenContentRef)
+const {
+  editName,
+  isRenaming,
+  isLongPressed,
+  setRenameInputRef,
+  onLongPress,
+  cancelLongPress,
+  submitRename,
+  cancelRename,
+} = useFileTreeItemRename(node, nodeStore.renameNode)
 
 const handleClickNode = async () => {
   if (isLongPressed.value) {
@@ -195,17 +167,17 @@ const handleClickNode = async () => {
   if (isRenaming.value) return;
 
   if (isDir.value) {
-    nodeStore.setCurrentNode(node.value);
+    await nodeStore.setCurrentNode(node.value);
     if (canExpand.value) {
       await nodeStore.toggleDirectory(node.value);
     }
     return;
   }
 
-  nodeStore.setCurrentNode(node.value);
+  await nodeStore.setCurrentNode(node.value);
 };
 
-const handleClickDirectoryIcon = () => {
+const handleClickDirectoryIcon = async () => {
   if (isRenaming.value) {
     return;
   }
@@ -215,163 +187,28 @@ const handleClickDirectoryIcon = () => {
     return;
   }
 
-  nodeStore.setCurrentNode(node.value);
+  await nodeStore.setCurrentNode(node.value);
 };
 
-const resetDirectoryDragState = () => {
-  dragDepth = 0;
-  isDirectoryDragOver.value = false;
-};
+const {
+  isDirectoryDragOver,
+  handleDirectoryDragEnter,
+  handleDirectoryDragOver,
+  handleDirectoryDragLeave,
+  handleDirectoryDrop,
+} = useDirectoryFileDrop({
+  isDirectory: isDir,
+  getDestinationPath: () => node.value.path,
+  selectDirectory: () => nodeStore.setCurrentNode(node.value),
+})
 
-const hasDraggedFiles = (event: DragEvent): boolean => {
-  const types = event.dataTransfer?.types;
-  return Boolean(types && Array.from(types).includes('Files'));
-};
-
-const handleDirectoryDragEnter = (event: DragEvent) => {
-  if (!isDir.value || !hasDraggedFiles(event)) {
-    return;
-  }
-
-  dragDepth += 1;
-  isDirectoryDragOver.value = true;
-};
-
-const handleDirectoryDragOver = (event: DragEvent) => {
-  if (!isDir.value || !hasDraggedFiles(event)) {
-    return;
-  }
-
-  event.dataTransfer!.dropEffect = 'copy';
-  isDirectoryDragOver.value = true;
-};
-
-const handleDirectoryDragLeave = (event: DragEvent) => {
-  if (!isDir.value || !hasDraggedFiles(event)) {
-    return;
-  }
-
-  dragDepth = Math.max(0, dragDepth - 1);
-  if (dragDepth === 0) {
-    isDirectoryDragOver.value = false;
-  }
-};
-
-const handleDirectoryDrop = async (event: DragEvent) => {
-  if (!isDir.value || !hasDraggedFiles(event) || nodeStore.isUploadPending()) {
-    resetDirectoryDragState();
-    return;
-  }
-
-  const file = event.dataTransfer?.files?.[0];
-  resetDirectoryDragState();
-
-  if (!file) {
-    return;
-  }
-
-  const uploadPercent = ref(0);
-  nodeStore.setCurrentNode(node.value);
-  await nodeStore.uploadFile(file, uploadPercent, node.value.path);
-};
-
-const disconnectPanelResizeObserver = () => {
-  panelResizeObserver?.disconnect();
-  panelResizeObserver = null;
-};
-
-const animatePanelHeightToContent = () => {
-  const panel = childrenPanelRef.value;
-  const content = childrenContentRef.value;
-  if (!panel || !content) {
-    return;
-  }
-
-  const nextHeight = content.scrollHeight;
-  const currentHeight = panel.offsetHeight;
-  if (Math.abs(currentHeight - nextHeight) < 1) {
-    panel.style.height = `${nextHeight}px`;
-    return;
-  }
-
-  gsap.killTweensOf(panel);
-  gsap.set(panel, { height: currentHeight });
-  gsap.to(panel, {
-    height: nextHeight,
-    duration: 0.4,
-    ease: 'power2.out',
-    overwrite: 'auto',
+const onEnter = (element: Element, done: () => void) => {
+  childrenMotion.enter(element, () => {
+    childrenMotion.connectResizeObserver(() => isOpened.value);
+    done();
   });
 };
-
-const connectPanelResizeObserver = () => {
-  disconnectPanelResizeObserver();
-  if (!childrenContentRef.value) {
-    return;
-  }
-
-  panelResizeObserver = new ResizeObserver(() => {
-    if (!isOpened.value) {
-      return;
-    }
-    animatePanelHeightToContent();
-  });
-  panelResizeObserver.observe(childrenContentRef.value);
-};
-
-watch(
-  isOpened,
-  async (opened) => {
-    disconnectPanelResizeObserver();
-    if (!opened) {
-      return;
-    }
-
-    await nextTick();
-    connectPanelResizeObserver();
-  },
-  { flush: 'post' }
-);
-
-onBeforeUnmount(() => {
-  disconnectPanelResizeObserver();
-});
-
-const onEnter = (el: Element, done: () => void) => {
-  const panel = el as HTMLElement;
-  const content = panel.firstElementChild as HTMLElement | null;
-  const nextHeight = content?.scrollHeight ?? panel.scrollHeight;
-
-  gsap.killTweensOf(panel);
-  gsap.set(panel, { height: 0 });
-  
-  gsap.to(panel, {
-    height: nextHeight,
-    duration: 0.4,
-    ease: 'power2.out',
-    overwrite: 'auto',
-    onComplete: () => {
-      panel.style.height = `${content?.scrollHeight ?? nextHeight}px`;
-      done();
-    }
-  });
-};
-
-const onLeave = (el: Element, done: () => void) => {
-  const panel = el as HTMLElement;
-  disconnectPanelResizeObserver();
-
-  gsap.killTweensOf(panel);
-  gsap.set(panel, { height: panel.offsetHeight });
-  
-  gsap.to(panel, {
-    height: 0,
-    duration: 0.4,
-    ease: 'power2.inOut',
-    overwrite: 'auto',
-    onComplete: done
-  });
-};
+const onLeave = childrenMotion.leave;
 </script>
 
 
@@ -386,15 +223,16 @@ const onLeave = (el: Element, done: () => void) => {
   color: var(--color-text-pri);
   width: 100%; 
   box-sizing: border-box;
+  padding-left: calc(var(--tree-depth) * var(--tree-indent-step));
 }
 
 .node-content {
-  padding: 2px 6px;
+  padding: var(--tree-row-padding);
   cursor: pointer;
-  border-radius: 5px;
+  border-radius: var(--tree-row-radius);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--hint-gap);
   width: 100%;
 
   transition: background-color var(--motion-soft-duration) var(--motion-soft-ease);
@@ -418,14 +256,14 @@ const onLeave = (el: Element, done: () => void) => {
 }
 
 .dir-icon {
-  transition: fill 0.2s ease;
+  transition: fill var(--motion-soft-duration) var(--motion-soft-ease);
 }
 
 .node-toggle-btn,
 .node-leading-spacer {
   /* width: 2rem; */
   /* min-width: 2rem; */
-  height: 1rem;
+  height: var(--tree-icon-size);
   flex-shrink: 0;
 }
 
@@ -446,10 +284,10 @@ const onLeave = (el: Element, done: () => void) => {
 .disclosure-caret {
   width: 0;
   height: 0;
-  border-top: 4px solid transparent;
-  border-bottom: 4px solid transparent;
-  border-left: 5px solid var(--color-text-sec);
-  transition: transform 0.2s ease;
+  border-top: var(--tree-caret-height) solid transparent;
+  border-bottom: var(--tree-caret-height) solid transparent;
+  border-left: var(--tree-caret-width) solid var(--color-text-sec);
+  transition: transform var(--motion-soft-duration) var(--motion-soft-ease);
 }
 
 .disclosure-caret.is-hidden {
@@ -516,7 +354,7 @@ const onLeave = (el: Element, done: () => void) => {
   outline: none;
   padding: 0 var(--node-text-padding-x);
   margin: 0;
-  border-radius: 5px;
+  border-radius: var(--tree-row-radius);
   color: var(--color-text-pri);
   font-family: inherit;
   box-sizing: border-box;
@@ -524,8 +362,8 @@ const onLeave = (el: Element, done: () => void) => {
 }
 
 .node-icon {
-  width: 1rem;
-  height: 1rem;
+  width: var(--tree-icon-size);
+  height: var(--tree-icon-size);
   flex-shrink: 0;
   pointer-events: none;
 }
@@ -533,17 +371,18 @@ const onLeave = (el: Element, done: () => void) => {
 .node-placeholder {
   padding-top: 2px;
   padding-bottom: 2px;
+  padding-left: calc(var(--tree-depth) * var(--tree-indent-step));
 }
 
 .node-placeholder-content {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 2px 6px;
+  gap: var(--hint-gap);
+  padding: var(--tree-row-padding);
 }
 
 .node-placeholder-text {
-  max-width: 260px;
+  max-width: var(--tree-rename-max-width);
 }
 
 .node-children-content {

@@ -4,7 +4,7 @@
     title="Registration"
     @opened="handleOpened"
   >
-    <div style="width: 360px;">
+    <div class="register-modal">
       
       <UnderlinedInput
         v-model="registerForm.username"
@@ -41,7 +41,7 @@
         <GhostButton
           class="f-s py-0"
           @click="handleConfirm"
-          :disabled="!isFormValied || userStore.isRegisterPending()"
+          :disabled="!isFormValid || userStore.isRegisterPending()"
           :loading="userStore.isRegisterPending()"
         >
           Create Account
@@ -61,11 +61,14 @@ import { useUserStore } from "@/stores/user"
 
 const userStore = useUserStore()
 const props = defineProps<{ modelValue: boolean }>();
-const emit = defineEmits(['update:modelValue', 'submit']);
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: boolean): void
+  (event: 'submit'): void
+}>();
 
 const isVisible = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+  set: (value: boolean) => emit('update:modelValue', value)
 });
 
 const registerForm = reactive({
@@ -74,7 +77,7 @@ const registerForm = reactive({
   password: ''
 });
 
-const isFormValied = computed(() => 
+const isFormValid = computed(() =>
   registerForm.username.length >= 1 && registerForm.email.length >= 1 && registerForm.password.length >= 1
 );
 
@@ -105,3 +108,9 @@ const resetForm = () => {
   registerForm.password = '';
 }
 </script>
+
+<style scoped>
+.register-modal {
+  width: var(--modal-width-sm);
+}
+</style>

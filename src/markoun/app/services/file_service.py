@@ -90,9 +90,12 @@ async def upload_file(abs_path: Path, file: UploadFile) -> UploadedFileResponse:
     filename = file.filename or f"file_{uuid.uuid4().hex[:8]}.unknown"
     filepath = abs_path / filename
     try:
-        async with aiofiles.open(filepath, "wb") as f:
+        async with aiofiles.open(filepath, "xb") as f:
             while content := await file.read(1024 * 1024):
                 await f.write(content)
+    except FileExistsError as err:
+        logger.error(f"[{filepath} is existed]")
+        raise HTTPException(**CONSTANT.SERV_FILE_EXISTED) from err
     except Exception as err:
         logger.exception(err)
         raise HTTPException(**CONSTANT.SERV_FILE_UPLOAD_FAIL) from err

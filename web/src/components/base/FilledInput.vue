@@ -1,5 +1,5 @@
 <template>
-  <div :class="$attrs.class" style="padding-top: 14px;">
+  <div :class="$attrs.class" class="filled-input-shell">
     <div class="filled-input-wrapper">
       <label :for="uniqueId" class="filled-input-label">{{ label }}</label>
       
@@ -23,14 +23,16 @@ defineOptions({
   inheritAttrs: false
 });
 
-const props = withDefaults(defineProps<{
+withDefaults(defineProps<{
   label: string;
   modelValue: string | number;
 }>(), {
   modelValue: ''
 });
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: string): void
+}>();
 
 const attrs = useAttrs();
 const instance = getCurrentInstance();
@@ -43,7 +45,9 @@ defineExpose({
 });
 
 const inputAttrs = computed(() => {
-  const { class: cls, style, ...rest } = attrs;
+  const rest = { ...attrs };
+  delete rest.class;
+  delete rest.style;
   return rest;
 });
 
@@ -55,11 +59,15 @@ const handleInput = (event: Event) => {
 
 
 <style scoped>
+.filled-input-shell {
+  padding-top: var(--filled-input-shell-padding-top);
+}
+
 .filled-input-wrapper {
   position: relative;
-  border-radius: 8px;
-  padding: 7px 12px;
-  transition: background-color 0.3s ease;
+  border-radius: var(--input-radius);
+  padding: var(--filled-input-padding);
+  transition: background-color var(--motion-medium-duration) ease;
   background-color: var(--color-bg-field);
 }
 
@@ -73,10 +81,10 @@ const handleInput = (event: Event) => {
 
 .filled-input-label {
   position: absolute;
-  padding: 0px 14px;
-  top: -14px;
+  padding: 0 var(--filled-input-label-padding-x);
+  top: var(--filled-input-label-top);
   left: 0px;
-  height: 28px;
+  height: var(--filled-input-label-height);
   display: flex;
   align-items: center;
   pointer-events: none;
@@ -93,10 +101,10 @@ const handleInput = (event: Event) => {
   bottom: -20px;
   left: 0;
   right: 0;
-  border-radius: 8px;
+  border-radius: var(--input-radius);
   pointer-events: none;
   z-index: -1;
-  transition: background-color 0.3s ease;
+  transition: background-color var(--motion-medium-duration) ease;
   background-color: var(--color-bg-field);
 }
 
@@ -107,7 +115,7 @@ const handleInput = (event: Event) => {
   background: transparent;
   outline: none;
   font-size: 0.9rem;
-  border-radius: 8px;
+  border-radius: var(--input-radius);
   color: var(--color-text-pri);
   font-family: inherit;
   z-index: 2;

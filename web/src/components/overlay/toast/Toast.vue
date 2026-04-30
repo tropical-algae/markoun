@@ -10,7 +10,7 @@
         v-if="currentNotice" 
         :key="currentNotice.id"
         class="notice-toast"
-        :style="{ backgroundColor: config.bgColor, boxShadow: `0 0 15px ${config.shadowColor}` }"
+        :style="{ backgroundColor: config.bgColor, boxShadow: `0 0 var(--toast-shadow-blur) ${config.shadowColor}` }"
       >
         <BaseIconText 
           :text="currentNotice.message" 
@@ -27,6 +27,7 @@
 import gsap from 'gsap';
 import { computed, watch } from 'vue';
 import { useToastStore } from '@/stores/toast';
+import { TOAST_MOTION } from '@/constants/ui';
 
 import BaseIconText from '@/components/base/BaseIconText.vue';
 
@@ -38,13 +39,13 @@ const noticeMap = {
   error: {
     bgColor: 'var(--color-bg-error)',
     shadowColor: 'var(--color-bg-error-shadow)',
-    textColor: '#ffffff',
+    textColor: 'var(--color-text-inverse)',
     icon: ErrorIcon
   },
   warning: {
     bgColor: 'var(--color-bg-warning)',
     shadowColor: 'var(--color-bg-warning-shadow)',
-    textColor: '#ffffff',
+    textColor: 'var(--color-text-inverse)',
     icon: WarningIcon
   },
   info: {
@@ -73,14 +74,14 @@ watch(currentNotice, (val) => {
     if (toastStore.queue[0]?.id === val.id) {
       toastStore.popNotice();
     }
-  }, 5000);
+  }, TOAST_MOTION.lifeMs);
 });
 
 const onEnter = (el: Element, done: () => void) => {
   gsap.set(el, { xPercent: -50, x: 0 }); 
   gsap.fromTo(el, 
     { 
-      y: 20,
+      y: TOAST_MOTION.enterY,
       opacity: 0,
       scale: 0.95
     },
@@ -88,7 +89,7 @@ const onEnter = (el: Element, done: () => void) => {
       y: 0,
       opacity: 0.95, 
       scale: 1,
-      duration: 0.4, 
+      duration: TOAST_MOTION.enterDuration,
       ease: 'back.out(1.6)',
       onComplete: done 
     }
@@ -97,10 +98,10 @@ const onEnter = (el: Element, done: () => void) => {
 
 const onLeave = (el: Element, done: () => void) => {
   gsap.to(el, { 
-    y: -20,
+    y: TOAST_MOTION.leaveY,
     opacity: 0, 
     scale: 0.95,
-    duration: 0.25,
+    duration: TOAST_MOTION.leaveDuration,
     ease: 'power2.in',
     onComplete: done 
   });
@@ -110,14 +111,14 @@ const onLeave = (el: Element, done: () => void) => {
 <style scoped>
 .notice-toast {
   position: fixed;
-  bottom: 42px;
+  bottom: var(--toast-bottom);
   left: 50%;
-  z-index: 9999;
+  z-index: var(--toast-z-index);
   
-  padding: 10px 16px;
-  border-radius: 8px;
+  padding: var(--toast-padding);
+  border-radius: var(--toast-radius);
   
-  max-width: 80vw;
+  max-width: var(--toast-max-width);
   /* min-width: 200px; */
   backdrop-filter: blur(2px);
 }

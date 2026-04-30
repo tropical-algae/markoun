@@ -33,7 +33,9 @@ defineOptions({
 
 const attrs = useAttrs();
 const inputAttrs = computed(() => {
-  const { class: cls, style, ...rest } = attrs;
+  const rest = { ...attrs };
+  delete rest.class;
+  delete rest.style;
   return rest;
 });
 const isFocused = ref(false);
@@ -74,7 +76,7 @@ const handleInput = (event: Event) => {
 .underlined-input-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--underlined-input-gap);
   width: 100%;
   position: relative;
 }
@@ -84,7 +86,7 @@ const handleInput = (event: Event) => {
   /* letter-spacing: 1.5px; */
   color: var(--color-text-sec);
   font-weight: 600;
-  transition: color 0.3s ease;
+  transition: color var(--motion-medium-duration) ease;
   user-select: none;
 }
 
@@ -119,7 +121,7 @@ const handleInput = (event: Event) => {
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 1px;
+  height: var(--underlined-input-line-height);
   background-color: var(--color-line);
 }
 
@@ -128,12 +130,12 @@ const handleInput = (event: Event) => {
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 1px;
+  height: var(--underlined-input-line-height);
   background-color: var(--color-text-pri);
   
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 0.5s ease;
+  transition: transform var(--motion-medium-duration) ease;
   
   z-index: 1;
 }

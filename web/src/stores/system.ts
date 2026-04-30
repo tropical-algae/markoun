@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { checkSystemStatusApi, getAvailableSettingApi, isAllowRegisterApi, updateSettingApi } from '@/api/system'
 import { useActionLedger } from '@/composables/useActionLedger'
 import type { AsyncStatus } from '@/types/async'
-import type { SysSettingResponse } from '@/types/system'
+import { SysSettingType, type SysSettingResponse } from '@/types/system'
 
 
 export const useSysStore = defineStore('sys', () => {
@@ -15,6 +15,21 @@ export const useSysStore = defineStore('sys', () => {
   const settingsState = ref<AsyncStatus>('idle')
   const registrationAllowedState = ref<AsyncStatus>('idle')
   const actionLedger = useActionLedger()
+
+  const withUpdatedSettingValue = (
+    setting: SysSettingResponse,
+    value: string | boolean,
+  ): SysSettingResponse | null => {
+    if (setting.type === SysSettingType.BOOL && typeof value === 'boolean') {
+      return { ...setting, value }
+    }
+
+    if (setting.type === SysSettingType.STR && typeof value === 'string') {
+      return { ...setting, value }
+    }
+
+    return null
+  }
 
   const refreshSysStatus = async () => {
     sysStatusState.value = version.value === '' ? 'loading' : 'refreshing'
@@ -56,21 +71,28 @@ export const useSysStore = defineStore('sys', () => {
   }
 
   const updateSystemSetting = async (id: string, newValue: string | boolean): Promise<boolean> => {
-    const item = currentSettings.value.find(s => s.id === id);
-    if (!item) {
+    const setting = currentSettings.value.find((item) => item.id === id);
+    if (!setting) {
       return false
     }
 
-    const previousValue = item.value
-    ;(item as any).value = newValue
+    const nextSetting = withUpdatedSettingValue(setting, newValue)
+    if (!nextSetting) {
+      return false
+    }
+
+    const previousSettings = currentSettings.value
+    currentSettings.value = currentSettings.value.map((item) => {
+      return item.id === id ? nextSetting : item
+    })
 
     try {
       await actionLedger.runAction(`setting:${id}`, async () => {
         await updateSettingApi(id, newValue);
       })
       return true
-    } catch (error) {
-      ;(item as any).value = previousValue
+    } catch (_) {
+      currentSettings.value = previousSettings
       return false
     }
   }

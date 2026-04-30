@@ -15,24 +15,24 @@
           @dragstart.prevent
         />
 
-        <Transition name="soft-swap" mode="out-in">
-          <div v-if="previewGate.showLoading.value" key="loading" class="image-preview-overlay">
+        <AsyncGate
+          :status="previewLoadState"
+          tag="div"
+          class="image-preview-overlay"
+        >
+          <template #loading>
             <BaseSkeleton
               class="image-preview-skeleton"
               :width="`${displaySize.width}px`"
               :height="`${displaySize.height}px`"
               radius="10px"
             />
-          </div>
+          </template>
 
-          <div
-            v-else-if="previewGate.showError.value"
-            key="error"
-            class="image-preview-overlay image-preview-error"
-          >
-            <span class="f-s">Unable to load this image.</span>
-          </div>
-        </Transition>
+          <template #error>
+            <span class="image-preview-error f-s">Unable to load this image.</span>
+          </template>
+        </AsyncGate>
       </div>
     </div>
   </BaseModal>
@@ -43,17 +43,22 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 import BaseModal from '@/components/base/BaseModal.vue';
 import BaseSkeleton from '@/components/base/BaseSkeleton.vue';
+import AsyncGate from '@/components/base/AsyncGate.vue';
 
-import { useAsyncGate } from '@/composables/useAsyncGate';
 import { useNodeStore } from '@/stores/note';
 import type { AsyncStatus } from '@/types/async';
+import { IMAGE_PREVIEW_SIZE } from '@/constants/ui';
 
-const DEFAULT_WIDTH = 640
-const DEFAULT_HEIGHT = 420
-const MIN_WIDTH = 280
-const MAX_WIDTH = 720
-const VIEWPORT_WIDTH_RATIO = 0.82
-const VIEWPORT_HEIGHT_RATIO = 0.72
+const {
+  defaultWidth: DEFAULT_WIDTH,
+  defaultHeight: DEFAULT_HEIGHT,
+  minWidth: MIN_WIDTH,
+  maxWidth: MAX_WIDTH,
+  viewportWidthRatio: VIEWPORT_WIDTH_RATIO,
+  viewportHeightRatio: VIEWPORT_HEIGHT_RATIO,
+  minStageWidth: MIN_STAGE_WIDTH,
+  minStageHeight: MIN_STAGE_HEIGHT,
+} = IMAGE_PREVIEW_SIZE
 
 const nodeStore = useNodeStore()
 
@@ -74,9 +79,6 @@ const isVisible = computed({
 
 const imageUrl = computed(() => nodeStore.currentPreviewImageUrl)
 const previewTitle = computed(() => nodeStore.currentPreviewImageNode?.name || 'Image Preview')
-const previewGate = useAsyncGate({
-  status: previewLoadState,
-})
 
 const updateViewport = () => {
   viewportWidth.value = window.innerWidth
@@ -90,8 +92,8 @@ const resetPreviewState = () => {
 }
 
 const fitImageSize = (width: number, height: number) => {
-  const maxWidth = Math.max(220, Math.min(MAX_WIDTH, Math.floor(viewportWidth.value * VIEWPORT_WIDTH_RATIO)))
-  const maxHeight = Math.max(180, Math.floor(viewportHeight.value * VIEWPORT_HEIGHT_RATIO))
+  const maxWidth = Math.max(MIN_STAGE_WIDTH, Math.min(MAX_WIDTH, Math.floor(viewportWidth.value * VIEWPORT_WIDTH_RATIO)))
+  const maxHeight = Math.max(MIN_STAGE_HEIGHT, Math.floor(viewportHeight.value * VIEWPORT_HEIGHT_RATIO))
   const minWidth = Math.min(MIN_WIDTH, maxWidth)
 
   let nextWidth = width || Math.min(DEFAULT_WIDTH, maxWidth)
@@ -167,7 +169,7 @@ onBeforeUnmount(() => {
 .image-preview-shell {
   display: flex;
   justify-content: center;
-  min-width: min(82vw, 320px);
+  min-width: var(--image-preview-shell-min-width);
 }
 
 .image-preview-stage {
@@ -176,7 +178,7 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  border-radius: 10px;
+  border-radius: var(--image-preview-radius);
   background-color: var(--color-bg-sec);
 }
 
@@ -203,7 +205,7 @@ onBeforeUnmount(() => {
 .image-preview-error {
   color: var(--color-text-sec);
   text-align: center;
-  padding: 24px;
+  padding: var(--modal-body-padding);
 }
 
 .image-preview-skeleton {

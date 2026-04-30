@@ -5,7 +5,7 @@
 		</div>
 
     <div class="auth-container d-flex flex-grow-1 justify-content-center align-items-center">
-      <div style="width: 100%; max-width: 480px; min-width: 300px;">
+      <div class="auth-panel">
 
 				<h1 class="auth-title">Login</h1>
 				<form @submit.prevent="onLogin" class="auth-form">
@@ -62,8 +62,7 @@
 
 					<div class="d-flex justify-content-center">
             <GhostButton
-              class="f-l fw-bold"
-              style="width: 220px;"
+              class="auth-submit-button f-l fw-bold"
               type="submit"
               :loading="userStore.isLoginPending()"
               :disabled="userStore.isLoginPending()"
@@ -118,7 +117,7 @@ onMounted(async () => {
 .auth-wrapper {
   min-height: 100vh;
   width: 100%;
-  padding: 0 80px 80px 80px;
+  padding: var(--auth-wrapper-padding);
 
   display: flex;
 	
@@ -126,7 +125,7 @@ onMounted(async () => {
 }
 
 .site-brand {
-	height: 80px;
+	height: var(--auth-brand-height);
 	width: 100%;
 	color: var(--color-text-pri);
 	font-weight: bold;
@@ -139,20 +138,25 @@ onMounted(async () => {
   border: 1px solid var(--color-line);
   box-sizing: border-box;
 
-  padding: 20px;
+  padding: var(--auth-container-padding);
   border-top-right-radius: 120px;
   border-top-left-radius: 5px;
   border-bottom-left-radius: 120px;
   border-bottom-right-radius: 5px;
   
-  /* box-shadow: 0 -10px 20px rgba(123, 123, 123, 0.5);  */
+}
+
+.auth-panel {
+  width: 100%;
+  max-width: var(--auth-panel-max-width);
+  min-width: var(--auth-panel-min-width);
 }
 
 .auth-title {
   font-size: 2.5rem;
   font-weight: 700;
   color: var(--color-text-pri);
-  margin-bottom: 50px;
+  margin-bottom: var(--auth-title-margin-bottom);
   letter-spacing: -1px;
 }
 
@@ -179,12 +183,12 @@ onMounted(async () => {
   left: 0;
   bottom: 0;
   width: 100%;
-  height: 1px;
+  height: var(--divider-line-width);
   background-color: var(--color-text-sec);
 
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 0.3s ease;
+  transition: transform var(--motion-medium-duration) ease;
 }
 
 .auth-form .links-row button:hover::after {
@@ -193,7 +197,7 @@ onMounted(async () => {
 
 .register-link-placeholder {
   display: inline-block;
-  width: 116px;
+  width: var(--auth-register-placeholder-width);
   height: 0.9rem;
 }
 
@@ -205,9 +209,12 @@ onMounted(async () => {
 .auth-submit {
   font-size: 1.1rem;
   font-weight: bold;
-  padding: 8px 80px;
-  border-radius: 10px !important;
+  border-radius: var(--radius-xl) !important;
   background-color: var(--color-text-pri) !important;
+}
+
+.auth-submit-button {
+  width: var(--auth-submit-width);
 }
 
 </style>

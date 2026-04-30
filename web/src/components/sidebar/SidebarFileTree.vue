@@ -96,6 +96,6 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 2px 6px;
+  padding: var(--tree-row-padding);
 }
 </style>

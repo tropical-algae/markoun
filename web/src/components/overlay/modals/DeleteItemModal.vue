@@ -3,7 +3,7 @@
     v-model="isVisible" 
     title="Delete Item"
   >
-    <div style="width: 360px;">
+    <div class="delete-item-modal">
       <p>Are you sure you want to delete <span class="fw-bold">{{ targetPath }}</span> ?</p>
       <div class="d-flex justify-content-end gap-2">
         <GhostButton
@@ -37,12 +37,14 @@ import { useNodeStore } from "@/stores/note"
 
 const nodeStore = useNodeStore()
 const props = defineProps<{ modelValue: boolean }>();
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: boolean): void
+}>();
 
 const targetPath = ref('Default Page')
 const isVisible = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+  set: (value: boolean) => emit('update:modelValue', value)
 });
 
 watch(
@@ -63,3 +65,9 @@ const handleConfirm = async () => {
 };
 
 </script>
+
+<style scoped>
+.delete-item-modal {
+  width: var(--modal-width-sm);
+}
+</style>

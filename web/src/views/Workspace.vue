@@ -18,7 +18,8 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onBeforeUnmount, onMounted } from 'vue';
+import { onBeforeRouteLeave } from 'vue-router';
 
 import Sidebar from '@/components/sidebar/Sidebar.vue';
 import NoteEditor from '@/components/editor/NoteEditor.vue';
@@ -28,14 +29,27 @@ const nodeStore = useNodeStore()
 
 onMounted(() => {
   void nodeStore.ensureWelcomeNoteLoaded().catch(() => null)
+  window.addEventListener('pagehide', handlePageHide)
 })
+
+onBeforeUnmount(() => {
+  window.removeEventListener('pagehide', handlePageHide)
+})
+
+onBeforeRouteLeave(async () => {
+  await nodeStore.saveCurrentFileIfDirty()
+})
+
+const handlePageHide = () => {
+  nodeStore.saveCurrentFileBeforeUnload()
+}
 
 </script>
 
 <style scoped>
 
 .workspace-header {
-  height: 28px;
+  height: var(--icon-button-size);
   flex-shrink: 0;
 	border-bottom: 1px solid var(--color-line);
   box-sizing: border-box;
@@ -45,13 +59,13 @@ onMounted(() => {
 }
 
 .workspace-footer {
-  height: 28px;
+  height: var(--icon-button-size);
   flex-shrink: 0;
   font-size: 0.7rem;
 	border-top: 1px solid var(--color-line);
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  user-select: None;
+  user-select: none;
 }
 </style>

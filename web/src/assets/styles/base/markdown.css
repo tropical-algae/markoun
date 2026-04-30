@@ -17,7 +17,7 @@
   white-space: pre-wrap;
   word-wrap: break-word;
   background-color: var(--color-bg-dark);
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
 
 }
 
@@ -27,7 +27,7 @@
   padding: 0.5rem 1rem;
   overflow-x: hidden;
   background-color: var(--color-bg-dark);
-  border-radius: 5px;
+  border-radius: var(--radius-sm);
 }
 
 .note-preview pre code {
@@ -52,7 +52,7 @@
   border-left: 4px solid var(--color-action);
   background-color: var(--color-bg-dark);
 
-  border-radius: 5px;
+  border-radius: var(--radius-sm);
 
   /* overflow-wrap: break-word;
   overflow-x: hidden; */
@@ -77,7 +77,7 @@
   max-width: 100%;
   height: auto;
   margin: 1rem 0;
-  border-radius: 15px;
+  border-radius: var(--radius-image);
   opacity: 0.8;
 }
 

@@ -97,7 +97,7 @@ const handleUpdateSetting = async (id: string, newValue: string | boolean) => {
 }
 
 .settings-footer-value-slot {
-  min-width: 88px;
+  min-width: var(--settings-footer-value-min-width);
   min-height: var(--meta-tag-height);
   display: inline-flex;
   align-items: center;
@@ -121,8 +121,8 @@ const handleUpdateSetting = async (id: string, newValue: string | boolean) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
-  padding-bottom: 14px;
+  gap: var(--settings-skeleton-gap);
+  padding-bottom: var(--settings-skeleton-padding-bottom);
 }
 
 .setting-skeleton-text {

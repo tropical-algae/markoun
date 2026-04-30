@@ -1,7 +1,7 @@
 <template>
   <div class="d-flex justify-content-between align-items-center pb-2">
     
-    <div class="d-flex flex-column pe-3" style="min-width: 0;">
+    <div class="setting-copy d-flex flex-column pe-3">
       <span class="fw-bold f-s">{{ setting.name }}</span>
       <span class="text-truncate f-xs">{{ setting.desc }}</span>
     </div>
@@ -10,27 +10,25 @@
       
       <div v-if="setting.type === SysSettingType.BOOL" class="form-check form-switch m-0">
         <input 
-          class="form-check-input" 
+          class="setting-switch form-check-input"
           type="checkbox" 
           :id="setting.id"
           :checked="(setting as BoolSysSetting).value"
           :disabled="pending"
           @change="handleChange($event)"
-          style="cursor: pointer;"
         >
       </div>
 
       <div v-else-if="setting.type === SysSettingType.STR">
         <input 
           type="text" 
-          class="form-control form-control-sm text-end"
+          class="setting-text-input form-control form-control-sm text-end"
           :value="draftValue"
           :disabled="pending"
           @input="handleInput($event)"
           @blur="commitDraft"
           @keydown.enter.prevent="commitDraft"
           placeholder="Enter value"
-          style="width: 120px;"
         >
       </div>
 
@@ -88,3 +86,17 @@ const commitDraft = () => {
   emit('update', props.setting.id, draftValue.value)
 }
 </script>
+
+<style scoped>
+.setting-copy {
+  min-width: 0;
+}
+
+.setting-switch {
+  cursor: pointer;
+}
+
+.setting-text-input {
+  width: var(--setting-text-input-width);
+}
+</style>

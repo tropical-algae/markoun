@@ -6,10 +6,18 @@
         class="base-modal-backdrop"
         @click="handleBackdropClick"
       >
-        <div class="base-modal-card" @click.stop>
+        <div
+          ref="modalCardRef"
+          class="base-modal-card"
+          role="dialog"
+          aria-modal="true"
+          :aria-labelledby="title ? titleId : undefined"
+          tabindex="-1"
+          @click.stop
+        >
           
           <header v-if="title" class="base-modal-header">
-            <span class="base-modal-title f-l">{{ title }}</span>
+            <span :id="titleId" class="base-modal-title f-l">{{ title }}</span>
           </header>
 
           <div class="base-modal-body"><slot></slot></div>
@@ -21,25 +29,88 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{
+import { nextTick, onBeforeUnmount, ref, useId, watch } from 'vue'
+
+const props = withDefaults(defineProps<{
   modelValue: boolean;
   title?: string;
+  closeOnBackdrop?: boolean;
+  closeOnEscape?: boolean;
+}>(), {
+  closeOnBackdrop: true,
+  closeOnEscape: true,
+});
+
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: boolean): void
+  (event: 'close'): void
+  (event: 'opened'): void
 }>();
 
-const emit = defineEmits(['update:modelValue', 'close', 'opened']);
+const titleId = useId()
+const modalCardRef = ref<HTMLElement | null>(null)
+let previousActiveElement: HTMLElement | null = null
 
 const close = () => {
+  if (!props.modelValue) {
+    return
+  }
+
   emit('update:modelValue', false);
   emit('close');
 };
 
 const handleBackdropClick = () => {
+  if (!props.closeOnBackdrop) {
+    return
+  }
+
   close();
 };
 
+const focusModalCard = async () => {
+  await nextTick()
+  modalCardRef.value?.focus({ preventScroll: true })
+}
+
+const restorePreviousFocus = () => {
+  previousActiveElement?.focus({ preventScroll: true })
+  previousActiveElement = null
+}
+
+const handleKeydown = (event: KeyboardEvent) => {
+  if (!props.closeOnEscape || event.key !== 'Escape') {
+    return
+  }
+
+  event.stopPropagation()
+  close()
+}
+
+watch(
+  () => props.modelValue,
+  (isOpen) => {
+    if (isOpen) {
+      previousActiveElement = document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null
+      window.addEventListener('keydown', handleKeydown)
+      return
+    }
+
+    window.removeEventListener('keydown', handleKeydown)
+    restorePreviousFocus()
+  },
+)
+
 const onAfterEnter = () => {
+  void focusModalCard()
   emit('opened');
 };
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', handleKeydown)
+})
 </script>
 
 <style scoped>
@@ -59,20 +130,24 @@ const onAfterEnter = () => {
 
 .base-modal-card {
   background-color: var(--color-bg-pri);
-  box-shadow: 0 10px 40px var(--color-bg-pri-shadow);
-  border-radius: 12px;
+  box-shadow: 0 var(--modal-card-shadow-y) var(--modal-card-shadow-blur) var(--color-bg-pri-shadow);
+  border-radius: var(--modal-radius);
   overflow: hidden;
   
   width: fit-content;
   height: fit-content;
-  max-width: 90vw;
-  max-height: 90vh;
+  max-width: var(--modal-max-width);
+  max-height: var(--modal-max-height);
   display: flex;
   flex-direction: column;
 }
 
+.base-modal-card:focus {
+  outline: none;
+}
+
 .base-modal-header {
-  padding: 10px 24px;
+  padding: var(--modal-header-padding);
   border-bottom: 1px solid var(--color-line);
   display: flex;
   justify-content: space-between;
@@ -86,26 +161,26 @@ const onAfterEnter = () => {
 }
 
 .base-modal-body {
-  padding: 24px;
+  padding: var(--modal-body-padding);
   overflow-y: auto; 
 }
 
 .modal-enter-active,
 .modal-leave-active {
-  transition: background-color 0.4s ease; 
+  transition: opacity var(--motion-modal-duration) ease;
 }
 
 .modal-enter-active .base-modal-card {
-  animation: card-enter 0.4s ease forwards;
+  animation: card-enter var(--motion-modal-duration) ease forwards;
 }
 
 .modal-leave-active .base-modal-card {
-  animation: card-leave 0.4s ease-in forwards;
+  animation: card-leave var(--motion-modal-duration) ease-in forwards;
 }
 
 .modal-enter-from,
 .modal-leave-to {
-  background-color: transparent;
+  opacity: 0;
 }
 
 @keyframes card-enter {
