@@ -72,7 +72,7 @@ class Constant(BaseSettings):
         "detail": "Failed to delete file or directory",
     }
     SERV_FILE_EXISTED: dict = {
-        "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+        "status_code": status.HTTP_409_CONFLICT,
         "detail": "File already exists",
     }
     SERV_FILE_CREATE_FAIL: dict = {
