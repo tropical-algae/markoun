@@ -1,5 +1,50 @@
 <!-- version list -->
 
+## v0.1.1 (2026-04-30)
+
+### Bug Fixes
+
+- [site] close upload modal after success
+  ([`a12f72d`](https://github.com/tropical-algae/markoun/commit/a12f72d8df8e376c6dad272201b20786c7dd5604))
+
+- [site] sanitize markdown preview output
+  ([`33261bf`](https://github.com/tropical-algae/markoun/commit/33261bff015bf81579816902b12d19fc07c83b3b))
+
+- Correct filename and extension parsing for folders with dots
+  ([`aee5c01`](https://github.com/tropical-algae/markoun/commit/aee5c0183326aea9420647f4714ce326b6a73a8e))
+
+- Reject duplicate file uploads
+  ([`c3f17e2`](https://github.com/tropical-algae/markoun/commit/c3f17e298abac9ec7db913f6c4d6693c3c0d85c5))
+
+### Features
+
+- [site] auto save dirty notes on navigation
+  ([`2e605b2`](https://github.com/tropical-algae/markoun/commit/2e605b27511df3acbdd6121ffa108beb740a83c7))
+
+- [site] improve base modal behavior
+  ([`3d596b9`](https://github.com/tropical-algae/markoun/commit/3d596b9c9d458b11dcd1cdcea1f2e309a06d2b30))
+
+### Refactoring
+
+- [site] decouple request error handling
+  ([`6471883`](https://github.com/tropical-algae/markoun/commit/64718835c5914af5d07dc07a125bba24675576e8))
+
+- [site] move behavior tokens into ts constants
+  ([`41a4c63`](https://github.com/tropical-algae/markoun/commit/41a4c634375f5c78695babda720fc0210ba2ceff))
+
+- [site] reorganize frontend code structure
+  ([`444d59e`](https://github.com/tropical-algae/markoun/commit/444d59e84fc0c7f1ca8e329c3a7d9fa7b9a2d405))
+
+- [site] share upload task state
+  ([`f826674`](https://github.com/tropical-algae/markoun/commit/f82667463f7093d0a8f2c51e2f2f4b2018488749))
+
+- [site] split file tree item interactions
+  ([`f5e8180`](https://github.com/tropical-algae/markoun/commit/f5e8180d1937962b6d5634d54ed137dbf19cbdba))
+
+- [site] split file tree state from note store
+  ([`e5f882a`](https://github.com/tropical-algae/markoun/commit/e5f882acd960b9693bc9ab6f82545e6903aa2729))
+
+
 ## v0.1.0 (2026-04-27)
 
 ### Bug Fixes
