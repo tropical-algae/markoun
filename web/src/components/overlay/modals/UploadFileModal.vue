@@ -39,8 +39,7 @@
           </div>
         </div>
         <p class="text-center text-secondary small">
-          <span v-if="uploadedFileName === ''">Uploading...</span>
-          <span v-else>{{ uploadedFileName }} has been uploaded.</span>
+          <span>Uploading...</span>
         </p>
       </div>
 
@@ -82,7 +81,6 @@ const {
   isUploading,
   uploadPercent,
   currentFileName,
-  uploadedFileName,
   uploadFile,
 } = useFileUploadTask()
 
@@ -113,7 +111,7 @@ const handleFileSelect = async (e: Event) => {
 
 const handleDrop = async (e: DragEvent) => {
   isDragOver.value = false
-  const file =e.dataTransfer?.files?.[0] 
+  const file = e.dataTransfer?.files?.[0]
   if (file) {
     await handleUpload(file)
   }
@@ -121,6 +119,7 @@ const handleDrop = async (e: DragEvent) => {
 
 const handleUpload = async (file: File) => {
   await uploadFile(file)
+  isVisible.value = false
 }
 </script>
 

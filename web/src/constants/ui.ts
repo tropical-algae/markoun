@@ -33,7 +33,5 @@ export const TOAST_MOTION = {
   leaveDuration: 0.25,
 } as const
 
-export const UPLOAD_RESET_DELAY_MS = 5000
 export const TREE_LONG_PRESS_DELAY_MS = 600
 export const USER_PROFILE_HEIGHT_MOTION_DURATION = 0.35
-
