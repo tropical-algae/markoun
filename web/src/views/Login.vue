@@ -52,8 +52,17 @@
                 </button>
               </AsyncGate>
             </div>
-            <label class="d-flex gap-2 f-s">
-              <input type="checkbox" v-model="loginForm.remember_me" :disabled="userStore.isLoginPending()">
+            <label
+              class="choice-control f-s fw-semibold"
+              :class="{ 'is-disabled': userStore.isLoginPending() }"
+            >
+              <input
+                class="choice-input"
+                type="checkbox"
+                v-model="loginForm.remember_me"
+                :disabled="userStore.isLoginPending()"
+              >
+              <span class="choice-box"></span>
               <span>Remember me</span>
             </label>
 					</div>

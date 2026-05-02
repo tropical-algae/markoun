@@ -3,8 +3,8 @@
     v-model="isVisible" 
     title="Delete Item"
   >
-    <div class="delete-item-modal">
-      <p>Are you sure you want to delete <span class="fw-bold">{{ targetPath }}</span> ?</p>
+    <div class="delete-item-modal fc-pri">
+      <p>Delete <span class="fw-bold">{{ targetPath }}</span> ?</p>
       <div class="d-flex justify-content-end gap-2">
         <GhostButton
           class="f-s py-0"

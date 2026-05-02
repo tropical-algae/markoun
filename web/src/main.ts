@@ -7,6 +7,7 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import App from "@/App.vue"
 import router from "@/router/index"
 import { useToastStore } from "@/stores/toast"
+import { useThemeStore } from "@/stores/theme"
 import { setRequestErrorHandler } from "@/utils/request"
 
 const app = createApp(App)
@@ -14,6 +15,9 @@ const pinia = createPinia()
 
 app.use(pinia)
 app.use(router)
+
+const themeStore = useThemeStore(pinia)
+themeStore.initTheme()
 
 setRequestErrorHandler((error) => {
   const toastStore = useToastStore(pinia)

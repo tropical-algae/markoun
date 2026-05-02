@@ -7,7 +7,7 @@ button {
 
 button.cancel {
   color: var(--color-text-inverse);
-  background-color: var(--color-bg-muted);
+  background-color: var(--color-bg-field);
   border-radius: var(--button-radius);
   transition: opacity var(--motion-medium-duration) ease;
 }
@@ -39,7 +39,7 @@ button.confirm:hover {
 
   fill: var(--color-text-pri);
 
-  transition: background-color var(--motion-soft-duration) var(--motion-soft-ease);
+  transition: background-color var(--motion-soft-duration) ease;
 }
 
 button:hover > .icon-btn,

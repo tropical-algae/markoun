@@ -9,17 +9,13 @@
   --color-bg-pri: #ffffff;
   --color-bg-sec: #f9f9f9;
   --color-bg-field: #f0f0f0;
-  --color-bg-muted: #999999;
   --color-bg-selected: #eaeaea;
   --color-bg-dark: rgba(0, 0, 0, 0.08);
 
   --color-text-pri: #242424;
   --color-text-sec: #797979;
-  --color-text-muted: var(--color-text-sec);
-  --color-text-inverse: #ffffff;
-
-  /* 提示文本色 */
-  --color-text-trifle: #b3b3b3;
+  --color-text-muted: #b3b3b3;
+  --color-text-inverse: var(--color-bg-pri);
 
   --color-bg-error: #f46b6b;
   --color-bg-warning: #f3a245;
@@ -36,7 +32,7 @@
   --color-bg-warning-shadow: rgba(243, 162, 69, 0.2);
   --color-text-pri-shadow: rgba(22, 22, 22, 0.2);
 
-  --color-action: #4b9ff4;
+  --color-action: #569ce2;
   --color-action-light: #ecf5ff;
   --color-accent-alt: var(--color-action);
 
@@ -49,8 +45,7 @@
   --radius-image: 15px;
   --radius-pill: 999px;
 
-  --motion-soft-duration: 0.18s;
-  --motion-soft-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-soft-duration: 0.2s;
   --motion-medium-duration: 0.3s;
   --motion-modal-duration: 0.4s;
   --motion-height-duration: 0.4;
@@ -58,7 +53,7 @@
   --motion-toast-enter-duration: 0.4;
   --motion-toast-leave-duration: 0.25;
   --motion-spinner-duration: 0.7s;
-  --motion-theme-duration: 0.7s;
+  --motion-theme-duration: 0.5s;
   --motion-skeleton-duration: 1.35s;
   --async-gate-delay-ms: 150;
   --async-gate-min-visible-ms: 400;
@@ -77,7 +72,6 @@
   --editor-content-padding-x-min: 20px;
   --editor-line-height: 1.6;
   --editor-async-gate-delay-ms: 0;
-  --editor-inspector-title-margin-x: 24px;
   --editor-meta-value-min-width: 40px;
 
   --modal-width-sm: 360px;
@@ -112,6 +106,16 @@
   --hint-gap: 6px;
 
   --input-radius: var(--radius-lg);
+  --control-focus-ring-size: 3px;
+  --choice-checkbox-size: 14px;
+  --choice-checkbox-radius: var(--radius-xs);
+  --choice-check-width: 4px;
+  --choice-check-height: 8px;
+  --switch-width: 34px;
+  --switch-height: 18px;
+  --switch-padding: 2px;
+  --switch-thumb-size: 12px;
+  --switch-thumb-translate-x: 15px;
   --filled-input-shell-padding-top: 14px;
   --filled-input-padding: 7px 12px;
   --filled-input-label-padding-x: 14px;
@@ -162,6 +166,14 @@
   --settings-skeleton-gap: 16px;
   --settings-skeleton-padding-bottom: 14px;
 
+  /* --theme-option-width: 58px;
+  --theme-option-height: 28px; */
+  --theme-option-radius: var(--radius-md);
+  --theme-option-padding-x: 8px;
+  --theme-option-padding-y: 2px;
+
+  --theme-option-gap: 8px;
+
   --profile-card-padding: 14px;
   --profile-card-gap: 10px;
   --profile-meta-gap-x: 12px;
@@ -177,6 +189,58 @@
   --image-preview-min-stage-width: 220;
   --image-preview-min-stage-height: 180;
   --image-preview-radius: var(--radius-xl);
+}
+
+:root[data-theme="dark"] {
+  --color-bg-pri: #271e27;
+  --color-bg-sec: #211b21;
+  --color-bg-field: #543a54;
+  --color-bg-selected: #443248;
+  --color-bg-dark: rgba(255, 255, 255, 0.08);
+
+  --color-text-pri: #c6b8b0;
+  --color-text-sec: #c59d87;
+  --color-text-muted: #9a8479;
+
+  --color-bg-error: #914444;
+  --color-bg-warning: #c17f34;
+
+  --color-line: #58473d;
+  --color-skeleton: #543a54;
+
+  /* 阴影色 */
+  --color-bg-pri-shadow: rgba(45, 35, 45, 0.2);
+  --color-bg-error-shadow: rgba(244, 107, 107, 0.2);
+  --color-bg-warning-shadow: rgba(243, 162, 69, 0.2);
+  --color-text-pri-shadow: rgba(22, 22, 22, 0.2);
+
+  --color-action: #daae95;
+  --color-action-light: #523c2f;
+  --color-accent-alt: var(--color-action);
+
+}
+
+:root[data-theme="dark"] .bg-white {
+  background-color: var(--color-bg-pri) !important;
+}
+
+:root[data-theme="dark"] .form-control,
+:root[data-theme="dark"] .form-check-input {
+  color: var(--color-text-pri);
+  background-color: var(--color-bg-field);
+  border-color: var(--color-line);
+}
+
+:root[data-theme="dark"] .form-control:focus,
+:root[data-theme="dark"] .form-check-input:focus {
+  color: var(--color-text-pri);
+  background-color: var(--color-bg-field);
+  border-color: var(--color-action);
+  box-shadow: 0 0 0 0.2rem var(--color-action-light);
+}
+
+:root[data-theme="dark"] .form-control::placeholder {
+  color: var(--color-text-muted);
 }
 
 
@@ -201,8 +265,8 @@ html {
 .soft-swap-enter-active,
 .soft-swap-leave-active {
   transition:
-    opacity var(--motion-soft-duration) var(--motion-soft-ease),
-    transform var(--motion-soft-duration) var(--motion-soft-ease);
+    opacity var(--motion-soft-duration) ease,
+    transform var(--motion-soft-duration) ease;
 }
 
 .soft-swap-enter-from,

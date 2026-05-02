@@ -122,19 +122,19 @@ const handleInput = (event: Event) => {
 }
 
 .filled-input-content::input-placeholder{
-	color: var(--color-text-trifle);
+	color: var(--color-text-muted);
 }
 .filled-input-content::-webkit-input-placeholder{
-	color: var(--color-text-trifle);
+	color: var(--color-text-muted);
 }
 .filled-input-content::-moz-placeholder{
-	color: var(--color-text-trifle);
+	color: var(--color-text-muted);
 }
 .filled-input-content::-moz-placeholder{
-	color: var(--color-text-trifle);
+	color: var(--color-text-muted);
 }
 .filled-input-content::-ms-input-placeholder{
-	color: var(--color-text-trifle);
+	color: var(--color-text-muted);
 }
 
 </style>

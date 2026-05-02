@@ -38,7 +38,7 @@
             </div>
           </div>
         </div>
-        <p class="text-center text-secondary small">
+        <p class="text-center f-s fc-sec">
           <span>Uploading...</span>
         </p>
       </div>

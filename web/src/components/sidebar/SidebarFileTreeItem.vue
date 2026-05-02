@@ -253,8 +253,9 @@ const onLeave = childrenMotion.leave;
   align-items: center;
   gap: var(--hint-gap);
   width: 100%;
+  min-width: 0;
 
-  transition: background-color var(--motion-soft-duration) var(--motion-soft-ease);
+  transition: background-color var(--motion-soft-duration) ease;
 }
 
 .node-content > .meta-tag {
@@ -270,12 +271,13 @@ const onLeave = childrenMotion.leave;
 
 .node-text-slot {
   width: 100%;
+  min-width: 0;
   padding: 1px 0;
   min-height: var(--node-text-height);
 }
 
 .dir-icon {
-  transition: fill var(--motion-soft-duration) var(--motion-soft-ease);
+  transition: fill var(--motion-soft-duration) ease;
 }
 
 .node-toggle-btn,
@@ -306,7 +308,7 @@ const onLeave = childrenMotion.leave;
   border-top: var(--tree-caret-height) solid transparent;
   border-bottom: var(--tree-caret-height) solid transparent;
   border-left: var(--tree-caret-width) solid var(--color-text-sec);
-  transition: transform var(--motion-soft-duration) var(--motion-soft-ease);
+  transition: transform var(--motion-soft-duration) ease;
 }
 
 .disclosure-caret.is-hidden {
@@ -324,21 +326,25 @@ const onLeave = childrenMotion.leave;
   overflow: hidden;
   text-overflow: ellipsis;
   width: 100%; 
+  max-width: 100%;
   min-height: var(--node-text-height);
-  display: flex;
-  align-items: center;
+  display: block;
   box-sizing: border-box;
   line-height: var(--node-text-line-height);
 }
 
 .node-text-wrapper .file-name { 
   color: var(--color-text-sec);
-  transition: color var(--motion-soft-duration) var(--motion-soft-ease);
+  transition: color var(--motion-soft-duration) ease;
 }
 
 .node-content.is-selected .node-text-wrapper span,
 .node-content:hover .node-text-wrapper span {
   color: var(--color-text-pri);
+}
+
+.dir-icon {
+  fill: var(--color-text-pri);
 }
 
 .node-content.is-selected .dir-icon,

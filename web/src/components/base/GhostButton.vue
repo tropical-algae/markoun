@@ -138,10 +138,10 @@ onBeforeUnmount(() => {
   
   cursor: pointer;
   transition: 
-    background-color var(--motion-soft-duration) var(--motion-soft-ease),
-    color var(--motion-soft-duration) var(--motion-soft-ease),
-    border-color var(--motion-soft-duration) var(--motion-soft-ease),
-    opacity var(--motion-soft-duration) var(--motion-soft-ease);
+    background-color var(--motion-soft-duration) ease,
+    color var(--motion-soft-duration) ease,
+    border-color var(--motion-soft-duration) ease,
+    opacity var(--motion-soft-duration) ease;
   user-select: none;
 }
 

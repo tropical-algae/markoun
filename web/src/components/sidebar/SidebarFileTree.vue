@@ -8,7 +8,7 @@
   </BaseHeader>
   
   <div
-    class="file-tree-root flex-grow-1 overflow-y-scroll my-2"
+    class="file-tree-root flex-grow-1 overflow-y-scroll p-0 my-3"
     :class="{ 'is-root-dragover': isRootDirectoryDragOver }"
     @dragenter.prevent="handleRootDirectoryDragEnter"
     @dragover.prevent="handleRootDirectoryDragOver"
@@ -128,7 +128,7 @@ onMounted(async () => {
   height: 100%;
   display: flex;
   flex-direction: column;
-  transition: background-color var(--motion-soft-duration) var(--motion-soft-ease);
+  transition: background-color var(--motion-soft-duration) ease;
   border-radius: var(--tree-row-radius);
 }
 

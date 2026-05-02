@@ -2,21 +2,28 @@
   <div class="d-flex justify-content-between align-items-center pb-2">
     
     <div class="setting-copy d-flex flex-column pe-3">
-      <span class="fw-bold f-s">{{ setting.name }}</span>
-      <span class="text-truncate f-xs">{{ setting.desc }}</span>
+      <span class="fw-bold f-s fc-pri">{{ setting.name }}</span>
+      <span class="text-truncate f-xs fc-sec">{{ setting.desc }}</span>
     </div>
 
     <div class="flex-shrink-0">
       
-      <div v-if="setting.type === SysSettingType.BOOL" class="form-check form-switch m-0">
+      <div v-if="setting.type === SysSettingType.BOOL">
+        <label
+          class="switch-control"
+          :class="{ 'is-disabled': pending }"
+          :for="setting.id"
+        >
         <input 
-          class="setting-switch form-check-input"
+          class="switch-input"
           type="checkbox" 
           :id="setting.id"
           :checked="(setting as BoolSysSetting).value"
           :disabled="pending"
           @change="handleChange($event)"
         >
+          <span class="switch-track"></span>
+        </label>
       </div>
 
       <div v-else-if="setting.type === SysSettingType.STR">
@@ -90,10 +97,6 @@ const commitDraft = () => {
 <style scoped>
 .setting-copy {
   min-width: 0;
-}
-
-.setting-switch {
-  cursor: pointer;
 }
 
 .setting-text-input {
