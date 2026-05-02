@@ -49,3 +49,80 @@ def test_item_children_api(client: TestClient):
     assert len(child_data["children"]) == 1
     assert child_data["children"][0]["path"] == f"{dir_name}/{file_name}.md"
     assert child_data["children"][0]["type"] == "file"
+
+
+@pytest.mark.run(order=7)
+def test_move_item_api(client: TestClient):
+    suffix = uuid4().hex[:8]
+    source_dir = f"move-source-{suffix}"
+    target_dir = f"move-target-{suffix}"
+    file_name = f"note-{suffix}"
+
+    for dir_name in [source_dir, target_dir]:
+        response = client.post(
+            url=f"{settings.API_PREFIX}/dir/create",
+            json={"path": "./", "name": dir_name},
+        )
+        assert response.status_code == 200
+
+    file_response = client.post(
+        url=f"{settings.API_PREFIX}/file/create",
+        json={"path": source_dir, "name": file_name},
+    )
+    assert file_response.status_code == 200
+
+    move_response = client.post(
+        url=f"{settings.API_PREFIX}/item/move",
+        json={"path": f"{source_dir}/{file_name}.md", "target_dir": target_dir},
+    )
+    move_data = move_response.json()["data"]
+
+    assert move_response.status_code == 200
+    assert move_data["path"] == f"{target_dir}/{file_name}.md"
+    assert move_data["type"] == "file"
+
+    source_children_response = client.get(
+        url=f"{settings.API_PREFIX}/item/children",
+        params={"path": source_dir},
+    )
+    target_children_response = client.get(
+        url=f"{settings.API_PREFIX}/item/children",
+        params={"path": target_dir},
+    )
+
+    assert source_children_response.status_code == 200
+    assert source_children_response.json()["data"]["children"] == []
+    assert target_children_response.status_code == 200
+    assert target_children_response.json()["data"]["children"][0]["path"] == (
+        f"{target_dir}/{file_name}.md"
+    )
+
+
+@pytest.mark.run(order=8)
+def test_move_item_rejects_existing_target(client: TestClient):
+    suffix = uuid4().hex[:8]
+    source_dir = f"conflict-source-{suffix}"
+    target_dir = f"conflict-target-{suffix}"
+    file_name = f"note-{suffix}"
+
+    for dir_name in [source_dir, target_dir]:
+        response = client.post(
+            url=f"{settings.API_PREFIX}/dir/create",
+            json={"path": "./", "name": dir_name},
+        )
+        assert response.status_code == 200
+
+    for dir_name in [source_dir, target_dir]:
+        response = client.post(
+            url=f"{settings.API_PREFIX}/file/create",
+            json={"path": dir_name, "name": file_name},
+        )
+        assert response.status_code == 200
+
+    move_response = client.post(
+        url=f"{settings.API_PREFIX}/item/move",
+        json={"path": f"{source_dir}/{file_name}.md", "target_dir": target_dir},
+    )
+
+    assert move_response.status_code == 409
+    assert move_response.json()["message"] == "File already exists"

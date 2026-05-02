@@ -7,6 +7,7 @@ from markoun.app.api.deps import get_current_user
 from markoun.app.services.item_service import (
     get_directory_children,
     get_file_tree,
+    move_item,
     remove_item,
     rename_item,
 )
@@ -19,6 +20,7 @@ from markoun.core.model.file import (
     DirectoryChildrenResponse,
     DirNode,
     FileNode,
+    ItemMoveRequest,
     ItemRenameRequest,
 )
 from markoun.core.model.user import ScopeType
@@ -76,3 +78,14 @@ async def api_item_rename(
     abs_path = relative_path_to_abs_path(Path(data.path))
     rename_item(abs_path, data.new_name)
     return MSG_SUCCESS
+
+
+@router.post("/move", response_model=FileNode)
+@exception_handling(CONSTANT.RESP_SERVER_ERROR)
+async def api_item_move(
+    data: ItemMoveRequest,
+    _: UserAccount = Security(get_current_user, scopes=[ScopeType.ADMIN, ScopeType.USER]),
+) -> FileNode:
+    abs_path = relative_path_to_abs_path(Path(data.path))
+    abs_target_dir = relative_path_to_abs_path(Path(data.target_dir))
+    return await move_item(abs_path, abs_target_dir, DISPLAYED_FILE_TYPES)

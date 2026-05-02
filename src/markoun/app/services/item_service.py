@@ -112,6 +112,46 @@ def remove_item(abs_path: Path) -> None:
         shutil.rmtree(abs_path)
 
 
+async def move_item(
+    source_path: str | Path,
+    target_dir: str | Path,
+    displayed_file_types: set[str],
+) -> FileNode:
+    source_path = Path(source_path).resolve()
+    target_dir = Path(target_dir).resolve()
+
+    if not source_path.exists():
+        logger.error(f"Failed to move {source_path}, file not existed!")
+        raise HTTPException(**CONSTANT.SERV_FILE_NOT_EXISTED)
+
+    if not target_dir.exists() or not target_dir.is_dir():
+        logger.error(
+            f"Failed to move {source_path}, target dir {target_dir} not existed!"
+        )
+        raise HTTPException(**CONSTANT.SERV_FILE_NOT_EXISTED)
+
+    if source_path.parent == target_dir:
+        node = await _get_node_summary(source_path, displayed_file_types)
+        if node is None:
+            raise HTTPException(**CONSTANT.SERV_FILE_NOT_EXISTED)
+        return node
+
+    if source_path.is_dir() and target_dir.is_relative_to(source_path):
+        logger.error(f"Failed to move {source_path} into itself or child {target_dir}")
+        raise HTTPException(**CONSTANT.SERV_ITEM_MOVE_FORBIDDEN)
+
+    new_path = target_dir / source_path.name
+    if new_path.exists():
+        logger.error(f"Failed to move {source_path}, target {new_path} existed!")
+        raise HTTPException(**CONSTANT.SERV_FILE_EXISTED)
+
+    source_path.rename(new_path)
+    node = await _get_node_summary(new_path, displayed_file_types)
+    if node is None:
+        raise HTTPException(**CONSTANT.SERV_FILE_NOT_EXISTED)
+    return node
+
+
 def rename_item(path: str | Path, new_name: str) -> None:
     path = Path(path)
     if not path.exists():

@@ -91,6 +91,10 @@ class Constant(BaseSettings):
         "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
         "detail": "File does not exist",
     }
+    SERV_ITEM_MOVE_FORBIDDEN: dict = {
+        "status_code": status.HTTP_400_BAD_REQUEST,
+        "detail": "Cannot move item into itself or its child",
+    }
     SERV_FILE_SAVE_FAIL: dict = {
         "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
         "detail": "Failed to save file",
