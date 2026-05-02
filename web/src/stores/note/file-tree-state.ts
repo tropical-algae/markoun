@@ -2,6 +2,7 @@ import { computed, ref } from 'vue'
 import { getDirectoryChildrenApi } from '@/api/item'
 import type { DirectoryLoadState, FsNode } from '@/types/file-system'
 import {
+  getParentPath,
   isPathInside,
   normalizeNodePath,
   replacePathPrefix,
@@ -162,6 +163,15 @@ export const useFileTreeState = () => {
     return normalizedNode
   }
 
+  const removeNodeFromParentDirectory = (path: string) => {
+    const normalizedPath = normalizeNodePath(path)
+    const parentPath = getParentPath(normalizedPath)
+    const nextChildren = getDirectoryChildren(parentPath).filter((child) => {
+      return child.path !== normalizedPath
+    })
+    replaceDirectoryChildren(parentPath, nextChildren)
+  }
+
   const remapDirectoryTreePathPrefix = (
     oldPath: string,
     newPath: string,
@@ -220,6 +230,25 @@ export const useFileTreeState = () => {
     expandedDirPaths.value = nextExpandedDirPaths
   }
 
+  const moveNodeToDirectory = (
+    oldPath: string,
+    targetDir: string,
+    node: FsNode,
+  ) => {
+    const normalizedOldPath = normalizeNodePath(oldPath)
+    const normalizedTargetDir = normalizeNodePath(targetDir)
+    const normalizedNode = normalizeFsNode(node)
+
+    if (normalizedOldPath === normalizedNode.path) {
+      return normalizedNode
+    }
+
+    removeNodeFromParentDirectory(normalizedOldPath)
+    remapDirectoryTreePathPrefix(normalizedOldPath, normalizedNode.path, normalizedNode.name)
+    upsertNode(normalizedTargetDir, normalizedNode)
+    return normalizedNode
+  }
+
   return {
     rootNodes,
     getDirectoryChildren,
@@ -233,6 +262,6 @@ export const useFileTreeState = () => {
     upsertNode,
     remapDirectoryTreePathPrefix,
     removeNodeFromDirectoryTree,
+    moveNodeToDirectory,
   }
 }
-

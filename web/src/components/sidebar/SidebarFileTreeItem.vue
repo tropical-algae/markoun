@@ -6,12 +6,19 @@
     >
       <div
         class="node-content"
-        :class="{ 'is-selected': isActive, 'is-dragover': isDirectoryDragOver }"
+        :class="{
+          'is-selected': isActive,
+          'is-dragover': isDirectoryDragOver,
+          'is-node-dragging': isNodeDragging,
+        }"
+        :draggable="!isRenaming"
         @click="handleClickNode"
-        @dragenter.prevent="handleDirectoryDragEnter"
-        @dragover.prevent="handleDirectoryDragOver"
-        @dragleave.prevent="handleDirectoryDragLeave"
-        @drop.prevent="handleDirectoryDrop"
+        @dragstart.stop="handleDragStart"
+        @dragend="handleNodeDragEnd"
+        @dragenter.prevent.stop="handleDirectoryDragEnter"
+        @dragover.prevent.stop="handleDirectoryDragOver"
+        @dragleave.prevent.stop="handleDirectoryDragLeave"
+        @drop.prevent.stop="handleDirectoryDrop"
       >
         <button
           v-if="isDir"
@@ -110,7 +117,8 @@ import { useNodeStore } from '@/stores/note';
 import type { AsyncStatus } from '@/types/async';
 import { useHeightMotion } from '@/composables/useHeightMotion';
 import { useFileTreeItemRename } from '@/composables/useFileTreeItemRename';
-import { useDirectoryFileDrop } from '@/composables/useDirectoryFileDrop';
+import { useFileTreeDropTarget } from '@/composables/useFileTreeDropTarget';
+import { useFileTreeNodeDrag } from '@/composables/useFileTreeNodeDrag';
 
 import FolderOpenIcon from "@/assets/icons/folder-open.svg"
 import FolderIcon from "@/assets/icons/folder.svg"
@@ -158,6 +166,16 @@ const {
   submitRename,
   cancelRename,
 } = useFileTreeItemRename(node, nodeStore.renameNode)
+const {
+  isNodeDragging,
+  handleNodeDragStart,
+  handleNodeDragEnd,
+} = useFileTreeNodeDrag(node, () => !isRenaming.value)
+
+const handleDragStart = (event: DragEvent) => {
+  cancelLongPress()
+  handleNodeDragStart(event)
+}
 
 const handleClickNode = async () => {
   if (isLongPressed.value) {
@@ -196,10 +214,11 @@ const {
   handleDirectoryDragOver,
   handleDirectoryDragLeave,
   handleDirectoryDrop,
-} = useDirectoryFileDrop({
+} = useFileTreeDropTarget({
   isDirectory: isDir,
   getDestinationPath: () => node.value.path,
   selectDirectory: () => nodeStore.setCurrentNode(node.value),
+  moveNode: nodeStore.moveNode,
 })
 
 const onEnter = (element: Element, done: () => void) => {
@@ -336,6 +355,10 @@ const onLeave = childrenMotion.leave;
   background-color: var(--color-action-light);
   /* border: 1.5px dashed var(--color-action); */
   box-shadow: inset 0 0 0 1px var(--color-action);
+}
+
+.node-content.is-node-dragging {
+  opacity: 0.45;
 }
 
 .node-content.is-dragover .node-text-wrapper span {

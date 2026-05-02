@@ -27,7 +27,7 @@ import {
   saveNoteApi,
   saveNoteKeepalive,
 } from "@/api/file";
-import { removeItemApi, renameItemApi } from "@/api/item";
+import { moveItemApi, removeItemApi, renameItemApi } from "@/api/item";
 import { createDirApi } from "@/api/dir";
 import { getWelcomeNoteApi } from "@/api/system";
 import { useFileTreeState } from "@/stores/note/file-tree-state";
@@ -457,6 +457,78 @@ export const useNodeStore = defineStore('note', () => {
     toastStore.pushNotice('info', "Rename successful!")
   }
 
+  const moveNode = async (node: FsNode, targetDir: string): Promise<void> => {
+    const normalizedNode = normalizeFsNode(node)
+    const normalizedOldPath = normalizedNode.path
+    const normalizedTargetDir = normalizeNodePath(targetDir)
+    const currentParent = getParentPath(normalizedOldPath)
+
+    if (currentParent === normalizedTargetDir) {
+      return
+    }
+
+    if (
+      currentFileNode.value
+      && isPathInside(currentFileNode.value.path, normalizedOldPath)
+    ) {
+      await saveCurrentFileIfDirty()
+    }
+
+    const response = await actionLedger.runAction(`move:${normalizedOldPath}`, async () => {
+      return await moveItemApi(normalizedOldPath, normalizedTargetDir)
+    })
+    const movedNode = fileTree.moveNodeToDirectory(
+      normalizedOldPath,
+      normalizedTargetDir,
+      response.data,
+    )
+
+    currentNode.value = remapReferencedNode(
+      currentNode.value,
+      normalizedOldPath,
+      movedNode.path,
+      movedNode.name,
+    )
+    currentFileNode.value = remapReferencedNode(
+      currentFileNode.value,
+      normalizedOldPath,
+      movedNode.path,
+      movedNode.name,
+    )
+    currentPreviewImageNode.value = remapReferencedNode(
+      currentPreviewImageNode.value,
+      normalizedOldPath,
+      movedNode.path,
+      movedNode.name,
+    )
+
+    const nextCurrentFilePath = replacePathPrefix(
+      currentFile.value.path,
+      normalizedOldPath,
+      movedNode.path,
+    )
+    if (nextCurrentFilePath !== currentFile.value.path) {
+      currentFile.value = {
+        ...currentFile.value,
+        path: nextCurrentFilePath,
+        name: currentFile.value.path === normalizedOldPath
+          ? movedNode.name
+          : currentFile.value.name,
+        meta: {
+          ...currentFile.value.meta,
+          path: replacePathPrefix(
+            currentFile.value.meta.path || '',
+            normalizedOldPath,
+            movedNode.path,
+          ),
+        },
+      }
+    }
+
+    await fileTree.ensureDirectoryVisible(normalizedTargetDir)
+    toastStore.pushNotice('info', "Move successful!")
+  }
+
   return { 
     rootNodes,
     welcomeNoteState,
@@ -496,5 +568,6 @@ export const useNodeStore = defineStore('note', () => {
     saveCurrentFileBeforeUnload,
     deletedItem,
     renameNode,
+    moveNode,
   }
 });

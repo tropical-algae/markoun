@@ -1,10 +1,10 @@
 <template>
   <div class="d-flex flex-column h-100">
-    <BaseHeader>
+    <BaseHeader class="p-0">
       <div class="f-m fw-bold text-uppercase">Account</div>
     </BaseHeader>
 
-    <div class="container-fluid flex-grow-1 overflow-y-scroll py-2 user-sidebar-body">
+    <div class="user-sidebar-body container-fluid flex-grow-1 overflow-y-scroll px-0 py-2">
       <section class="mb-5">
         <div class="text-uppercase fw-bold mb-3 f-m">Profile</div>
 
@@ -116,7 +116,7 @@
       </section>
     </div>
 
-    <div class="p-3 border-top bg-white flex-shrink-0 user-sidebar-footer">
+    <div class="user-sidebar-footer border-top bg-white flex-shrink-0 py-3">
       <GhostButton
         class="w-100 f-s"
         theme="danger"

@@ -1,15 +1,17 @@
 <template>
   <aside class="sidebar-wrapper d-flex flex-row">
-    <div class="sidebar-container d-flex flex-column gap-2 px-2">
+    <div class="sidebar-container px-2">
       <BaseHeader class="p-0">
         <button @click="toggleSubSidebar()">
           <component :is="SidebarToggleIcon" class="icon-btn"></component>
         </button>
       </BaseHeader>
 
-      <button v-for="(item, _) in sideBtns" @click="item.func()">
-        <component :is="item.icon" class="icon-btn"></component>
-      </button>
+      <div class=" d-flex flex-column gap-2 mt-2">
+        <button v-for="(item, _) in sideBtns" @click="item.func()">
+          <component :is="item.icon" class="icon-btn"></component>
+        </button>
+      </div>
       <div class="vertical-line turn-right"></div>
     </div>
 
@@ -19,7 +21,7 @@
       :style="{ width: currentWidth }"
     >
       <div
-        class="sub-sidebar-inner d-flex flex-column"
+        class="sub-sidebar-inner d-flex flex-column px-2"
         :style="{ width: subSidebarWidth + 'px' }"
       >
         <SidebarFileTree v-if="currentMode === SidebarMode.FileTree" />

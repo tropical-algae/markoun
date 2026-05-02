@@ -1,5 +1,5 @@
 import type { ApiResponse } from '@/types/api'
-import type { DirectoryChildrenResponse } from '@/types/file-system'
+import type { DirectoryChildrenResponse, FsNode } from '@/types/file-system'
 import request from '@/utils/request'
 
 /**
@@ -46,5 +46,22 @@ export const renameItemApi = (
       path: path,
       new_name: new_name
     }
+  })
+}
+
+/**
+ * 移动文件/文件夹到目标目录
+ */
+export const moveItemApi = (
+  path: string,
+  targetDir: string,
+): Promise<ApiResponse<FsNode>> => {
+  return request({
+    url: '/api/v1/item/move',
+    method: 'post',
+    data: {
+      path,
+      target_dir: targetDir,
+    },
   })
 }

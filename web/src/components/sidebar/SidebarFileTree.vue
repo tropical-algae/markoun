@@ -1,10 +1,20 @@
 <template>
-  <div class="d-flex justify-content-center align-items-center gap-2 py-2">
-    <button v-for="(item, _) in toolBtns" @click="item.func()">
-      <component :is="item.icon" class="icon-btn"></component>
-    </button>
-  </div>
-  <div class="px-2 flex-grow-1 overflow-y-scroll">
+  <BaseHeader class="p-0">
+    <div class="d-flex justify-content-center align-items-center gap-2 py-2">
+      <button v-for="(item, _) in toolBtns" @click="item.func()">
+        <component :is="item.icon" class="icon-btn"></component>
+      </button>
+    </div>
+  </BaseHeader>
+  
+  <div
+    class="file-tree-root flex-grow-1 overflow-y-scroll my-2"
+    :class="{ 'is-root-dragover': isRootDirectoryDragOver }"
+    @dragenter.prevent="handleRootDirectoryDragEnter"
+    @dragover.prevent="handleRootDirectoryDragOver"
+    @dragleave.prevent="handleRootDirectoryDragLeave"
+    @drop.prevent="handleRootDirectoryDrop"
+  >
     <AsyncGate :status="rootLoadStatus">
       <template #loading>
         <div class="tree-loading-state py-2">
@@ -46,6 +56,7 @@ import UploadFileModal from "@/components/overlay/modals/UploadFileModal.vue"
 import DeleteItemModal from "@/components/overlay/modals/DeleteItemModal.vue"
 import ImagePreviewModal from "@/components/overlay/modals/ImagePreviewModal.vue"
 
+import BaseHeader from '@/components/base/BaseHeader.vue';
 import SidebarFileTreeItem from "@/components/sidebar/SidebarFileTreeItem.vue"
 import AsyncGate from "@/components/base/AsyncGate.vue"
 import BaseSkeleton from "@/components/base/BaseSkeleton.vue"
@@ -57,18 +68,32 @@ import TrashIcon from "@/assets/icons/trash.svg"
 
 import { useNodeStore } from "@/stores/note"
 import type { AsyncStatus } from "@/types/async"
+import { useFileTreeDropTarget } from "@/composables/useFileTreeDropTarget"
+import { ROOT_DIRECTORY_PATH } from "@/utils/file-system"
 
 const showNewNote = ref(false);
 const showNewFolder = ref(false);
 const showUpload = ref(false);
 const deleteItem = ref(false);
 const nodeStore = useNodeStore()
+const isRootDirectory = computed(() => true)
 const rootLoadStatus = computed<AsyncStatus>(() => {
   const state = nodeStore.getDirectoryLoadState('.')
   if (state === 'loaded') {
     return 'ready'
   }
   return state
+})
+const {
+  isDirectoryDragOver: isRootDirectoryDragOver,
+  handleDirectoryDragEnter: handleRootDirectoryDragEnter,
+  handleDirectoryDragOver: handleRootDirectoryDragOver,
+  handleDirectoryDragLeave: handleRootDirectoryDragLeave,
+  handleDirectoryDrop: handleRootDirectoryDrop,
+} = useFileTreeDropTarget({
+  isDirectory: isRootDirectory,
+  getDestinationPath: () => ROOT_DIRECTORY_PATH,
+  moveNode: nodeStore.moveNode,
 })
 
 const toolBtns = [
@@ -97,5 +122,18 @@ onMounted(async () => {
   align-items: center;
   gap: 6px;
   padding: var(--tree-row-padding);
+}
+
+.file-tree-root {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  transition: background-color var(--motion-soft-duration) var(--motion-soft-ease);
+  border-radius: var(--tree-row-radius);
+}
+
+.file-tree-root.is-root-dragover {
+  background-color: var(--color-action-light);
+  box-shadow: 0 0 0 1px var(--color-action);
 }
 </style>

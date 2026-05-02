@@ -1,10 +1,10 @@
 <template>
   <div class="d-flex flex-column h-100">
-    <BaseHeader>
+    <BaseHeader class="p-0">
       <div class="f-m fw-bold text-uppercase">Settings</div>
     </BaseHeader>
 
-    <div class="container-fluid flex-grow-1 overflow-y-scroll py-2 settings-body">
+    <div class="container-fluid flex-grow-1 overflow-y-scroll px-0 py-2 settings-body">
       <AsyncGate :status="sysStore.settingsState">
         <template #loading>
           <section class="mb-5">
@@ -30,7 +30,7 @@
       </AsyncGate>
     </div>
 
-    <div class="p-3 border-top bg-white flex-shrink-0 settings-footer">
+    <div class="settings-footer border-top bg-white flex-shrink-0 py-3">
       <div class="settings-footer-row d-flex justify-content-between align-items-center text-muted small mb-1">
         <span class="text-uppercase f-s">App Version:</span>
         <div class="settings-footer-value-slot">
