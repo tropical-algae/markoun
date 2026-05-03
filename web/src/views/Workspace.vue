@@ -1,6 +1,6 @@
 <template>
   <div class="d-flex flex-column vh-100">
-    <div class="workspace-header small fw-bold px-2">
+    <div class="workspace-header f-m fw-bold px-2 fc-pri">
       Markoun
     </div>
 
@@ -9,7 +9,7 @@
       <NoteEditor />
     </div>
 
-    <div class="workspace-footer text-muted px-2">
+    <div class="workspace-footer f-s px-2 fc-sec">
       &copy; 2026 tropical algae. MIT License
     </div>
 
@@ -55,17 +55,18 @@ const handlePageHide = () => {
   box-sizing: border-box;
   display: flex;
   align-items: center;
+  transition: border-color var(--motion-theme-duration) ease;
   /* justify-content: center; */
 }
 
 .workspace-footer {
   height: var(--icon-button-size);
   flex-shrink: 0;
-  font-size: 0.7rem;
 	border-top: 1px solid var(--color-line);
   box-sizing: border-box;
   display: flex;
   align-items: center;
   user-select: none;
+  transition: border-color var(--motion-theme-duration) ease;
 }
 </style>

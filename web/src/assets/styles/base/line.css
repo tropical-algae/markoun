@@ -1,6 +1,7 @@
 .separator-line {
   width: 100%;
   color: var(--color-text-pri);
+  transition: border-color 10s ease;
 } 
 
 .vertical-line {
@@ -11,7 +12,7 @@
   background-color: transparent;
   /* background-color: var(--color-line); */
 
-  transition: border-color var(--motion-medium-duration) ease;
+  transition: border-color var(--motion-theme-duration) ease;
   z-index: 9;
 }
 
@@ -27,4 +28,13 @@
 
 .vertical-line.col-drag {
   cursor: col-resize;
+}
+
+.vertical-line.col-drag.is-resizing {
+  cursor: default;
+}
+
+.horizontal-line-top {
+  border-top: 1px solid var(--color-line);
+  transition: border-color var(--motion-theme-duration) ease;
 }

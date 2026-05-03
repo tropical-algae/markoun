@@ -50,6 +50,11 @@ class ItemRenameRequest(BaseModel):
     new_name: str
 
 
+class ItemMoveRequest(BaseModel):
+    path: str
+    target_dir: str
+
+
 class UploadedFileResponse(BaseModel):
     filename: str
     node: FileNode | None = None

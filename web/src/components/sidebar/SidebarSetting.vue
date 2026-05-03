@@ -4,7 +4,16 @@
       <div class="f-m fw-bold text-uppercase">Settings</div>
     </BaseHeader>
 
-    <div class="container-fluid flex-grow-1 overflow-y-scroll py-2 settings-body">
+    <div class="settings-body container-fluid flex-grow-1 overflow-y-scroll p-0 my-3">
+
+      <div class="text-uppercase fw-bold mb-2 f-m fc-pri">Appearance</div>
+
+      <section class="mb-4">
+          <SidebarSettingTheme />
+      </section>
+
+      <div class="text-uppercase fw-bold mb-2 f-m fc-pri">General</div>
+
       <AsyncGate :status="sysStore.settingsState">
         <template #loading>
           <section class="mb-5">
@@ -30,8 +39,8 @@
       </AsyncGate>
     </div>
 
-    <div class="p-3 border-top bg-white flex-shrink-0 settings-footer">
-      <div class="settings-footer-row d-flex justify-content-between align-items-center text-muted small mb-1">
+    <div class="settings-footer horizontal-line-top flex-shrink-0 py-3">
+      <div class="settings-footer-row d-flex justify-content-between align-items-center mb-1 f-s fc-pri">
         <span class="text-uppercase f-s">App Version:</span>
         <div class="settings-footer-value-slot">
           <AsyncGate :status="sysStore.sysStatusState" class="settings-footer-gate">
@@ -44,7 +53,7 @@
         </div>
       </div>
 
-      <div class="settings-footer-row d-flex justify-content-between align-items-center text-muted small">
+      <div class="settings-footer-row d-flex justify-content-between align-items-center f-s fc-pri">
         <span class="text-uppercase f-s">System Status:</span>
         <div class="settings-footer-value-slot">
           <AsyncGate :status="sysStore.sysStatusState" class="settings-footer-gate">
@@ -68,6 +77,7 @@ import AsyncGate from '@/components/base/AsyncGate.vue';
 import BaseHeader from '@/components/base/BaseHeader.vue';
 import BaseSkeleton from '@/components/base/BaseSkeleton.vue';
 import SidebarSettingItem from '@/components/sidebar/SidebarSettingItem.vue';
+import SidebarSettingTheme from '@/components/sidebar/SidebarSettingTheme.vue';
 
 const sysStore = useSysStore()
 

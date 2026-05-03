@@ -6,12 +6,19 @@
     >
       <div
         class="node-content"
-        :class="{ 'is-selected': isActive, 'is-dragover': isDirectoryDragOver }"
+        :class="{
+          'is-selected': isActive,
+          'is-dragover': isDirectoryDragOver,
+          'is-node-dragging': isNodeDragging,
+        }"
+        :draggable="!isRenaming"
         @click="handleClickNode"
-        @dragenter.prevent="handleDirectoryDragEnter"
-        @dragover.prevent="handleDirectoryDragOver"
-        @dragleave.prevent="handleDirectoryDragLeave"
-        @drop.prevent="handleDirectoryDrop"
+        @dragstart.stop="handleDragStart"
+        @dragend="handleNodeDragEnd"
+        @dragenter.prevent.stop="handleDirectoryDragEnter"
+        @dragover.prevent.stop="handleDirectoryDragOver"
+        @dragleave.prevent.stop="handleDirectoryDragLeave"
+        @drop.prevent.stop="handleDirectoryDrop"
       >
         <button
           v-if="isDir"
@@ -110,7 +117,8 @@ import { useNodeStore } from '@/stores/note';
 import type { AsyncStatus } from '@/types/async';
 import { useHeightMotion } from '@/composables/useHeightMotion';
 import { useFileTreeItemRename } from '@/composables/useFileTreeItemRename';
-import { useDirectoryFileDrop } from '@/composables/useDirectoryFileDrop';
+import { useFileTreeDropTarget } from '@/composables/useFileTreeDropTarget';
+import { useFileTreeNodeDrag } from '@/composables/useFileTreeNodeDrag';
 
 import FolderOpenIcon from "@/assets/icons/folder-open.svg"
 import FolderIcon from "@/assets/icons/folder.svg"
@@ -158,6 +166,16 @@ const {
   submitRename,
   cancelRename,
 } = useFileTreeItemRename(node, nodeStore.renameNode)
+const {
+  isNodeDragging,
+  handleNodeDragStart,
+  handleNodeDragEnd,
+} = useFileTreeNodeDrag(node, () => !isRenaming.value)
+
+const handleDragStart = (event: DragEvent) => {
+  cancelLongPress()
+  handleNodeDragStart(event)
+}
 
 const handleClickNode = async () => {
   if (isLongPressed.value) {
@@ -196,10 +214,11 @@ const {
   handleDirectoryDragOver,
   handleDirectoryDragLeave,
   handleDirectoryDrop,
-} = useDirectoryFileDrop({
+} = useFileTreeDropTarget({
   isDirectory: isDir,
   getDestinationPath: () => node.value.path,
   selectDirectory: () => nodeStore.setCurrentNode(node.value),
+  moveNode: nodeStore.moveNode,
 })
 
 const onEnter = (element: Element, done: () => void) => {
@@ -234,8 +253,9 @@ const onLeave = childrenMotion.leave;
   align-items: center;
   gap: var(--hint-gap);
   width: 100%;
+  min-width: 0;
 
-  transition: background-color var(--motion-soft-duration) var(--motion-soft-ease);
+  transition: background-color var(--motion-soft-duration) ease;
 }
 
 .node-content > .meta-tag {
@@ -251,12 +271,13 @@ const onLeave = childrenMotion.leave;
 
 .node-text-slot {
   width: 100%;
+  min-width: 0;
   padding: 1px 0;
   min-height: var(--node-text-height);
 }
 
 .dir-icon {
-  transition: fill var(--motion-soft-duration) var(--motion-soft-ease);
+  transition: fill var(--motion-soft-duration) ease;
 }
 
 .node-toggle-btn,
@@ -287,7 +308,7 @@ const onLeave = childrenMotion.leave;
   border-top: var(--tree-caret-height) solid transparent;
   border-bottom: var(--tree-caret-height) solid transparent;
   border-left: var(--tree-caret-width) solid var(--color-text-sec);
-  transition: transform var(--motion-soft-duration) var(--motion-soft-ease);
+  transition: transform var(--motion-soft-duration) ease;
 }
 
 .disclosure-caret.is-hidden {
@@ -305,21 +326,25 @@ const onLeave = childrenMotion.leave;
   overflow: hidden;
   text-overflow: ellipsis;
   width: 100%; 
+  max-width: 100%;
   min-height: var(--node-text-height);
-  display: flex;
-  align-items: center;
+  display: block;
   box-sizing: border-box;
   line-height: var(--node-text-line-height);
 }
 
 .node-text-wrapper .file-name { 
   color: var(--color-text-sec);
-  transition: color var(--motion-soft-duration) var(--motion-soft-ease);
+  transition: color var(--motion-soft-duration) ease;
 }
 
 .node-content.is-selected .node-text-wrapper span,
 .node-content:hover .node-text-wrapper span {
   color: var(--color-text-pri);
+}
+
+.dir-icon {
+  fill: var(--color-text-pri);
 }
 
 .node-content.is-selected .dir-icon,
@@ -336,6 +361,10 @@ const onLeave = childrenMotion.leave;
   background-color: var(--color-action-light);
   /* border: 1.5px dashed var(--color-action); */
   box-shadow: inset 0 0 0 1px var(--color-action);
+}
+
+.node-content.is-node-dragging {
+  opacity: 0.45;
 }
 
 .node-content.is-dragover .node-text-wrapper span {

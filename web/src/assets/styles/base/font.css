@@ -8,7 +8,7 @@
 }
 
 .f-m {
-    font-size: 1rem;
+    font-size: 0.9rem;
 }
 
 .f-l {
@@ -17,4 +17,12 @@
 
 .f-xl {
     font-size: 1.25rem;
+}
+
+.fc-pri {
+  color: var(--color-text-pri);
+}
+
+.fc-sec {
+  color: var(--color-text-sec);
 }

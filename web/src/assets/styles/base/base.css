@@ -29,10 +29,134 @@
   white-space: nowrap;
   vertical-align: middle;
   box-sizing: border-box;
+  transition: background-color var(--motion-theme-duration) ease;
 }
 
 .container-header {
   height: var(--layout-header-height);
 	border-bottom: 1px solid var(--color-line);
   box-sizing: border-box;
+  transition: border-color var(--motion-theme-duration) ease;
+}
+
+.choice-control,
+.switch-control {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-text-sec);
+  cursor: pointer;
+  transition:
+    color var(--motion-soft-duration) ease,
+    opacity var(--motion-soft-duration) ease;
+}
+
+.choice-control {
+  gap: var(--hint-gap);
+}
+
+.choice-control:hover,
+.switch-control:hover {
+  color: var(--color-text-pri);
+}
+
+.choice-control.is-disabled,
+.switch-control.is-disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.choice-input,
+.switch-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.choice-box {
+  position: relative;
+  width: var(--choice-checkbox-size);
+  height: var(--choice-checkbox-size);
+  flex-shrink: 0;
+  border: 1.5px solid var(--color-line);
+  border-radius: var(--choice-checkbox-radius);
+  background-color: var(--color-bg-field);
+  box-sizing: border-box;
+  transition:
+    background-color var(--motion-soft-duration) ease,
+    border-color var(--motion-soft-duration) ease,
+    box-shadow var(--motion-soft-duration) ease;
+}
+
+.choice-box::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  width: var(--choice-check-width);
+  height: var(--choice-check-height);
+  border: solid var(--color-text-inverse);
+  border-width: 0 1.5px 1.5px 0;
+  opacity: 0;
+  transform: translate(-50%, -50%) rotate(45deg) scale(0.75);
+  transition:
+    opacity var(--motion-soft-duration) ease,
+    transform var(--motion-soft-duration) ease;
+}
+
+.choice-input:checked + .choice-box {
+  background-color: var(--color-action);
+  border-color: var(--color-action);
+}
+
+.choice-input:checked + .choice-box::after {
+  opacity: 1;
+  transform: translate(-50%, -50%) rotate(45deg) scale(1);
+}
+
+.choice-input:focus-visible + .choice-box,
+.switch-input:focus-visible + .switch-track {
+  box-shadow: 0 0 0 var(--control-focus-ring-size) var(--color-action-light);
+}
+
+.switch-track {
+  position: relative;
+  width: var(--switch-width);
+  height: var(--switch-height);
+  flex-shrink: 0;
+  border: 1.5px solid var(--color-line);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-bg-field);
+  box-sizing: border-box;
+  transition:
+    background-color var(--motion-soft-duration) ease,
+    border-color var(--motion-soft-duration) ease,
+    box-shadow var(--motion-soft-duration) ease;
+}
+
+.switch-track::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: var(--switch-padding);
+  width: var(--switch-thumb-size);
+  height: var(--switch-thumb-size);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-text-muted);
+  transform: translateY(-50%);
+  transition:
+    background-color var(--motion-soft-duration) ease,
+    transform var(--motion-soft-duration) ease;
+}
+
+.switch-input:checked + .switch-track {
+  background-color: var(--color-action);
+  border-color: var(--color-action);
+}
+
+.switch-input:checked + .switch-track::after {
+  background-color: var(--color-text-inverse);
+  transform: translate(var(--switch-thumb-translate-x), -50%);
 }

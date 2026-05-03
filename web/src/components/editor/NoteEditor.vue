@@ -1,5 +1,5 @@
 <template>
-  <div class="editor-wrapper" :class="{ 'is-resizing': isInspectorResizing }">
+  <div class="editor-wrapper px-3" :class="{ 'is-resizing': isInspectorResizing }">
     <BaseHeader>
       <div class="col-auto d-flex justify-content-start flex-shrink-0 gap-2 ps-1">
         <button v-for="item in sidebarIcons" @click="item.func()" :disabled="nodeStore.isSavePending()">
@@ -8,7 +8,7 @@
       </div>
 
       <div class="editor-title-slot col px-3">
-        <span class="d-block text-truncate text-muted text-center">
+        <span class="d-block text-truncate text-center fc-pri">
           {{ nodeStore.currentFileDisplayName }}
         </span>
       </div>
@@ -41,7 +41,7 @@
           </div>
         </template>
 
-        <div class="editor-ready-state">
+        <div class="editor-ready-state fc-pri">
           <textarea
             v-model="nodeStore.currentFile.content"
             ref="markdownEditorRef"
@@ -62,16 +62,16 @@
     :style="{ width: currentWidth }"
     :class="{ 'is-smooth': !isInspectorResizing }"
   >
-    <div class="inspector-container" :style="{ width: inspectorWidth + 'px' }">
-      <div v-if="currentMode === InspectMode.Meta" class="d-flex flex-column h-100 overflow-hidden p-0 small text-muted">
-        <BaseHeader class="px-3">
-          <div class="small text-muted uppercase">File Meta</div>
+    <div class="inspector-container f-m px-3" :style="{ width: inspectorWidth + 'px' }">
+      <div v-if="currentMode === InspectMode.Meta" class="d-flex flex-column h-100 overflow-hidden p-0 small">
+        <BaseHeader>
+          <div class="text-uppercase f-s fc-pri">File Meta</div>
         </BaseHeader>
         <AsyncGate
           :status="nodeStore.currentFileStatus"
           :show-delay-ms="editorAsyncGateDelayMs"
           tag="div"
-          class="note-meta px-3"
+          class="note-meta"
         >
           <template #loading>
             <div class="inspector-skeleton">
@@ -82,28 +82,28 @@
           </template>
 
           <div class="meta-grid">
-            <div class="meta-key">characters:</div>
-            <div class="meta-value">{{ nodeStore.currentFile.content.length }}</div>
+            <div class="meta-key fc-sec">characters:</div>
+            <div class="meta-value fc-sec">{{ nodeStore.currentFile.content.length }}</div>
             <template
               v-for="(value, key) in nodeStore.currentFile.meta"
               :key="key"
             >
-              <div class="meta-key">{{ key }}:</div>
-              <div class="meta-value">{{ value }}</div>
+              <div class="meta-key fc-sec">{{ key }}:</div>
+              <div class="meta-value fc-sec">{{ value }}</div>
             </template>
           </div>
         </AsyncGate>
       </div>
 
       <div v-else-if="currentMode === InspectMode.Preview" class="d-flex flex-column h-100 overflow-hidden p-0">
-        <BaseHeader class="px-3">
-          <div class="small text-muted uppercase">Preview</div>
+        <BaseHeader>
+          <div class="text-uppercase f-s fc-pri">Preview</div>
         </BaseHeader>
         <AsyncGate
           :status="nodeStore.currentFileStatus"
           :show-delay-ms="editorAsyncGateDelayMs"
           tag="div"
-          class="note-preview px-3"
+          class="note-preview"
         >
           <template #loading>
             <div class="preview-skeleton">
@@ -114,7 +114,7 @@
             </div>
           </template>
 
-          <div v-html="nodeStore.currentRenderedFile"></div>
+          <div v-html="nodeStore.currentRenderedFile" class="fc-pri"></div>
         </AsyncGate>
       </div>
     </div>
@@ -237,6 +237,7 @@ const insertText = (text: string) => {
   position: relative;
   background-color: var(--color-bg-sec);
   overflow: hidden; 
+  transition: background-color var(--motion-theme-duration) ease;
 }
 
 .editor-wrapper .floating-left {
@@ -295,6 +296,22 @@ const insertText = (text: string) => {
 	overflow-y: scroll;
 }
 
+.markdown-editor::input-placeholder{
+	color: var(--color-text-muted);
+}
+.markdown-editor::-webkit-input-placeholder{
+	color: var(--color-text-muted);
+}
+.markdown-editor::-moz-placeholder{
+	color: var(--color-text-muted);
+}
+.markdown-editor::-moz-placeholder{
+	color: var(--color-text-muted);
+}
+.markdown-editor::-ms-input-placeholder{
+	color: var(--color-text-muted);
+}
+
 .editor-loading-state {
   padding: var(--editor-content-padding-y)
     calc(max(var(--editor-content-padding-x-min), (100% - var(--editor-content-max-width)) / 2));
@@ -321,19 +338,10 @@ const insertText = (text: string) => {
 
 .inspector-container {
   height: 100%; 
-  font-size: 14px;
 
   display: flex;
   flex-direction: column;
   white-space: nowrap; 
-}
-
-.inspector-title {
-  height: var(--layout-header-height);
-  display: flex;
-  align-items: center;
-	border-bottom: 1px solid var(--color-line);
-  margin: 0 var(--editor-inspector-title-margin-x);
 }
 
 .note-meta,

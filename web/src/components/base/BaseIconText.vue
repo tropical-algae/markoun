@@ -28,7 +28,7 @@ withDefaults(defineProps<{
   color?: string;
 }>(), {
   fontSize: 'var(--hint-font-size)',
-  color: 'var(--color-text-trifle)'
+  color: 'var(--color-text-muted)'
 });
 </script>
 

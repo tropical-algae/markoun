@@ -1,16 +1,17 @@
 <template>
   <aside class="sidebar-wrapper d-flex flex-row">
-    <div class="sidebar-container d-flex flex-column gap-2 px-2">
-      <BaseHeader class="p-0">
+    <div class="sidebar-container px-2">
+      <BaseHeader>
         <button @click="toggleSubSidebar()">
           <component :is="SidebarToggleIcon" class="icon-btn"></component>
         </button>
       </BaseHeader>
 
-      <button v-for="(item, _) in sideBtns" @click="item.func()">
-        <component :is="item.icon" class="icon-btn"></component>
-      </button>
-      <div class="vertical-line turn-right"></div>
+      <div class=" d-flex flex-column gap-2 my-3">
+        <button v-for="(item, _) in sideBtns" @click="item.func()">
+          <component :is="item.icon" class="icon-btn"></component>
+        </button>
+      </div>
     </div>
 
     <div
@@ -19,7 +20,7 @@
       :style="{ width: currentWidth }"
     >
       <div
-        class="sub-sidebar-inner d-flex flex-column"
+        class="sub-sidebar-inner d-flex flex-column px-3"
         :style="{ width: subSidebarWidth + 'px' }"
       >
         <SidebarFileTree v-if="currentMode === SidebarMode.FileTree" />
@@ -100,6 +101,9 @@ const sideBtns = [
   z-index: 2;
   background-color: var(--color-bg-sec);
   border-right: 1px solid var(--color-line);
+  transition:
+    background-color var(--motion-theme-duration) ease,
+    border-color var(--motion-theme-duration) ease;
 }
 
 .file-tree-wrapper {

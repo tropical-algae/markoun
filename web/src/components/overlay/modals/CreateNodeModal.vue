@@ -16,7 +16,7 @@
         @keyup.enter="handleConfirm"
       />
 
-      <BaseIconText :icon="InfoIcon" :text="hint" class="mb-3" />
+      <BaseIconText :icon="InfoIcon" :text="hint" class="mb-3" color="var(--color-text-muted)"/>
 
       <div class="d-flex justify-content-end gap-2">
         <GhostButton

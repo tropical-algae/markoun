@@ -4,9 +4,9 @@
       <div class="f-m fw-bold text-uppercase">Account</div>
     </BaseHeader>
 
-    <div class="container-fluid flex-grow-1 overflow-y-scroll py-2 user-sidebar-body">
-      <section class="mb-5">
-        <div class="text-uppercase fw-bold mb-3 f-m">Profile</div>
+    <div class="user-sidebar-body container-fluid flex-grow-1 overflow-y-scroll p-0 my-3">
+      <section class="mb-4">
+        <div class="text-uppercase fw-bold mb-2 f-m fc-pri">Profile</div>
 
         <div ref="profileMotionShellRef" class="user-profile-motion-shell">
           <div ref="profileMotionContentRef" class="user-profile-motion-content">
@@ -36,13 +36,13 @@
               </template>
 
               <template #empty>
-                <div class="user-profile-empty f-s">
+                <div class="user-profile-empty f-s fc-sec">
                   User information is temporarily unavailable.
                 </div>
               </template>
 
               <div class="user-profile-card">
-                <div class="user-name f-m fw-bold">
+                <div class="user-name f-m fw-bold fc-pri">
                   {{ userStore.currentUserProfile?.full_name || 'Unnamed user' }}
                 </div>
                 <div class="user-email f-s">
@@ -77,8 +77,8 @@
         </div>
       </section>
 
-      <section class="mb-5">
-        <div class="text-uppercase fw-bold mb-3 f-m">Security</div>
+      <section class="mb-4">
+        <div class="text-uppercase fw-bold mb-2 f-m fc-pri">Security</div>
 
         <div class="mb-3">
           <UnderlinedInput
@@ -116,7 +116,7 @@
       </section>
     </div>
 
-    <div class="p-3 border-top bg-white flex-shrink-0 user-sidebar-footer">
+    <div class="user-sidebar-footer horizontal-line-top flex-shrink-0 fc-pri py-3">
       <GhostButton
         class="w-100 f-s"
         theme="danger"

@@ -186,7 +186,7 @@ onBeforeUnmount(() => {
   display: block;
   object-fit: contain;
   opacity: 0;
-  transition: opacity var(--motion-soft-duration) var(--motion-soft-ease);
+  transition: opacity var(--motion-soft-duration) ease;
 }
 
 .image-preview-image.is-ready {
