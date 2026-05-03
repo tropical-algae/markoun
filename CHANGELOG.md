@@ -1,5 +1,19 @@
 <!-- version list -->
 
+## v0.1.2 (2026-05-03)
+
+### Features
+
+- [site] add file tree drag move and polish styles
+  ([`2105bad`](https://github.com/tropical-algae/markoun/commit/2105bade8b8e81cd9274363d1fc6b10cf12d1d5a))
+
+- [site] support dragging and moving items
+  ([`b7e18a9`](https://github.com/tropical-algae/markoun/commit/b7e18a974d2bdcf8c45525b0a39b0aba62f65842))
+
+- Add api for moving items
+  ([`fc28cb6`](https://github.com/tropical-algae/markoun/commit/fc28cb65554e3acce1c10e87f3ca0885cf1c3245))
+
+
 ## v0.1.1 (2026-04-30)
 
 ### Bug Fixes
