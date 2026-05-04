@@ -1,9 +1,11 @@
 <template>
   <BaseHeader class="p-0">
     <div class="d-flex justify-content-center align-items-center gap-2 py-2">
-      <button v-for="(item, _) in toolBtns" @click="item.func()">
-        <component :is="item.icon" class="icon-btn"></component>
-      </button>
+      <BaseTooltip v-for="item in toolBtns" :key="item.label" :text="item.label" placement="bottom">
+        <button @click="item.func()" :aria-label="item.label">
+          <component :is="item.icon" class="icon-btn"></component>
+        </button>
+      </BaseTooltip>
     </div>
   </BaseHeader>
   
@@ -60,6 +62,7 @@ import BaseHeader from '@/components/base/BaseHeader.vue';
 import SidebarFileTreeItem from "@/components/sidebar/SidebarFileTreeItem.vue"
 import AsyncGate from "@/components/base/AsyncGate.vue"
 import BaseSkeleton from "@/components/base/BaseSkeleton.vue"
+import BaseTooltip from "@/components/base/BaseTooltip.vue"
 
 import NewNoteIcon from "@/assets/icons/add-document.svg"
 import NewFolderIcon from "@/assets/icons/folder-plus-circle.svg"
@@ -97,10 +100,10 @@ const {
 })
 
 const toolBtns = [
-  { icon: NewNoteIcon, func: () => { showNewNote.value = true } },
-  { icon: NewFolderIcon, func: () => { showNewFolder.value = true } },
-  { icon: UploadIcon, func: () => { showUpload.value = true } },
-  { icon: TrashIcon, func: () => { deleteItem.value = true } },
+  { icon: NewNoteIcon, label: 'New note', func: () => { showNewNote.value = true } },
+  { icon: NewFolderIcon, label: 'New folder', func: () => { showNewFolder.value = true } },
+  { icon: UploadIcon, label: 'Upload file', func: () => { showUpload.value = true } },
+  { icon: TrashIcon, label: 'Delete item', func: () => { deleteItem.value = true } },
 ]
 
 

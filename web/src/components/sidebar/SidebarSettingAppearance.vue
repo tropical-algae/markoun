@@ -7,25 +7,49 @@
 
     <div class="theme-options">
       <button
-        v-for="option in themeStore.themeOptions"
+        v-for="option in appearanceStore.themeOptions"
         :key="option.id"
         class="theme-option f-s"
-        :class="{ 'is-active': themeStore.currentTheme === option.id }"
+        :class="{ 'is-active': appearanceStore.currentTheme === option.id }"
         :data-theme="option.id"
         :aria-label="`Use ${option.label} theme`"
-        :aria-pressed="themeStore.currentTheme === option.id"
-        @click="themeStore.setTheme(option.id)"
+        :aria-pressed="appearanceStore.currentTheme === option.id"
+        @click="appearanceStore.setTheme(option.id)"
       >
         {{ option.label }}
       </button>
     </div>
   </div>
+
+  <div class="d-flex justify-content-between align-items-center pb-2">
+    <div class="setting-copy d-flex flex-column pe-3">
+      <span class="fw-bold f-s fc-pri">Bubble Hints</span>
+      <span class="text-truncate f-xs fc-sec">Show helper bubbles when hovering icon buttons.</span>
+    </div>
+
+    <label class="switch-control" for="appearance-tooltips">
+      <input
+        id="appearance-tooltips"
+        class="switch-input"
+        type="checkbox"
+        aria-label="Toggle bubble hints"
+        :checked="appearanceStore.showTooltips"
+        @change="handleTooltipChange"
+      />
+      <span class="switch-track" aria-hidden="true"></span>
+    </label>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { useThemeStore } from '@/stores/theme'
+import { useAppearanceStore } from '@/stores/appearance'
 
-const themeStore = useThemeStore()
+const appearanceStore = useAppearanceStore()
+
+const handleTooltipChange = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  appearanceStore.setShowTooltips(target.checked)
+}
 </script>
 
 <style scoped>
@@ -41,8 +65,6 @@ const themeStore = useThemeStore()
 }
 
 .theme-option {
-  /* min-width: var(--theme-option-width);
-  height: var(--theme-option-height); */
   border: 1px solid var(--color-line);
   border-radius: var(--theme-option-radius);
   background: var(--color-bg-field);
@@ -66,6 +88,5 @@ const themeStore = useThemeStore()
 
 .theme-option.is-active {
   background-color: var(--color-action-light);
-  /* box-shadow: 0 0 0 2px var(--color-action-light); */
 }
 </style>

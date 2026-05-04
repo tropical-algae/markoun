@@ -6,3 +6,4 @@ export const THEME_OPTIONS = [
 export type ThemeMode = typeof THEME_OPTIONS[number]['id']
 
 export const DEFAULT_THEME_MODE: ThemeMode = 'light'
+export const DEFAULT_SHOW_TOOLTIPS = true
