@@ -1,3 +1,5 @@
+import asyncio
+import json
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -15,38 +17,19 @@ from markoun.common.util import (
     formated_file_size,
 )
 from markoun.core.model.base import FsNodeType
-from markoun.core.model.file import FileMeta, FileNode, UploadedFileResponse
+from markoun.core.model.file import (
+    FileMeta,
+    FileNode,
+    FileSearchMatch,
+    FileSearchResult,
+    UploadedFileResponse,
+)
 
 TIME_FORMAT = "%Y-%m-%d %H:%M"
 NOTE_SUFFIX = "md"
 DISPLAYED_FILE_TYPES = set(settings.DISPLAYED_FILE_TYPES)
-
-
-# async def get_format_markdown(abs_filepath: Path) -> str:
-#     parent_path = abs_filepath.parent.resolve()
-#     md = Markdown(renderer=MarkdownRenderer)
-
-#     content = await aread_file(abs_filepath)
-#     doc = md.parse(content)
-
-#     def walk(node):
-#         if isinstance(node, Image | Link):
-#             original_dest = node.dest
-
-#             if not original_dest.startswith(("http", "https", "www", "#")):
-#                 dest_path = Path(original_dest)
-#                 if not dest_path.is_absolute():
-#                     resolved_abs_path = (parent_path / dest_path).resolve()
-#                     node.dest = str(get_static_asset_path(resolved_abs_path))
-
-#         if hasattr(node, "children") and isinstance(node.children, list):
-#             for child in node.children:
-#                 walk(child)
-
-#     walk(doc)
-
-#     final_md = md.render(doc)
-#     return final_md
+DEFAULT_SEARCH_LIMIT = 20
+MAX_SEARCH_LIMIT = 200
 
 
 def get_file_meta(abs_filepath: Path) -> FileMeta:
@@ -67,6 +50,80 @@ def get_file_meta(abs_filepath: Path) -> FileMeta:
         changed=fmt(stat.st_ctime),
         accessed=fmt(stat.st_atime),
     )
+
+
+async def search_markdown_files(
+    keyword: str,
+    abs_root: Path,
+    limit: int = DEFAULT_SEARCH_LIMIT,
+) -> list[FileSearchResult]:
+    normalized_keyword = keyword.strip()
+    if not normalized_keyword:
+        raise HTTPException(**CONSTANT.SERV_FILE_SEARCH_EMPTY_KEYWORD)
+
+    safe_limit = max(1, min(limit, MAX_SEARCH_LIMIT))
+    process = await asyncio.create_subprocess_exec(
+        "rg",
+        "--json",
+        "--fixed-strings",
+        "--no-ignore",
+        "--glob",
+        f"*.{NOTE_SUFFIX}",
+        normalized_keyword,
+        str(abs_root),
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+
+    if process.stdout is None or process.stderr is None:
+        raise HTTPException(**CONSTANT.SERV_FILE_SEARCH_FAIL)
+
+    stderr_task = asyncio.create_task(process.stderr.read())
+    results_by_path: dict[str, FileSearchResult] = {}
+    reached_limit = False
+
+    while line := await process.stdout.readline():
+        data = json.loads(line.decode("utf-8"))
+        if data.get("type") == "match":
+            match_data = data["data"]
+            filepath = Path(match_data["path"]["text"]).resolve()
+            if not filepath.is_file() or file_suffix(filepath) != NOTE_SUFFIX:
+                continue
+
+            relative_path = str(abs_path_to_relative_path(filepath))
+            result = results_by_path.get(relative_path)
+            if result is None:
+                if len(results_by_path) >= safe_limit:
+                    reached_limit = True
+                    process.terminate()
+                    break
+
+                result = FileSearchResult(
+                    node=FileNode(
+                        name=filepath.stem,
+                        path=relative_path,
+                        type=FsNodeType.FILE,
+                        suffix=NOTE_SUFFIX,
+                    ),
+                )
+                results_by_path[relative_path] = result
+
+            result.matches.append(
+                FileSearchMatch(
+                    snippet=match_data["lines"]["text"].strip(),
+                    line=match_data["line_number"],
+                )
+            )
+
+    returncode = await process.wait()
+    stderr = await stderr_task
+    if returncode == 1:
+        return []
+    if returncode != 0 and not reached_limit:
+        logger.error(f"[Failed to search markdown files] {stderr.decode().strip()}")
+        raise HTTPException(**CONSTANT.RESP_SERVER_ERROR)
+
+    return list(results_by_path.values())
 
 
 @exception_handling(CONSTANT.SERV_FILE_CREATE_FAIL)

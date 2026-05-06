@@ -24,7 +24,7 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
 RUN apt-get update && \
-    apt-get install -y nginx curl && \
+    apt-get install -y nginx curl ripgrep && \
     rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml uv.lock poe_tasks.toml README.md ./

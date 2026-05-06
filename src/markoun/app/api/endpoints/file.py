@@ -1,10 +1,18 @@
 from pathlib import Path
 
-from fastapi import APIRouter, File, Security, UploadFile
+from fastapi import APIRouter, File, Query, Security, UploadFile
 
 from markoun.app.api.deps import get_current_user
-from markoun.app.services.file_service import create_note, get_file_meta, upload_file
+from markoun.app.services.file_service import (
+    DEFAULT_SEARCH_LIMIT,
+    MAX_SEARCH_LIMIT,
+    create_note,
+    get_file_meta,
+    search_markdown_files,
+    upload_file,
+)
 from markoun.app.utils.constant import CONSTANT
+from markoun.common.config import settings
 from markoun.common.decorator import exception_handling
 from markoun.common.util import aread_file, awrite_file, relative_path_to_abs_path
 from markoun.core.db.models import UserAccount
@@ -14,11 +22,13 @@ from markoun.core.model.file import (
     FileMeta,
     FileNode,
     FileSaveRequest,
+    FileSearchResult,
     UploadedFileResponse,
 )
 from markoun.core.model.user import ScopeType
 
 router = APIRouter()
+DOCUMENT_ABS_ROOT = Path(settings.DOCUMENT_ROOT).absolute()
 
 
 @router.get("/load", response_model=FileContentResponse)
@@ -31,6 +41,16 @@ async def api_load_note(
     content = await aread_file(abs_filepath)
     meta = get_file_meta(abs_filepath)
     return FileContentResponse(content=content, meta=meta)
+
+
+@router.get("/search", response_model=list[FileSearchResult])
+@exception_handling(CONSTANT.RESP_SERVER_ERROR)
+async def api_search_notes(
+    keyword: str,
+    limit: int = Query(DEFAULT_SEARCH_LIMIT, ge=1, le=MAX_SEARCH_LIMIT),
+    _: UserAccount = Security(get_current_user, scopes=[ScopeType.ADMIN, ScopeType.USER]),
+) -> list[FileSearchResult]:
+    return await search_markdown_files(keyword, DOCUMENT_ABS_ROOT, limit)
 
 
 @router.post("/create", response_model=FileNode)
