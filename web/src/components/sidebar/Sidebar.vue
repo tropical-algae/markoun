@@ -57,7 +57,7 @@ import SidebarToggleIcon from "@/assets/icons/sidebar.svg"
 import FileTreeIcon from "@/assets/icons/rectangle-list.svg"
 import SearchIcon from "@/assets/icons/analytics-magnifying-glass.svg"
 import SettingIcon from "@/assets/icons/settings.svg"
-import UserIcon from "@/assets/icons/user-pen.svg"
+import UserIcon from "@/assets/icons/portrait.svg"
 
 import SidebarFileTree from "@/components/sidebar/SidebarFileTree.vue"
 import SidebarSearch from "@/components/sidebar/SidebarSearch.vue"
