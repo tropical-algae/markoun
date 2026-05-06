@@ -16,6 +16,8 @@
   --color-text-sec: #797979;
   --color-text-muted: #b3b3b3;
   --color-text-inverse: var(--color-bg-pri);
+  --color-tooltip-bg: var(--color-text-pri);
+  --color-tooltip-text: var(--color-bg-pri);
 
   --color-bg-error: #f46b6b;
   --color-bg-warning: #f3a245;
@@ -52,9 +54,10 @@
   --motion-height-user-duration: 0.35;
   --motion-toast-enter-duration: 0.4;
   --motion-toast-leave-duration: 0.25;
-  --motion-spinner-duration: 0.7s;
+  --motion-spinner-duration: 0.5s;
   --motion-theme-duration: 0.5s;
   --motion-skeleton-duration: 1.35s;
+  --motion-tooltip-duration: 0.4s;
   --async-gate-delay-ms: 150;
   --async-gate-min-visible-ms: 400;
 
@@ -87,6 +90,22 @@
   --icon-button-size: 28px;
   --icon-button-padding: 6px;
   --icon-button-radius: var(--radius-sm);
+
+  --tooltip-z-index: 40;
+  --tooltip-gap: 8px;
+  --tooltip-padding: 6px 9px;
+  --tooltip-radius: var(--radius-lg);
+  --tooltip-font-size: 0.72rem;
+  --tooltip-line-height: 1.2;
+  --tooltip-max-width: 180px;
+  --tooltip-arrow-size: 7px;
+  --tooltip-bounce-start-scale: 0.82;
+  --tooltip-bounce-overshoot-scale: 1.06;
+  --tooltip-bounce-end-scale: 1;
+  --tooltip-bounce-distance: 4px;
+  --tooltip-shadow-y: 8px;
+  --tooltip-shadow-blur: 22px;
+
   --skeleton-height-default: 1rem;
   --skeleton-radius-default: var(--radius-pill);
 
@@ -166,12 +185,18 @@
   --settings-skeleton-gap: 16px;
   --settings-skeleton-padding-bottom: 14px;
 
-  /* --theme-option-width: 58px;
-  --theme-option-height: 28px; */
+  --search-result-gap: 8px;
+  --search-result-padding: 10px;
+  --search-result-radius: var(--radius-lg);
+  --search-result-border-width: 1px;
+  --search-result-snippet-line-height: 1.45;
+  --search-result-line-width: 34px;
+  --search-empty-padding: 22px;
+  --search-skeleton-gap: 10px;
+
   --theme-option-radius: var(--radius-md);
   --theme-option-padding-x: 8px;
   --theme-option-padding-y: 2px;
-
   --theme-option-gap: 8px;
 
   --profile-card-padding: 14px;

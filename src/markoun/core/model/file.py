@@ -40,6 +40,16 @@ class FileContentResponse(BaseModel):
     meta: FileMeta
 
 
+class FileSearchMatch(BaseModel):
+    snippet: str
+    line: int
+
+
+class FileSearchResult(BaseModel):
+    node: FileNode
+    matches: list[FileSearchMatch] = Field(default_factory=list)
+
+
 class FileSaveRequest(BaseModel):
     filepath: str
     content: str

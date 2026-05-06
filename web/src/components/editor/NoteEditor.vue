@@ -2,9 +2,15 @@
   <div class="editor-wrapper px-3" :class="{ 'is-resizing': isInspectorResizing }">
     <BaseHeader>
       <div class="col-auto d-flex justify-content-start flex-shrink-0 gap-2 ps-1">
-        <button v-for="item in sidebarIcons" @click="item.func()" :disabled="nodeStore.isSavePending()">
-          <component :is="item.icon" class="icon-btn" :class="{ 'is-pending': nodeStore.isSavePending() }"></component>
-        </button>
+        <BaseTooltip v-for="item in sidebarIcons" :key="item.label" :text="item.label" placement="bottom">
+          <button
+            @click="item.func()"
+            :disabled="nodeStore.isSavePending()"
+            :aria-label="item.label"
+          >
+            <component :is="item.icon" class="icon-btn" :class="{ 'is-pending': nodeStore.isSavePending() }"></component>
+          </button>
+        </BaseTooltip>
       </div>
 
       <div class="editor-title-slot col px-3">
@@ -14,13 +20,20 @@
       </div>
 
       <div class="col-auto d-flex justify-content-end flex-shrink-0 gap-2 pe-1">
-        <button 
-          v-for="item in inspectIcons" 
-          :class="{ active: showInspector && currentMode === item.mode }"
-          @click="toggleInspector(item.mode)"
+        <BaseTooltip
+          v-for="item in inspectIcons"
+          :key="item.label"
+          :text="item.label"
+          placement="bottom"
         >
-          <component :is="item.icon" class="icon-btn"></component>
-        </button>
+          <button
+            :class="{ active: showInspector && currentMode === item.mode }"
+            @click="toggleInspector(item.mode)"
+            :aria-label="item.label"
+          >
+            <component :is="item.icon" class="icon-btn"></component>
+          </button>
+        </BaseTooltip>
       </div>
     </BaseHeader>
     
@@ -139,6 +152,7 @@ import { insertTimeToFileName } from '@/utils/file-system';
 import BaseHeader from '@/components/base/BaseHeader.vue';
 import BaseSkeleton from '@/components/base/BaseSkeleton.vue';
 import AsyncGate from '@/components/base/AsyncGate.vue';
+import BaseTooltip from '@/components/base/BaseTooltip.vue';
 
 const nodeStore = useNodeStore()
 
@@ -163,11 +177,11 @@ const markdownEditorRef = ref<HTMLTextAreaElement | null>(null);
 const editorAsyncGateDelayMs = EDITOR_ASYNC_GATE_DELAY_MS;
 
 const inspectIcons = [
-  { icon: MetaIcon, mode: InspectMode.Meta },
-  { icon: PreviewIcon, mode: InspectMode.Preview },
+  { icon: MetaIcon, label: 'File meta', mode: InspectMode.Meta },
+  { icon: PreviewIcon, label: 'Preview', mode: InspectMode.Preview },
 ] as const
 const sidebarIcons = [
-  { icon: SaveIcon, func: async () => { await nodeStore.saveCurrentFile(); } },
+  { icon: SaveIcon, label: 'Save note', func: async () => { await nodeStore.saveCurrentFile(); } },
 ] as const
 
 const toggleInspector = (mode: InspectMode) => {

@@ -9,7 +9,7 @@
       <div class="text-uppercase fw-bold mb-2 f-m fc-pri">Appearance</div>
 
       <section class="mb-4">
-          <SidebarSettingTheme />
+          <SidebarSettingAppearance />
       </section>
 
       <div class="text-uppercase fw-bold mb-2 f-m fc-pri">General</div>
@@ -77,7 +77,7 @@ import AsyncGate from '@/components/base/AsyncGate.vue';
 import BaseHeader from '@/components/base/BaseHeader.vue';
 import BaseSkeleton from '@/components/base/BaseSkeleton.vue';
 import SidebarSettingItem from '@/components/sidebar/SidebarSettingItem.vue';
-import SidebarSettingTheme from '@/components/sidebar/SidebarSettingTheme.vue';
+import SidebarSettingAppearance from '@/components/sidebar/SidebarSettingAppearance.vue';
 
 const sysStore = useSysStore()
 

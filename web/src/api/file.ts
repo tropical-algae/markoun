@@ -1,5 +1,10 @@
 import type { ApiResponse } from '@/types/api'
-import type { FileDetailResponse, FsNode, UploadResponse } from '@/types/file-system'
+import type {
+  FileDetailResponse,
+  FileSearchResult,
+  FsNode,
+  UploadResponse,
+} from '@/types/file-system'
 import request from '@/utils/request'
 
 const resolveApiUrl = (path: string): string => {
@@ -18,6 +23,20 @@ export const getFileContentApi = (
     method: 'get',
     params: {
       filepath: filepath
+    }
+  })
+}
+
+export const searchFileContentApi = (
+  keyword: string,
+  limit: number
+): Promise<ApiResponse<FileSearchResult[]>> => {
+  return request({
+    url: '/api/v1/file/search',
+    method: 'get',
+    params: {
+      keyword,
+      limit,
     }
   })
 }

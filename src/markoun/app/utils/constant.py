@@ -99,6 +99,14 @@ class Constant(BaseSettings):
         "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
         "detail": "Failed to save file",
     }
+    SERV_FILE_SEARCH_EMPTY_KEYWORD: dict = {
+        "status_code": status.HTTP_400_BAD_REQUEST,
+        "detail": "Search keyword cannot be empty",
+    }
+    SERV_FILE_SEARCH_FAIL: dict = {
+        "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+        "detail": "Failed to search file",
+    }
     SERV_SETTING_UPDATE_FAIL: dict = {
         "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
         "detail": "Failed to update system settings",

@@ -2,15 +2,24 @@
   <aside class="sidebar-wrapper d-flex flex-row">
     <div class="sidebar-container px-2">
       <BaseHeader>
-        <button @click="toggleSubSidebar()">
-          <component :is="SidebarToggleIcon" class="icon-btn"></component>
-        </button>
+        <BaseTooltip text="Toggle sidebar" placement="right">
+          <button @click="toggleSubSidebar()" aria-label="Toggle sidebar">
+            <component :is="SidebarToggleIcon" class="icon-btn"></component>
+          </button>
+        </BaseTooltip>
       </BaseHeader>
 
       <div class=" d-flex flex-column gap-2 my-3">
-        <button v-for="(item, _) in sideBtns" @click="item.func()">
-          <component :is="item.icon" class="icon-btn"></component>
-        </button>
+        <BaseTooltip
+          v-for="item in sideBtns"
+          :key="item.label"
+          :text="item.label"
+          placement="right"
+        >
+          <button @click="item.func()" :aria-label="item.label">
+            <component :is="item.icon" class="icon-btn"></component>
+          </button>
+        </BaseTooltip>
       </div>
     </div>
 
@@ -24,6 +33,7 @@
         :style="{ width: subSidebarWidth + 'px' }"
       >
         <SidebarFileTree v-if="currentMode === SidebarMode.FileTree" />
+        <SidebarSearch v-else-if="currentMode === SidebarMode.Search" />
         <SidebarUser v-else-if="currentMode === SidebarMode.User" />
         <SidebarSetting v-else />
       </div>
@@ -45,13 +55,16 @@ import { SIDEBAR_PANE_WIDTH } from "@/constants/ui"
 
 import SidebarToggleIcon from "@/assets/icons/sidebar.svg"
 import FileTreeIcon from "@/assets/icons/rectangle-list.svg"
+import SearchIcon from "@/assets/icons/analytics-magnifying-glass.svg"
 import SettingIcon from "@/assets/icons/settings.svg"
-import UserIcon from "@/assets/icons/user-pen.svg"
+import UserIcon from "@/assets/icons/portrait.svg"
 
 import SidebarFileTree from "@/components/sidebar/SidebarFileTree.vue"
+import SidebarSearch from "@/components/sidebar/SidebarSearch.vue"
 import SidebarSetting from "@/components/sidebar/SidebarSetting.vue"
 import SidebarUser from "@/components/sidebar/SidebarUser.vue"
 import BaseHeader from '@/components/base/BaseHeader.vue';
+import BaseTooltip from '@/components/base/BaseTooltip.vue';
 
 const showSubSidebar = ref(true);
 const {
@@ -83,9 +96,10 @@ const toggleSubSidebar = (mode: SidebarMode | null = null) => {
 };
 
 const sideBtns = [
-  { icon: FileTreeIcon, func: () => { toggleSubSidebar(SidebarMode.FileTree); } },
-  { icon: UserIcon, func: () => { toggleSubSidebar(SidebarMode.User); } },
-  { icon: SettingIcon, func: () => { toggleSubSidebar(SidebarMode.Settings); } }
+  { icon: FileTreeIcon, label: 'Files', func: () => { toggleSubSidebar(SidebarMode.FileTree); } },
+  { icon: SearchIcon, label: 'Search', func: () => { toggleSubSidebar(SidebarMode.Search); } },
+  { icon: UserIcon, label: 'Profile', func: () => { toggleSubSidebar(SidebarMode.User); } },
+  { icon: SettingIcon, label: 'Settings', func: () => { toggleSubSidebar(SidebarMode.Settings); } }
 ]
 
 </script>

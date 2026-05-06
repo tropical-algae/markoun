@@ -27,6 +27,16 @@ export interface FileDetailResponse {
   meta: Record<string, string>;
 }
 
+export interface FileSearchMatch {
+  snippet: string;
+  line: number;
+}
+
+export interface FileSearchResult {
+  node: FsNode;
+  matches: FileSearchMatch[];
+}
+
 export interface UploadResponse {
   filename: string;
   node: FsNode | null;
