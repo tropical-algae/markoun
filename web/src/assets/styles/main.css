@@ -185,12 +185,18 @@
   --settings-skeleton-gap: 16px;
   --settings-skeleton-padding-bottom: 14px;
 
-  /* --theme-option-width: 58px;
-  --theme-option-height: 28px; */
+  --search-result-gap: 8px;
+  --search-result-padding: 10px;
+  --search-result-radius: var(--radius-lg);
+  --search-result-border-width: 1px;
+  --search-result-snippet-line-height: 1.45;
+  --search-result-line-width: 34px;
+  --search-empty-padding: 22px;
+  --search-skeleton-gap: 10px;
+
   --theme-option-radius: var(--radius-md);
   --theme-option-padding-x: 8px;
   --theme-option-padding-y: 2px;
-
   --theme-option-gap: 8px;
 
   --profile-card-padding: 14px;

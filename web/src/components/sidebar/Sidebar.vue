@@ -33,6 +33,7 @@
         :style="{ width: subSidebarWidth + 'px' }"
       >
         <SidebarFileTree v-if="currentMode === SidebarMode.FileTree" />
+        <SidebarSearch v-else-if="currentMode === SidebarMode.Search" />
         <SidebarUser v-else-if="currentMode === SidebarMode.User" />
         <SidebarSetting v-else />
       </div>
@@ -54,10 +55,12 @@ import { SIDEBAR_PANE_WIDTH } from "@/constants/ui"
 
 import SidebarToggleIcon from "@/assets/icons/sidebar.svg"
 import FileTreeIcon from "@/assets/icons/rectangle-list.svg"
+import SearchIcon from "@/assets/icons/analytics-magnifying-glass.svg"
 import SettingIcon from "@/assets/icons/settings.svg"
 import UserIcon from "@/assets/icons/user-pen.svg"
 
 import SidebarFileTree from "@/components/sidebar/SidebarFileTree.vue"
+import SidebarSearch from "@/components/sidebar/SidebarSearch.vue"
 import SidebarSetting from "@/components/sidebar/SidebarSetting.vue"
 import SidebarUser from "@/components/sidebar/SidebarUser.vue"
 import BaseHeader from '@/components/base/BaseHeader.vue';
@@ -94,6 +97,7 @@ const toggleSubSidebar = (mode: SidebarMode | null = null) => {
 
 const sideBtns = [
   { icon: FileTreeIcon, label: 'Files', func: () => { toggleSubSidebar(SidebarMode.FileTree); } },
+  { icon: SearchIcon, label: 'Search', func: () => { toggleSubSidebar(SidebarMode.Search); } },
   { icon: UserIcon, label: 'Profile', func: () => { toggleSubSidebar(SidebarMode.User); } },
   { icon: SettingIcon, label: 'Settings', func: () => { toggleSubSidebar(SidebarMode.Settings); } }
 ]

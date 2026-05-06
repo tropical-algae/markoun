@@ -1,5 +1,6 @@
 export const SidebarMode = {
   FileTree: 'fileTree',
+  Search: 'search',
   User: 'user',
   Settings: 'settings',
 } as const;
