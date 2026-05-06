@@ -1,38 +1,14 @@
 from pathlib import Path
 from uuid import uuid4
 
+import pytest
 from fastapi.testclient import TestClient
 
 from markoun.common.config import settings
 
 
-def authenticate_client(client: TestClient) -> None:
-    suffix = uuid4().hex[:8]
-    username = f"search-user-{suffix}"
-    password = "123456"
-
-    register_response = client.post(
-        url=f"{settings.API_PREFIX}/auth/register",
-        json={
-            "full_name": username,
-            "password": password,
-            "email": f"{username}@test.com",
-        },
-    )
-    assert register_response.status_code == 200
-
-    login_response = client.post(
-        url=f"{settings.API_PREFIX}/auth/login",
-        data={
-            "username": username,
-            "password": password,
-        },
-    )
-    assert login_response.status_code == 200
-
-
+@pytest.mark.run(order=10)
 def test_search_markdown_files_returns_matching_nodes(client: TestClient):
-    authenticate_client(client)
     suffix = uuid4().hex[:8]
     keyword = f"needle-{suffix}"
     root = Path(settings.DOCUMENT_ROOT).absolute() / f"search-{suffix}"
@@ -71,8 +47,8 @@ def test_search_markdown_files_returns_matching_nodes(client: TestClient):
     ]
 
 
+@pytest.mark.run(order=11)
 def test_search_markdown_files_respects_limit(client: TestClient):
-    authenticate_client(client)
     suffix = uuid4().hex[:8]
     keyword = f"needle-{suffix}"
     root = Path(settings.DOCUMENT_ROOT).absolute() / f"search-limit-{suffix}"
@@ -90,8 +66,8 @@ def test_search_markdown_files_respects_limit(client: TestClient):
     assert len(results) == 1
 
 
+@pytest.mark.run(order=12)
 def test_search_markdown_files_rejects_blank_keyword(client: TestClient):
-    authenticate_client(client)
     response = client.get(
         url=f"{settings.API_PREFIX}/file/search",
         params={"keyword": "   "},

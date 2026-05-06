@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 from markoun.common.config import settings
 
 
-@pytest.mark.run(order=5)
+@pytest.mark.run(order=7)
 def test_item_children_api(client: TestClient):
     suffix = uuid4().hex[:8]
     dir_name = f"tree-{suffix}"
@@ -51,7 +51,7 @@ def test_item_children_api(client: TestClient):
     assert child_data["children"][0]["type"] == "file"
 
 
-@pytest.mark.run(order=7)
+@pytest.mark.run(order=8)
 def test_move_item_api(client: TestClient):
     suffix = uuid4().hex[:8]
     source_dir = f"move-source-{suffix}"
@@ -98,7 +98,7 @@ def test_move_item_api(client: TestClient):
     )
 
 
-@pytest.mark.run(order=8)
+@pytest.mark.run(order=9)
 def test_move_item_rejects_existing_target(client: TestClient):
     suffix = uuid4().hex[:8]
     source_dir = f"conflict-source-{suffix}"

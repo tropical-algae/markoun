@@ -25,7 +25,7 @@ jobs:
 
       - name: Install system dependencies
         run: |
-          sudo apt-get update && sudo apt-get install -y git
+          sudo apt-get update && sudo apt-get install -y git ripgrep
 
       - name: Install project dependencies
         run: |

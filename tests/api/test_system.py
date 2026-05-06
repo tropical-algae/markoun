@@ -1,10 +1,12 @@
 from pathlib import Path
 
+import pytest
 from fastapi.testclient import TestClient
 
 from markoun.common.config import settings
 
 
+@pytest.mark.run(order=14)
 def test_welcome_note_uses_configured_path(
     client: TestClient,
     monkeypatch,
@@ -22,6 +24,7 @@ def test_welcome_note_uses_configured_path(
     assert response.json()["data"] == "# Custom Welcome\n\nHello from mounted file."
 
 
+@pytest.mark.run(order=15)
 def test_welcome_note_falls_back_when_file_missing(
     client: TestClient,
     monkeypatch,
