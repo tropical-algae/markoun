@@ -1,5 +1,29 @@
 <!-- version list -->
 
+## v0.1.3 (2026-05-06)
+
+### Chores
+
+- Sync uv.lock
+  ([`1686173`](https://github.com/tropical-algae/markoun/commit/16861736904567e2da894eb203121a7f67f339ef))
+
+### Features
+
+- [site] add configurable bubble hints
+  ([`307f99a`](https://github.com/tropical-algae/markoun/commit/307f99a3debd9f436470d4eb8df93299520567f0))
+
+- [site] add new sidebar to support file retrieval
+  ([`b803216`](https://github.com/tropical-algae/markoun/commit/b8032160b881c43161b88b0d13b16bcb332e0ccb))
+
+- Add markdown content search api
+  ([`594b173`](https://github.com/tropical-algae/markoun/commit/594b173c948225bde6ff8ebc5a3ab992401b0c00))
+
+### Testing
+
+- Improve test cases and add missing dependencies
+  ([`41d6e83`](https://github.com/tropical-algae/markoun/commit/41d6e83ec6f61dd79f18bdad6119f504972feed2))
+
+
 ## v0.1.2 (2026-05-03)
 
 ### Features
