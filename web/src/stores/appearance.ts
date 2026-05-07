@@ -3,12 +3,14 @@ import { ref } from 'vue'
 import {
   DEFAULT_SHOW_TOOLTIPS,
   DEFAULT_THEME_MODE,
+  DEFAULT_USE_WIDE_EDITOR_LINES,
   THEME_OPTIONS,
   type ThemeMode,
 } from '@/constants/appearance'
 
 const THEME_STORAGE_KEY = 'markoun.theme'
 const TOOLTIP_STORAGE_KEY = 'markoun.showTooltips'
+const WIDE_EDITOR_LINES_STORAGE_KEY = 'markoun.useWideEditorLines'
 const LEGACY_THEME_COLOR_STORAGE_KEY = 'markoun.themeColor'
 
 const isThemeMode = (value: string | null): value is ThemeMode => {
@@ -35,6 +37,7 @@ const applyTheme = (themeMode: ThemeMode) => {
 export const useAppearanceStore = defineStore('appearance', () => {
   const currentTheme = ref<ThemeMode>(DEFAULT_THEME_MODE)
   const showTooltips = ref(DEFAULT_SHOW_TOOLTIPS)
+  const useWideEditorLines = ref(DEFAULT_USE_WIDE_EDITOR_LINES)
 
   const initAppearance = () => {
     if (typeof window === 'undefined') {
@@ -48,6 +51,10 @@ export const useAppearanceStore = defineStore('appearance', () => {
     showTooltips.value = parseStoredBoolean(
       window.localStorage.getItem(TOOLTIP_STORAGE_KEY),
       DEFAULT_SHOW_TOOLTIPS,
+    )
+    useWideEditorLines.value = parseStoredBoolean(
+      window.localStorage.getItem(WIDE_EDITOR_LINES_STORAGE_KEY),
+      DEFAULT_USE_WIDE_EDITOR_LINES,
     )
 
     window.localStorage.removeItem(LEGACY_THEME_COLOR_STORAGE_KEY)
@@ -64,12 +71,19 @@ export const useAppearanceStore = defineStore('appearance', () => {
     window.localStorage.setItem(TOOLTIP_STORAGE_KEY, String(isEnabled))
   }
 
+  const setUseWideEditorLines = (isEnabled: boolean) => {
+    useWideEditorLines.value = isEnabled
+    window.localStorage.setItem(WIDE_EDITOR_LINES_STORAGE_KEY, String(isEnabled))
+  }
+
   return {
     currentTheme,
     showTooltips,
+    useWideEditorLines,
     themeOptions: THEME_OPTIONS,
     initAppearance,
     setTheme,
     setShowTooltips,
+    setUseWideEditorLines,
   }
 })

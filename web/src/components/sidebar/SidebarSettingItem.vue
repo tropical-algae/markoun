@@ -2,13 +2,14 @@
   <div class="d-flex justify-content-between align-items-center pb-2">
     
     <div class="setting-copy d-flex flex-column pe-3">
-      <span class="fw-bold f-s fc-pri">{{ setting.name }}</span>
-      <span class="text-truncate f-xs fc-sec">{{ setting.desc }}</span>
+      <span class="fw-bold f-s fc-pri">{{ settingName }}</span>
+      <span class="text-truncate f-xs fc-sec">{{ settingDesc }}</span>
     </div>
 
     <div class="flex-shrink-0">
+      <slot name="control"></slot>
       
-      <div v-if="setting.type === SysSettingType.BOOL">
+      <div v-if="!hasControlSlot && setting?.type === SysSettingType.BOOL">
         <label
           class="switch-control"
           :class="{ 'is-disabled': pending }"
@@ -22,11 +23,11 @@
           :disabled="pending"
           @change="handleChange($event)"
         >
-          <span class="switch-track"></span>
+          <span class="switch-track" aria-hidden="true"></span>
         </label>
       </div>
 
-      <div v-else-if="setting.type === SysSettingType.STR">
+      <div v-else-if="!hasControlSlot && setting?.type === SysSettingType.STR">
         <input 
           type="text" 
           class="setting-text-input form-control form-control-sm text-end"
@@ -44,12 +45,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { computed, ref, useSlots, watch } from 'vue';
 import { SysSettingType, type BoolSysSetting, type SysSettingResponse } from '@/types/system';
 
 
 const props = defineProps<{
-  setting: SysSettingResponse
+  setting?: SysSettingResponse
+  name?: string
+  desc?: string
   pending?: boolean
 }>();
 
@@ -57,20 +60,25 @@ const emit = defineEmits<{
   (e: 'update', id: string, newValue: string | boolean): void
 }>();
 
+const slots = useSlots()
+const hasControlSlot = computed(() => Boolean(slots.control))
+const settingName = computed(() => props.setting?.name ?? props.name ?? '')
+const settingDesc = computed(() => props.setting?.desc ?? props.desc ?? '')
+
 const handleChange = (event: Event) => {
   const target = event.target as HTMLInputElement;
   
-  if (props.setting.type === SysSettingType.BOOL) {
+  if (props.setting?.type === SysSettingType.BOOL) {
     emit('update', props.setting.id, target.checked);
   }
 };
 
-const draftValue = ref(props.setting.type === SysSettingType.STR ? props.setting.value : '')
+const draftValue = ref(props.setting?.type === SysSettingType.STR ? props.setting.value : '')
 
 watch(
   () => props.setting,
   (setting) => {
-    if (setting.type === SysSettingType.STR) {
+    if (setting?.type === SysSettingType.STR) {
       draftValue.value = setting.value
     }
   },
@@ -82,7 +90,7 @@ const handleInput = (event: Event) => {
 }
 
 const commitDraft = () => {
-  if (props.setting.type !== SysSettingType.STR) {
+  if (props.setting?.type !== SysSettingType.STR) {
     return
   }
 

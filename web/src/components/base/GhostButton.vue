@@ -197,6 +197,8 @@ onBeforeUnmount(() => {
 .ghost-btn.is-loading:disabled {
   border-style: solid;
   opacity: 1;
+  background-color: var(--btn-main-color);
+  color: var(--btn-hover-text-color);
 }
 
 @keyframes ghost-btn-spin {

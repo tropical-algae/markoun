@@ -31,7 +31,7 @@
         </div>
       </template>
 
-      <div>
+      <div class="mb-4">
         <SidebarFileTreeItem
           v-for="item in nodeStore.rootNodes"
           :key="item.path"

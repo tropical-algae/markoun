@@ -399,8 +399,7 @@ export const useNodeStore = defineStore('note', () => {
     if (!isCurrentFileDirty.value) {
       return
     }
-
-    await saveCurrentFile({ silent: true })
+    await saveCurrentFile({ silent: false })
   }
 
   const saveCurrentFileBeforeUnload = () => {
