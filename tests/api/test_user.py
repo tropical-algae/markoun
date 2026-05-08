@@ -59,6 +59,7 @@ def test_user_login_api(client: TestClient, data_store: DataStore, user: dict):
     assert response.status_code == 200
     assert data["status"] == 200
     assert access_token
+    assert "secure" not in response.headers.get("set-cookie", "").lower()
 
     # store token data
     data_store.admin_user_id = data["user_id"]
@@ -84,3 +85,40 @@ def test_current_user_profile(client: TestClient):
     assert data["email"] == TEMP_USER["email"]
     assert ScopeType.USER.value in data["scopes"]
     assert "password" not in data
+
+
+@pytest.mark.run(order=6)
+@pytest.mark.parametrize(
+    ("username", "password"),
+    [
+        ("missing-user", "123456"),
+        (TEMP_USER["full_name"], "wrong-password"),
+    ],
+)
+def test_user_login_uses_generic_auth_error(
+    client: TestClient, username: str, password: str
+):
+    url = f"{settings.API_PREFIX}/auth/login"
+    response = client.post(
+        url=url,
+        data={
+            "username": username,
+            "password": password,
+        },
+    )
+
+    assert response.status_code == 401
+    assert response.json()["message"] == "Incorrect username or password"
+
+
+@pytest.mark.run(order=7)
+def test_update_password_requires_request_body(client: TestClient):
+    url = f"{settings.API_PREFIX}/auth/password"
+    new_password = "new-123456"
+
+    query_response = client.patch(url=url, params={"new_passwd": new_password})
+    assert query_response.status_code == 422
+
+    body_response = client.patch(url=url, json={"new_passwd": new_password})
+    assert body_response.status_code == 200
+    assert body_response.json()["data"]

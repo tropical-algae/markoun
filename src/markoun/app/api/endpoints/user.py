@@ -27,6 +27,7 @@ from markoun.core.db.models import UserAccount
 from markoun.core.model.user import (
     CurrentUserProfile,
     LoginResponse,
+    PasswordUpdateRequest,
     ScopeType,
     UserBasicInfo,
 )
@@ -105,11 +106,11 @@ async def api_user_register(
 @router.patch("/password")
 @exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_update_setting(
-    new_passwd: str,
+    payload: PasswordUpdateRequest,
     db: AsyncSession = Depends(get_db),
     current_user: UserAccount = Security(
         get_current_user, scopes=[ScopeType.ADMIN, ScopeType.USER]
     ),
 ):
-    await user_update_passwd(db=db, user=current_user, new_passwd=new_passwd)
+    await user_update_passwd(db=db, user=current_user, new_passwd=payload.new_passwd)
     return MSG_SUCCESS

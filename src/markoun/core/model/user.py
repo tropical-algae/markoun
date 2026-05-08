@@ -30,6 +30,10 @@ class CurrentUserProfile(BaseModel):
     joined_at: str | None
 
 
+class PasswordUpdateRequest(BaseModel):
+    new_passwd: str = Field(description="New user password")
+
+
 class TokenPayload(BaseModel):
     userid: str
     username: str

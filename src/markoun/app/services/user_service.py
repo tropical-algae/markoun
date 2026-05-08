@@ -54,7 +54,7 @@ async def user_login(
 ) -> UserAccount:
     user = await select_user_by_full_name(db, full_name=user_form.username)
     if not user:
-        raise HTTPException(**CONSTANT.RESP_USER_NOT_EXISTS)
+        raise HTTPException(**CONSTANT.RESP_USER_INCORRECT_PASSWD)
 
     if not verify_password(user_form.password, str(user.password)):
         raise HTTPException(**CONSTANT.RESP_USER_INCORRECT_PASSWD)
@@ -77,14 +77,19 @@ async def user_login(
         max_age=int(access_token_expires.total_seconds()),
         expires=int(access_token_expires.total_seconds()),
         samesite="lax",
-        secure=False,
+        secure=settings.ACCESS_TOKEN_COOKIE_SECURE,
         path="/",
     )
     return user
 
 
 def user_logout(response: Response) -> None:
-    response.delete_cookie(key="access_token", path="/", samesite="lax")
+    response.delete_cookie(
+        key="access_token",
+        path="/",
+        samesite="lax",
+        secure=settings.ACCESS_TOKEN_COOKIE_SECURE,
+    )
 
 
 async def user_register(user: UserBasicInfo, db: AsyncSession) -> UserAccount:
