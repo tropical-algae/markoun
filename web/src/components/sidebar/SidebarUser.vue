@@ -8,7 +8,7 @@
       <section class="mb-4">
         <div class="text-uppercase fw-bold mb-2 f-m fc-pri">Profile</div>
 
-        <div ref="profileMotionShellRef" class="user-profile-motion-shell">
+        <div ref="profileMotionShellRef">
           <div ref="profileMotionContentRef" class="user-profile-motion-content">
             <AsyncGate
               :status="userStore.currentUserProfileState"
@@ -236,10 +236,6 @@ const handleUpdatePassword = async () => {
   min-height: 0;
 }
 
-.user-profile-motion-shell {
-  overflow: hidden;
-}
-
 .user-profile-motion-content {
   width: 100%;
 }
@@ -247,11 +243,16 @@ const handleUpdatePassword = async () => {
 .user-profile-card,
 .user-profile-shell,
 .user-profile-empty {
+  width: 100%;
+  box-sizing: border-box;
   border: 1px solid var(--color-line);
   border-radius: var(--radius-xl);
   white-space: normal;
   background-color: var(--color-bg-sec);
   padding: var(--profile-card-padding);
+  transition:
+    background-color var(--motion-theme-duration) ease,
+    border-color var(--motion-theme-duration) ease;
 }
 
 .user-profile-empty {
@@ -305,5 +306,15 @@ const handleUpdatePassword = async () => {
 
 .password-hint {
   transition: opacity var(--password-hint-opacity-duration) ease;
+}
+
+.profile-swap-enter-active,
+.profile-swap-leave-active {
+  transition: opacity var(--motion-soft-duration) ease;
+}
+
+.profile-swap-enter-from,
+.profile-swap-leave-to {
+  opacity: 0;
 }
 </style>

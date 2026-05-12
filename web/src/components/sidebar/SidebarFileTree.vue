@@ -79,9 +79,8 @@ const showNewFolder = ref(false);
 const showUpload = ref(false);
 const deleteItem = ref(false);
 const nodeStore = useNodeStore()
-const isRootDirectory = computed(() => true)
 const rootLoadStatus = computed<AsyncStatus>(() => {
-  const state = nodeStore.getDirectoryLoadState('.')
+  const state = nodeStore.getDirectoryLoadState(ROOT_DIRECTORY_PATH)
   if (state === 'loaded') {
     return 'ready'
   }
@@ -94,7 +93,7 @@ const {
   handleDirectoryDragLeave: handleRootDirectoryDragLeave,
   handleDirectoryDrop: handleRootDirectoryDrop,
 } = useFileTreeDropTarget({
-  isDirectory: isRootDirectory,
+  isDirectory: true,
   getDestinationPath: () => ROOT_DIRECTORY_PATH,
   moveNode: nodeStore.moveNode,
 })

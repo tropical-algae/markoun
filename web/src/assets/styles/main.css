@@ -119,6 +119,12 @@
   --tree-row-radius: var(--radius-sm);
   --tree-icon-size: 1rem;
   --tree-rename-max-width: 260px;
+  --tree-node-text-line-height: 1rem;
+  --tree-node-text-padding-y: 2px;
+  --tree-node-text-padding-x: 3px;
+  --tree-node-text-height: calc(
+    var(--tree-node-text-line-height) + var(--tree-node-text-padding-y) * 2
+  );
 
   --hint-icon-size: 0.7rem;
   --hint-font-size: 0.7rem;
@@ -144,8 +150,6 @@
   --underlined-input-line-height: 1px;
   --divider-line-width: 1px;
   --resize-line-width: 2px;
-  --tree-caret-height: 4px;
-  --tree-caret-width: 5px;
   --password-hint-opacity-duration: 0.2s;
 
   --button-radius: var(--radius-md);

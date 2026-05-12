@@ -26,7 +26,6 @@
           :class="{ 'is-opened': isOpened, 'is-disabled': !canExpand }"
           @click.stop="handleClickDirectoryIcon"
         >
-          <!-- <span class="disclosure-caret" :class="{ 'is-hidden': !canExpand }"></span> -->
           <component
             :is="currentIcon"
             class="node-icon dir-icon"
@@ -234,10 +233,6 @@ const onLeave = childrenMotion.leave;
 <style scoped>
 
 .node-wrapper {
-  --node-text-line-height: 1rem;
-  --node-text-padding-y: 2px;
-  --node-text-padding-x: 3px;
-  --node-text-height: calc(var(--node-text-line-height) + var(--node-text-padding-y) * 2);
   font-size: 0.8rem;
   color: var(--color-text-pri);
   width: 100%; 
@@ -246,16 +241,32 @@ const onLeave = childrenMotion.leave;
 }
 
 .node-content {
+  position: relative;
   padding: var(--tree-row-padding);
   cursor: pointer;
   border-radius: var(--tree-row-radius);
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   gap: var(--hint-gap);
   width: 100%;
   min-width: 0;
+  background-color: transparent;
+  isolation: isolate;
+}
 
-  transition: background-color var(--motion-soft-duration) ease;
+.node-content::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background-color: var(--color-bg-selected);
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity var(--motion-soft-duration) ease,
+    background-color var(--motion-soft-duration) ease;
 }
 
 .node-content > .meta-tag {
@@ -273,7 +284,7 @@ const onLeave = childrenMotion.leave;
   width: 100%;
   min-width: 0;
   padding: 1px 0;
-  min-height: var(--node-text-height);
+  min-height: var(--tree-node-text-height);
 }
 
 .dir-icon {
@@ -282,8 +293,6 @@ const onLeave = childrenMotion.leave;
 
 .node-toggle-btn,
 .node-leading-spacer {
-  /* width: 2rem; */
-  /* min-width: 2rem; */
   height: var(--tree-icon-size);
   flex-shrink: 0;
 }
@@ -302,35 +311,18 @@ const onLeave = childrenMotion.leave;
   cursor: default;
 }
 
-.disclosure-caret {
-  width: 0;
-  height: 0;
-  border-top: var(--tree-caret-height) solid transparent;
-  border-bottom: var(--tree-caret-height) solid transparent;
-  border-left: var(--tree-caret-width) solid var(--color-text-sec);
-  transition: transform var(--motion-soft-duration) ease;
-}
-
-.disclosure-caret.is-hidden {
-  visibility: hidden;
-}
-
-.node-toggle-btn.is-opened .disclosure-caret {
-  transform: rotate(90deg);
-}
-
 .node-text-wrapper .file-name, 
 .node-text-wrapper .dir-name {
-  padding: var(--node-text-padding-y) var(--node-text-padding-x);
+  padding: var(--tree-node-text-padding-y) var(--tree-node-text-padding-x);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   width: 100%; 
   max-width: 100%;
-  min-height: var(--node-text-height);
+  min-height: var(--tree-node-text-height);
   display: block;
   box-sizing: border-box;
-  line-height: var(--node-text-line-height);
+  line-height: var(--tree-node-text-line-height);
 }
 
 .node-text-wrapper .file-name { 
@@ -352,15 +344,18 @@ const onLeave = childrenMotion.leave;
   fill: var(--color-action);
 }
 
-.node-content.is-selected,
-.node-content:hover {
-  background-color: var(--color-bg-selected);
+.node-content.is-selected::before,
+.node-content:hover::before {
+  opacity: 1;
 }
 
 .node-content.is-dragover {
-  background-color: var(--color-action-light);
-  /* border: 1.5px dashed var(--color-action); */
   box-shadow: inset 0 0 0 1px var(--color-action);
+}
+
+.node-content.is-dragover::before {
+  background-color: var(--color-action-light);
+  opacity: 1;
 }
 
 .node-content.is-node-dragging {
@@ -378,16 +373,16 @@ const onLeave = childrenMotion.leave;
 .rename-input {
   background-color: var(--color-bg-pri);
   width: 100%;
-  min-height: var(--node-text-height);
+  min-height: var(--tree-node-text-height);
   border: none;
   outline: none;
-  padding: 0 var(--node-text-padding-x);
+  padding: 0 var(--tree-node-text-padding-x);
   margin: 0;
   border-radius: var(--tree-row-radius);
   color: var(--color-text-pri);
   font-family: inherit;
   box-sizing: border-box;
-  line-height: var(--node-text-line-height);
+  line-height: var(--tree-node-text-line-height);
 }
 
 .node-icon {

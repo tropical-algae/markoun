@@ -10,16 +10,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
 import CreateNodeModal from '@/components/overlay/modals/CreateNodeModal.vue'
+import { useModelProxy } from '@/composables/useModelProxy'
 
 const props = defineProps<{ modelValue: boolean }>()
 const emit = defineEmits<{
   (event: 'update:modelValue', value: boolean): void
 }>()
 
-const isVisible = computed({
-  get: () => props.modelValue,
-  set: (value: boolean) => emit('update:modelValue', value),
-})
+const isVisible = useModelProxy(props, emit)
 </script>

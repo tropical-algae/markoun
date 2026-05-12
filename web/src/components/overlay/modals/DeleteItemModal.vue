@@ -29,23 +29,21 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
-import BaseModal from '@/components/base/BaseModal.vue';
-import GhostButton from '@/components/base/GhostButton.vue';
+import { ref, watch } from 'vue'
+import BaseModal from '@/components/base/BaseModal.vue'
+import GhostButton from '@/components/base/GhostButton.vue'
 
 import { useNodeStore } from "@/stores/note"
+import { useModelProxy } from '@/composables/useModelProxy'
 
 const nodeStore = useNodeStore()
-const props = defineProps<{ modelValue: boolean }>();
+const props = defineProps<{ modelValue: boolean }>()
 const emit = defineEmits<{
   (event: 'update:modelValue', value: boolean): void
-}>();
+}>()
 
 const targetPath = ref('Default Page')
-const isVisible = computed({
-  get: () => props.modelValue,
-  set: (value: boolean) => emit('update:modelValue', value)
-});
+const isVisible = useModelProxy(props, emit)
 
 watch(
   () => isVisible.value,
@@ -59,10 +57,8 @@ watch(
 
 const handleConfirm = async () => {
   await nodeStore.deletedItem()
-  
-  // 初始化状态
-  isVisible.value = false;
-};
+  isVisible.value = false
+}
 
 </script>
 
