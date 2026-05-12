@@ -75,7 +75,10 @@
         class="node-children-panel overflow-hidden"
       >
         <div ref="childrenContentRef" class="node-children-content">
-          <AsyncGate :status="childLoadStatus">
+          <AsyncGate
+            :status="childLoadStatus"
+            transition-name="tree-node-swap"
+          >
             <template #loading>
               <div
                 class="node-placeholder"
@@ -283,7 +286,7 @@ const onLeave = childrenMotion.leave;
 .node-text-slot {
   width: 100%;
   min-width: 0;
-  padding: 1px 0;
+  padding: var(--tree-node-text-slot-padding-y) 0;
   min-height: var(--tree-node-text-height);
 }
 
@@ -393,8 +396,6 @@ const onLeave = childrenMotion.leave;
 }
 
 .node-placeholder {
-  padding-top: 2px;
-  padding-bottom: 2px;
   padding-left: calc(var(--tree-depth) * var(--tree-indent-step));
 }
 
@@ -403,6 +404,8 @@ const onLeave = childrenMotion.leave;
   align-items: center;
   gap: var(--hint-gap);
   padding: var(--tree-row-padding);
+  min-height: var(--tree-node-row-height);
+  box-sizing: border-box;
 }
 
 .node-placeholder-text {
@@ -411,5 +414,15 @@ const onLeave = childrenMotion.leave;
 
 .node-children-content {
   width: 100%;
+}
+
+:deep(.tree-node-swap-enter-active),
+:deep(.tree-node-swap-leave-active) {
+  transition: opacity var(--motion-soft-duration) ease;
+}
+
+:deep(.tree-node-swap-enter-from),
+:deep(.tree-node-swap-leave-to) {
+  opacity: 0;
 }
 </style>

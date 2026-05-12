@@ -115,15 +115,23 @@
   --meta-tag-font-size: 0.55rem;
 
   --tree-indent-step: 12px;
-  --tree-row-padding: 2px 6px;
+  --tree-row-padding-y: 2px;
+  --tree-row-padding-x: 6px;
+  --tree-row-padding: var(--tree-row-padding-y) var(--tree-row-padding-x);
   --tree-row-radius: var(--radius-sm);
   --tree-icon-size: 1rem;
   --tree-rename-max-width: 260px;
   --tree-node-text-line-height: 1rem;
+  --tree-node-text-slot-padding-y: 1px;
   --tree-node-text-padding-y: 2px;
   --tree-node-text-padding-x: 3px;
   --tree-node-text-height: calc(
     var(--tree-node-text-line-height) + var(--tree-node-text-padding-y) * 2
+  );
+  --tree-node-row-height: calc(
+    var(--tree-node-text-height) +
+    var(--tree-node-text-slot-padding-y) * 2 +
+    var(--tree-row-padding-y) * 2
   );
 
   --hint-icon-size: 0.7rem;
