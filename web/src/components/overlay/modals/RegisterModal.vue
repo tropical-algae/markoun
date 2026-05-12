@@ -58,6 +58,7 @@ import UnderlinedInput from '@/components/base/UnderlinedInput.vue';
 import GhostButton from '@/components/base/GhostButton.vue';
 
 import { useUserStore } from "@/stores/user"
+import { useModelProxy } from '@/composables/useModelProxy'
 
 const userStore = useUserStore()
 const props = defineProps<{ modelValue: boolean }>();
@@ -66,10 +67,7 @@ const emit = defineEmits<{
   (event: 'submit'): void
 }>();
 
-const isVisible = computed({
-  get: () => props.modelValue,
-  set: (value: boolean) => emit('update:modelValue', value)
-});
+const isVisible = useModelProxy(props, emit)
 
 const registerForm = reactive({
   username: '',

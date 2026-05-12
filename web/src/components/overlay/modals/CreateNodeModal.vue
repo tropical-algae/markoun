@@ -49,6 +49,7 @@ import GhostButton from '@/components/base/GhostButton.vue'
 import UnderlinedInput from '@/components/base/UnderlinedInput.vue'
 import InfoIcon from '@/assets/icons/info.svg'
 import { useNodeStore } from '@/stores/note'
+import { useModelProxy } from '@/composables/useModelProxy'
 
 const props = defineProps<{
   modelValue: boolean
@@ -67,11 +68,7 @@ const nodeStore = useNodeStore()
 const nodeName = ref('')
 const inputRef = ref<InstanceType<typeof UnderlinedInput> | null>(null)
 
-const isVisible = computed({
-  get: () => props.modelValue,
-  set: (value: boolean) => emit('update:modelValue', value),
-})
-
+const isVisible = useModelProxy(props, emit)
 const isPending = computed(() => nodeStore.isCreatePending(props.nodeType))
 
 const handleOpened = () => {

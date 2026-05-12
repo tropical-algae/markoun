@@ -1,5 +1,11 @@
 <template>
-  <div class="editor-wrapper px-3" :class="{ 'is-resizing': isInspectorResizing }">
+  <div
+    class="editor-wrapper px-3"
+    :class="{
+      'is-resizing': isInspectorResizing,
+      'is-wide-lines': appearanceStore.useWideEditorLines,
+    }"
+  >
     <BaseHeader>
       <div class="col-auto d-flex justify-content-start flex-shrink-0 gap-2 ps-1">
         <BaseTooltip v-for="item in sidebarIcons" :key="item.label" :text="item.label" placement="bottom">
@@ -144,6 +150,7 @@ import MetaIcon from "@/assets/icons/info.svg"
 import SaveIcon from "@/assets/icons/disk.svg"
 
 import { useNodeStore } from '@/stores/note';
+import { useAppearanceStore } from '@/stores/appearance';
 import { useResizablePane } from '@/composables/useResizablePane';
 import { InspectMode } from '@/types/ui';
 import { EDITOR_ASYNC_GATE_DELAY_MS, INSPECTOR_PANE_WIDTH } from '@/constants/ui';
@@ -155,6 +162,7 @@ import AsyncGate from '@/components/base/AsyncGate.vue';
 import BaseTooltip from '@/components/base/BaseTooltip.vue';
 
 const nodeStore = useNodeStore()
+const appearanceStore = useAppearanceStore()
 
 const showInspector = ref(false);
 const {
@@ -245,6 +253,8 @@ const insertText = (text: string) => {
 /* 编辑器部分 */
 
 .editor-wrapper {
+  --editor-content-padding-x: calc(max(var(--editor-content-padding-x-min), (100% - var(--editor-content-max-width)) / 2));
+
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -252,6 +262,10 @@ const insertText = (text: string) => {
   background-color: var(--color-bg-sec);
   overflow: hidden; 
   transition: background-color var(--motion-theme-duration) ease;
+}
+
+.editor-wrapper.is-wide-lines {
+  --editor-content-padding-x: var(--editor-content-padding-x-min);
 }
 
 .editor-wrapper .floating-left {
@@ -291,12 +305,15 @@ const insertText = (text: string) => {
   height: 100%;
 }
 
+.editor-ready-state {
+  position: relative;
+}
+
 .markdown-editor {
   width: 100%;
   height: 100%;
 
-  padding: var(--editor-content-padding-y)
-    calc(max(var(--editor-content-padding-x-min), (100% - var(--editor-content-max-width)) / 2));
+  padding: var(--editor-content-padding-y) var(--editor-content-padding-x);
 
   border: none;
   outline: none;
@@ -327,8 +344,7 @@ const insertText = (text: string) => {
 }
 
 .editor-loading-state {
-  padding: var(--editor-content-padding-y)
-    calc(max(var(--editor-content-padding-x-min), (100% - var(--editor-content-max-width)) / 2));
+  padding: var(--editor-content-padding-y) var(--editor-content-padding-x);
   display: flex;
   flex-direction: column;
   gap: 14px;

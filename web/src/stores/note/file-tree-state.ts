@@ -8,25 +8,7 @@ import {
   replacePathPrefix,
   ROOT_DIRECTORY_PATH,
 } from '@/utils/file-system'
-import { normalizeFsNode, sortFsNodes } from '@/utils/file-node'
-
-const remapNodePathPrefix = (
-  node: FsNode,
-  oldPath: string,
-  newPath: string,
-  exactName: string,
-): FsNode => {
-  const nextPath = replacePathPrefix(node.path, oldPath, newPath)
-  if (nextPath === node.path) {
-    return node
-  }
-
-  return {
-    ...node,
-    path: nextPath,
-    name: node.path === oldPath ? exactName : node.name,
-  }
-}
+import { normalizeFsNode, remapFsNodePathPrefix, sortFsNodes } from '@/utils/file-node'
 
 export const useFileTreeState = () => {
   const directoryChildrenByPath = ref<Record<string, FsNode[]>>({})
@@ -180,7 +162,7 @@ export const useFileTreeState = () => {
     const nextDirectoryChildrenByPath: Record<string, FsNode[]> = {}
     for (const [directoryPath, children] of Object.entries(directoryChildrenByPath.value)) {
       nextDirectoryChildrenByPath[replacePathPrefix(directoryPath, oldPath, newPath)] = sortFsNodes(
-        children.map((child) => remapNodePathPrefix(child, oldPath, newPath, exactName)),
+        children.map((child) => remapFsNodePathPrefix(child, oldPath, newPath, exactName)),
       )
     }
     directoryChildrenByPath.value = nextDirectoryChildrenByPath

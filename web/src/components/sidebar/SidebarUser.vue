@@ -8,7 +8,7 @@
       <section class="mb-4">
         <div class="text-uppercase fw-bold mb-2 f-m fc-pri">Profile</div>
 
-        <div ref="profileMotionShellRef" class="user-profile-motion-shell">
+        <div ref="profileMotionShellRef">
           <div ref="profileMotionContentRef" class="user-profile-motion-content">
             <AsyncGate
               :status="userStore.currentUserProfileState"
@@ -17,13 +17,12 @@
               <template #loading>
                 <div class="user-profile-shell">
                   <BaseSkeleton width="52%" height="1.1rem" />
-                  <BaseSkeleton width="68%" height="0.85rem" />
 
                   <div class="user-meta-shell user-meta-shell-loading mt-3">
                     <BaseSkeleton width="60px" height="0.7rem" />
                     <div class="user-tag-shell">
-                      <BaseSkeleton width="56px" height="var(--meta-tag-height)" radius="4px" />
-                      <BaseSkeleton width="44px" height="var(--meta-tag-height)" radius="4px" />
+                      <BaseSkeleton width="56px" height="var(--meta-tag-height)" />
+                      <BaseSkeleton width="44px" height="var(--meta-tag-height)" />
                     </div>
 
                     <BaseSkeleton width="46px" height="0.7rem" />
@@ -98,17 +97,17 @@
 
           <BaseIconText
             :icon="InfoIcon"
-            :text="passwordHint"
+            :text="pwdHint"
             color="var(--color-bg-error)"
             class="password-hint"
-            :style="{ opacity: showPasswordHint ? 1 : 0 }"
+            :style="{ opacity: showPwdHint ? 1 : 0 }"
           />
         </div>
 
         <GhostButton
           class="w-100 f-s"
-          :disabled="!isPwdLenValid || !isPwdConfValid || userStore.isUpdatePasswordPending()"
-          :loading="userStore.isUpdatePasswordPending()"
+          :disabled="!isPwdLenValid || !isPwdConfValid || isPwdButtonPending"
+          :loading="isPwdButtonPending"
           @click="handleUpdatePassword"
         >
           Update Password
@@ -120,8 +119,8 @@
       <GhostButton
         class="w-100 f-s"
         theme="danger"
-        :disabled="userStore.isLogoutPending()"
-        :loading="userStore.isLogoutPending()"
+        :disabled="isLogoutButtonPending"
+        :loading="isLogoutButtonPending"
         @click="handleLogout"
       >
         Logout
@@ -158,13 +157,22 @@ const pwdForm = reactive({
   new: '',
   confirm: '',
 })
+const isPwdFlowPending = ref(false)
+const isPwdButtonPending = computed(() =>
+  isPwdFlowPending.value || userStore.isUpdatePasswordPending()
+)
+
+const isLogoutFlowPending = ref(false)
+const isLogoutButtonPending = computed(() =>
+  isLogoutFlowPending.value || userStore.isLogoutPending()
+)
 
 const isPwdLenValid = computed(() => pwdForm.new.length >= 6)
 const isPwdConfValid = computed(() => pwdForm.new === pwdForm.confirm)
-const showPasswordHint = computed(() => {
+const showPwdHint = computed(() => {
   return Boolean(pwdForm.new && pwdForm.confirm) && (!isPwdLenValid.value || !isPwdConfValid.value)
 })
-const passwordHint = computed(() => {
+const pwdHint = computed(() => {
   return !isPwdLenValid.value ? 'Password must be longer than 6.' : 'Passwords do not match.'
 })
 
@@ -191,16 +199,34 @@ onBeforeUnmount(() => {
 })
 
 const handleLogout = async () => {
-  const isDone = await userStore.logout()
-  if (isDone) {
-    await router.replace({ name: 'Login' })
+  if (isLogoutFlowPending.value) {
+    return
+  }
+
+  isLogoutFlowPending.value = true
+  try {
+    const isDone = await userStore.logout()
+    if (isDone) {
+      await router.replace({ name: 'Login' })
+    }
+  } finally {
+    isLogoutFlowPending.value = false
   }
 }
 
 const handleUpdatePassword = async () => {
-  const isDone = await userStore.updatePassword(pwdForm.new)
-  if (isDone) {
-    await handleLogout()
+  if (isPwdFlowPending.value) {
+    return
+  }
+
+  isPwdFlowPending.value = true
+  try {
+    const isDone = await userStore.updatePassword(pwdForm.new)
+    if (isDone) {
+      await handleLogout()
+    }
+  } finally {
+    isPwdFlowPending.value = false
   }
 }
 </script>
@@ -210,10 +236,6 @@ const handleUpdatePassword = async () => {
   min-height: 0;
 }
 
-.user-profile-motion-shell {
-  overflow: hidden;
-}
-
 .user-profile-motion-content {
   width: 100%;
 }
@@ -221,17 +243,16 @@ const handleUpdatePassword = async () => {
 .user-profile-card,
 .user-profile-shell,
 .user-profile-empty {
+  width: 100%;
+  box-sizing: border-box;
   border: 1px solid var(--color-line);
   border-radius: var(--radius-xl);
   white-space: normal;
   background-color: var(--color-bg-sec);
   padding: var(--profile-card-padding);
-}
-
-.user-profile-shell {
-  display: flex;
-  flex-direction: column;
-  gap: var(--profile-card-gap);
+  transition:
+    background-color var(--motion-theme-duration) ease,
+    border-color var(--motion-theme-duration) ease;
 }
 
 .user-profile-empty {
@@ -239,12 +260,12 @@ const handleUpdatePassword = async () => {
 }
 
 .user-name {
-  line-height: 1.3;
+  line-height: var(--profile-name-line-height);
 }
 
 .user-email {
   color: var(--color-text-sec);
-  line-height: 1.5;
+  line-height: var(--profile-email-line-height);
 }
 
 .user-scopes {
@@ -270,7 +291,7 @@ const handleUpdatePassword = async () => {
 .user-meta-value {
   min-width: 0;
   color: var(--color-text-pri);
-  line-height: 1.45;
+  line-height: var(--profile-meta-value-line-height);
   word-break: break-word;
 }
 
@@ -285,5 +306,15 @@ const handleUpdatePassword = async () => {
 
 .password-hint {
   transition: opacity var(--password-hint-opacity-duration) ease;
+}
+
+.profile-swap-enter-active,
+.profile-swap-leave-active {
+  transition: opacity var(--motion-soft-duration) ease;
+}
+
+.profile-swap-enter-from,
+.profile-swap-leave-to {
+  opacity: 0;
 }
 </style>

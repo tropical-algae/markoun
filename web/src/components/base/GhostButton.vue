@@ -9,14 +9,19 @@
       <span class="ghost-btn-label" :class="{ 'is-hidden': visibleLoading }">
         <slot></slot>
       </span>
-      <span v-if="visibleLoading" class="ghost-btn-spinner" aria-hidden="true"></span>
+      <span
+        class="ghost-btn-spinner"
+        :class="{ 'is-visible': visibleLoading }"
+        aria-hidden="true"
+      ></span>
     </span>
   </button>
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, ref, watch } from 'vue';
+import { computed } from 'vue';
 import { ASYNC_GATE_DELAY_MS, ASYNC_GATE_MIN_VISIBLE_MS } from '@/constants/ui';
+import { useDelayedVisibility } from '@/composables/useDelayedVisibility';
 
 interface Props {
   theme?: 'primary' | 'danger' | 'secondary' | 'submit';
@@ -34,89 +39,13 @@ const props = withDefaults(defineProps<Props>(), {
   loadingMinDurationMs: undefined,
 });
 
-const visibleLoading = ref(false)
-let loadingVisibleAt = 0
-let showTimer: number | null = null
-let hideTimer: number | null = null
-
-const clearShowTimer = () => {
-  if (showTimer !== null) {
-    window.clearTimeout(showTimer)
-    showTimer = null
-  }
-}
-
-const clearHideTimer = () => {
-  if (hideTimer !== null) {
-    window.clearTimeout(hideTimer)
-    hideTimer = null
-  }
-}
-
-const showLoading = () => {
-  if (visibleLoading.value) {
-    return
-  }
-
-  visibleLoading.value = true
-  loadingVisibleAt = Date.now()
-}
-
-const hideLoading = () => {
-  visibleLoading.value = false
-  loadingVisibleAt = 0
-}
-
-watch(
+const visibleLoading = useDelayedVisibility(
   () => props.loading,
-  (loading) => {
-    if (loading) {
-      clearHideTimer()
-
-      if (visibleLoading.value) {
-        return
-      }
-
-      clearShowTimer()
-      showTimer = window.setTimeout(() => {
-        showTimer = null
-        if (props.loading) {
-          showLoading()
-        }
-      }, props.loadingDelayMs ?? ASYNC_GATE_DELAY_MS)
-      return
-    }
-
-    clearShowTimer()
-
-    if (!visibleLoading.value) {
-      return
-    }
-
-    const elapsed = Date.now() - loadingVisibleAt
-    const minDuration = props.loadingMinDurationMs ?? ASYNC_GATE_MIN_VISIBLE_MS
-    const remaining = Math.max(0, minDuration - elapsed)
-
-    clearHideTimer()
-    if (remaining === 0) {
-      hideLoading()
-      return
-    }
-
-    hideTimer = window.setTimeout(() => {
-      hideTimer = null
-      if (!props.loading) {
-        hideLoading()
-      }
-    }, remaining)
+  {
+    delayMs: computed(() => props.loadingDelayMs ?? ASYNC_GATE_DELAY_MS),
+    minVisibleMs: computed(() => props.loadingMinDurationMs ?? ASYNC_GATE_MIN_VISIBLE_MS),
   },
-  { immediate: true },
 )
-
-onBeforeUnmount(() => {
-  clearShowTimer()
-  clearHideTimer()
-})
 </script>
 
 <style scoped>
@@ -124,28 +53,46 @@ onBeforeUnmount(() => {
   --btn-main-color: var(--color-text-pri); 
   --btn-hover-text-color: var(--color-bg-pri);
   
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: var(--ghost-button-padding);
-  border-width: var(--ghost-button-border-width);
   opacity: 1;
 
   background-color: transparent;
-  border: var(--ghost-button-border-width) solid var(--btn-main-color);
+  /* border: var(--ghost-button-border-width) solid var(--btn-main-color); */
+  box-shadow: inset 0 0 0 1px var(--btn-main-color);
+
   color: var(--btn-main-color);
   border-radius: var(--button-radius);
+  overflow: hidden;
   
   cursor: pointer;
   transition: 
-    background-color var(--motion-soft-duration) ease,
     color var(--motion-soft-duration) ease,
     border-color var(--motion-soft-duration) ease,
     opacity var(--motion-soft-duration) ease;
   user-select: none;
 }
 
+.ghost-btn::before {
+  position: absolute;
+  inset: -20px;
+  z-index: 0;
+  background-color: var(--btn-main-color);
+
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity var(--motion-soft-duration) ease,
+    background-color var(--motion-soft-duration) ease;
+}
+
 .ghost-btn-content {
+  position: relative;
+  z-index: 1;
   display: grid;
   place-items: center;
 }
@@ -166,19 +113,31 @@ onBeforeUnmount(() => {
   border: var(--ghost-button-spinner-border-width) solid currentColor;
   border-right-color: transparent;
   animation: ghost-btn-spin var(--motion-spinner-duration) linear infinite;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--motion-soft-duration) ease;
 }
 
-.ghost-btn.type-danger {
-  --btn-main-color: var(--color-bg-error);
+.ghost-btn-spinner.is-visible {
+  opacity: 1;
+  visibility: visible;
 }
 
 .ghost-btn.type-secondary {
   --btn-main-color: var(--color-text-sec);
 }
 
+.ghost-btn.type-danger {
+  --btn-main-color: var(--color-bg-error);
+}
+
 .ghost-btn:not(:disabled):hover {
-  background-color: var(--btn-main-color);
   color: var(--btn-hover-text-color);
+}
+
+.ghost-btn:not(:disabled):hover::before,
+.ghost-btn.is-loading::before {
+  opacity: 1;
 }
 
 .ghost-btn:not(:disabled):active {
@@ -186,17 +145,14 @@ onBeforeUnmount(() => {
 }
 
 .ghost-btn:disabled {
-  border-style: dashed;
   opacity: 0.7;
   cursor: not-allowed;
-  
-  background-color: transparent;
   color: var(--btn-main-color);
 }
 
 .ghost-btn.is-loading:disabled {
-  border-style: solid;
   opacity: 1;
+  color: var(--btn-hover-text-color);
 }
 
 @keyframes ghost-btn-spin {

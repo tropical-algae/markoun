@@ -77,7 +77,7 @@ export const updatePasswordApi = (newPasswd: string): Promise<ApiResponse<string
   return request({
     url: '/api/v1/auth/password',
     method: 'patch',
-    params: {
+    data: {
       new_passwd: newPasswd,
     }
   })

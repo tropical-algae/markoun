@@ -1,4 +1,4 @@
-import { ref, type Ref } from 'vue'
+import { ref, toValue, type MaybeRefOrGetter } from 'vue'
 import { useFileUploadTask } from '@/composables/useFileUploadTask'
 import {
   FILE_TREE_NODE_MIME,
@@ -9,7 +9,7 @@ import type { FsNode } from '@/types/file-system'
 import { getParentPath, isPathInside, normalizeNodePath } from '@/utils/file-system'
 
 interface UseFileTreeDropTargetOptions {
-  isDirectory: Readonly<Ref<boolean>>;
+  isDirectory: MaybeRefOrGetter<boolean>;
   getDestinationPath: () => string;
   selectDirectory?: () => Promise<void>;
   moveNode: (node: FsNode, targetDir: string) => Promise<void>;
@@ -51,7 +51,7 @@ export const useFileTreeDropTarget = (options: UseFileTreeDropTargetOptions) => 
   }
 
   const getDropKind = (event: DragEvent): 'file' | 'node' | null => {
-    if (!options.isDirectory.value) {
+    if (!toValue(options.isDirectory)) {
       return null
     }
 

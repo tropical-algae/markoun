@@ -1,62 +1,76 @@
 <template>
-  <div class="d-flex justify-content-between align-items-center pb-2">
-    <div class="setting-copy d-flex flex-column pe-3">
-      <span class="fw-bold f-s fc-pri">Theme Mode</span>
-      <span class="text-truncate f-xs fc-sec">Switch between light and dark interface.</span>
-    </div>
+  <SidebarSettingItem
+    name="Theme Mode"
+    desc="Switch between light and dark interface."
+  >
+    <template #control>
+      <div class="theme-options">
+        <button
+          v-for="option in appearanceStore.themeOptions"
+          :key="option.id"
+          class="theme-option f-s"
+          :class="{ 'is-active': appearanceStore.currentTheme === option.id }"
+          :data-theme="option.id"
+          :aria-label="`Use ${option.label} theme`"
+          :aria-pressed="appearanceStore.currentTheme === option.id"
+          @click="appearanceStore.setTheme(option.id)"
+        >
+          {{ option.label }}
+        </button>
+      </div>
+    </template>
+  </SidebarSettingItem>
 
-    <div class="theme-options">
-      <button
-        v-for="option in appearanceStore.themeOptions"
-        :key="option.id"
-        class="theme-option f-s"
-        :class="{ 'is-active': appearanceStore.currentTheme === option.id }"
-        :data-theme="option.id"
-        :aria-label="`Use ${option.label} theme`"
-        :aria-pressed="appearanceStore.currentTheme === option.id"
-        @click="appearanceStore.setTheme(option.id)"
-      >
-        {{ option.label }}
-      </button>
-    </div>
-  </div>
-
-  <div class="d-flex justify-content-between align-items-center pb-2">
-    <div class="setting-copy d-flex flex-column pe-3">
-      <span class="fw-bold f-s fc-pri">Bubble Hints</span>
-      <span class="text-truncate f-xs fc-sec">Show helper bubbles when hovering icon buttons.</span>
-    </div>
-
-    <label class="switch-control" for="appearance-tooltips">
-      <input
-        id="appearance-tooltips"
-        class="switch-input"
-        type="checkbox"
-        aria-label="Toggle bubble hints"
-        :checked="appearanceStore.showTooltips"
-        @change="handleTooltipChange"
-      />
-      <span class="switch-track" aria-hidden="true"></span>
-    </label>
-  </div>
+  <SidebarSettingItem
+    v-for="setting in boolSettings"
+    :key="setting.id"
+    :setting="setting"
+    @update="handleBoolSettingUpdate"
+  />
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useAppearanceStore } from '@/stores/appearance'
+import SidebarSettingItem from '@/components/sidebar/SidebarSettingItem.vue'
+import { SysSettingType, type SysSettingResponse } from '@/types/system'
 
 const appearanceStore = useAppearanceStore()
 
-const handleTooltipChange = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  appearanceStore.setShowTooltips(target.checked)
+const boolSettings = computed<SysSettingResponse[]>(() => [
+  {
+    id: 'appearance-tooltips',
+    name: 'Bubble Hints',
+    desc: 'Show helper bubbles when hovering icon buttons.',
+    type: SysSettingType.BOOL,
+    value: appearanceStore.showTooltips,
+  },
+  {
+    id: 'appearance-wide-editor-lines',
+    name: 'Wide Editor Lines',
+    desc: 'Use the full editor width instead of the focused text column.',
+    type: SysSettingType.BOOL,
+    value: appearanceStore.useWideEditorLines,
+  },
+])
+
+const handleBoolSettingUpdate = (id: string, value: string | boolean) => {
+  if (typeof value !== 'boolean') {
+    return
+  }
+
+  if (id === 'appearance-tooltips') {
+    appearanceStore.setShowTooltips(value)
+    return
+  }
+
+  if (id === 'appearance-wide-editor-lines') {
+    appearanceStore.setUseWideEditorLines(value)
+  }
 }
 </script>
 
 <style scoped>
-.setting-copy {
-  min-width: 0;
-}
-
 .theme-options {
   display: flex;
   align-items: center;

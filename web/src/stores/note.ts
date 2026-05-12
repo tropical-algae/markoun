@@ -9,7 +9,6 @@ import {
   getParentPath,
   isPathInside,
   normalizeNodePath,
-  replacePathPrefix,
   ROOT_DIRECTORY_PATH,
 } from "@/utils/file-system";
 import {
@@ -18,6 +17,8 @@ import {
   isMarkdownNode,
   isPreviewableImageNode,
   normalizeFsNode,
+  remapFileDetailPathPrefix,
+  remapOptionalFsNodePathPrefix,
 } from "@/utils/file-node";
 import { renderMarkdownFile } from "@/utils/markdown";
 import {
@@ -31,48 +32,12 @@ import { moveItemApi, removeItemApi, renameItemApi } from "@/api/item";
 import { createDirApi } from "@/api/dir";
 import { getWelcomeNoteApi } from "@/api/system";
 import { useFileTreeState } from "@/stores/note/file-tree-state";
-
-const DEFAULT_WELCOME_NOTE_CONTENT = `# Welcome to Markoun
-
-Markoun is a lightweight, self-hosted, and entirely file-based Markdown editor designed for users who prioritize privacy and simplicity.
-
-> The UI layout of Markoun is inspired by [Haptic](https://github.com/chroxify/haptic) and [Obsidian](https://github.com/obsidianmd) — both excellent Markdown editing tools.
-
----
-
-**Useful shortcuts and gestures**
-
-| Action | How |
-| --- | --- |
-| Rename a file or folder | Long-press its name |
-| Upload into a folder | Drag a file onto the folder |
-| Paste an image into a note | Press \`Ctrl+V\` in the editor |
-
-Only Markdown files and supported image files appear in the file tree by default.  
-To expose more file types, update \`DISPLAYED_FILE_TYPES\` in your configuration.
-
-**LaTeX support**
-
-\`\`\`md
-# Example
-
-Inline math: $E = mc^2$
-
-$$
-\\int_0^1 x^2\\,dx = \\frac{1}{3}
-$$
-\`\`\`
-
----
-
-If you deploy with Docker, this page can be replaced by mounting your own \`welcome.md\`.
-
-Maintained by: **tropical algae**  
-Repository: [tropical-algae/markoun](https://github.com/tropical-algae/markoun.git)
-`
+import { DEFAULT_WELCOME_NOTE_CONTENT } from "@/constants/note";
 
 export const useNodeStore = defineStore('note', () => {
-  const createDefaultFileContent = (content: string = DEFAULT_WELCOME_NOTE_CONTENT): FileDetail => ({
+  const createDefaultFileContent = (
+    content: string = DEFAULT_WELCOME_NOTE_CONTENT,
+  ): FileDetail => ({
     name: 'WELCOME',
     path: '',
     suffix: '',
@@ -89,12 +54,20 @@ export const useNodeStore = defineStore('note', () => {
 
   const currentFileStatus = ref<AsyncStatus>('idle')
   const currentFile = ref<FileDetail>(createDefaultFileContent())
-  const currentParentPath = computed(() => getParentPath(currentNode.value ?? currentFileNode.value))
-  const currentFileParentPath = computed(() => getParentPath(currentFileNode.value ?? currentFile.value.path))
-  const currentPathLabel = computed(() => currentParentPath.value === ROOT_DIRECTORY_PATH ? '/' : currentParentPath.value)
+  const currentParentPath = computed(() => {
+    return getParentPath(currentNode.value ?? currentFileNode.value)
+  })
+  const currentFileParentPath = computed(() => {
+    return getParentPath(currentFileNode.value ?? currentFile.value.path)
+  })
+  const currentPathLabel = computed(() => {
+    return currentParentPath.value === ROOT_DIRECTORY_PATH ? '/' : currentParentPath.value
+  })
   const rootNodes = fileTree.rootNodes
   const currentFileDisplayName = computed(() => currentFileNode.value?.name || currentFile.value.name)
-  const canEditCurrentFile = computed(() => currentFileStatus.value === 'ready' && Boolean(currentFileNode.value))
+  const canEditCurrentFile = computed(() => {
+    return currentFileStatus.value === 'ready' && Boolean(currentFileNode.value)
+  })
   const isCurrentFileDirty = computed(() => {
     return canEditCurrentFile.value && currentFile.value.content !== lastSavedContent.value
   })
@@ -145,59 +118,34 @@ export const useNodeStore = defineStore('note', () => {
     isInitialized = false
   }
 
-  const remapReferencedNode = (
-    node: FsNode | null,
-    oldPath: string,
-    newPath: string,
-    exactName: string,
-  ): FsNode | null => {
-    if (!node) {
-      return null
-    }
-
-    const nextPath = replacePathPrefix(node.path, oldPath, newPath)
-    if (nextPath === node.path) {
-      return node
-    }
-
-    return {
-      ...node,
-      path: nextPath,
-      name: node.path === oldPath ? exactName : node.name,
-    }
-  }
-
   const remapDirectoryTreePathPrefix = (oldPath: string, newPath: string, exactName: string) => {
     fileTree.remapDirectoryTreePathPrefix(oldPath, newPath, exactName)
 
-    currentNode.value = remapReferencedNode(currentNode.value, oldPath, newPath, exactName)
-    currentFileNode.value = remapReferencedNode(currentFileNode.value, oldPath, newPath, exactName)
-    currentPreviewImageNode.value = remapReferencedNode(
+    currentNode.value = remapOptionalFsNodePathPrefix(currentNode.value, oldPath, newPath, exactName)
+    currentFileNode.value = remapOptionalFsNodePathPrefix(currentFileNode.value, oldPath, newPath, exactName)
+    currentPreviewImageNode.value = remapOptionalFsNodePathPrefix(
       currentPreviewImageNode.value,
       oldPath,
       newPath,
       exactName,
     )
 
-    const nextCurrentFilePath = replacePathPrefix(currentFile.value.path, oldPath, newPath)
-    if (nextCurrentFilePath !== currentFile.value.path) {
-      currentFile.value = {
-        ...currentFile.value,
-        path: nextCurrentFilePath,
-        name: currentFile.value.path === oldPath ? exactName : currentFile.value.name,
-        meta: {
-          ...currentFile.value.meta,
-          path: replacePathPrefix(currentFile.value.meta.path || '', oldPath, newPath),
-        },
-      }
-    }
+    currentFile.value = remapFileDetailPathPrefix(
+      currentFile.value,
+      oldPath,
+      newPath,
+      exactName,
+    )
   }
 
   const removeNodeFromDirectoryTree = (path: string) => {
     const normalizedPath = normalizeNodePath(path)
     fileTree.removeNodeFromDirectoryTree(normalizedPath)
 
-    if (currentPreviewImageNode.value && isPathInside(currentPreviewImageNode.value.path, normalizedPath)) {
+    if (
+      currentPreviewImageNode.value
+      && isPathInside(currentPreviewImageNode.value.path, normalizedPath)
+    ) {
       currentPreviewImageNode.value = null
     }
   }
@@ -399,8 +347,7 @@ export const useNodeStore = defineStore('note', () => {
     if (!isCurrentFileDirty.value) {
       return
     }
-
-    await saveCurrentFile({ silent: true })
+    await saveCurrentFile({ silent: false })
   }
 
   const saveCurrentFileBeforeUnload = () => {
@@ -483,47 +430,31 @@ export const useNodeStore = defineStore('note', () => {
       response.data,
     )
 
-    currentNode.value = remapReferencedNode(
+    currentNode.value = remapOptionalFsNodePathPrefix(
       currentNode.value,
       normalizedOldPath,
       movedNode.path,
       movedNode.name,
     )
-    currentFileNode.value = remapReferencedNode(
+    currentFileNode.value = remapOptionalFsNodePathPrefix(
       currentFileNode.value,
       normalizedOldPath,
       movedNode.path,
       movedNode.name,
     )
-    currentPreviewImageNode.value = remapReferencedNode(
+    currentPreviewImageNode.value = remapOptionalFsNodePathPrefix(
       currentPreviewImageNode.value,
       normalizedOldPath,
       movedNode.path,
       movedNode.name,
     )
 
-    const nextCurrentFilePath = replacePathPrefix(
-      currentFile.value.path,
+    currentFile.value = remapFileDetailPathPrefix(
+      currentFile.value,
       normalizedOldPath,
       movedNode.path,
+      movedNode.name,
     )
-    if (nextCurrentFilePath !== currentFile.value.path) {
-      currentFile.value = {
-        ...currentFile.value,
-        path: nextCurrentFilePath,
-        name: currentFile.value.path === normalizedOldPath
-          ? movedNode.name
-          : currentFile.value.name,
-        meta: {
-          ...currentFile.value.meta,
-          path: replacePathPrefix(
-            currentFile.value.meta.path || '',
-            normalizedOldPath,
-            movedNode.path,
-          ),
-        },
-      }
-    }
 
     await fileTree.ensureDirectoryVisible(normalizedTargetDir)
     toastStore.pushNotice('info', "Move successful!")

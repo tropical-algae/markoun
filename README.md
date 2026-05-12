@@ -63,6 +63,7 @@ Markoun is configured via a `config.yaml` file. Below are some important options
 | `DEBUG`                                | Enables/disable debug-level logging for the backend service.                                              | false                                      |
 | `ACCESS_TOKEN_DEFAULT_EXPIRE_MINUTES`  | **Standard Session Lifetime**: Duration (in minutes) a user remains logged in before the session expires. | 1440                                       |
 | `ACCESS_TOKEN_EXTENDED_EXPIRE_MINUTES` | **Persistent Session Lifetime**: Duration (in minutes) for users who select "Remember Me" during login.   | 43200                                      |
+| `ACCESS_TOKEN_COOKIE_SECURE`           | Sends the auth cookie only over HTTPS. Enable this when the public site is served through HTTPS.          | false                                      |
 | `DISPLAYED_FILE_TYPES`                 | **File Filter**: A list of file extensions that the editor is permitted to display.                       | ["md", "png", "jpg", "jpeg", "bmp", "svg"] |
 | `WELCOME_NOTE_PATH`                    | Path to the Markdown file used as the default welcome page when no document is open.                      | `./welcome.md`                             |
 
@@ -91,7 +92,7 @@ The administrator can enable or disable user registration in the settings sectio
 - [x] **File system architecture**: design can be further optimized
 - [x] **UI polish**: incomplete animation feedback and styling inconsistencies
 - [ ] **Settings expansion**: add more configurable options for personalization and workflow control
-- [ ] **Quick actions & interaction enhancements**: support more intuitive and efficient operations
+- [x] **Quick actions & interaction enhancements**: support more intuitive and efficient operations
 - [x] **Improved usability**: provide a smoother and more comfortable operation experience
 - [x] **Enhanced previews**: support richer previews, including image preview and ~~Gantt chart rendering~~ in Markdown files
 - [ ] **Frontend refactoring**: codebase requires further optimization

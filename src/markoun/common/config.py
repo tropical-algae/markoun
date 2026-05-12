@@ -39,6 +39,7 @@ class BasicSetting(BaseSettings):
     ACCESS_TOKEN_EXTENDED_EXPIRE_MINUTES: int = 60 * 24 * 30
 
     ACCESS_TOKEN_SECRET_KEY: str = secrets.token_hex(32)
+    ACCESS_TOKEN_COOKIE_SECURE: bool = False
 
     DOCUMENT_ROOT: str = "./data"
     WELCOME_NOTE_PATH: str = "./welcome.md"
