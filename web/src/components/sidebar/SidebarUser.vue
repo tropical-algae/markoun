@@ -266,10 +266,12 @@ const handleUpdatePassword = async () => {
 .user-email {
   color: var(--color-text-sec);
   line-height: var(--profile-email-line-height);
+  overflow-wrap: anywhere;
 }
 
 .user-scopes {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--hint-gap);
 }
 
@@ -297,6 +299,7 @@ const handleUpdatePassword = async () => {
 
 .user-tag-shell {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--hint-gap);
 }
 

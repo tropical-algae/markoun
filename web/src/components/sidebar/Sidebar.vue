@@ -2,21 +2,31 @@
   <aside class="sidebar-wrapper d-flex flex-row">
     <div class="sidebar-container px-2">
       <BaseHeader>
-        <BaseTooltip text="Toggle sidebar" placement="right">
-          <button @click="toggleSubSidebar()" aria-label="Toggle sidebar">
+        <BaseTooltip text="Toggle sidebar" :placement="sidebarTooltipPlacement">
+          <button
+            @click="toggleSubSidebar()"
+            aria-label="Toggle sidebar"
+            :aria-expanded="showSubSidebar"
+          >
             <component :is="SidebarToggleIcon" class="icon-btn"></component>
           </button>
         </BaseTooltip>
       </BaseHeader>
 
-      <div class=" d-flex flex-column gap-2 my-3">
+      <div class="sidebar-nav d-flex flex-column gap-2 my-3">
         <BaseTooltip
           v-for="item in sideBtns"
           :key="item.label"
           :text="item.label"
-          placement="right"
+          :placement="sidebarTooltipPlacement"
         >
-          <button @click="item.func()" :aria-label="item.label">
+          <button
+            class="sidebar-nav-button"
+            :class="{ 'is-active': currentMode === item.mode && showSubSidebar }"
+            @click="toggleSubSidebar(item.mode)"
+            :aria-label="item.label"
+            :aria-pressed="currentMode === item.mode && showSubSidebar"
+          >
             <component :is="item.icon" class="icon-btn"></component>
           </button>
         </BaseTooltip>
@@ -25,15 +35,23 @@
 
     <div
       class="sub-sidebar-container"
-      :class="{ 'is-smooth': !isSubSidebarResizing }"
+      :class="{ 'is-smooth': !isSubSidebarResizing, 'is-open': showSubSidebar }"
       :style="{ width: currentWidth }"
+      :inert="!showSubSidebar"
+      :aria-hidden="!showSubSidebar"
     >
       <div
         class="sub-sidebar-inner d-flex flex-column px-3"
         :style="{ width: subSidebarWidth + 'px' }"
       >
-        <SidebarFileTree v-if="currentMode === SidebarMode.FileTree" />
-        <SidebarSearch v-else-if="currentMode === SidebarMode.Search" />
+        <SidebarFileTree
+          v-if="currentMode === SidebarMode.FileTree"
+          @node-opened="handleContentOpen"
+        />
+        <SidebarSearch
+          v-else-if="currentMode === SidebarMode.Search"
+          @node-opened="handleContentOpen"
+        />
         <SidebarUser v-else-if="currentMode === SidebarMode.User" />
         <SidebarSetting v-else />
       </div>
@@ -41,17 +59,18 @@
 
     <div
       class="vertical-line turn-right col-drag"
-      @mousedown.prevent="startResizing"
+      @pointerdown.prevent="startResizing"
       :class="{ 'is-resizing': !showSubSidebar }"
     ></div>
   </aside>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue"
+import { computed, ref } from "vue"
 import { SidebarMode } from "@/types/ui"
 import { useResizablePane } from "@/composables/useResizablePane"
-import { SIDEBAR_PANE_WIDTH } from "@/constants/ui"
+import { useMediaQuery } from "@/composables/useMediaQuery"
+import { COMPACT_LAYOUT_MEDIA_QUERY, SIDEBAR_PANE_WIDTH } from "@/constants/ui"
 
 import SidebarToggleIcon from "@/assets/icons/sidebar.svg"
 import FileTreeIcon from "@/assets/icons/rectangle-list.svg"
@@ -67,6 +86,8 @@ import BaseHeader from '@/components/base/BaseHeader.vue';
 import BaseTooltip from '@/components/base/BaseTooltip.vue';
 
 const showSubSidebar = ref(true);
+const isCompactLayout = useMediaQuery(COMPACT_LAYOUT_MEDIA_QUERY)
+const sidebarTooltipPlacement = computed(() => isCompactLayout.value ? 'bottom' : 'right')
 const {
   width: subSidebarWidth,
   isResizing: isSubSidebarResizing,
@@ -95,12 +116,18 @@ const toggleSubSidebar = (mode: SidebarMode | null = null) => {
   }
 };
 
+const handleContentOpen = () => {
+  if (isCompactLayout.value) {
+    showSubSidebar.value = false
+  }
+}
+
 const sideBtns = [
-  { icon: FileTreeIcon, label: 'Files', func: () => { toggleSubSidebar(SidebarMode.FileTree); } },
-  { icon: SearchIcon, label: 'Search', func: () => { toggleSubSidebar(SidebarMode.Search); } },
-  { icon: UserIcon, label: 'Profile', func: () => { toggleSubSidebar(SidebarMode.User); } },
-  { icon: SettingIcon, label: 'Settings', func: () => { toggleSubSidebar(SidebarMode.Settings); } }
-]
+  { icon: FileTreeIcon, label: 'Files', mode: SidebarMode.FileTree },
+  { icon: SearchIcon, label: 'Search', mode: SidebarMode.Search },
+  { icon: UserIcon, label: 'Profile', mode: SidebarMode.User },
+  { icon: SettingIcon, label: 'Settings', mode: SidebarMode.Settings },
+] as const
 
 </script>
 
@@ -109,6 +136,7 @@ const sideBtns = [
   height: 100%;
   position: relative;
   user-select: none;
+  flex-shrink: 0;
 }
 
 .sidebar-container {
@@ -135,5 +163,65 @@ const sideBtns = [
   height: 100%;
   min-width: var(--layout-sidebar-inner-min-width);
   white-space: nowrap;
+}
+
+.sidebar-nav-button.is-active .icon-btn {
+  fill: var(--color-action);
+}
+
+@media (max-width: 768px) {
+  .sidebar-wrapper {
+    width: 100%;
+    height: auto;
+    flex-direction: column !important;
+    z-index: var(--layout-mobile-layer-z-index);
+  }
+
+  .sidebar-container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    border-right: 0;
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .sidebar-container :deep(.container-header) {
+    height: var(--icon-button-size);
+    border-bottom: 0;
+  }
+
+  .sidebar-nav {
+    flex: 1;
+    flex-direction: row !important;
+    justify-content: flex-end;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  .sub-sidebar-container {
+    width: 100% !important;
+    height: auto;
+    max-height: 0;
+    border-bottom: 1px solid var(--color-line);
+    background-color: var(--color-bg-sec);
+    transition:
+      max-height var(--motion-medium-duration) ease,
+      border-color var(--motion-theme-duration) ease,
+      background-color var(--motion-theme-duration) ease;
+  }
+
+  .sub-sidebar-container.is-open {
+    max-height: var(--layout-mobile-sidebar-panel-max-height);
+  }
+
+  .sub-sidebar-inner {
+    width: 100% !important;
+    min-width: 0;
+    height: var(--layout-mobile-sidebar-panel-max-height);
+  }
+
+  .vertical-line {
+    display: none;
+  }
 }
 </style>

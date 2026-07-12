@@ -39,13 +39,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 import BaseModal from '@/components/base/BaseModal.vue';
 import BaseSkeleton from '@/components/base/BaseSkeleton.vue';
 import AsyncGate from '@/components/base/AsyncGate.vue';
 
 import { useNodeStore } from '@/stores/note';
+import { useViewportSize } from '@/composables/useViewportSize';
 import type { AsyncStatus } from '@/types/async';
 import { IMAGE_PREVIEW_SIZE } from '@/constants/ui';
 
@@ -61,9 +62,8 @@ const {
 } = IMAGE_PREVIEW_SIZE
 
 const nodeStore = useNodeStore()
+const viewportSize = useViewportSize()
 
-const viewportWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 1440)
-const viewportHeight = ref(typeof window !== 'undefined' ? window.innerHeight : 900)
 const naturalWidth = ref(0)
 const naturalHeight = ref(0)
 const previewLoadState = ref<AsyncStatus>('idle')
@@ -80,11 +80,6 @@ const isVisible = computed({
 const imageUrl = computed(() => nodeStore.currentPreviewImageUrl)
 const previewTitle = computed(() => nodeStore.currentPreviewImageNode?.name || 'Image Preview')
 
-const updateViewport = () => {
-  viewportWidth.value = window.innerWidth
-  viewportHeight.value = window.innerHeight
-}
-
 const resetPreviewState = () => {
   naturalWidth.value = 0
   naturalHeight.value = 0
@@ -92,8 +87,8 @@ const resetPreviewState = () => {
 }
 
 const fitImageSize = (width: number, height: number) => {
-  const maxWidth = Math.max(MIN_STAGE_WIDTH, Math.min(MAX_WIDTH, Math.floor(viewportWidth.value * VIEWPORT_WIDTH_RATIO)))
-  const maxHeight = Math.max(MIN_STAGE_HEIGHT, Math.floor(viewportHeight.value * VIEWPORT_HEIGHT_RATIO))
+  const maxWidth = Math.max(MIN_STAGE_WIDTH, Math.min(MAX_WIDTH, Math.floor(viewportSize.width.value * VIEWPORT_WIDTH_RATIO)))
+  const maxHeight = Math.max(MIN_STAGE_HEIGHT, Math.floor(viewportSize.height.value * VIEWPORT_HEIGHT_RATIO))
   const minWidth = Math.min(MIN_WIDTH, maxWidth)
 
   let nextWidth = width || Math.min(DEFAULT_WIDTH, maxWidth)
@@ -155,14 +150,6 @@ const handleImageError = () => {
 watch(imageUrl, () => {
   resetPreviewState()
 }, { immediate: true })
-
-onMounted(() => {
-  window.addEventListener('resize', updateViewport)
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener('resize', updateViewport)
-})
 </script>
 
 <style scoped>

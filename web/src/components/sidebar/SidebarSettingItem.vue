@@ -1,12 +1,12 @@
 <template>
-  <div class="d-flex justify-content-between align-items-center pb-2">
+  <div class="setting-item">
     
-    <div class="setting-copy d-flex flex-column pe-3">
+    <div class="setting-copy">
       <span class="fw-bold f-s fc-pri">{{ settingName }}</span>
-      <span class="text-truncate f-xs fc-sec">{{ settingDesc }}</span>
+      <span class="setting-desc f-xs fc-sec">{{ settingDesc }}</span>
     </div>
 
-    <div class="flex-shrink-0">
+    <div class="setting-control">
       <slot name="control"></slot>
       
       <div v-if="!hasControlSlot && setting?.type === SysSettingType.BOOL">
@@ -103,11 +103,49 @@ const commitDraft = () => {
 </script>
 
 <style scoped>
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--settings-skeleton-gap);
+  padding-bottom: 0.5rem;
+}
+
 .setting-copy {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
+}
+
+.setting-desc {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.setting-control {
+  display: flex;
+  justify-content: flex-end;
+  flex-shrink: 0;
 }
 
 .setting-text-input {
   width: var(--setting-text-input-width);
+}
+
+@media (max-width: 768px) {
+  .setting-item {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: var(--hint-gap);
+  }
+
+  .setting-control,
+  .setting-control > div {
+    width: 100%;
+  }
+
+  .setting-text-input {
+    width: 100%;
+  }
 }
 </style>

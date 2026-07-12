@@ -3,9 +3,9 @@
     ref="anchorRef"
     class="tooltip-anchor"
     :class="[{ 'is-block': block }, `tooltip-anchor-${placement}`]"
-    :aria-describedby="shouldShowTooltip ? tooltipId : undefined"
-    @mouseenter="openTooltip"
-    @mouseleave="closeTooltip"
+    :aria-describedby="isActive ? tooltipId : undefined"
+    @pointerenter="handlePointerEnter"
+    @pointerleave="handlePointerLeave"
     @focusin="handleFocusIn"
     @focusout="closeTooltip"
   >
@@ -40,6 +40,8 @@ import {
   type CSSProperties,
 } from 'vue'
 import { useAppearanceStore } from '@/stores/appearance'
+import { useMediaQuery } from '@/composables/useMediaQuery'
+import { readCssTimeMs } from '@/utils/css'
 
 type TooltipPlacement = 'top' | 'right' | 'bottom' | 'left'
 
@@ -58,6 +60,7 @@ const shouldShowTooltip = computed(() => appearanceStore.showTooltips && props.t
 const showBubble = computed(() => shouldShowTooltip.value && isRendered.value)
 
 const anchorRef = ref<HTMLElement | null>(null)
+const supportsHoverPointer = useMediaQuery('(hover: hover) and (pointer: fine)')
 const isRendered = ref(false)
 const isActive = ref(false)
 const tooltipStyle = ref<CSSProperties>({
@@ -157,6 +160,22 @@ const openTooltip = async () => {
   })
 }
 
+const handlePointerEnter = (event: PointerEvent) => {
+  if (!supportsHoverPointer.value || event.pointerType === 'touch') {
+    return
+  }
+
+  void openTooltip()
+}
+
+const handlePointerLeave = (event: PointerEvent) => {
+  if (event.pointerType === 'touch') {
+    return
+  }
+
+  closeTooltip()
+}
+
 const closeTooltip = () => {
   clearAnimationFrame()
   isActive.value = false
@@ -165,7 +184,7 @@ const closeTooltip = () => {
   closeTimer = window.setTimeout(() => {
     closeTimer = null
     isRendered.value = false
-  }, 400)
+  }, readCssTimeMs('--motion-tooltip-duration', 400))
 }
 
 const handleFocusIn = (event: FocusEvent) => {
@@ -176,6 +195,12 @@ const handleFocusIn = (event: FocusEvent) => {
 
 watch(shouldShowTooltip, (isEnabled) => {
   if (!isEnabled) {
+    closeTooltip()
+  }
+})
+
+watch(supportsHoverPointer, (canHover) => {
+  if (!canHover) {
     closeTooltip()
   }
 })

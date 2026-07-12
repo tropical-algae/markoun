@@ -61,6 +61,11 @@
   --async-gate-delay-ms: 150;
   --async-gate-min-visible-ms: 400;
 
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+
   --layout-header-height: 48px;
   --layout-sidebar-width-default: 250;
   --layout-sidebar-width-min: 240;
@@ -69,6 +74,14 @@
   --layout-inspector-width-default: 250;
   --layout-inspector-width-min: 200;
   --layout-inspector-width-max: 600;
+  --layout-mobile-panel-width: 88vw;
+  --layout-mobile-panel-max-width: 360px;
+  --layout-mobile-sidebar-panel-max-height: 46dvh;
+  --layout-mobile-layer-z-index: 30;
+  --layout-mobile-overlay-shadow-x: -10px;
+  --layout-mobile-overlay-shadow-blur: 30px;
+  --layout-mobile-editor-padding-y: 18px;
+  --layout-mobile-editor-padding-x-min: 14px;
 
   --editor-content-max-width: 800px;
   --editor-content-padding-y: 30px;
@@ -86,8 +99,11 @@
   --modal-card-shadow-blur: 40px;
   --modal-header-padding: 10px 24px;
   --modal-body-padding: 24px;
+  --modal-mobile-viewport-gap: 14px;
+  --modal-mobile-body-padding: 18px;
 
   --icon-button-size: 28px;
+  --icon-button-mobile-size: 36px;
   --icon-button-padding: 6px;
   --icon-button-radius: var(--radius-sm);
 
@@ -185,11 +201,16 @@
   --upload-reset-delay-ms: 5000;
 
   --auth-wrapper-padding: 0 80px 80px 80px;
+  --auth-wrapper-mobile-padding: 0 16px 18px 16px;
   --auth-brand-height: 80px;
+  --auth-brand-mobile-height: 58px;
   --auth-container-padding: 20px;
+  --auth-container-mobile-padding: 18px;
+  --auth-container-mobile-radius: var(--radius-2xl);
   --auth-panel-max-width: 480px;
   --auth-panel-min-width: 300px;
   --auth-title-margin-bottom: 50px;
+  --auth-title-mobile-margin-bottom: 34px;
   --auth-submit-width: 220px;
   --auth-register-placeholder-width: 116px;
   --setting-text-input-width: 120px;
@@ -214,6 +235,9 @@
   --profile-card-padding: 14px;
   --profile-meta-gap-x: 12px;
   --profile-meta-gap-y: 8px;
+  --profile-name-line-height: 1.25;
+  --profile-email-line-height: 1.35;
+  --profile-meta-value-line-height: 1.35;
 
   --image-preview-default-width: 640;
   --image-preview-default-height: 420;
@@ -254,6 +278,12 @@
   --color-action-light: #523c2f;
   --color-accent-alt: var(--color-action);
 
+}
+
+@media (max-width: 768px) {
+  :root {
+    --icon-button-size: var(--icon-button-mobile-size);
+  }
 }
 
 :root[data-theme="dark"] .bg-white {

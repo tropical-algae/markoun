@@ -111,7 +111,7 @@ const onLeave = (el: Element, done: () => void) => {
 <style scoped>
 .notice-toast {
   position: fixed;
-  bottom: var(--toast-bottom);
+  bottom: calc(var(--toast-bottom) + var(--safe-area-bottom));
   left: 50%;
   z-index: var(--toast-z-index);
   

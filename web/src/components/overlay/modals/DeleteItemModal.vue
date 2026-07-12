@@ -64,6 +64,10 @@ const handleConfirm = async () => {
 
 <style scoped>
 .delete-item-modal {
-  width: var(--modal-width-sm);
+  width: min(var(--modal-width-sm), 100%);
+}
+
+.delete-item-modal p {
+  overflow-wrap: anywhere;
 }
 </style>

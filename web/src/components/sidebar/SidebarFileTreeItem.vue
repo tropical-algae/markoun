@@ -49,11 +49,10 @@
             <span 
               v-else
               :class="{ 'file-name': !isDir, 'dir-name': isDir }"
-              @mousedown="onLongPress"
-              @touchstart="onLongPress"
-              @mouseup="cancelLongPress"
-              @mouseleave="cancelLongPress"
-              @touchend="cancelLongPress"
+              @pointerdown="startLongPress"
+              @pointerup="stopLongPress"
+              @pointerleave="stopLongPress"
+              @pointercancel="stopLongPress"
             >
               {{ node.name }}
             </span>
@@ -103,6 +102,7 @@
                 :key="child.path" 
                 :node="child" 
                 :depth="depth + 1"
+                @node-opened="emit('nodeOpened')"
               />
             </div>
           </AsyncGate>
@@ -130,6 +130,9 @@ import BaseSkeleton from '@/components/base/BaseSkeleton.vue';
 
 const nodeStore = useNodeStore()
 const props = defineProps<{ node: FsNode, depth: number }>();
+const emit = defineEmits<{
+  (event: 'nodeOpened'): void
+}>()
 
 const node = computed(() => props.node);
 const nodeIndentStyle = computed(() => ({
@@ -163,8 +166,8 @@ const {
   isRenaming,
   isLongPressed,
   setRenameInputRef,
-  onLongPress,
-  cancelLongPress,
+  startLongPress,
+  stopLongPress,
   submitRename,
   cancelRename,
 } = useFileTreeItemRename(node, nodeStore.renameNode)
@@ -175,7 +178,7 @@ const {
 } = useFileTreeNodeDrag(node, () => !isRenaming.value)
 
 const handleDragStart = (event: DragEvent) => {
-  cancelLongPress()
+  stopLongPress()
   handleNodeDragStart(event)
 }
 
@@ -195,6 +198,7 @@ const handleClickNode = async () => {
   }
 
   await nodeStore.setCurrentNode(node.value);
+  emit('nodeOpened')
 };
 
 const handleClickDirectoryIcon = async () => {
@@ -326,6 +330,7 @@ const onLeave = childrenMotion.leave;
   display: block;
   box-sizing: border-box;
   line-height: var(--tree-node-text-line-height);
+  touch-action: manipulation;
 }
 
 .node-text-wrapper .file-name { 
@@ -333,8 +338,7 @@ const onLeave = childrenMotion.leave;
   transition: color var(--motion-soft-duration) ease;
 }
 
-.node-content.is-selected .node-text-wrapper span,
-.node-content:hover .node-text-wrapper span {
+.node-content.is-selected .node-text-wrapper span {
   color: var(--color-text-pri);
 }
 
@@ -342,13 +346,11 @@ const onLeave = childrenMotion.leave;
   fill: var(--color-text-pri);
 }
 
-.node-content.is-selected .dir-icon,
-.node-content:hover .dir-icon {
+.node-content.is-selected .dir-icon {
   fill: var(--color-action);
 }
 
-.node-content.is-selected::before,
-.node-content:hover::before {
+.node-content.is-selected::before {
   opacity: 1;
 }
 
@@ -424,5 +426,19 @@ const onLeave = childrenMotion.leave;
 :deep(.tree-node-swap-enter-from),
 :deep(.tree-node-swap-leave-to) {
   opacity: 0;
+}
+
+@media (hover: hover) {
+  .node-content:hover .node-text-wrapper span {
+    color: var(--color-text-pri);
+  }
+
+  .node-content:hover .dir-icon {
+    fill: var(--color-action);
+  }
+
+  .node-content:hover::before {
+    opacity: 1;
+  }
 }
 </style>

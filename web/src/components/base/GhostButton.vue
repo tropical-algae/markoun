@@ -131,13 +131,18 @@ const visibleLoading = useDelayedVisibility(
   --btn-main-color: var(--color-bg-error);
 }
 
-.ghost-btn:not(:disabled):hover {
-  color: var(--btn-hover-text-color);
-}
-
-.ghost-btn:not(:disabled):hover::before,
 .ghost-btn.is-loading::before {
   opacity: 1;
+}
+
+@media (hover: hover) {
+  .ghost-btn:not(:disabled):hover {
+    color: var(--btn-hover-text-color);
+  }
+
+  .ghost-btn:not(:disabled):hover::before {
+    opacity: 1;
+  }
 }
 
 .ghost-btn:not(:disabled):active {

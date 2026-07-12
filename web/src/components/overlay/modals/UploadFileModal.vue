@@ -127,7 +127,7 @@ const handleUpload = async (file: File) => {
 <style scoped>
 
 .upload-modal {
-  width: var(--modal-width-md);
+  width: min(var(--modal-width-md), 100%);
 }
 
 .upload-file-input {
@@ -149,9 +149,16 @@ const handleUpload = async (file: File) => {
     background-color var(--motion-medium-duration) ease;
 }
 
-.upload-drop-zone:hover, .upload-drop-zone.is-dragover {
+.upload-drop-zone.is-dragover {
   border-color: var(--color-action);
   background-color: var(--color-action-light);
+}
+
+@media (hover: hover) {
+  .upload-drop-zone:hover {
+    border-color: var(--color-action);
+    background-color: var(--color-action-light);
+  }
 }
 
 .upload-drop-zone .upload-icon {

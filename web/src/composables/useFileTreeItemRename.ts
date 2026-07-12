@@ -17,12 +17,14 @@ export const useFileTreeItemRename = (
   const isLongPressed = ref(false)
   const renameInputRef = ref<HTMLInputElement | null>(null)
   let pressTimer: number | null = null
+  let activePointerId: number | null = null
 
   const cancelLongPress = () => {
     if (pressTimer) {
       clearTimeout(pressTimer)
       pressTimer = null
     }
+    activePointerId = null
   }
 
   const enterRenameMode = async () => {
@@ -34,12 +36,27 @@ export const useFileTreeItemRename = (
     renameInputRef.value?.select()
   }
 
-  const onLongPress = () => {
+  const startLongPress = (event: PointerEvent) => {
+    if (event.button !== 0 || isRenaming.value) {
+      return
+    }
+
+    cancelLongPress()
+    activePointerId = event.pointerId
     isLongPressed.value = false
     pressTimer = window.setTimeout(() => {
+      pressTimer = null
       isLongPressed.value = true
       void enterRenameMode()
     }, TREE_LONG_PRESS_DELAY_MS)
+  }
+
+  const stopLongPress = (event?: PointerEvent) => {
+    if (event && activePointerId !== null && event.pointerId !== activePointerId) {
+      return
+    }
+
+    cancelLongPress()
   }
 
   const cancelRename = () => {
@@ -70,8 +87,8 @@ export const useFileTreeItemRename = (
     isRenaming,
     isLongPressed,
     setRenameInputRef,
-    onLongPress,
-    cancelLongPress,
+    startLongPress,
+    stopLongPress,
     submitRename,
     cancelRename,
   }

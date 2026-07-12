@@ -89,6 +89,6 @@ const handleConfirm = async () => {
 
 <style scoped>
 .create-node-modal {
-  width: var(--modal-width-sm);
+  width: min(var(--modal-width-sm), 100%);
 }
 </style>

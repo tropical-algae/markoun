@@ -20,7 +20,7 @@
             <span :id="titleId" class="base-modal-title f-l">{{ title }}</span>
           </header>
 
-          <div class="base-modal-body"><slot></slot></div>
+          <div class="base-modal-body touch-scroll"><slot></slot></div>
           
         </div>
       </div>
@@ -119,12 +119,18 @@ onBeforeUnmount(() => {
   top: 0;
   left: 0;
   width: 100vw;
-  height: 100vh;
+  height: 100dvh;
   z-index: 999;
   background-color: var(--color-backdrop); 
   display: flex;
   align-items: center;
   justify-content: center;
+  padding:
+    calc(var(--modal-mobile-viewport-gap) + var(--safe-area-top))
+    calc(var(--modal-mobile-viewport-gap) + var(--safe-area-right))
+    calc(var(--modal-mobile-viewport-gap) + var(--safe-area-bottom))
+    calc(var(--modal-mobile-viewport-gap) + var(--safe-area-left));
+  box-sizing: border-box;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -162,6 +168,8 @@ onBeforeUnmount(() => {
 
 .base-modal-body {
   padding: var(--modal-body-padding);
+  min-width: 0;
+  box-sizing: border-box;
   overflow-y: auto; 
 }
 
@@ -202,6 +210,27 @@ onBeforeUnmount(() => {
   100% {
     opacity: 0;
     transform: translateY(10px);
+  }
+}
+
+@media (max-width: 768px) {
+  .base-modal-card {
+    max-width: calc(
+      100vw -
+      var(--modal-mobile-viewport-gap) * 2 -
+      var(--safe-area-left) -
+      var(--safe-area-right)
+    );
+    max-height: calc(
+      100dvh -
+      var(--modal-mobile-viewport-gap) * 2 -
+      var(--safe-area-top) -
+      var(--safe-area-bottom)
+    );
+  }
+
+  .base-modal-body {
+    padding: var(--modal-mobile-body-padding);
   }
 }
 </style>

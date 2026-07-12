@@ -1,10 +1,10 @@
 <template>
-  <div class="d-flex flex-column vh-100">
+  <div class="workspace-shell d-flex flex-column">
     <div class="workspace-header f-m fw-bold px-2 fc-pri">
       Markoun
     </div>
 
-    <div class="d-flex flex-row flex-grow-1 overflow-auto">
+    <div class="workspace-main d-flex flex-row flex-grow-1 overflow-hidden">
       <Sidebar />
       <NoteEditor />
     </div>
@@ -49,7 +49,10 @@ const handlePageHide = () => {
 <style scoped>
 
 .workspace-header {
-  height: var(--icon-button-size);
+  min-height: var(--icon-button-size);
+  padding-top: var(--safe-area-top);
+  padding-left: calc(0.5rem + var(--safe-area-left)) !important;
+  padding-right: calc(0.5rem + var(--safe-area-right)) !important;
   flex-shrink: 0;
 	border-bottom: 1px solid var(--color-line);
   box-sizing: border-box;
@@ -60,7 +63,10 @@ const handlePageHide = () => {
 }
 
 .workspace-footer {
-  height: var(--icon-button-size);
+  min-height: var(--icon-button-size);
+  padding-bottom: var(--safe-area-bottom);
+  padding-left: calc(0.5rem + var(--safe-area-left)) !important;
+  padding-right: calc(0.5rem + var(--safe-area-right)) !important;
   flex-shrink: 0;
 	border-top: 1px solid var(--color-line);
   box-sizing: border-box;
@@ -68,5 +74,21 @@ const handlePageHide = () => {
   align-items: center;
   user-select: none;
   transition: border-color var(--motion-theme-duration) ease;
+}
+
+.workspace-shell {
+  height: 100dvh;
+  min-height: 0;
+}
+
+.workspace-main {
+  min-height: 0;
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .workspace-main {
+    flex-direction: column !important;
+  }
 }
 </style>

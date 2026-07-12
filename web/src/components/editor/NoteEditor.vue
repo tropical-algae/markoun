@@ -36,6 +36,7 @@
             :class="{ active: showInspector && currentMode === item.mode }"
             @click="toggleInspector(item.mode)"
             :aria-label="item.label"
+            :aria-pressed="showInspector && currentMode === item.mode"
           >
             <component :is="item.icon" class="icon-btn"></component>
           </button>
@@ -64,7 +65,7 @@
           <textarea
             v-model="nodeStore.currentFile.content"
             ref="markdownEditorRef"
-            class="markdown-editor"
+            class="markdown-editor touch-scroll"
             :disabled="!nodeStore.canEditCurrentFile"
             placeholder="Start typing..."
             spellcheck="false"
@@ -79,18 +80,28 @@
     class="inspector-wrapper" 
     ref="inspectorRef"
     :style="{ width: currentWidth }"
-    :class="{ 'is-smooth': !isInspectorResizing }"
+    :class="{ 'is-smooth': !isInspectorResizing, 'is-open': showInspector }"
+    :inert="!showInspector"
+    :aria-hidden="!showInspector"
   >
     <div class="inspector-container f-m px-3" :style="{ width: inspectorWidth + 'px' }">
       <div v-if="currentMode === InspectMode.Meta" class="d-flex flex-column h-100 overflow-hidden p-0 small">
         <BaseHeader>
           <div class="text-uppercase f-s fc-pri">File Meta</div>
+          <button
+            class="inspector-close-button"
+            type="button"
+            aria-label="Close inspector"
+            @click="showInspector = false"
+          >
+            x
+          </button>
         </BaseHeader>
         <AsyncGate
           :status="nodeStore.currentFileStatus"
           :show-delay-ms="editorAsyncGateDelayMs"
           tag="div"
-          class="note-meta"
+          class="note-meta touch-scroll"
         >
           <template #loading>
             <div class="inspector-skeleton">
@@ -117,12 +128,20 @@
       <div v-else-if="currentMode === InspectMode.Preview" class="d-flex flex-column h-100 overflow-hidden p-0">
         <BaseHeader>
           <div class="text-uppercase f-s fc-pri">Preview</div>
+          <button
+            class="inspector-close-button"
+            type="button"
+            aria-label="Close inspector"
+            @click="showInspector = false"
+          >
+            x
+          </button>
         </BaseHeader>
         <AsyncGate
           :status="nodeStore.currentFileStatus"
           :show-delay-ms="editorAsyncGateDelayMs"
           tag="div"
-          class="note-preview"
+          class="note-preview touch-scroll"
         >
           <template #loading>
             <div class="preview-skeleton">
@@ -137,7 +156,7 @@
         </AsyncGate>
       </div>
     </div>
-    <div class="vertical-line turn-left col-drag" @mousedown="startResizing" :class="{ 'is-resizing': isInspectorResizing }"></div>
+    <div class="vertical-line turn-left col-drag" @pointerdown.prevent="startResizing" :class="{ 'is-resizing': isInspectorResizing }"></div>
   </aside>
 
 </template>
@@ -364,6 +383,8 @@ const insertText = (text: string) => {
   position: relative;
   overflow: hidden; 
   flex-shrink: 0;
+  background-color: var(--color-bg-sec);
+  transition: background-color var(--motion-theme-duration) ease;
 }
 
 .inspector-container {
@@ -415,5 +436,66 @@ const insertText = (text: string) => {
   word-break: break-word;
   overflow-wrap: break-word;
   text-align: left;
+}
+
+.inspector-close-button {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .editor-wrapper {
+    width: 100%;
+    min-height: 0;
+    --editor-content-padding-y: var(--layout-mobile-editor-padding-y);
+    --editor-content-padding-x-min: var(--layout-mobile-editor-padding-x-min);
+  }
+
+  .editor-wrapper :deep(.container-header) {
+    padding-inline: 2px;
+  }
+
+  .inspector-wrapper {
+    position: absolute;
+    inset: 0 0 0 auto;
+    z-index: var(--layout-mobile-layer-z-index);
+    width: 0 !important;
+    max-width: min(var(--layout-mobile-panel-width), var(--layout-mobile-panel-max-width));
+    box-shadow: none;
+  }
+
+  .inspector-wrapper.is-open {
+    width: min(var(--layout-mobile-panel-width), var(--layout-mobile-panel-max-width)) !important;
+    box-shadow:
+      var(--layout-mobile-overlay-shadow-x) 0
+      var(--layout-mobile-overlay-shadow-blur)
+      var(--color-text-pri-shadow);
+  }
+
+  .inspector-container {
+    width: min(var(--layout-mobile-panel-width), var(--layout-mobile-panel-max-width)) !important;
+  }
+
+  .inspector-wrapper .vertical-line {
+    display: none;
+  }
+
+  .inspector-close-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--icon-button-size);
+    height: var(--icon-button-size);
+    margin-left: auto;
+    border-radius: var(--icon-button-radius);
+    color: var(--color-text-sec);
+    font-size: 1.2rem;
+    line-height: 1;
+  }
+
+  .inspector-close-button:active,
+  .inspector-close-button:focus-visible {
+    color: var(--color-text-pri);
+    background-color: var(--color-bg-selected);
+  }
 }
 </style>

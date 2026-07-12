@@ -37,6 +37,7 @@
           :key="item.path"
           :node="item"
           :depth="0"
+          @node-opened="emit('nodeOpened')"
         />
       </div>
     </AsyncGate>
@@ -73,6 +74,10 @@ import { useNodeStore } from "@/stores/note"
 import type { AsyncStatus } from "@/types/async"
 import { useFileTreeDropTarget } from "@/composables/useFileTreeDropTarget"
 import { ROOT_DIRECTORY_PATH } from "@/utils/file-system"
+
+const emit = defineEmits<{
+  (event: 'nodeOpened'): void
+}>()
 
 const showNewNote = ref(false);
 const showNewFolder = ref(false);

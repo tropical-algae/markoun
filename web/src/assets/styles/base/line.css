@@ -1,7 +1,7 @@
 .separator-line {
   width: 100%;
   color: var(--color-text-pri);
-  transition: border-color 10s ease;
+  transition: border-color var(--motion-theme-duration) ease;
 } 
 
 .vertical-line {
@@ -28,6 +28,7 @@
 
 .vertical-line.col-drag {
   cursor: col-resize;
+  touch-action: none;
 }
 
 .vertical-line.col-drag.is-resizing {

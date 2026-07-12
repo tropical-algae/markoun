@@ -109,6 +109,6 @@ const resetForm = () => {
 
 <style scoped>
 .register-modal {
-  width: var(--modal-width-sm);
+  width: min(var(--modal-width-sm), 100%);
 }
 </style>

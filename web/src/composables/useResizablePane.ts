@@ -25,14 +25,14 @@ export const useResizablePane = (options: UseResizablePaneOptions) => {
     removeListeners = null
   }
 
-  const startResizing = (event: MouseEvent) => {
+  const startResizing = (event: PointerEvent) => {
     stopResizing()
 
     isResizing.value = true
     const startX = event.clientX
     const startWidth = width.value
 
-    const onMouseMove = (moveEvent: MouseEvent) => {
+    const onPointerMove = (moveEvent: PointerEvent) => {
       if (!isResizing.value) {
         return
       }
@@ -43,12 +43,14 @@ export const useResizablePane = (options: UseResizablePaneOptions) => {
       width.value = clamp(startWidth + deltaX, options.minWidth, options.maxWidth)
     }
 
-    document.addEventListener('mousemove', onMouseMove)
-    document.addEventListener('mouseup', stopResizing)
+    document.addEventListener('pointermove', onPointerMove)
+    document.addEventListener('pointerup', stopResizing)
+    document.addEventListener('pointercancel', stopResizing)
 
     removeListeners = () => {
-      document.removeEventListener('mousemove', onMouseMove)
-      document.removeEventListener('mouseup', stopResizing)
+      document.removeEventListener('pointermove', onPointerMove)
+      document.removeEventListener('pointerup', stopResizing)
+      document.removeEventListener('pointercancel', stopResizing)
     }
   }
 

@@ -126,7 +126,7 @@ onMounted(async () => {
 
 <style scoped>
 .auth-wrapper {
-  min-height: 100vh;
+  min-height: 100dvh;
   width: 100%;
   padding: var(--auth-wrapper-padding);
 
@@ -202,10 +202,6 @@ onMounted(async () => {
   transition: transform var(--motion-medium-duration) ease;
 }
 
-.auth-form .links-row button:hover::after {
-  transform: scaleX(1);
-}
-
 .register-link-placeholder {
   display: inline-block;
   width: var(--auth-register-placeholder-width);
@@ -226,6 +222,49 @@ onMounted(async () => {
 
 .auth-submit-button {
   width: var(--auth-submit-width);
+}
+
+@media (max-width: 768px) {
+  .auth-wrapper {
+    padding: var(--auth-wrapper-mobile-padding);
+  }
+
+  .site-brand {
+    height: var(--auth-brand-mobile-height);
+    font-size: 1.55rem;
+  }
+
+  .auth-container {
+    flex: 1;
+    align-items: flex-start !important;
+    padding: var(--auth-container-mobile-padding);
+    border-radius: var(--auth-container-mobile-radius);
+  }
+
+  .auth-panel {
+    min-width: 0;
+  }
+
+  .auth-title {
+    font-size: 2.1rem;
+    margin-bottom: var(--auth-title-mobile-margin-bottom);
+  }
+
+  .auth-form .links-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--hint-gap);
+  }
+
+  .auth-submit-button {
+    width: 100%;
+  }
+}
+
+@media (hover: hover) {
+  .auth-form .links-row button:hover::after {
+    transform: scaleX(1);
+  }
 }
 
 </style>

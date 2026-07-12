@@ -22,7 +22,7 @@
       :status="searchStatus"
       :is-empty="hasSearched && results.length === 0"
       tag="div"
-      class="search-body"
+      class="search-body touch-scroll"
     >
       <template #loading>
         <div class="search-skeleton-list">
@@ -51,7 +51,7 @@
           v-for="result in results"
           :key="result.node.path"
           :text="result.node.path"
-          placement="right"
+          :placement="resultTooltipPlacement"
           block
         >
           <button
@@ -96,6 +96,8 @@
 import { computed, ref } from 'vue'
 
 import { searchFileContentApi } from '@/api/file'
+import { COMPACT_LAYOUT_MEDIA_QUERY } from '@/constants/ui'
+import { useMediaQuery } from '@/composables/useMediaQuery'
 import { useNodeStore } from '@/stores/note'
 import { useToastStore } from '@/stores/toast'
 import type { AsyncStatus } from '@/types/async'
@@ -110,6 +112,9 @@ import BaseTooltip from '@/components/base/BaseTooltip.vue';
 import UnderlinedInput from '@/components/base/UnderlinedInput.vue'
 
 const DEFAULT_SEARCH_LIMIT = 50
+const emit = defineEmits<{
+  (event: 'nodeOpened'): void
+}>()
 
 const keyword = ref('')
 const results = ref<FileSearchResult[]>([])
@@ -118,6 +123,8 @@ const hasSearched = ref(false)
 
 const nodeStore = useNodeStore()
 const toastStore = useToastStore()
+const isCompactLayout = useMediaQuery(COMPACT_LAYOUT_MEDIA_QUERY)
+const resultTooltipPlacement = computed(() => isCompactLayout.value ? 'bottom' : 'right')
 
 const normalizedKeyword = computed(() => keyword.value.trim())
 const canSearch = computed(() => {
@@ -147,6 +154,7 @@ const submitSearch = async () => {
 
 const openSearchResult = async (result: FileSearchResult) => {
   await nodeStore.setCurrentNode(result.node)
+  emit('nodeOpened')
 }
 </script>
 
@@ -189,11 +197,17 @@ const openSearchResult = async (result: FileSearchResult) => {
     transform var(--motion-soft-duration) ease;
 }
 
-button.search-result-card:hover,
 button.search-result-card:focus-visible {
   border-color: var(--color-action);
   background-color: var(--color-action-light);
   /* transform: translateY(-1px); */
+}
+
+@media (hover: hover) {
+  button.search-result-card:hover {
+    border-color: var(--color-action);
+    background-color: var(--color-action-light);
+  }
 }
 
 .search-result-title-row {

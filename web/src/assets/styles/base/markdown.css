@@ -66,10 +66,16 @@
 /*********** 链接 ***********/
 
 .note-preview a, 
-.note-preview a:visited, 
-.note-preview a:hover {
+.note-preview a:visited {
   color: var(--color-action);
   text-decoration: none;
+}
+
+@media (hover: hover) {
+  .note-preview a:hover {
+    color: var(--color-action);
+    text-decoration: none;
+  }
 }
 
 .note-preview img {

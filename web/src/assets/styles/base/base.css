@@ -13,6 +13,12 @@
   cursor: col-resize;
 }
 
+.touch-scroll,
+.overflow-y-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
 .meta-tag {
   display: inline-flex;
   align-items: center;
@@ -53,11 +59,6 @@
 
 .choice-control {
   gap: var(--hint-gap);
-}
-
-.choice-control:hover,
-.switch-control:hover {
-  color: var(--color-text-pri);
 }
 
 .choice-control.is-disabled,
@@ -159,4 +160,11 @@
 .switch-input:checked + .switch-track::after {
   background-color: var(--color-text-inverse);
   transform: translate(var(--switch-thumb-translate-x), -50%);
+}
+
+@media (hover: hover) {
+  .choice-control:hover,
+  .switch-control:hover {
+    color: var(--color-text-pri);
+  }
 }

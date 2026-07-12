@@ -62,8 +62,9 @@ withDefaults(defineProps<{
 .hint-content {
   height: 100%;
   flex: 1;
-  word-wrap: break-word;
-  word-break: break-all;
+  min-width: 0;
+  word-break: normal;
+  overflow-wrap: anywhere;
 
   text-align: left;
 }

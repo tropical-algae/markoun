@@ -1,6 +1,7 @@
 export const ASYNC_GATE_DELAY_MS = 150
 export const ASYNC_GATE_MIN_VISIBLE_MS = 400
 export const EDITOR_ASYNC_GATE_DELAY_MS = 0
+export const COMPACT_LAYOUT_MEDIA_QUERY = '(max-width: 768px)'
 
 export const SIDEBAR_PANE_WIDTH = {
   initial: 250,

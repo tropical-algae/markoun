@@ -75,6 +75,7 @@ const handleBoolSettingUpdate = (id: string, value: string | boolean) => {
   display: flex;
   align-items: center;
   gap: var(--theme-option-gap);
+  flex-wrap: wrap;
   flex-shrink: 0;
 }
 
@@ -94,7 +95,6 @@ const handleBoolSettingUpdate = (id: string, value: string | boolean) => {
     border-color var(--motion-soft-duration) ease;
 }
 
-.theme-option:hover,
 .theme-option.is-active {
   border-color: var(--color-action);
   color: var(--color-action);
@@ -102,5 +102,22 @@ const handleBoolSettingUpdate = (id: string, value: string | boolean) => {
 
 .theme-option.is-active {
   background-color: var(--color-action-light);
+}
+
+@media (max-width: 768px) {
+  .theme-options {
+    width: 100%;
+  }
+
+  .theme-option {
+    flex: 1 1 0;
+  }
+}
+
+@media (hover: hover) {
+  .theme-option:hover {
+    border-color: var(--color-action);
+    color: var(--color-action);
+  }
 }
 </style>

@@ -140,9 +140,14 @@ const handleInput = (event: Event) => {
   z-index: 1;
 }
 
-.underlined-input-container:hover .underlined-input-line-active,
 .underlined-input-wrapper.is-focused .underlined-input-line-active {
   transform: scaleX(1);
+}
+
+@media (hover: hover) {
+  .underlined-input-container:hover .underlined-input-line-active {
+    transform: scaleX(1);
+  }
 }
 
 .underlined-input-wrapper.is-disabled {
