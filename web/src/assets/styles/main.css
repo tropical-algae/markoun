@@ -74,12 +74,7 @@
   --layout-inspector-width-default: 250;
   --layout-inspector-width-min: 200;
   --layout-inspector-width-max: 600;
-  --layout-mobile-panel-width: 88vw;
-  --layout-mobile-panel-max-width: 360px;
-  --layout-mobile-sidebar-panel-max-height: 46dvh;
   --layout-mobile-layer-z-index: 30;
-  --layout-mobile-overlay-shadow-x: -10px;
-  --layout-mobile-overlay-shadow-blur: 30px;
   --layout-mobile-editor-padding-y: 18px;
   --layout-mobile-editor-padding-x-min: 14px;
 
@@ -88,6 +83,13 @@
   --editor-content-padding-x-min: 20px;
   --editor-line-height: 1.6;
   --editor-async-gate-delay-ms: 0;
+  --editor-floating-inline-offset: 16px;
+  --editor-floating-gap: 8px;
+  --editor-loading-gap: 14px;
+  --editor-inspector-content-margin-top: 12px;
+  --editor-inspector-skeleton-gap: 12px;
+  --editor-meta-row-gap: 8px;
+  --editor-meta-column-gap: 16px;
   --editor-meta-value-min-width: 40px;
 
   --modal-width-sm: 360px;
@@ -103,7 +105,7 @@
   --modal-mobile-body-padding: 18px;
 
   --icon-button-size: 28px;
-  --icon-button-mobile-size: 36px;
+  --icon-button-mobile-size: 28px;
   --icon-button-padding: 6px;
   --icon-button-radius: var(--radius-sm);
 
@@ -114,9 +116,9 @@
   --tooltip-font-size: 0.72rem;
   --tooltip-line-height: 1.2;
   --tooltip-max-width: 180px;
+  --tooltip-viewport-padding: 8px;
   --tooltip-arrow-size: 7px;
   --tooltip-bounce-start-scale: 0.82;
-  --tooltip-bounce-overshoot-scale: 1.06;
   --tooltip-bounce-end-scale: 1;
   --tooltip-bounce-distance: 4px;
   --tooltip-shadow-y: 8px;
@@ -136,6 +138,10 @@
   --tree-row-padding: var(--tree-row-padding-y) var(--tree-row-padding-x);
   --tree-row-radius: var(--radius-sm);
   --tree-icon-size: 1rem;
+  --tree-font-size: 0.8rem;
+  --tree-skeleton-gap: 4px;
+  --tree-skeleton-row-gap: 6px;
+  --tree-toggle-gap: 4px;
   --tree-rename-max-width: 260px;
   --tree-node-text-line-height: 1rem;
   --tree-node-text-slot-padding-y: 1px;
@@ -149,6 +155,7 @@
     var(--tree-node-text-slot-padding-y) * 2 +
     var(--tree-row-padding-y) * 2
   );
+  --tree-long-press-delay-ms: 600;
 
   --hint-icon-size: 0.7rem;
   --hint-font-size: 0.7rem;
@@ -198,7 +205,6 @@
   --progress-track-height: 6px;
   --progress-track-radius: 3px;
   --progress-transition-duration: 0.2s;
-  --upload-reset-delay-ms: 5000;
 
   --auth-wrapper-padding: 0 80px 80px 80px;
   --auth-wrapper-mobile-padding: 0 16px 18px 16px;

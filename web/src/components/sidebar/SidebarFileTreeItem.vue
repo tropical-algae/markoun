@@ -240,7 +240,7 @@ const onLeave = childrenMotion.leave;
 <style scoped>
 
 .node-wrapper {
-  font-size: 0.8rem;
+  font-size: var(--tree-font-size);
   color: var(--color-text-pri);
   width: 100%; 
   box-sizing: border-box;
@@ -310,7 +310,7 @@ const onLeave = childrenMotion.leave;
   padding: 0;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--tree-toggle-gap);
   cursor: pointer;
 }
 

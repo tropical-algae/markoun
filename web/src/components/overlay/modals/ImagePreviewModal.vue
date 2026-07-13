@@ -48,18 +48,7 @@ import AsyncGate from '@/components/base/AsyncGate.vue';
 import { useNodeStore } from '@/stores/note';
 import { useViewportSize } from '@/composables/useViewportSize';
 import type { AsyncStatus } from '@/types/async';
-import { IMAGE_PREVIEW_SIZE } from '@/constants/ui';
-
-const {
-  defaultWidth: DEFAULT_WIDTH,
-  defaultHeight: DEFAULT_HEIGHT,
-  minWidth: MIN_WIDTH,
-  maxWidth: MAX_WIDTH,
-  viewportWidthRatio: VIEWPORT_WIDTH_RATIO,
-  viewportHeightRatio: VIEWPORT_HEIGHT_RATIO,
-  minStageWidth: MIN_STAGE_WIDTH,
-  minStageHeight: MIN_STAGE_HEIGHT,
-} = IMAGE_PREVIEW_SIZE
+import { readCssNumber } from '@/utils/css';
 
 const nodeStore = useNodeStore()
 const viewportSize = useViewportSize()
@@ -80,6 +69,17 @@ const isVisible = computed({
 const imageUrl = computed(() => nodeStore.currentPreviewImageUrl)
 const previewTitle = computed(() => nodeStore.currentPreviewImageNode?.name || 'Image Preview')
 
+const readPreviewSizeConfig = () => ({
+  defaultWidth: readCssNumber('--image-preview-default-width', 640),
+  defaultHeight: readCssNumber('--image-preview-default-height', 420),
+  minWidth: readCssNumber('--image-preview-min-width', 280),
+  maxWidth: readCssNumber('--image-preview-max-width', 720),
+  minStageWidth: readCssNumber('--image-preview-min-stage-width', 220),
+  minStageHeight: readCssNumber('--image-preview-min-stage-height', 180),
+  viewportWidthRatio: readCssNumber('--image-preview-viewport-width-ratio', 0.82),
+  viewportHeightRatio: readCssNumber('--image-preview-viewport-height-ratio', 0.72),
+})
+
 const resetPreviewState = () => {
   naturalWidth.value = 0
   naturalHeight.value = 0
@@ -87,12 +87,19 @@ const resetPreviewState = () => {
 }
 
 const fitImageSize = (width: number, height: number) => {
-  const maxWidth = Math.max(MIN_STAGE_WIDTH, Math.min(MAX_WIDTH, Math.floor(viewportSize.width.value * VIEWPORT_WIDTH_RATIO)))
-  const maxHeight = Math.max(MIN_STAGE_HEIGHT, Math.floor(viewportSize.height.value * VIEWPORT_HEIGHT_RATIO))
-  const minWidth = Math.min(MIN_WIDTH, maxWidth)
+  const config = readPreviewSizeConfig()
+  const maxWidth = Math.max(
+    config.minStageWidth,
+    Math.min(config.maxWidth, Math.floor(viewportSize.width.value * config.viewportWidthRatio)),
+  )
+  const maxHeight = Math.max(
+    config.minStageHeight,
+    Math.floor(viewportSize.height.value * config.viewportHeightRatio),
+  )
+  const minWidth = Math.min(config.minWidth, maxWidth)
 
-  let nextWidth = width || Math.min(DEFAULT_WIDTH, maxWidth)
-  let nextHeight = height || Math.min(DEFAULT_HEIGHT, maxHeight)
+  let nextWidth = width || Math.min(config.defaultWidth, maxWidth)
+  let nextHeight = height || Math.min(config.defaultHeight, maxHeight)
 
   if (nextWidth > maxWidth) {
     const scale = maxWidth / nextWidth
@@ -138,8 +145,9 @@ const imageStyle = computed(() => ({
 
 const handleImageLoad = (event: Event) => {
   const image = event.target as HTMLImageElement
-  naturalWidth.value = image.naturalWidth || DEFAULT_WIDTH
-  naturalHeight.value = image.naturalHeight || DEFAULT_HEIGHT
+  const config = readPreviewSizeConfig()
+  naturalWidth.value = image.naturalWidth || config.defaultWidth
+  naturalHeight.value = image.naturalHeight || config.defaultHeight
   previewLoadState.value = 'ready'
 }
 

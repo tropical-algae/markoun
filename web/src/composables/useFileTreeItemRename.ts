@@ -5,7 +5,7 @@ import {
   type ComponentPublicInstance,
   type Ref,
 } from 'vue'
-import { TREE_LONG_PRESS_DELAY_MS } from '@/constants/ui'
+import { readCssTimeMs } from '@/utils/css'
 import type { FsNode } from '@/types/file-system'
 
 export const useFileTreeItemRename = (
@@ -48,7 +48,7 @@ export const useFileTreeItemRename = (
       pressTimer = null
       isLongPressed.value = true
       void enterRenameMode()
-    }, TREE_LONG_PRESS_DELAY_MS)
+    }, readCssTimeMs('--tree-long-press-delay-ms', 600))
   }
 
   const stopLongPress = (event?: PointerEvent) => {

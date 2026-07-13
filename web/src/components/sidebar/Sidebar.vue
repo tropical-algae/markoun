@@ -1,5 +1,8 @@
 <template>
-  <aside class="sidebar-wrapper d-flex flex-row">
+  <aside
+    class="sidebar-wrapper d-flex flex-row"
+    :class="{ 'is-mobile-panel-open': isCompactLayout && showSubSidebar }"
+  >
     <div class="sidebar-container px-2">
       <BaseHeader>
         <BaseTooltip text="Toggle sidebar" :placement="sidebarTooltipPlacement">
@@ -66,11 +69,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue"
+import { ref, watch } from "vue"
 import { SidebarMode } from "@/types/ui"
 import { useResizablePane } from "@/composables/useResizablePane"
 import { useMediaQuery } from "@/composables/useMediaQuery"
-import { COMPACT_LAYOUT_MEDIA_QUERY, SIDEBAR_PANE_WIDTH } from "@/constants/ui"
+import { COMPACT_LAYOUT_MEDIA_QUERY } from "@/constants/layout"
+import { readCssNumber } from "@/utils/css"
 
 import SidebarToggleIcon from "@/assets/icons/sidebar.svg"
 import FileTreeIcon from "@/assets/icons/rectangle-list.svg"
@@ -85,18 +89,22 @@ import SidebarUser from "@/components/sidebar/SidebarUser.vue"
 import BaseHeader from '@/components/base/BaseHeader.vue';
 import BaseTooltip from '@/components/base/BaseTooltip.vue';
 
-const showSubSidebar = ref(true);
+const emit = defineEmits<{
+  (event: 'mobile-panel-change', value: boolean): void
+}>()
+
 const isCompactLayout = useMediaQuery(COMPACT_LAYOUT_MEDIA_QUERY)
-const sidebarTooltipPlacement = computed(() => isCompactLayout.value ? 'bottom' : 'right')
+const showSubSidebar = ref(!isCompactLayout.value);
+const sidebarTooltipPlacement = 'right'
 const {
   width: subSidebarWidth,
   isResizing: isSubSidebarResizing,
   startResizing,
   visibleWidth,
 } = useResizablePane({
-  initialWidth: SIDEBAR_PANE_WIDTH.initial,
-  minWidth: SIDEBAR_PANE_WIDTH.min,
-  maxWidth: SIDEBAR_PANE_WIDTH.max,
+  initialWidth: readCssNumber('--layout-sidebar-width-default', 250),
+  minWidth: readCssNumber('--layout-sidebar-width-min', 240),
+  maxWidth: readCssNumber('--layout-sidebar-width-max', 500),
   direction: 'right',
 })
 
@@ -121,6 +129,18 @@ const handleContentOpen = () => {
     showSubSidebar.value = false
   }
 }
+
+watch(
+  [showSubSidebar, isCompactLayout],
+  () => {
+    emit('mobile-panel-change', isCompactLayout.value && showSubSidebar.value)
+  },
+  { immediate: true },
+)
+
+watch(isCompactLayout, (isCompact) => {
+  showSubSidebar.value = !isCompact
+})
 
 const sideBtns = [
   { icon: FileTreeIcon, label: 'Files', mode: SidebarMode.FileTree },
@@ -171,53 +191,59 @@ const sideBtns = [
 
 @media (max-width: 768px) {
   .sidebar-wrapper {
-    width: 100%;
-    height: auto;
-    flex-direction: column !important;
+    width: auto;
+    height: 100%;
+    flex-direction: row !important;
     z-index: var(--layout-mobile-layer-z-index);
+  }
+
+  .sidebar-wrapper.is-mobile-panel-open {
+    width: 100%;
   }
 
   .sidebar-container {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    width: 100%;
-    border-right: 0;
-    border-bottom: 1px solid var(--color-line);
-  }
-
-  .sidebar-container :deep(.container-header) {
-    height: var(--icon-button-size);
+    flex-shrink: 0;
+    height: 100%;
+    border-right: 1px solid var(--color-line);
     border-bottom: 0;
   }
 
+  .sidebar-container :deep(header) {
+    width: var(--icon-button-size);
+  }
+
   .sidebar-nav {
-    flex: 1;
-    flex-direction: row !important;
-    justify-content: flex-end;
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
+    flex: 0 0 auto;
+    flex-direction: column !important;
+    justify-content: flex-start;
+    margin-top: 1rem !important;
+    margin-bottom: 1rem !important;
   }
 
   .sub-sidebar-container {
-    width: 100% !important;
-    height: auto;
-    max-height: 0;
-    border-bottom: 1px solid var(--color-line);
+    width: 0 !important;
+    height: 100%;
+    max-height: none;
+    border-bottom: 0;
     background-color: var(--color-bg-sec);
     transition:
-      max-height var(--motion-medium-duration) ease,
+      width var(--motion-medium-duration) ease,
       border-color var(--motion-theme-duration) ease,
       background-color var(--motion-theme-duration) ease;
   }
 
   .sub-sidebar-container.is-open {
-    max-height: var(--layout-mobile-sidebar-panel-max-height);
+    flex: 1;
+    width: auto !important;
   }
 
   .sub-sidebar-inner {
     width: 100% !important;
     min-width: 0;
-    height: var(--layout-mobile-sidebar-panel-max-height);
+    height: 100%;
   }
 
   .vertical-line {

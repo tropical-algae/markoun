@@ -27,3 +27,19 @@ export const readCssTimeMs = (name: string, fallbackMs: number): number => {
     .getPropertyValue(name)
   return parseCssTimeToMs(value) ?? fallbackMs
 }
+
+export const readCssNumber = (name: string, fallback: number): number => {
+  if (typeof window === 'undefined') {
+    return fallback
+  }
+
+  const value = window.getComputedStyle(document.documentElement)
+    .getPropertyValue(name)
+    .trim()
+  const parsed = Number.parseFloat(value)
+  return Number.isFinite(parsed) ? parsed : fallback
+}
+
+export const readCssLengthPx = (name: string, fallbackPx: number): number => {
+  return readCssNumber(name, fallbackPx)
+}

@@ -1,6 +1,6 @@
 <template>
   <BaseHeader class="p-0">
-    <div class="d-flex justify-content-center align-items-center gap-2 py-2">
+    <div class="d-flex justify-content-center align-items-center gap-2 py-2 w-100">
       <BaseTooltip v-for="item in toolBtns" :key="item.label" :text="item.label" placement="bottom">
         <button @click="item.func()" :aria-label="item.label">
           <component :is="item.icon" class="icon-btn"></component>
@@ -121,13 +121,13 @@ onMounted(async () => {
 .tree-loading-state {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--tree-skeleton-gap);
 }
 
 .tree-skeleton-row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--tree-skeleton-row-gap);
   padding: var(--tree-row-padding);
 }
 

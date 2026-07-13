@@ -45,7 +45,6 @@
   padding: 0 1rem;
   color: var(--color-text-sec);
 
-  /* font-style: italic; */
   font-size: 0.875rem;
   white-space: pre-wrap;
 
@@ -53,9 +52,6 @@
   background-color: var(--color-bg-dark);
 
   border-radius: var(--radius-sm);
-
-  /* overflow-wrap: break-word;
-  overflow-x: hidden; */
 }
 
 .note-preview blockquote p {

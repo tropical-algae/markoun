@@ -96,7 +96,7 @@
 import { computed, ref } from 'vue'
 
 import { searchFileContentApi } from '@/api/file'
-import { COMPACT_LAYOUT_MEDIA_QUERY } from '@/constants/ui'
+import { COMPACT_LAYOUT_MEDIA_QUERY } from '@/constants/layout'
 import { useMediaQuery } from '@/composables/useMediaQuery'
 import { useNodeStore } from '@/stores/note'
 import { useToastStore } from '@/stores/toast'
@@ -200,7 +200,6 @@ const openSearchResult = async (result: FileSearchResult) => {
 button.search-result-card:focus-visible {
   border-color: var(--color-action);
   background-color: var(--color-action-light);
-  /* transform: translateY(-1px); */
 }
 
 @media (hover: hover) {

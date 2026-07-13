@@ -25,9 +25,9 @@
 
 <script setup lang="ts">
 import gsap from 'gsap';
-import { computed, watch } from 'vue';
+import { computed, onBeforeUnmount, watch } from 'vue';
 import { useToastStore } from '@/stores/toast';
-import { TOAST_MOTION } from '@/constants/ui';
+import { readCssLengthPx, readCssNumber, readCssTimeMs } from '@/utils/css';
 
 import BaseIconText from '@/components/base/BaseIconText.vue';
 
@@ -62,26 +62,43 @@ const config = computed(() => noticeMap[currentNotice.value?.type || 'info']);
 
 let timer: number | null = null;
 
-watch(currentNotice, (val) => {
-  if (timer) {
-    clearTimeout(timer);
-    timer = null;
+const clearTimer = () => {
+  if (timer !== null) {
+    window.clearTimeout(timer)
+    timer = null
   }
+}
+
+const getToastMotion = () => ({
+  lifeMs: readCssTimeMs('--toast-life-ms', 5000),
+  enterY: readCssLengthPx('--toast-enter-y', 20),
+  leaveY: readCssLengthPx('--toast-leave-y', -20),
+  enterDuration: readCssNumber('--motion-toast-enter-duration', 0.4),
+  leaveDuration: readCssNumber('--motion-toast-leave-duration', 0.25),
+})
+
+watch(currentNotice, (val) => {
+  clearTimer()
 
   if (!val) return;
 
-  timer = setTimeout(() => {
+  timer = window.setTimeout(() => {
     if (toastStore.queue[0]?.id === val.id) {
       toastStore.popNotice();
     }
-  }, TOAST_MOTION.lifeMs);
+  }, getToastMotion().lifeMs);
 });
 
+onBeforeUnmount(() => {
+  clearTimer()
+})
+
 const onEnter = (el: Element, done: () => void) => {
+  const motion = getToastMotion()
   gsap.set(el, { xPercent: -50, x: 0 }); 
   gsap.fromTo(el, 
     { 
-      y: TOAST_MOTION.enterY,
+      y: motion.enterY,
       opacity: 0,
       scale: 0.95
     },
@@ -89,7 +106,7 @@ const onEnter = (el: Element, done: () => void) => {
       y: 0,
       opacity: 0.95, 
       scale: 1,
-      duration: TOAST_MOTION.enterDuration,
+      duration: motion.enterDuration,
       ease: 'back.out(1.6)',
       onComplete: done 
     }
@@ -97,11 +114,12 @@ const onEnter = (el: Element, done: () => void) => {
 };
 
 const onLeave = (el: Element, done: () => void) => {
+  const motion = getToastMotion()
   gsap.to(el, { 
-    y: TOAST_MOTION.leaveY,
+    y: motion.leaveY,
     opacity: 0, 
     scale: 0.95,
-    duration: TOAST_MOTION.leaveDuration,
+    duration: motion.leaveDuration,
     ease: 'power2.in',
     onComplete: done 
   });
@@ -119,7 +137,6 @@ const onLeave = (el: Element, done: () => void) => {
   border-radius: var(--toast-radius);
   
   max-width: var(--toast-max-width);
-  /* min-width: 200px; */
   backdrop-filter: blur(2px);
 }
 </style>

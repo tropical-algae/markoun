@@ -10,7 +10,6 @@
   bottom: 0;
   position: absolute;
   background-color: transparent;
-  /* background-color: var(--color-line); */
 
   transition: border-color var(--motion-theme-duration) ease;
   z-index: 9;

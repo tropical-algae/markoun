@@ -20,8 +20,8 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { ASYNC_GATE_DELAY_MS, ASYNC_GATE_MIN_VISIBLE_MS } from '@/constants/ui';
 import { useDelayedVisibility } from '@/composables/useDelayedVisibility';
+import { readCssTimeMs } from '@/utils/css';
 
 interface Props {
   theme?: 'primary' | 'danger' | 'secondary' | 'submit';
@@ -42,8 +42,12 @@ const props = withDefaults(defineProps<Props>(), {
 const visibleLoading = useDelayedVisibility(
   () => props.loading,
   {
-    delayMs: computed(() => props.loadingDelayMs ?? ASYNC_GATE_DELAY_MS),
-    minVisibleMs: computed(() => props.loadingMinDurationMs ?? ASYNC_GATE_MIN_VISIBLE_MS),
+    delayMs: computed(() =>
+      props.loadingDelayMs ?? readCssTimeMs('--async-gate-delay-ms', 150)
+    ),
+    minVisibleMs: computed(() =>
+      props.loadingMinDurationMs ?? readCssTimeMs('--async-gate-min-visible-ms', 400)
+    ),
   },
 )
 </script>
@@ -61,7 +65,6 @@ const visibleLoading = useDelayedVisibility(
   opacity: 1;
 
   background-color: transparent;
-  /* border: var(--ghost-button-border-width) solid var(--btn-main-color); */
   box-shadow: inset 0 0 0 1px var(--btn-main-color);
 
   color: var(--btn-main-color);

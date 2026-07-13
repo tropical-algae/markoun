@@ -4,9 +4,14 @@
       Markoun
     </div>
 
-    <div class="workspace-main d-flex flex-row flex-grow-1 overflow-hidden">
-      <Sidebar />
-      <NoteEditor />
+    <div
+      class="workspace-main d-flex flex-row flex-grow-1 overflow-hidden"
+      :class="{ 'is-mobile-sidebar-open': isMobileSidebarOpen }"
+    >
+      <Sidebar @mobile-panel-change="isMobileSidebarOpen = $event" />
+      <div class="workspace-editor-pane">
+        <NoteEditor />
+      </div>
     </div>
 
     <div class="workspace-footer f-s px-2 fc-sec">
@@ -18,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted } from 'vue';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { onBeforeRouteLeave } from 'vue-router';
 
 import Sidebar from '@/components/sidebar/Sidebar.vue';
@@ -26,6 +31,7 @@ import NoteEditor from '@/components/editor/NoteEditor.vue';
 import { useNodeStore } from '@/stores/note';
 
 const nodeStore = useNodeStore()
+const isMobileSidebarOpen = ref(false)
 
 onMounted(() => {
   void nodeStore.ensureWelcomeNoteLoaded().catch(() => null)
@@ -59,7 +65,6 @@ const handlePageHide = () => {
   display: flex;
   align-items: center;
   transition: border-color var(--motion-theme-duration) ease;
-  /* justify-content: center; */
 }
 
 .workspace-footer {
@@ -86,9 +91,21 @@ const handlePageHide = () => {
   position: relative;
 }
 
+.workspace-editor-pane {
+  position: relative;
+  flex: 1;
+  display: flex;
+  min-width: 0;
+  overflow: hidden;
+}
+
 @media (max-width: 768px) {
   .workspace-main {
-    flex-direction: column !important;
+    flex-direction: row !important;
+  }
+
+  .workspace-main.is-mobile-sidebar-open .workspace-editor-pane {
+    display: none;
   }
 }
 </style>

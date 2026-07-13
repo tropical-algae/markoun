@@ -15,6 +15,7 @@
       <span
         v-if="showBubble"
         :id="tooltipId"
+        ref="bubbleRef"
         role="tooltip"
         class="tooltip-bubble"
         :class="[
@@ -41,7 +42,7 @@ import {
 } from 'vue'
 import { useAppearanceStore } from '@/stores/appearance'
 import { useMediaQuery } from '@/composables/useMediaQuery'
-import { readCssTimeMs } from '@/utils/css'
+import { readCssLengthPx, readCssTimeMs } from '@/utils/css'
 
 type TooltipPlacement = 'top' | 'right' | 'bottom' | 'left'
 
@@ -60,16 +61,20 @@ const shouldShowTooltip = computed(() => appearanceStore.showTooltips && props.t
 const showBubble = computed(() => shouldShowTooltip.value && isRendered.value)
 
 const anchorRef = ref<HTMLElement | null>(null)
+const bubbleRef = ref<HTMLElement | null>(null)
 const supportsHoverPointer = useMediaQuery('(hover: hover) and (pointer: fine)')
 const isRendered = ref(false)
 const isActive = ref(false)
-const tooltipStyle = ref<CSSProperties>({
+type TooltipStyle = CSSProperties & { '--tooltip-arrow-offset'?: string }
+
+const tooltipStyle = ref<TooltipStyle>({
   left: '0px',
   top: '0px',
 })
 
 let closeTimer: number | null = null
 let animationFrame: number | null = null
+let hasPositionListeners = false
 
 const clearCloseTimer = () => {
   if (closeTimer !== null) {
@@ -85,62 +90,103 @@ const clearAnimationFrame = () => {
   }
 }
 
-const getTooltipGap = () => {
-  const value = window.getComputedStyle(document.documentElement)
-    .getPropertyValue('--tooltip-gap')
-  const parsed = Number.parseFloat(value)
-  return Number.isFinite(parsed) ? parsed : 8
+const clamp = (value: number, min: number, max: number) => {
+  if (max < min) {
+    return min
+  }
+
+  return Math.min(Math.max(value, min), max)
+}
+
+const getViewportBounds = () => {
+  const viewport = window.visualViewport
+  const left = viewport?.offsetLeft ?? 0
+  const top = viewport?.offsetTop ?? 0
+
+  return {
+    left,
+    top,
+    right: left + (viewport?.width ?? window.innerWidth),
+    bottom: top + (viewport?.height ?? window.innerHeight),
+  }
 }
 
 const updateTooltipPosition = () => {
   const anchor = anchorRef.value
-  if (!anchor) {
+  const bubble = bubbleRef.value
+  if (!anchor || !bubble) {
     return
   }
 
   const rect = anchor.getBoundingClientRect()
-  const gap = getTooltipGap()
+  const bubbleWidth = bubble.offsetWidth
+  const bubbleHeight = bubble.offsetHeight
+  const gap = readCssLengthPx('--tooltip-gap', 8)
+  const padding = readCssLengthPx('--tooltip-viewport-padding', 8)
+  const arrowSize = readCssLengthPx('--tooltip-arrow-size', 7)
+  const viewport = getViewportBounds()
   const centerX = rect.left + rect.width / 2
   const centerY = rect.top + rect.height / 2
+  const minLeft = viewport.left + padding
+  const maxLeft = viewport.right - padding - bubbleWidth
+  const minTop = viewport.top + padding
+  const maxTop = viewport.bottom - padding - bubbleHeight
+  let left = centerX - bubbleWidth / 2
+  let top = rect.top - gap - bubbleHeight
+  let arrowOffset = centerX - left
 
   if (props.placement === 'right') {
-    tooltipStyle.value = {
-      left: `${rect.right + gap}px`,
-      top: `${centerY}px`,
-    }
-    return
+    left = rect.right + gap
+    top = centerY - bubbleHeight / 2
+    left = clamp(left, minLeft, maxLeft)
+    top = clamp(top, minTop, maxTop)
+    arrowOffset = centerY - top
+  } else if (props.placement === 'bottom') {
+    left = centerX - bubbleWidth / 2
+    top = rect.bottom + gap
+    left = clamp(left, minLeft, maxLeft)
+    top = clamp(top, minTop, maxTop)
+    arrowOffset = centerX - left
+  } else if (props.placement === 'left') {
+    left = rect.left - gap - bubbleWidth
+    top = centerY - bubbleHeight / 2
+    left = clamp(left, minLeft, maxLeft)
+    top = clamp(top, minTop, maxTop)
+    arrowOffset = centerY - top
+  } else {
+    left = clamp(left, minLeft, maxLeft)
+    top = clamp(top, minTop, maxTop)
+    arrowOffset = centerX - left
   }
 
-  if (props.placement === 'bottom') {
-    tooltipStyle.value = {
-      left: `${centerX}px`,
-      top: `${rect.bottom + gap}px`,
-    }
-    return
-  }
-
-  if (props.placement === 'left') {
-    tooltipStyle.value = {
-      left: `${rect.left - gap}px`,
-      top: `${centerY}px`,
-    }
-    return
-  }
-
+  const maxArrowOffset = props.placement === 'top' || props.placement === 'bottom'
+    ? bubbleWidth - arrowSize / 2
+    : bubbleHeight - arrowSize / 2
   tooltipStyle.value = {
-    left: `${centerX}px`,
-    top: `${rect.top - gap}px`,
+    left: `${left}px`,
+    top: `${top}px`,
+    '--tooltip-arrow-offset': `${clamp(arrowOffset, arrowSize / 2, maxArrowOffset)}px`,
   }
 }
 
 const addPositionListeners = () => {
+  if (hasPositionListeners) {
+    return
+  }
+
   window.addEventListener('resize', updateTooltipPosition)
   window.addEventListener('scroll', updateTooltipPosition, true)
+  hasPositionListeners = true
 }
 
 const removePositionListeners = () => {
+  if (!hasPositionListeners) {
+    return
+  }
+
   window.removeEventListener('resize', updateTooltipPosition)
   window.removeEventListener('scroll', updateTooltipPosition, true)
+  hasPositionListeners = false
 }
 
 const openTooltip = async () => {
@@ -228,6 +274,7 @@ onBeforeUnmount(() => {
 .tooltip-bubble {
   position: fixed;
   z-index: var(--tooltip-z-index);
+  --tooltip-arrow-offset: 50%;
   width: max-content;
   max-width: var(--tooltip-max-width);
   padding: var(--tooltip-padding);
@@ -271,45 +318,45 @@ onBeforeUnmount(() => {
 
 .tooltip-bubble-top::after {
   bottom: calc(var(--tooltip-arrow-size) / -2);
-  left: calc(50% - var(--tooltip-arrow-size) / 2);
+  left: calc(var(--tooltip-arrow-offset) - var(--tooltip-arrow-size) / 2);
 }
 
 .tooltip-bubble-right::after {
-  top: calc(50% - var(--tooltip-arrow-size) / 2);
+  top: calc(var(--tooltip-arrow-offset) - var(--tooltip-arrow-size) / 2);
   left: calc(var(--tooltip-arrow-size) / -2);
 }
 
 .tooltip-bubble-bottom::after {
   top: calc(var(--tooltip-arrow-size) / -2);
-  left: calc(50% - var(--tooltip-arrow-size) / 2);
+  left: calc(var(--tooltip-arrow-offset) - var(--tooltip-arrow-size) / 2);
 }
 
 .tooltip-bubble-left::after {
-  top: calc(50% - var(--tooltip-arrow-size) / 2);
+  top: calc(var(--tooltip-arrow-offset) - var(--tooltip-arrow-size) / 2);
   right: calc(var(--tooltip-arrow-size) / -2);
 }
 
 .tooltip-bubble-top {
-  --tooltip-hidden-transform: translateX(-50%) translateY(calc(-100% + var(--tooltip-bounce-distance))) scale(var(--tooltip-bounce-start-scale));
-  --tooltip-open-transform: translateX(-50%) translateY(-100%);
+  --tooltip-hidden-transform: translateY(var(--tooltip-bounce-distance)) scale(var(--tooltip-bounce-start-scale));
+  --tooltip-open-transform: translateY(0) scale(var(--tooltip-bounce-end-scale));
   --tooltip-transform-origin: 50% 100%;
 }
 
 .tooltip-bubble-right {
-  --tooltip-hidden-transform: translateY(-50%) translateX(calc(var(--tooltip-bounce-distance) * -1)) scale(var(--tooltip-bounce-start-scale));
-  --tooltip-open-transform: translateY(-50%) translateX(0);
+  --tooltip-hidden-transform: translateX(calc(var(--tooltip-bounce-distance) * -1)) scale(var(--tooltip-bounce-start-scale));
+  --tooltip-open-transform: translateX(0) scale(var(--tooltip-bounce-end-scale));
   --tooltip-transform-origin: 0 50%;
 }
 
 .tooltip-bubble-bottom {
-  --tooltip-hidden-transform: translateX(-50%) translateY(calc(var(--tooltip-bounce-distance) * -1)) scale(var(--tooltip-bounce-start-scale));
-  --tooltip-open-transform: translateX(-50%) translateY(0);
+  --tooltip-hidden-transform: translateY(calc(var(--tooltip-bounce-distance) * -1)) scale(var(--tooltip-bounce-start-scale));
+  --tooltip-open-transform: translateY(0) scale(var(--tooltip-bounce-end-scale));
   --tooltip-transform-origin: 50% 0;
 }
 
 .tooltip-bubble-left {
-  --tooltip-hidden-transform: translateY(-50%) translateX(calc(-100% + var(--tooltip-bounce-distance))) scale(var(--tooltip-bounce-start-scale));
-  --tooltip-open-transform: translateY(-50%) translateX(-100%);
+  --tooltip-hidden-transform: translateX(var(--tooltip-bounce-distance)) scale(var(--tooltip-bounce-start-scale));
+  --tooltip-open-transform: translateX(0) scale(var(--tooltip-bounce-end-scale));
   --tooltip-transform-origin: 100% 50%;
 }
 </style>

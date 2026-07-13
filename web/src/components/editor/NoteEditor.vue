@@ -87,15 +87,17 @@
     <div class="inspector-container f-m px-3" :style="{ width: inspectorWidth + 'px' }">
       <div v-if="currentMode === InspectMode.Meta" class="d-flex flex-column h-100 overflow-hidden p-0 small">
         <BaseHeader>
-          <div class="text-uppercase f-s fc-pri">File Meta</div>
-          <button
-            class="inspector-close-button"
-            type="button"
-            aria-label="Close inspector"
-            @click="showInspector = false"
-          >
-            x
-          </button>
+          <div class="inspector-header-content">
+            <div class="text-uppercase f-s fc-pri">File Meta</div>
+            <button
+              class="inspector-close-button"
+              type="button"
+              aria-label="Close inspector"
+              @click="showInspector = false"
+            >
+              x
+            </button>
+          </div>
         </BaseHeader>
         <AsyncGate
           :status="nodeStore.currentFileStatus"
@@ -127,15 +129,17 @@
 
       <div v-else-if="currentMode === InspectMode.Preview" class="d-flex flex-column h-100 overflow-hidden p-0">
         <BaseHeader>
-          <div class="text-uppercase f-s fc-pri">Preview</div>
-          <button
-            class="inspector-close-button"
-            type="button"
-            aria-label="Close inspector"
-            @click="showInspector = false"
-          >
-            x
-          </button>
+          <div class="inspector-header-content">
+            <div class="text-uppercase f-s fc-pri">Preview</div>
+            <button
+              class="inspector-close-button"
+              type="button"
+              aria-label="Close inspector"
+              @click="showInspector = false"
+            >
+              x
+            </button>
+          </div>
         </BaseHeader>
         <AsyncGate
           :status="nodeStore.currentFileStatus"
@@ -172,8 +176,8 @@ import { useNodeStore } from '@/stores/note';
 import { useAppearanceStore } from '@/stores/appearance';
 import { useResizablePane } from '@/composables/useResizablePane';
 import { InspectMode } from '@/types/ui';
-import { EDITOR_ASYNC_GATE_DELAY_MS, INSPECTOR_PANE_WIDTH } from '@/constants/ui';
 import { insertTimeToFileName } from '@/utils/file-system';
+import { readCssNumber, readCssTimeMs } from '@/utils/css';
 
 import BaseHeader from '@/components/base/BaseHeader.vue';
 import BaseSkeleton from '@/components/base/BaseSkeleton.vue';
@@ -190,9 +194,9 @@ const {
   startResizing,
   visibleWidth,
 } = useResizablePane({
-  initialWidth: INSPECTOR_PANE_WIDTH.initial,
-  minWidth: INSPECTOR_PANE_WIDTH.min,
-  maxWidth: INSPECTOR_PANE_WIDTH.max,
+  initialWidth: readCssNumber('--layout-inspector-width-default', 250),
+  minWidth: readCssNumber('--layout-inspector-width-min', 200),
+  maxWidth: readCssNumber('--layout-inspector-width-max', 600),
   direction: 'left',
 })
 
@@ -201,7 +205,7 @@ const currentWidth = visibleWidth(showInspector);
 
 const fileUploadPercent = ref(0);
 const markdownEditorRef = ref<HTMLTextAreaElement | null>(null);
-const editorAsyncGateDelayMs = EDITOR_ASYNC_GATE_DELAY_MS;
+const editorAsyncGateDelayMs = readCssTimeMs('--editor-async-gate-delay-ms', 0);
 
 const inspectIcons = [
   { icon: MetaIcon, label: 'File meta', mode: InspectMode.Meta },
@@ -269,8 +273,6 @@ const insertText = (text: string) => {
 
 <style scoped>
 
-/* 编辑器部分 */
-
 .editor-wrapper {
   --editor-content-padding-x: calc(max(var(--editor-content-padding-x-min), (100% - var(--editor-content-max-width)) / 2));
 
@@ -289,16 +291,16 @@ const insertText = (text: string) => {
 
 .editor-wrapper .floating-left {
   position: absolute;
-  left: 16px;
+  left: var(--editor-floating-inline-offset);
   display: flex;
-  gap: 8px;
+  gap: var(--editor-floating-gap);
 }
 
 .editor-wrapper .floating-right {
   position: absolute;
-  right: 16px;
+  right: var(--editor-floating-inline-offset);
   display: flex;
-  gap: 8px;
+  gap: var(--editor-floating-gap);
 }
 
 .editor-container {
@@ -337,7 +339,7 @@ const insertText = (text: string) => {
   border: none;
   outline: none;
   background: transparent;
-  color: var(--text-main);
+  color: var(--color-text-pri);
   font-size: 16px;
   line-height: var(--editor-line-height);
   resize: none;
@@ -366,7 +368,7 @@ const insertText = (text: string) => {
   padding: var(--editor-content-padding-y) var(--editor-content-padding-x);
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: var(--editor-loading-gap);
 }
 
 .editor-skeleton-line {
@@ -376,8 +378,6 @@ const insertText = (text: string) => {
 .icon-btn.is-pending {
   opacity: 0.55;
 }
-
-/* 侧边栏信息部分 */
 
 .inspector-wrapper {
   position: relative;
@@ -398,9 +398,7 @@ const insertText = (text: string) => {
 .note-meta,
 .note-preview {
   flex: 1;
-  /* padding-left: 24px;
-  padding-right: 24px; */
-  margin-top: 12px;
+  margin-top: var(--editor-inspector-content-margin-top);
   content-visibility: auto; 
   contain: layout paint style;
   overflow-y: scroll;
@@ -412,14 +410,14 @@ const insertText = (text: string) => {
 .preview-skeleton {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--editor-inspector-skeleton-gap);
 }
 
 .note-meta .meta-grid {
   display: grid;
   grid-template-columns: max-content 1fr;
-  row-gap: 8px;
-  column-gap: 16px;
+  row-gap: var(--editor-meta-row-gap);
+  column-gap: var(--editor-meta-column-gap);
 
   align-items: start;
 }
@@ -442,6 +440,13 @@ const insertText = (text: string) => {
   display: none;
 }
 
+.inspector-header-content {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+}
+
 @media (max-width: 768px) {
   .editor-wrapper {
     width: 100%;
@@ -456,23 +461,20 @@ const insertText = (text: string) => {
 
   .inspector-wrapper {
     position: absolute;
-    inset: 0 0 0 auto;
-    z-index: var(--layout-mobile-layer-z-index);
+    inset: 0;
+    z-index: calc(var(--layout-mobile-layer-z-index) + 1);
     width: 0 !important;
-    max-width: min(var(--layout-mobile-panel-width), var(--layout-mobile-panel-max-width));
+    max-width: 100%;
     box-shadow: none;
   }
 
   .inspector-wrapper.is-open {
-    width: min(var(--layout-mobile-panel-width), var(--layout-mobile-panel-max-width)) !important;
-    box-shadow:
-      var(--layout-mobile-overlay-shadow-x) 0
-      var(--layout-mobile-overlay-shadow-blur)
-      var(--color-text-pri-shadow);
+    width: 100% !important;
+    box-shadow: none;
   }
 
   .inspector-container {
-    width: min(var(--layout-mobile-panel-width), var(--layout-mobile-panel-max-width)) !important;
+    width: 100% !important;
   }
 
   .inspector-wrapper .vertical-line {
