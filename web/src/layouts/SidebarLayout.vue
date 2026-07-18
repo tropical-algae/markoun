@@ -82,15 +82,12 @@ const {
   overflow: hidden;
   height: 100%;
   position: relative;
-  transition:
-    background-color var(--motion-theme-duration) ease,
-    border-color var(--motion-theme-duration) ease;
+  transition: border-color var(--motion-theme-duration) ease;
 }
 
 .sub-sidebar-container.is-width-animated {
   transition:
     width var(--motion-medium-duration) ease,
-    background-color var(--motion-theme-duration) ease,
     border-color var(--motion-theme-duration) ease;
 }
 
@@ -139,7 +136,6 @@ const {
     height: 100%;
     max-height: none;
     border-bottom: 0;
-    background-color: var(--color-bg-sec);
   }
 
   .sub-sidebar-container.is-open {

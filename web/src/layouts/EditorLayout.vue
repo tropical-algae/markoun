@@ -4,6 +4,7 @@
     :class="{
       'is-resizing': isInspectorResizing,
       'is-wide-lines': wideLines,
+      'is-inspector-open': inspectorOpen,
     }"
   >
     <slot name="header"></slot>
@@ -109,14 +110,10 @@ const closeInspector = () => {
   position: relative;
   overflow: hidden;
   flex-shrink: 0;
-  background-color: var(--color-bg-sec);
-  transition: background-color var(--motion-theme-duration) ease;
 }
 
 .inspector-wrapper.is-width-animated {
-  transition:
-    width var(--motion-medium-duration) ease,
-    background-color var(--motion-theme-duration) ease;
+  transition: width var(--motion-medium-duration) ease;
 }
 
 .inspector-container {
@@ -141,6 +138,10 @@ const closeInspector = () => {
     --editor-content-padding-x-min: var(--layout-mobile-editor-padding-x-min);
   }
 
+  .editor-wrapper.is-inspector-open {
+    display: none;
+  }
+
   .inspector-wrapper {
     position: absolute;
     inset: 0 0 0 auto;
@@ -151,7 +152,7 @@ const closeInspector = () => {
   }
 
   .inspector-wrapper.is-width-animated {
-    transition: background-color var(--motion-theme-duration) ease;
+    transition: none;
   }
 
   .inspector-wrapper.is-open {
