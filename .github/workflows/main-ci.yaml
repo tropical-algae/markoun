@@ -1,117 +1,121 @@
-name: detection-release
+name: Release
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  detection:
+  checks:
+    name: Quality Checks
     runs-on: ubuntu-latest
+
     steps:
       - name: Setup | Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup | Python 3.11
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
-      - name: Install dependencies
+      - name: Setup | Python Dependencies
         run: |
-          sudo apt-get update && sudo apt-get install -y git
-          pip install pre-commit==4.3.0
+          python -m pip install --upgrade pip
+          python -m pip install uv==0.9.7
+          uv sync --dev --frozen
 
-      - name: Run pre-commit checks
-        run: |
-          pre-commit run --all-files --show-diff-on-failure
+      - name: Check | Pre-commit
+        run: uv run pre-commit run --all-files --show-diff-on-failure
+
+      - name: Check | Backend Tests
+        run: uv run poe test
 
   release:
+    name: Semantic Release
     runs-on: ubuntu-latest
-    environment: release
-    needs: detection
+    needs: checks
     if: github.ref == 'refs/heads/main'
     concurrency:
       group: ${{ github.workflow }}-release-${{ github.ref_name }}
       cancel-in-progress: false
+
     permissions:
       contents: write
+
+    outputs:
+      released: ${{ steps.release.outputs.released }}
+      tag: ${{ steps.release.outputs.tag }}
+      version: ${{ steps.release.outputs.version }}
+
     steps:
       - name: Setup | Checkout Repository on Release Branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.ref_name }}
           fetch-depth: 0
 
-      - name: Setup | Force release branch to be at workflow sha
-        run: |
-          git reset --hard ${{ github.sha }}
-
-      - name: Evaluate | Verify upstream has NOT changed
-        shell: bash
-        run: |
-          set +o pipefail
-
-          UPSTREAM_BRANCH_NAME="$(git status -sb | head -n 1 | cut -d' ' -f2 | grep -E '\.{3}' | cut -d'.' -f4)"
-          printf '%s\n' "Upstream branch name: $UPSTREAM_BRANCH_NAME"
-
-          set -o pipefail
-
-          if [ -z "$UPSTREAM_BRANCH_NAME" ]; then
-              printf >&2 '%s\n' "::error::Unable to determine upstream branch name!"
-              exit 1
-          fi
-
-          git fetch "${UPSTREAM_BRANCH_NAME%%/*}"
-
-          if ! UPSTREAM_SHA="$(git rev-parse "$UPSTREAM_BRANCH_NAME")"; then
-              printf >&2 '%s\n' "::error::Unable to determine upstream branch sha!"
-              exit 1
-          fi
-
-          HEAD_SHA="$(git rev-parse HEAD)"
-
-          if [ "$HEAD_SHA" != "$UPSTREAM_SHA" ]; then
-              printf >&2 '%s\n' "[HEAD SHA] $HEAD_SHA != $UPSTREAM_SHA [UPSTREAM SHA]"
-              printf >&2 '%s\n' "::error::Upstream has changed, aborting release..."
-              exit 1
-          fi
-
-          printf '%s\n' "Verified upstream branch has not changed, continuing with release..."
+      - name: Setup | Reset Release Branch to Workflow SHA
+        run: git reset --hard ${{ github.sha }}
 
       - name: Action | Semantic Version Release
         id: release
-        uses: python-semantic-release/python-semantic-release@v10.3.1
+        uses: python-semantic-release/python-semantic-release@v10.5.3
         with:
           config_file: semantic.toml
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          git_committer_name: "github-actions"
-          git_committer_email: "actions@users.noreply.github.com"
+          git_committer_name: github-actions
+          git_committer_email: actions@users.noreply.github.com
 
-      - name: Publish | Upload to GitHub Release Assets
-        uses: python-semantic-release/publish-action@v10.3.1
+      - name: Publish | Upload GitHub Release Assets
         if: steps.release.outputs.released == 'true'
+        uses: python-semantic-release/publish-action@v10.5.3
         with:
+          config_file: semantic.toml
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ steps.release.outputs.tag }}
 
-      - name: Docker login
-        run: |
-          echo "IMAGE_NAME=tropicalalgae/markoun" >> $GITHUB_ENV
-          echo "IMAGE_VERSION=${{ steps.release.outputs.version }}" >> $GITHUB_ENV
-          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+  publish:
+    name: Publish Docker Image
+    runs-on: ubuntu-latest
+    environment: release
+    needs: release
+    if: needs.release.outputs.released == 'true'
 
-      - name: Docker Release
-        env:
-          IMAGE_NAME: ${{ env.IMAGE_NAME }}
-          IMAGE_VERSION: ${{ env.IMAGE_VERSION }}
-        run: |
-          docker build -t $IMAGE_NAME:$IMAGE_VERSION .
-          docker tag $IMAGE_NAME:$IMAGE_VERSION $IMAGE_NAME:$IMAGE_VERSION 
-          docker tag $IMAGE_NAME:$IMAGE_VERSION $IMAGE_NAME
+    permissions:
+      contents: read
 
-          docker push $IMAGE_NAME:$IMAGE_VERSION
-          docker push $IMAGE_NAME
+    steps:
+      - name: Setup | Checkout Released Tag
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.release.outputs.tag }}
+
+      - name: Setup | Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Setup | Login to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Setup | Docker Metadata
+        id: docker_meta
+        uses: docker/metadata-action@v6
+        with:
+          images: tropicalalgae/markoun
+          tags: |
+            type=raw,value=${{ needs.release.outputs.version }}
+            type=raw,value=latest
+
+      - name: Publish | Build and Push Docker Image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          labels: ${{ steps.docker_meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
