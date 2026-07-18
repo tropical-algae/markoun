@@ -22,7 +22,7 @@ shell = "uv run python -m markoun.main"
 
 [tasks.check]
 help = "Auto-fix and format the code using ruff."
-sequence = ["_install", "_fix", "_lint", "_format"]
+sequence = ["_install", "_fix", "_lint", "_format", "_pre_commit"]
 ignore_fail = false
 
 
@@ -31,7 +31,7 @@ help = "Run tests quickly using the default Python environment."
 sequence = ["_test"]
 
 
-[tasks.check-test]
+[tasks.test-all]
 help = "Run test and auto-fix the code."
 sequence = ["check", "_test"]
 
