@@ -1,4 +1,4 @@
-<div align="center"><img style="width: 180px" src=".github/assets/logo.png"/></div>
+<div align="center"><img style="width: 240px" src=".github/assets/logo.png"/></div>
 <p align="center"><strong><span style="font-size: 1.25em;">A self-hosted, file-based Markdown editor</span></strong></p>
 <p align="center">
   <a href="README.md"><img src="https://img.shields.io/badge/Language-English-blue.svg"></a>
@@ -17,7 +17,7 @@ Markoun is a lightweight, self-hosted, and entirely file-based Markdown editor d
 
 - **LaTeX support**: Live Markdown preview with built-in LaTeX support
 
-- **Image Upload**: Supports file upload and `Ctrl + V ` clipboard image paste
+- **Keyboard Shortcuts**: Paste clipboard images and save the current document without leaving the editor
 
 - **Rich Configuration**: Flexible config.yaml options for logging, authentication, and file control
 
@@ -71,6 +71,13 @@ For more configurable options, see [config.py](src/markoun/common/config.py)
 
 ## Editor Details
 
+**Keyboard Shortcuts**:
+
+| **Action**            | **Windows / Linux** | **macOS**     |
+| --------------------- | ------------------- | ------------- |
+| Paste clipboard image | `Ctrl + V`          | `Command + V` |
+| Save current document | `Ctrl + S`          | `Command + S` |
+
 **Relative Image Paths**:
 When inserting images into a Markdown file, image paths are generated relative to the Markdown file’s location — not the project root. This ensures portability and correct rendering even if folders are moved.
 
@@ -95,7 +102,7 @@ The administrator can enable or disable user registration in the settings sectio
 - [x] **Quick actions & interaction enhancements**: support more intuitive and efficient operations
 - [x] **Improved usability**: provide a smoother and more comfortable operation experience
 - [x] **Enhanced previews**: support richer previews, including image preview and ~~Gantt chart rendering~~ in Markdown files
-- [ ] **Frontend refactoring**: codebase requires further optimization
+- [x] **Frontend refactoring**: codebase requires further optimization
 - [ ] **File synchronization**: support syncing files with a remote source
 - [ ] **Version management**: introduce file versioning with history tracking and restore capability
 
