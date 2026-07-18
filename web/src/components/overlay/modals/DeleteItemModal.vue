@@ -1,13 +1,14 @@
 <template>
-  <BaseModal 
-    v-model="isVisible" 
+  <BaseModal
+    v-model="isVisible"
     title="Delete Item"
   >
-    <div class="delete-item-modal fc-pri">
+    <ModalContentLayout class="delete-item-modal fc-pri">
       <p>Delete <span class="fw-bold">{{ targetPath }}</span> ?</p>
-      <div class="d-flex justify-content-end gap-2">
+
+      <template #actions>
         <GhostButton
-          class="f-s py-0"
+          class="modal-button f-s"
           @click="isVisible = false"
           theme="secondary"
           :disabled="nodeStore.isDeletePending()"
@@ -15,7 +16,7 @@
           Cancel
         </GhostButton>
         <GhostButton
-          class="f-s py-0"
+          class="modal-button f-s"
           @click="handleConfirm"
           theme="danger"
           :disabled="nodeStore.isDeletePending()"
@@ -23,8 +24,8 @@
         >
           Delete
         </GhostButton>
-      </div>
-    </div>
+      </template>
+    </ModalContentLayout>
   </BaseModal>
 </template>
 
@@ -32,8 +33,9 @@
 import { ref, watch } from 'vue'
 import BaseModal from '@/components/base/BaseModal.vue'
 import GhostButton from '@/components/base/GhostButton.vue'
+import ModalContentLayout from '@/layouts/ModalContentLayout.vue'
 
-import { useNodeStore } from "@/stores/note"
+import { useNodeStore } from '@/stores/note'
 import { useModelProxy } from '@/composables/useModelProxy'
 
 const nodeStore = useNodeStore()
@@ -56,17 +58,12 @@ watch(
 )
 
 const handleConfirm = async () => {
-  await nodeStore.deletedItem()
+  await nodeStore.deleteCurrentNode()
   isVisible.value = false
 }
-
 </script>
 
 <style scoped>
-.delete-item-modal {
-  width: min(var(--modal-width-sm), 100%);
-}
-
 .delete-item-modal p {
   overflow-wrap: anywhere;
 }

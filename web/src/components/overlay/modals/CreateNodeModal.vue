@@ -4,23 +4,23 @@
     :title="title"
     @opened="handleOpened"
   >
-    <div class="create-node-modal">
+    <ModalContentLayout>
       <UnderlinedInput
         v-model="nodeName"
         :label="inputLabel"
         ref="inputRef"
         type="text"
-        class="mb-2 f-s"
+        class="modal-field f-s"
         :disabled="isPending"
         :placeholder="placeholder"
         @keyup.enter="handleConfirm"
       />
 
-      <BaseIconText :icon="InfoIcon" :text="hint" class="mb-3" color="var(--color-text-muted)"/>
+      <BaseIconText :icon="InfoIcon" :text="hint" class="modal-hint" color="var(--color-text-muted)"/>
 
-      <div class="d-flex justify-content-end gap-2">
+      <template #actions>
         <GhostButton
-          class="f-s py-0"
+          class="modal-button f-s"
           @click="isVisible = false"
           theme="secondary"
           :disabled="isPending"
@@ -28,15 +28,15 @@
           Cancel
         </GhostButton>
         <GhostButton
-          class="f-s py-0"
+          class="modal-button f-s"
           @click="handleConfirm"
           :disabled="!nodeName.trim() || isPending"
           :loading="isPending"
         >
           Create
         </GhostButton>
-      </div>
-    </div>
+      </template>
+    </ModalContentLayout>
   </BaseModal>
 </template>
 
@@ -47,6 +47,7 @@ import BaseIconText from '@/components/base/BaseIconText.vue'
 import BaseModal from '@/components/base/BaseModal.vue'
 import GhostButton from '@/components/base/GhostButton.vue'
 import UnderlinedInput from '@/components/base/UnderlinedInput.vue'
+import ModalContentLayout from '@/layouts/ModalContentLayout.vue'
 import InfoIcon from '@/assets/icons/info.svg'
 import { useNodeStore } from '@/stores/note'
 import { useModelProxy } from '@/composables/useModelProxy'
@@ -86,9 +87,3 @@ const handleConfirm = async () => {
   nodeName.value = ''
 }
 </script>
-
-<style scoped>
-.create-node-modal {
-  width: min(var(--modal-width-sm), 100%);
-}
-</style>

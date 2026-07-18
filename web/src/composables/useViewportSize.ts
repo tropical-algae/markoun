@@ -1,8 +1,16 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue'
+import {
+  DEFAULT_VIEWPORT_HEIGHT,
+  DEFAULT_VIEWPORT_WIDTH,
+} from '@/constants/layout'
 
 export const useViewportSize = () => {
-  const width = ref(typeof window !== 'undefined' ? window.innerWidth : 1440)
-  const height = ref(typeof window !== 'undefined' ? window.innerHeight : 900)
+  const width = ref(
+    typeof window !== 'undefined' ? window.innerWidth : DEFAULT_VIEWPORT_WIDTH,
+  )
+  const height = ref(
+    typeof window !== 'undefined' ? window.innerHeight : DEFAULT_VIEWPORT_HEIGHT,
+  )
 
   const syncViewportSize = () => {
     width.value = window.visualViewport?.width ?? window.innerWidth

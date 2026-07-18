@@ -9,10 +9,10 @@ import type { FsNode } from '@/types/file-system'
 import { getParentPath, isPathInside, normalizeNodePath } from '@/utils/file-system'
 
 interface UseFileTreeDropTargetOptions {
-  isDirectory: MaybeRefOrGetter<boolean>;
-  getDestinationPath: () => string;
-  selectDirectory?: () => Promise<void>;
-  moveNode: (node: FsNode, targetDir: string) => Promise<void>;
+  isDirectory: MaybeRefOrGetter<boolean>
+  getDestinationPath: () => string
+  selectDirectory?: () => Promise<void>
+  moveNode: (node: FsNode, targetDir: string) => Promise<void>
 }
 
 const hasDraggedFiles = (event: DragEvent): boolean => {

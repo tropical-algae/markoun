@@ -1,88 +1,91 @@
 <template>
-  <BaseHeader class="p-0">
-    <div class="d-flex justify-content-center align-items-center gap-2 py-2 w-100">
-      <BaseTooltip v-for="item in toolBtns" :key="item.label" :text="item.label" placement="bottom">
-        <button @click="item.func()" :aria-label="item.label">
-          <component :is="item.icon" class="icon-btn"></component>
-        </button>
-      </BaseTooltip>
-    </div>
-  </BaseHeader>
-  
-  <div
-    class="file-tree-root flex-grow-1 overflow-y-scroll p-0 my-3"
-    :class="{ 'is-root-dragover': isRootDirectoryDragOver }"
-    @dragenter.prevent="handleRootDirectoryDragEnter"
-    @dragover.prevent="handleRootDirectoryDragOver"
-    @dragleave.prevent="handleRootDirectoryDragLeave"
-    @drop.prevent="handleRootDirectoryDrop"
-  >
-    <AsyncGate :status="rootLoadStatus">
-      <template #loading>
-        <div class="tree-loading-state py-2">
-          <div v-for="index in 6" :key="index" class="tree-skeleton-row">
-            <BaseSkeleton width="1rem" height="1rem" radius="4px" />
-            <BaseSkeleton
-              :width="index % 2 === 0 ? '68%' : '54%'"
-              height="1.2rem"
-              radius="6px"
-            />
-          </div>
-        </div>
-      </template>
-
-      <div class="mb-4">
-        <SidebarFileTreeItem
-          v-for="item in nodeStore.rootNodes"
-          :key="item.path"
-          :node="item"
-          :depth="0"
-          @node-opened="emit('nodeOpened')"
-        />
+  <SidebarPanelLayout>
+    <template #header>
+      <div class="sidebar-toolbar">
+        <BaseTooltip
+          v-for="item in toolBtns"
+          :key="item.label"
+          :text="item.label"
+          placement="bottom"
+        >
+          <button class="icon-btn" @click="item.func()" :aria-label="item.label">
+            <component :is="item.icon"></component>
+          </button>
+        </BaseTooltip>
       </div>
-    </AsyncGate>
-  </div>
+    </template>
 
-  <CreateNoteModal v-model="showNewNote"/>
-  <CreateDirModal v-model="showNewFolder"/>
-  <UploadFileModal v-model="showUpload"/>
-  <DeleteItemModal v-model="deleteItem"/>
-  <ImagePreviewModal />
+    <div
+      class="file-tree-root sidebar-panel-body"
+      :class="{ 'is-root-dragover': isRootDirectoryDragOver }"
+      @dragenter.prevent="handleRootDirectoryDragEnter"
+      @dragover.prevent="handleRootDirectoryDragOver"
+      @dragleave.prevent="handleRootDirectoryDragLeave"
+      @drop.prevent="handleRootDirectoryDrop"
+    >
+      <AsyncGate :status="rootLoadStatus">
+        <template #loading>
+          <SidebarFileTreeSkeleton :rows="6" />
+        </template>
+
+        <div class="file-tree-list">
+          <SidebarFileTreeItem
+            v-for="item in nodeStore.rootNodes"
+            :key="item.path"
+            :node="item"
+            :depth="0"
+            @node-opened="emit('nodeOpened')"
+          />
+        </div>
+      </AsyncGate>
+    </div>
+
+    <CreateNodeModal
+      v-model="showNewNote"
+      v-bind="createNoteModalConfig"
+    />
+    <CreateNodeModal
+      v-model="showNewFolder"
+      v-bind="createFolderModalConfig"
+    />
+    <UploadFileModal v-model="showUpload" />
+    <DeleteItemModal v-model="deleteItem" />
+    <ImagePreviewModal />
+  </SidebarPanelLayout>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue"
+import { computed, onMounted, ref } from 'vue'
 
-import CreateNoteModal from "@/components/overlay/modals/CreateNoteModal.vue"
-import CreateDirModal from "@/components/overlay/modals/CreateDirModal.vue"
-import UploadFileModal from "@/components/overlay/modals/UploadFileModal.vue"
-import DeleteItemModal from "@/components/overlay/modals/DeleteItemModal.vue"
-import ImagePreviewModal from "@/components/overlay/modals/ImagePreviewModal.vue"
+import CreateNodeModal from '@/components/overlay/modals/CreateNodeModal.vue'
+import UploadFileModal from '@/components/overlay/modals/UploadFileModal.vue'
+import DeleteItemModal from '@/components/overlay/modals/DeleteItemModal.vue'
+import ImagePreviewModal from '@/components/overlay/modals/ImagePreviewModal.vue'
 
-import BaseHeader from '@/components/base/BaseHeader.vue';
-import SidebarFileTreeItem from "@/components/sidebar/SidebarFileTreeItem.vue"
-import AsyncGate from "@/components/base/AsyncGate.vue"
-import BaseSkeleton from "@/components/base/BaseSkeleton.vue"
-import BaseTooltip from "@/components/base/BaseTooltip.vue"
+import SidebarFileTreeItem from '@/components/sidebar/SidebarFileTreeItem.vue'
+import SidebarFileTreeSkeleton from '@/components/sidebar/SidebarFileTreeSkeleton.vue'
+import AsyncGate from '@/components/base/AsyncGate.vue'
+import BaseTooltip from '@/components/base/BaseTooltip.vue'
+import SidebarPanelLayout from '@/layouts/SidebarPanelLayout.vue'
 
-import NewNoteIcon from "@/assets/icons/add-document.svg"
-import NewFolderIcon from "@/assets/icons/folder-plus-circle.svg"
-import UploadIcon from "@/assets/icons/cloud-upload-alt.svg"
-import TrashIcon from "@/assets/icons/trash.svg"
+import NewNoteIcon from '@/assets/icons/add-document.svg'
+import NewFolderIcon from '@/assets/icons/folder-plus-circle.svg'
+import UploadIcon from '@/assets/icons/cloud-upload-alt.svg'
+import TrashIcon from '@/assets/icons/trash.svg'
 
-import { useNodeStore } from "@/stores/note"
-import type { AsyncStatus } from "@/types/async"
-import { useFileTreeDropTarget } from "@/composables/useFileTreeDropTarget"
-import { ROOT_DIRECTORY_PATH } from "@/utils/file-system"
+import { useNodeStore } from '@/stores/note'
+import type { AsyncStatus } from '@/types/async'
+import { useFileTreeDropTarget } from '@/composables/useFileTreeDropTarget'
+import { ROOT_DIRECTORY_PATH } from '@/utils/file-system'
 
 const emit = defineEmits<{
   (event: 'nodeOpened'): void
 }>()
 
-const showNewNote = ref(false);
-const showNewFolder = ref(false);
-const showUpload = ref(false);
-const deleteItem = ref(false);
+const showNewNote = ref(false)
+const showNewFolder = ref(false)
+const showUpload = ref(false)
+const deleteItem = ref(false)
 const nodeStore = useNodeStore()
 const rootLoadStatus = computed<AsyncStatus>(() => {
   const state = nodeStore.getDirectoryLoadState(ROOT_DIRECTORY_PATH)
@@ -108,9 +111,23 @@ const toolBtns = [
   { icon: NewFolderIcon, label: 'New folder', func: () => { showNewFolder.value = true } },
   { icon: UploadIcon, label: 'Upload file', func: () => { showUpload.value = true } },
   { icon: TrashIcon, label: 'Delete item', func: () => { deleteItem.value = true } },
-]
+] as const
 
+const createNoteModalConfig = {
+  title: 'New Note',
+  inputLabel: 'Note Name',
+  placeholder: 'e.g. my_note',
+  hint: 'Created in the selected path. No extension needed.',
+  nodeType: 'file',
+} as const
 
+const createFolderModalConfig = {
+  title: 'New Folder',
+  inputLabel: 'Folder Name',
+  placeholder: 'e.g. temp_folder',
+  hint: 'Created in the selected path.',
+  nodeType: 'dir',
+} as const
 
 onMounted(async () => {
   await nodeStore.loadDirectory()
@@ -118,29 +135,19 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.tree-loading-state {
-  display: flex;
-  flex-direction: column;
-  gap: var(--tree-skeleton-gap);
-}
-
-.tree-skeleton-row {
-  display: flex;
-  align-items: center;
-  gap: var(--tree-skeleton-row-gap);
-  padding: var(--tree-row-padding);
-}
-
 .file-tree-root {
-  height: 100%;
   display: flex;
   flex-direction: column;
   transition: background-color var(--motion-soft-duration) ease;
   border-radius: var(--tree-row-radius);
 }
 
+.file-tree-list {
+  margin-bottom: var(--sidebar-section-margin-bottom);
+}
+
 .file-tree-root.is-root-dragover {
   background-color: var(--color-action-light);
-  box-shadow: 0 0 0 1px var(--color-action);
+  box-shadow: 0 0 0 var(--divider-line-width) var(--color-action);
 }
 </style>

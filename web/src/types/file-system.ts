@@ -1,43 +1,43 @@
-export type DirectoryLoadState = 'idle' | 'loading' | 'loaded' | 'error';
+export type DirectoryLoadState = 'idle' | 'loading' | 'loaded' | 'error'
 
 export interface FsNode {
-  name: string;
-  path: string;
-  type: 'file' | 'dir';
-  suffix: string;
-  has_children?: boolean | null;
-  children?: FsNode[];
+  name: string
+  path: string
+  type: 'file' | 'dir'
+  suffix: string
+  has_children?: boolean | null
+  children?: FsNode[]
 }
 
 export interface DirectoryChildrenResponse {
-  path: string;
-  children: FsNode[];
+  path: string
+  children: FsNode[]
 }
 
 export interface FileDetail {
-  name: string;
-  path: string;
-  suffix: string;
-  content: string;
-  meta: Record<string, string>;
+  name: string
+  path: string
+  suffix: string
+  content: string
+  meta: Record<string, string>
 }
 
 export interface FileDetailResponse {
-  content: string;
-  meta: Record<string, string>;
+  content: string
+  meta: Record<string, string>
 }
 
 export interface FileSearchMatch {
-  snippet: string;
-  line: number;
+  snippet: string
+  line: number
 }
 
 export interface FileSearchResult {
-  node: FsNode;
-  matches: FileSearchMatch[];
+  node: FsNode
+  matches: FileSearchMatch[]
 }
 
 export interface UploadResponse {
-  filename: string;
-  node: FsNode | null;
+  filename: string
+  node: FsNode | null
 }

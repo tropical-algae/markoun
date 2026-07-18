@@ -1,14 +1,12 @@
-import { createApp } from "vue"
+import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import "@/assets/styles/main.css"
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import '@/assets/styles/main.css'
 
-import App from "@/App.vue"
-import router from "@/router/index"
-import { useToastStore } from "@/stores/toast"
-import { useAppearanceStore } from "@/stores/appearance"
-import { setRequestErrorHandler } from "@/utils/request"
+import App from '@/App.vue'
+import router from '@/router'
+import { useToastStore } from '@/stores/toast'
+import { useAppearanceStore } from '@/stores/appearance'
+import { setRequestErrorHandler } from '@/utils/request'
 
 const app = createApp(App)
 const pinia = createPinia()

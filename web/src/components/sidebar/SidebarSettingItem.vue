@@ -1,6 +1,5 @@
 <template>
   <div class="setting-item">
-    
     <div class="setting-copy">
       <span class="fw-bold f-s fc-pri">{{ settingName }}</span>
       <span class="setting-desc f-xs fc-sec">{{ settingDesc }}</span>
@@ -8,29 +7,29 @@
 
     <div class="setting-control">
       <slot name="control"></slot>
-      
-      <div v-if="!hasControlSlot && setting?.type === SysSettingType.BOOL">
+
+      <div v-if="boolSetting">
         <label
           class="switch-control"
           :class="{ 'is-disabled': pending }"
-          :for="setting.id"
+          :for="boolSetting.id"
         >
-        <input 
-          class="switch-input"
-          type="checkbox" 
-          :id="setting.id"
-          :checked="(setting as BoolSysSetting).value"
-          :disabled="pending"
-          @change="handleChange($event)"
-        >
+          <input
+            class="switch-input"
+            type="checkbox"
+            :id="boolSetting.id"
+            :checked="boolSetting.value"
+            :disabled="pending"
+            @change="handleBoolChange"
+          >
           <span class="switch-track" aria-hidden="true"></span>
         </label>
       </div>
 
-      <div v-else-if="!hasControlSlot && setting?.type === SysSettingType.STR">
-        <input 
-          type="text" 
-          class="setting-text-input form-control form-control-sm text-end"
+      <div v-else-if="strSetting">
+        <input
+          type="text"
+          class="setting-text-input"
           :value="draftValue"
           :disabled="pending"
           @input="handleInput($event)"
@@ -39,39 +38,46 @@
           placeholder="Enter value"
         >
       </div>
-
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, useSlots, watch } from 'vue';
-import { SysSettingType, type BoolSysSetting, type SysSettingResponse } from '@/types/system';
-
+import { computed, ref, useSlots, watch } from 'vue'
+import {
+  SysSettingType,
+  type BoolSysSetting,
+  type StrSysSetting,
+  type SysSettingResponse,
+} from '@/types/system'
 
 const props = defineProps<{
   setting?: SysSettingResponse
   name?: string
   desc?: string
   pending?: boolean
-}>();
+}>()
 
 const emit = defineEmits<{
   (e: 'update', id: string, newValue: string | boolean): void
-}>();
+}>()
 
 const slots = useSlots()
 const hasControlSlot = computed(() => Boolean(slots.control))
 const settingName = computed(() => props.setting?.name ?? props.name ?? '')
 const settingDesc = computed(() => props.setting?.desc ?? props.desc ?? '')
-
-const handleChange = (event: Event) => {
-  const target = event.target as HTMLInputElement;
-  
-  if (props.setting?.type === SysSettingType.BOOL) {
-    emit('update', props.setting.id, target.checked);
+const boolSetting = computed<BoolSysSetting | null>(() => {
+  if (hasControlSlot.value || props.setting?.type !== SysSettingType.BOOL) {
+    return null
   }
-};
+  return props.setting
+})
+const strSetting = computed<StrSysSetting | null>(() => {
+  if (hasControlSlot.value || props.setting?.type !== SysSettingType.STR) {
+    return null
+  }
+  return props.setting
+})
 
 const draftValue = ref(props.setting?.type === SysSettingType.STR ? props.setting.value : '')
 
@@ -85,30 +91,35 @@ watch(
   { deep: true, immediate: true }
 )
 
+const handleBoolChange = (event: Event) => {
+  if (!boolSetting.value) {
+    return
+  }
+
+  emit('update', boolSetting.value.id, (event.target as HTMLInputElement).checked)
+}
+
 const handleInput = (event: Event) => {
   draftValue.value = (event.target as HTMLInputElement).value
 }
 
 const commitDraft = () => {
-  if (props.setting?.type !== SysSettingType.STR) {
+  if (!strSetting.value || draftValue.value === strSetting.value.value) {
     return
   }
 
-  if (draftValue.value === props.setting.value) {
-    return
-  }
-
-  emit('update', props.setting.id, draftValue.value)
+  emit('update', strSetting.value.id, draftValue.value)
 }
 </script>
 
 <style scoped>
 .setting-item {
   display: flex;
+  flex-direction: var(--setting-item-direction);
   justify-content: space-between;
-  align-items: center;
-  gap: var(--settings-skeleton-gap);
-  padding-bottom: 0.5rem;
+  align-items: var(--setting-item-align-items);
+  gap: var(--setting-item-gap);
+  padding-bottom: var(--setting-item-padding-bottom);
 }
 
 .setting-copy {
@@ -126,26 +137,37 @@ const commitDraft = () => {
   display: flex;
   justify-content: flex-end;
   flex-shrink: 0;
+  width: var(--setting-control-width);
+}
+
+.setting-control > div {
+  width: var(--setting-control-width);
 }
 
 .setting-text-input {
-  width: var(--setting-text-input-width);
+  width: var(--setting-text-input-current-width);
+  padding: var(--setting-text-input-padding);
+  border: var(--divider-line-width) solid var(--color-line);
+  border-radius: var(--setting-text-input-radius);
+  background-color: var(--color-bg-field);
+  color: var(--color-text-pri);
+  font-size: var(--setting-text-input-font-size);
+  line-height: var(--setting-text-input-line-height);
+  text-align: end;
+  transition:
+    background-color var(--motion-soft-duration) ease,
+    border-color var(--motion-soft-duration) ease,
+    box-shadow var(--motion-soft-duration) ease;
 }
 
-@media (max-width: 768px) {
-  .setting-item {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: var(--hint-gap);
-  }
+.setting-text-input:focus {
+  border-color: var(--color-action);
+  box-shadow: 0 0 0 var(--control-focus-ring-size) var(--color-action-light);
+  outline: none;
+}
 
-  .setting-control,
-  .setting-control > div {
-    width: 100%;
-  }
-
-  .setting-text-input {
-    width: 100%;
-  }
+.setting-text-input:disabled {
+  cursor: not-allowed;
+  opacity: var(--setting-text-input-disabled-opacity);
 }
 </style>

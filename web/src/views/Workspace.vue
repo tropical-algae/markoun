@@ -1,37 +1,23 @@
 <template>
-  <div class="workspace-shell d-flex flex-column">
-    <div class="workspace-header f-m fw-bold px-2 fc-pri">
-      Markoun
-    </div>
+  <WorkspaceLayout>
+    <template #sidebar>
+      <Sidebar />
+    </template>
 
-    <div
-      class="workspace-main d-flex flex-row flex-grow-1 overflow-hidden"
-      :class="{ 'is-mobile-sidebar-open': isMobileSidebarOpen }"
-    >
-      <Sidebar @mobile-panel-change="isMobileSidebarOpen = $event" />
-      <div class="workspace-editor-pane">
-        <NoteEditor />
-      </div>
-    </div>
-
-    <div class="workspace-footer f-s px-2 fc-sec">
-      &copy; 2026 tropical algae. MIT License
-    </div>
-
-  </div>
-
+    <NoteEditor />
+  </WorkspaceLayout>
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue';
-import { onBeforeRouteLeave } from 'vue-router';
+import { onBeforeUnmount, onMounted } from 'vue'
+import { onBeforeRouteLeave } from 'vue-router'
 
-import Sidebar from '@/components/sidebar/Sidebar.vue';
-import NoteEditor from '@/components/editor/NoteEditor.vue';
-import { useNodeStore } from '@/stores/note';
+import WorkspaceLayout from '@/layouts/WorkspaceLayout.vue'
+import Sidebar from '@/components/sidebar/Sidebar.vue'
+import NoteEditor from '@/components/editor/NoteEditor.vue'
+import { useNodeStore } from '@/stores/note'
 
 const nodeStore = useNodeStore()
-const isMobileSidebarOpen = ref(false)
 
 onMounted(() => {
   void nodeStore.ensureWelcomeNoteLoaded().catch(() => null)
@@ -49,63 +35,4 @@ onBeforeRouteLeave(async () => {
 const handlePageHide = () => {
   nodeStore.saveCurrentFileBeforeUnload()
 }
-
 </script>
-
-<style scoped>
-
-.workspace-header {
-  min-height: var(--icon-button-size);
-  padding-top: var(--safe-area-top);
-  padding-left: calc(0.5rem + var(--safe-area-left)) !important;
-  padding-right: calc(0.5rem + var(--safe-area-right)) !important;
-  flex-shrink: 0;
-	border-bottom: 1px solid var(--color-line);
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  transition: border-color var(--motion-theme-duration) ease;
-}
-
-.workspace-footer {
-  min-height: var(--icon-button-size);
-  padding-bottom: var(--safe-area-bottom);
-  padding-left: calc(0.5rem + var(--safe-area-left)) !important;
-  padding-right: calc(0.5rem + var(--safe-area-right)) !important;
-  flex-shrink: 0;
-	border-top: 1px solid var(--color-line);
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  user-select: none;
-  transition: border-color var(--motion-theme-duration) ease;
-}
-
-.workspace-shell {
-  height: 100dvh;
-  min-height: 0;
-}
-
-.workspace-main {
-  min-height: 0;
-  position: relative;
-}
-
-.workspace-editor-pane {
-  position: relative;
-  flex: 1;
-  display: flex;
-  min-width: 0;
-  overflow: hidden;
-}
-
-@media (max-width: 768px) {
-  .workspace-main {
-    flex-direction: row !important;
-  }
-
-  .workspace-main.is-mobile-sidebar-open .workspace-editor-pane {
-    display: none;
-  }
-}
-</style>

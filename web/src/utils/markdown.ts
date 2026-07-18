@@ -1,10 +1,10 @@
-import { Marked, Renderer } from 'marked';
-import DOMPurify from 'dompurify';
-import { katexExtensions } from '@/utils/katex'; 
-import { getMediaPath, getParentPath } from '@/utils/file-system';
+import { Marked, Renderer } from 'marked'
+import DOMPurify from 'dompurify'
+import { katexExtensions } from '@/utils/katex'
+import { getMediaPath, getParentPath } from '@/utils/file-system'
 
-const marked = new Marked();
-marked.use(katexExtensions());
+const marked = new Marked()
+marked.use(katexExtensions())
 
 const escapeHtmlAttribute = (value: string): string => {
   return value
@@ -40,4 +40,4 @@ export const renderMarkdownFile = (path: string, content: string): string => {
   })
 }
 
-export default marked;
+export default marked

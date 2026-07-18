@@ -77,15 +77,17 @@ const handleBoolSettingUpdate = (id: string, value: string | boolean) => {
   gap: var(--theme-option-gap);
   flex-wrap: wrap;
   flex-shrink: 0;
+  width: var(--theme-options-width);
 }
 
 .theme-option {
-  border: 1px solid var(--color-line);
+  border: var(--divider-line-width) solid var(--color-line);
   border-radius: var(--theme-option-radius);
   background: var(--color-bg-field);
   color: var(--color-text-sec);
   padding: var(--theme-option-padding-y) var(--theme-option-padding-x);
   display: inline-flex;
+  flex: var(--theme-option-flex);
   align-items: center;
   justify-content: center;
   cursor: pointer;
@@ -102,16 +104,6 @@ const handleBoolSettingUpdate = (id: string, value: string | boolean) => {
 
 .theme-option.is-active {
   background-color: var(--color-action-light);
-}
-
-@media (max-width: 768px) {
-  .theme-options {
-    width: 100%;
-  }
-
-  .theme-option {
-    flex: 1 1 0;
-  }
 }
 
 @media (hover: hover) {

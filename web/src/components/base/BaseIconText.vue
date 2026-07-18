@@ -1,11 +1,5 @@
 <template>
-  <div 
-    class="text-hint" 
-    :style="{ 
-      color: color, 
-      fontSize: fontSize 
-    }"
-  >
+  <div class="text-hint" :style="hintStyle">
     <div class="hint-icon" v-if="icon">
       <slot name="icon">
         <component :is="icon" />
@@ -19,17 +13,22 @@
 </template>
 
 <script setup lang="ts">
-import type { Component } from 'vue';
+import { computed, type Component, type CSSProperties } from 'vue'
 
-withDefaults(defineProps<{
-  text?: string;
-  icon?: Component;
-  fontSize?: string;
-  color?: string;
+const props = withDefaults(defineProps<{
+  text?: string
+  icon?: Component
+  fontSize?: string
+  color?: string
 }>(), {
   fontSize: 'var(--hint-font-size)',
   color: 'var(--color-text-muted)'
-});
+})
+
+const hintStyle = computed<CSSProperties>(() => ({
+  color: props.color,
+  fontSize: props.fontSize,
+}))
 </script>
 
 <style scoped>
@@ -38,7 +37,7 @@ withDefaults(defineProps<{
   align-items: flex-start;
   justify-content: center;
   gap: var(--hint-gap);
-  
+
   font-size: var(--hint-font-size);
   line-height: var(--hint-font-size);
   width: 100%;

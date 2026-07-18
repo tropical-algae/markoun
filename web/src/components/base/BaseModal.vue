@@ -1,8 +1,8 @@
 <template>
   <Teleport to="body">
     <Transition name="modal" @after-enter="onAfterEnter">
-      <div 
-        v-if="modelValue" 
+      <div
+        v-if="modelValue"
         class="base-modal-backdrop"
         @click="handleBackdropClick"
       >
@@ -15,13 +15,11 @@
           tabindex="-1"
           @click.stop
         >
-          
           <header v-if="title" class="base-modal-header">
             <span :id="titleId" class="base-modal-title f-l">{{ title }}</span>
           </header>
 
           <div class="base-modal-body touch-scroll"><slot></slot></div>
-          
         </div>
       </div>
     </Transition>
@@ -32,20 +30,20 @@
 import { nextTick, onBeforeUnmount, ref, useId, watch } from 'vue'
 
 const props = withDefaults(defineProps<{
-  modelValue: boolean;
-  title?: string;
-  closeOnBackdrop?: boolean;
-  closeOnEscape?: boolean;
+  modelValue: boolean
+  title?: string
+  closeOnBackdrop?: boolean
+  closeOnEscape?: boolean
 }>(), {
   closeOnBackdrop: true,
   closeOnEscape: true,
-});
+})
 
 const emit = defineEmits<{
   (event: 'update:modelValue', value: boolean): void
   (event: 'close'): void
   (event: 'opened'): void
-}>();
+}>()
 
 const titleId = useId()
 const modalCardRef = ref<HTMLElement | null>(null)
@@ -56,17 +54,17 @@ const close = () => {
     return
   }
 
-  emit('update:modelValue', false);
-  emit('close');
-};
+  emit('update:modelValue', false)
+  emit('close')
+}
 
 const handleBackdropClick = () => {
   if (!props.closeOnBackdrop) {
     return
   }
 
-  close();
-};
+  close()
+}
 
 const focusModalCard = async () => {
   await nextTick()
@@ -105,8 +103,8 @@ watch(
 
 const onAfterEnter = () => {
   void focusModalCard()
-  emit('opened');
-};
+  emit('opened')
+}
 
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', handleKeydown)
@@ -120,8 +118,8 @@ onBeforeUnmount(() => {
   left: 0;
   width: 100vw;
   height: 100dvh;
-  z-index: 999;
-  background-color: var(--color-backdrop); 
+  z-index: var(--modal-z-index);
+  background-color: var(--color-backdrop);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -139,11 +137,11 @@ onBeforeUnmount(() => {
   box-shadow: 0 var(--modal-card-shadow-y) var(--modal-card-shadow-blur) var(--color-bg-pri-shadow);
   border-radius: var(--modal-radius);
   overflow: hidden;
-  
+
   width: fit-content;
   height: fit-content;
-  max-width: var(--modal-max-width);
-  max-height: var(--modal-max-height);
+  max-width: var(--modal-card-current-max-width);
+  max-height: var(--modal-card-current-max-height);
   display: flex;
   flex-direction: column;
 }
@@ -154,7 +152,7 @@ onBeforeUnmount(() => {
 
 .base-modal-header {
   padding: var(--modal-header-padding);
-  border-bottom: 1px solid var(--color-line);
+  border-bottom: var(--divider-line-width) solid var(--color-line);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -167,10 +165,10 @@ onBeforeUnmount(() => {
 }
 
 .base-modal-body {
-  padding: var(--modal-body-padding);
+  padding: var(--modal-body-current-padding);
   min-width: 0;
   box-sizing: border-box;
-  overflow-y: auto; 
+  overflow-y: auto;
 }
 
 .modal-enter-active,
@@ -194,7 +192,7 @@ onBeforeUnmount(() => {
 @keyframes card-enter {
   0% {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(var(--modal-motion-y));
   }
   100% {
     opacity: 1;
@@ -209,28 +207,8 @@ onBeforeUnmount(() => {
   }
   100% {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(var(--modal-motion-y));
   }
 }
 
-@media (max-width: 768px) {
-  .base-modal-card {
-    max-width: calc(
-      100vw -
-      var(--modal-mobile-viewport-gap) * 2 -
-      var(--safe-area-left) -
-      var(--safe-area-right)
-    );
-    max-height: calc(
-      100dvh -
-      var(--modal-mobile-viewport-gap) * 2 -
-      var(--safe-area-top) -
-      var(--safe-area-bottom)
-    );
-  }
-
-  .base-modal-body {
-    padding: var(--modal-mobile-body-padding);
-  }
-}
 </style>

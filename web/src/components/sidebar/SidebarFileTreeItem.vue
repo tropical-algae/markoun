@@ -1,67 +1,34 @@
 <template>
   <div>
-    <div
-      class="node-wrapper"
-      :style="nodeIndentStyle"
-    >
-      <div
-        class="node-content"
-        :class="{
-          'is-selected': isActive,
-          'is-dragover': isDirectoryDragOver,
-          'is-node-dragging': isNodeDragging,
-        }"
-        :draggable="!isRenaming"
-        @click="handleClickNode"
-        @dragstart.stop="handleDragStart"
-        @dragend="handleNodeDragEnd"
-        @dragenter.prevent.stop="handleDirectoryDragEnter"
-        @dragover.prevent.stop="handleDirectoryDragOver"
-        @dragleave.prevent.stop="handleDirectoryDragLeave"
-        @drop.prevent.stop="handleDirectoryDrop"
-      >
-        <button
-          v-if="isDir"
-          class="node-toggle-btn"
-          :class="{ 'is-opened': isOpened, 'is-disabled': !canExpand }"
-          @click.stop="handleClickDirectoryIcon"
-        >
-          <component
-            :is="currentIcon"
-            class="node-icon dir-icon"
-          ></component>
-        </button>
-        <span v-else class="node-leading-spacer"></span>
-        
-        <div class="node-text-wrapper">
-          <div class="node-text-slot">
-            <input
-              v-if="isRenaming"
-              :ref="setRenameInputRef"
-              v-model="editName"
-              class="rename-input"
-              @click.stop 
-              @blur="submitRename" 
-              @keydown.enter="($event.target as HTMLInputElement).blur()" 
-              @keydown.esc="cancelRename"
-            />
-
-            <span 
-              v-else
-              :class="{ 'file-name': !isDir, 'dir-name': isDir }"
-              @pointerdown="startLongPress"
-              @pointerup="stopLongPress"
-              @pointerleave="stopLongPress"
-              @pointercancel="stopLongPress"
-            >
-              {{ node.name }}
-            </span>
-          </div>
-        </div>
-        
-        <span v-if="node.suffix" class="meta-tag">{{ node.suffix.toUpperCase() }}</span>
-      </div>
-    </div>
+    <SidebarFileTreeNodeRow
+      v-model:edit-name="editName"
+      :depth="depth"
+      :name="node.name"
+      :suffix="node.suffix"
+      :icon="currentIcon"
+      :is-directory="isDir"
+      :selected="isActive"
+      :opened="isOpened"
+      :can-expand="canExpand"
+      :drag-over="isDirectoryDragOver"
+      :dragging="isNodeDragging"
+      :renaming="isRenaming"
+      :set-rename-input-ref="setRenameInputRef"
+      @click-node="handleClickNode"
+      @click-directory-icon="handleClickDirectoryIcon"
+      @drag-start="handleDragStart"
+      @drag-end="handleNodeDragEnd"
+      @drag-enter="handleDirectoryDragEnter"
+      @drag-over="handleDirectoryDragOver"
+      @drag-leave="handleDirectoryDragLeave"
+      @drop="handleDirectoryDrop"
+      @pointer-down="startLongPress"
+      @pointer-up="stopLongPress"
+      @pointer-leave="stopLongPress"
+      @pointer-cancel="stopLongPress"
+      @submit-rename="submitRename"
+      @cancel-rename="cancelRename"
+    />
 
     <Transition
       @enter="onEnter"
@@ -79,28 +46,14 @@
             transition-name="tree-node-swap"
           >
             <template #loading>
-              <div
-                class="node-placeholder"
-                :style="placeholderIndentStyle"
-              >
-                <div class="node-placeholder-content">
-                  <span class="node-leading-spacer"></span>
-                  <BaseSkeleton width="1rem" height="1rem" radius="4px" />
-                  <BaseSkeleton
-                    class="node-placeholder-text"
-                    height="1rem"
-                    width="58%"
-                    radius="6px"
-                  />
-                </div>
-              </div>
+              <SidebarFileTreeSkeleton :depth="depth + 1" />
             </template>
 
             <div class="node-children-list">
-              <SidebarFileTreeItem 
-                v-for="(child, _index) in normalizedChildren" 
-                :key="child.path" 
-                :node="child" 
+              <SidebarFileTreeItem
+                v-for="(child, _index) in normalizedChildren"
+                :key="child.path"
+                :node="child"
                 :depth="depth + 1"
                 @node-opened="emit('nodeOpened')"
               />
@@ -113,54 +66,40 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
-import type { FsNode } from '@/types/file-system';
-import { useNodeStore } from '@/stores/note';
-import type { AsyncStatus } from '@/types/async';
-import { useHeightMotion } from '@/composables/useHeightMotion';
-import { useFileTreeItemRename } from '@/composables/useFileTreeItemRename';
-import { useFileTreeDropTarget } from '@/composables/useFileTreeDropTarget';
-import { useFileTreeNodeDrag } from '@/composables/useFileTreeNodeDrag';
+import { computed, ref } from 'vue'
+import type { FsNode } from '@/types/file-system'
+import { useNodeStore } from '@/stores/note'
+import { useFileTreeItemExpansion } from '@/composables/useFileTreeItemExpansion'
+import { useFileTreeItemRename } from '@/composables/useFileTreeItemRename'
+import { useFileTreeDropTarget } from '@/composables/useFileTreeDropTarget'
+import { useFileTreeNodeDrag } from '@/composables/useFileTreeNodeDrag'
 
-import FolderOpenIcon from "@/assets/icons/folder-open.svg"
-import FolderIcon from "@/assets/icons/folder.svg"
-import AsyncGate from '@/components/base/AsyncGate.vue';
-import BaseSkeleton from '@/components/base/BaseSkeleton.vue';
-
+import FolderOpenIcon from '@/assets/icons/folder-open.svg'
+import FolderIcon from '@/assets/icons/folder.svg'
+import AsyncGate from '@/components/base/AsyncGate.vue'
+import SidebarFileTreeNodeRow from '@/components/sidebar/SidebarFileTreeNodeRow.vue'
+import SidebarFileTreeSkeleton from '@/components/sidebar/SidebarFileTreeSkeleton.vue'
 
 const nodeStore = useNodeStore()
-const props = defineProps<{ node: FsNode, depth: number }>();
+const props = defineProps<{ node: FsNode, depth: number }>()
 const emit = defineEmits<{
   (event: 'nodeOpened'): void
 }>()
 
-const node = computed(() => props.node);
-const nodeIndentStyle = computed(() => ({
-  '--tree-depth': props.depth,
-}));
-const placeholderIndentStyle = computed(() => ({
-  '--tree-depth': props.depth + 1,
-}));
-
-const isDir = computed(() => node.value.type === 'dir');
-const isActive = computed(() => nodeStore.currentNode?.path === node.value.path);
-const isOpened = computed(() => isDir.value && nodeStore.isDirectoryExpanded(node.value.path));
-const normalizedChildren = computed(() => nodeStore.getDirectoryChildren(node.value.path));
-const childLoadStatus = computed<AsyncStatus>(() => {
-  const state = nodeStore.getDirectoryLoadState(node.value.path)
-  if (state === 'loaded') {
-    return 'ready'
-  }
-  return state
-});
-const canExpand = computed(() => {
-  return isDir.value && (node.value.has_children !== false || normalizedChildren.value.length > 0);
-});
+const node = computed(() => props.node)
+const isDir = computed(() => node.value.type === 'dir')
+const isActive = computed(() => nodeStore.currentNode?.path === node.value.path)
+const childrenPanelRef = ref<HTMLElement | null>(null)
+const childrenContentRef = ref<HTMLElement | null>(null)
+const {
+  isOpened,
+  normalizedChildren,
+  childLoadStatus,
+  canExpand,
+  onEnter,
+  onLeave,
+} = useFileTreeItemExpansion(node, isDir, childrenPanelRef, childrenContentRef)
 const currentIcon = computed(() => isOpened.value ? FolderOpenIcon : FolderIcon)
-
-const childrenPanelRef = ref<HTMLElement | null>(null);
-const childrenContentRef = ref<HTMLElement | null>(null);
-const childrenMotion = useHeightMotion(childrenPanelRef, childrenContentRef)
 const {
   editName,
   isRenaming,
@@ -184,35 +123,37 @@ const handleDragStart = (event: DragEvent) => {
 
 const handleClickNode = async () => {
   if (isLongPressed.value) {
-    isLongPressed.value = false;
-    return;
+    isLongPressed.value = false
+    return
   }
-  if (isRenaming.value) return;
+  if (isRenaming.value) {
+    return
+  }
 
   if (isDir.value) {
-    await nodeStore.setCurrentNode(node.value);
+    await nodeStore.setCurrentNode(node.value)
     if (canExpand.value) {
-      await nodeStore.toggleDirectory(node.value);
+      await nodeStore.toggleDirectory(node.value)
     }
-    return;
+    return
   }
 
-  await nodeStore.setCurrentNode(node.value);
+  await nodeStore.setCurrentNode(node.value)
   emit('nodeOpened')
-};
+}
 
 const handleClickDirectoryIcon = async () => {
   if (isRenaming.value) {
-    return;
+    return
   }
 
   if (isActive.value) {
-    nodeStore.clearCurrentNode();
-    return;
+    nodeStore.clearCurrentNode()
+    return
   }
 
-  await nodeStore.setCurrentNode(node.value);
-};
+  await nodeStore.setCurrentNode(node.value)
+}
 
 const {
   isDirectoryDragOver,
@@ -226,194 +167,9 @@ const {
   selectDirectory: () => nodeStore.setCurrentNode(node.value),
   moveNode: nodeStore.moveNode,
 })
-
-const onEnter = (element: Element, done: () => void) => {
-  childrenMotion.enter(element, () => {
-    childrenMotion.connectResizeObserver(() => isOpened.value);
-    done();
-  });
-};
-const onLeave = childrenMotion.leave;
 </script>
 
-
 <style scoped>
-
-.node-wrapper {
-  font-size: var(--tree-font-size);
-  color: var(--color-text-pri);
-  width: 100%; 
-  box-sizing: border-box;
-  padding-left: calc(var(--tree-depth) * var(--tree-indent-step));
-}
-
-.node-content {
-  position: relative;
-  padding: var(--tree-row-padding);
-  cursor: pointer;
-  border-radius: var(--tree-row-radius);
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  gap: var(--hint-gap);
-  width: 100%;
-  min-width: 0;
-  background-color: transparent;
-  isolation: isolate;
-}
-
-.node-content::before {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  border-radius: inherit;
-  background-color: var(--color-bg-selected);
-  content: "";
-  opacity: 0;
-  pointer-events: none;
-  transition:
-    opacity var(--motion-soft-duration) ease,
-    background-color var(--motion-soft-duration) ease;
-}
-
-.node-content > .meta-tag {
-  flex-shrink: 0;
-}
-
-.node-text-wrapper {
-  flex: 1;
-  min-width: 0; 
-  display: flex; 
-  align-items: stretch;
-}
-
-.node-text-slot {
-  width: 100%;
-  min-width: 0;
-  padding: var(--tree-node-text-slot-padding-y) 0;
-  min-height: var(--tree-node-text-height);
-}
-
-.dir-icon {
-  transition: fill var(--motion-soft-duration) ease;
-}
-
-.node-toggle-btn,
-.node-leading-spacer {
-  height: var(--tree-icon-size);
-  flex-shrink: 0;
-}
-
-.node-toggle-btn {
-  border: none;
-  background: transparent;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--tree-toggle-gap);
-  cursor: pointer;
-}
-
-.node-toggle-btn.is-disabled {
-  cursor: default;
-}
-
-.node-text-wrapper .file-name, 
-.node-text-wrapper .dir-name {
-  padding: var(--tree-node-text-padding-y) var(--tree-node-text-padding-x);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  width: 100%; 
-  max-width: 100%;
-  min-height: var(--tree-node-text-height);
-  display: block;
-  box-sizing: border-box;
-  line-height: var(--tree-node-text-line-height);
-  touch-action: manipulation;
-}
-
-.node-text-wrapper .file-name { 
-  color: var(--color-text-sec);
-  transition: color var(--motion-soft-duration) ease;
-}
-
-.node-content.is-selected .node-text-wrapper span {
-  color: var(--color-text-pri);
-}
-
-.dir-icon {
-  fill: var(--color-text-pri);
-}
-
-.node-content.is-selected .dir-icon {
-  fill: var(--color-action);
-}
-
-.node-content.is-selected::before {
-  opacity: 1;
-}
-
-.node-content.is-dragover {
-  box-shadow: inset 0 0 0 1px var(--color-action);
-}
-
-.node-content.is-dragover::before {
-  background-color: var(--color-action-light);
-  opacity: 1;
-}
-
-.node-content.is-node-dragging {
-  opacity: 0.45;
-}
-
-.node-content.is-dragover .node-text-wrapper span {
-  color: var(--color-text-pri);
-}
-
-.node-content.is-dragover .dir-icon {
-  fill: var(--color-action);
-}
-
-.rename-input {
-  background-color: var(--color-bg-pri);
-  width: 100%;
-  min-height: var(--tree-node-text-height);
-  border: none;
-  outline: none;
-  padding: 0 var(--tree-node-text-padding-x);
-  margin: 0;
-  border-radius: var(--tree-row-radius);
-  color: var(--color-text-pri);
-  font-family: inherit;
-  box-sizing: border-box;
-  line-height: var(--tree-node-text-line-height);
-}
-
-.node-icon {
-  width: var(--tree-icon-size);
-  height: var(--tree-icon-size);
-  flex-shrink: 0;
-  pointer-events: none;
-}
-
-.node-placeholder {
-  padding-left: calc(var(--tree-depth) * var(--tree-indent-step));
-}
-
-.node-placeholder-content {
-  display: flex;
-  align-items: center;
-  gap: var(--hint-gap);
-  padding: var(--tree-row-padding);
-  min-height: var(--tree-node-row-height);
-  box-sizing: border-box;
-}
-
-.node-placeholder-text {
-  max-width: var(--tree-rename-max-width);
-}
-
 .node-children-content {
   width: 100%;
 }
@@ -428,17 +184,4 @@ const onLeave = childrenMotion.leave;
   opacity: 0;
 }
 
-@media (hover: hover) {
-  .node-content:hover .node-text-wrapper span {
-    color: var(--color-text-pri);
-  }
-
-  .node-content:hover .dir-icon {
-    fill: var(--color-action);
-  }
-
-  .node-content:hover::before {
-    opacity: 1;
-  }
-}
 </style>

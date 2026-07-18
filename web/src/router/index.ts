@@ -1,44 +1,43 @@
-import { createRouter, createWebHistory } from "vue-router"
+import { createRouter, createWebHistory } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { buildLoginRedirectLocation, resolvePostAuthRedirect } from '@/router/auth'
 
-const Workspace = () => import("@/views/Workspace.vue")
-const Login = () => import("@/views/Login.vue")
+const Workspace = () => import('@/views/Workspace.vue')
+const Login = () => import('@/views/Login.vue')
 
-
-const siteTitle = import.meta.env.VITE_SITE_TITLE || 'My Blog';
+const siteTitle = import.meta.env.VITE_SITE_TITLE || 'My Blog'
 const routes = [
   {
-    path: "/",
-    name: "Workspace",
+    path: '/',
+    name: 'Workspace',
     components: {
       default: Workspace,
     },
     meta: {
       requiresAuth: true,
-      "title": 'Timeline - ' + siteTitle
-    }
+      title: `Timeline - ${siteTitle}`,
+    },
   },
   {
-    path: "/login",
-    name: "Login",
+    path: '/login',
+    name: 'Login',
     components: {
       default: Login,
     },
     meta: {
       guestOnly: true,
-      "title": 'Timeline - ' + siteTitle
-    }
+      title: `Timeline - ${siteTitle}`,
+    },
   },
   {
-    path: '/:pathMatch(.*)*', 
-    redirect: '/' 
-  }
+    path: '/:pathMatch(.*)*',
+    redirect: '/',
+  },
 ]
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
+  routes,
 })
 
 router.beforeEach(async (to) => {

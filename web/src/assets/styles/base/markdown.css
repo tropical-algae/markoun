@@ -12,7 +12,9 @@
 /*********** 代码标 ***********/
 
 .note-preview code {
-  padding: 0 0.3rem;
+  font-family: unset;
+  font-size: 0.85rem;
+  padding: 0 0.4rem;
   color: var(--color-text-sec);
   white-space: pre-wrap;
   word-wrap: break-word;
@@ -115,13 +117,13 @@
 
 .note-preview table {
   width: 100%;
-  margin: 1em 0;
+  margin: var(--markdown-table-margin-y) 0;
   border-collapse: collapse;
 }
 
 .note-preview th,
 .note-preview td {
-  padding: 0.15rem 0.5rem;
+  padding: var(--markdown-table-cell-padding);
   text-align: left;
-  border: 1px solid var(--color-line);
+  border: var(--divider-line-width) solid var(--color-line);
 }

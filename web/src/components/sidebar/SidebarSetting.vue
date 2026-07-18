@@ -1,33 +1,39 @@
 <template>
-  <div class="d-flex flex-column h-100">
-    <BaseHeader>
-      <div class="f-m fw-bold text-uppercase">Settings</div>
-    </BaseHeader>
+  <SidebarPanelLayout class="settings-sidebar" title="Settings">
+    <div class="settings-body sidebar-panel-body">
+      <div class="sidebar-section-title f-m">Appearance</div>
 
-    <div class="settings-body container-fluid flex-grow-1 overflow-y-scroll p-0 my-3">
-
-      <div class="text-uppercase fw-bold mb-2 f-m fc-pri">Appearance</div>
-
-      <section class="mb-4">
-          <SidebarSettingAppearance />
+      <section class="sidebar-section">
+        <SidebarSettingAppearance />
       </section>
 
-      <div class="text-uppercase fw-bold mb-2 f-m fc-pri">General</div>
+      <div class="sidebar-section-title f-m">General</div>
 
       <AsyncGate :status="sysStore.settingsState">
         <template #loading>
-          <section class="mb-5">
+          <section class="settings-list-section">
             <div v-for="index in 4" :key="index" class="setting-skeleton-row">
               <div class="setting-skeleton-text">
-                <BaseSkeleton width="46%" height="0.85rem" class="setting-skeleton-line" />
-                <BaseSkeleton height="0.7rem" class="setting-skeleton-line" />
+                <BaseSkeleton
+                  width="var(--settings-skeleton-title-width)"
+                  height="var(--settings-skeleton-title-height)"
+                  class="setting-skeleton-line"
+                />
+                <BaseSkeleton
+                  height="var(--settings-skeleton-desc-height)"
+                  class="setting-skeleton-line"
+                />
               </div>
-              <BaseSkeleton width="120px" height="1.8rem" radius="6px" />
+              <BaseSkeleton
+                width="var(--setting-text-input-width)"
+                height="var(--settings-skeleton-control-height)"
+                radius="var(--setting-text-input-radius)"
+              />
             </div>
           </section>
         </template>
 
-        <section v-if="sysStore.currentSettings.length > 0" class="mb-5">
+        <section v-if="sysStore.currentSettings.length > 0" class="settings-list-section">
           <SidebarSettingItem
             v-for="item in sysStore.currentSettings"
             :key="item.id"
@@ -39,45 +45,55 @@
       </AsyncGate>
     </div>
 
-    <div class="settings-footer horizontal-line-top flex-shrink-0 py-3">
-      <div class="settings-footer-row d-flex justify-content-between align-items-center mb-1 f-s fc-pri">
-        <span class="text-uppercase f-s">App Version:</span>
-        <div class="settings-footer-value-slot">
-          <AsyncGate :status="sysStore.sysStatusState" class="settings-footer-gate">
-            <template #loading>
-              <BaseSkeleton width="72px" height="var(--meta-tag-height)" radius="4px" />
-            </template>
+    <template #footer>
+      <div class="settings-footer sidebar-panel-footer horizontal-line-top">
+        <div class="settings-footer-row f-s fc-pri">
+          <span class="text-uppercase f-s">App Version:</span>
+          <div class="settings-footer-value-slot">
+            <AsyncGate :status="sysStore.sysStatusState" class="settings-footer-gate">
+              <template #loading>
+                <BaseSkeleton
+                  width="var(--settings-footer-version-skeleton-width)"
+                  height="var(--meta-tag-height)"
+                  radius="var(--settings-footer-skeleton-radius)"
+                />
+              </template>
 
-            <span class="meta-tag settings-footer-tag">v{{ sysStore.version }}</span>
-          </AsyncGate>
+              <span class="meta-tag settings-footer-tag">v{{ sysStore.version }}</span>
+            </AsyncGate>
+          </div>
+        </div>
+
+        <div class="settings-footer-row f-s fc-pri">
+          <span class="text-uppercase f-s">System Status:</span>
+          <div class="settings-footer-value-slot">
+            <AsyncGate :status="sysStore.sysStatusState" class="settings-footer-gate">
+              <template #loading>
+                <BaseSkeleton
+                  width="var(--settings-footer-status-skeleton-width)"
+                  height="var(--meta-tag-height)"
+                  radius="var(--settings-footer-skeleton-radius)"
+                />
+              </template>
+
+              <span class="meta-tag settings-footer-tag">{{ sysStore.status }}</span>
+            </AsyncGate>
+          </div>
         </div>
       </div>
-
-      <div class="settings-footer-row d-flex justify-content-between align-items-center f-s fc-pri">
-        <span class="text-uppercase f-s">System Status:</span>
-        <div class="settings-footer-value-slot">
-          <AsyncGate :status="sysStore.sysStatusState" class="settings-footer-gate">
-            <template #loading>
-              <BaseSkeleton width="88px" height="var(--meta-tag-height)" radius="4px" />
-            </template>
-
-            <span class="meta-tag settings-footer-tag">{{ sysStore.status }}</span>
-          </AsyncGate>
-        </div>
-      </div>
-    </div>
-  </div>
+    </template>
+  </SidebarPanelLayout>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
-import { useSysStore } from '@/stores/system';
+import { onMounted } from 'vue'
+import { useSysStore } from '@/stores/system'
 
-import AsyncGate from '@/components/base/AsyncGate.vue';
-import BaseHeader from '@/components/base/BaseHeader.vue';
-import BaseSkeleton from '@/components/base/BaseSkeleton.vue';
-import SidebarSettingItem from '@/components/sidebar/SidebarSettingItem.vue';
-import SidebarSettingAppearance from '@/components/sidebar/SidebarSettingAppearance.vue';
+import AsyncGate from '@/components/base/AsyncGate.vue'
+import BaseSkeleton from '@/components/base/BaseSkeleton.vue'
+import SidebarSettingItem from '@/components/sidebar/SidebarSettingItem.vue'
+import SidebarSettingAppearance from '@/components/sidebar/SidebarSettingAppearance.vue'
+import SidebarPanelLayout from '@/layouts/SidebarPanelLayout.vue'
 
 const sysStore = useSysStore()
 
@@ -98,12 +114,26 @@ const handleUpdateSetting = async (id: string, newValue: string | boolean) => {
   min-height: 0;
 }
 
+.settings-list-section {
+  margin-bottom: calc(
+    var(--sidebar-section-margin-bottom) +
+    var(--sidebar-settings-list-extra-gap)
+  );
+}
+
 .settings-footer {
   margin-top: auto;
 }
 
 .settings-footer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   min-height: var(--meta-tag-height);
+}
+
+.settings-footer-row + .settings-footer-row {
+  margin-top: var(--sidebar-footer-row-gap);
 }
 
 .settings-footer-value-slot {
@@ -139,7 +169,7 @@ const handleUpdateSetting = async (id: string, newValue: string | boolean) => {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--settings-skeleton-text-gap);
 }
 
 .setting-skeleton-line {

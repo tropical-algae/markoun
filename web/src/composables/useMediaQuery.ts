@@ -1,39 +1,66 @@
-import { onBeforeUnmount, ref } from 'vue'
+import { onScopeDispose, readonly, ref, type Ref } from 'vue'
+
+interface MediaQueryEntry {
+  matches: Ref<boolean>
+  mediaQuery: MediaQueryList
+  consumers: number
+  sync: () => void
+}
+
+const mediaQueries = new Map<string, MediaQueryEntry>()
+
+const addChangeListener = (entry: MediaQueryEntry) => {
+  if (typeof entry.mediaQuery.addEventListener === 'function') {
+    entry.mediaQuery.addEventListener('change', entry.sync)
+    return
+  }
+
+  entry.mediaQuery.addListener(entry.sync)
+}
+
+const removeChangeListener = (entry: MediaQueryEntry) => {
+  if (typeof entry.mediaQuery.removeEventListener === 'function') {
+    entry.mediaQuery.removeEventListener('change', entry.sync)
+    return
+  }
+
+  entry.mediaQuery.removeListener(entry.sync)
+}
+
+const createMediaQueryEntry = (query: string): MediaQueryEntry => {
+  const mediaQuery = window.matchMedia(query)
+  const matches = ref(mediaQuery.matches)
+  const entry: MediaQueryEntry = {
+    matches,
+    mediaQuery,
+    consumers: 0,
+    sync: () => {
+      matches.value = mediaQuery.matches
+    },
+  }
+
+  addChangeListener(entry)
+  return entry
+}
 
 export const useMediaQuery = (query: string) => {
-  const matches = ref(false)
-
   if (typeof window === 'undefined') {
-    return matches
+    return readonly(ref(false))
   }
 
-  const mediaQuery = window.matchMedia(query)
-  const syncMatches = () => {
-    matches.value = mediaQuery.matches
-  }
-  const addListener = () => {
-    if (typeof mediaQuery.addEventListener === 'function') {
-      mediaQuery.addEventListener('change', syncMatches)
+  const entry = mediaQueries.get(query) ?? createMediaQueryEntry(query)
+  mediaQueries.set(query, entry)
+  entry.consumers += 1
+
+  onScopeDispose(() => {
+    entry.consumers -= 1
+    if (entry.consumers > 0) {
       return
     }
 
-    mediaQuery.addListener(syncMatches)
-  }
-  const removeListener = () => {
-    if (typeof mediaQuery.removeEventListener === 'function') {
-      mediaQuery.removeEventListener('change', syncMatches)
-      return
-    }
-
-    mediaQuery.removeListener(syncMatches)
-  }
-
-  syncMatches()
-  addListener()
-
-  onBeforeUnmount(() => {
-    removeListener()
+    removeChangeListener(entry)
+    mediaQueries.delete(query)
   })
 
-  return matches
+  return readonly(entry.matches)
 }

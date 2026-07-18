@@ -38,13 +38,14 @@ import {
   ref,
   useId,
   watch,
-  type CSSProperties,
 } from 'vue'
 import { useAppearanceStore } from '@/stores/appearance'
 import { useMediaQuery } from '@/composables/useMediaQuery'
-import { readCssLengthPx, readCssTimeMs } from '@/utils/css'
-
-type TooltipPlacement = 'top' | 'right' | 'bottom' | 'left'
+import { readCssTimeMs } from '@/utils/css'
+import {
+  useTooltipPosition,
+  type TooltipPlacement,
+} from '@/composables/useTooltipPosition'
 
 const props = withDefaults(defineProps<{
   text: string
@@ -65,16 +66,15 @@ const bubbleRef = ref<HTMLElement | null>(null)
 const supportsHoverPointer = useMediaQuery('(hover: hover) and (pointer: fine)')
 const isRendered = ref(false)
 const isActive = ref(false)
-type TooltipStyle = CSSProperties & { '--tooltip-arrow-offset'?: string }
-
-const tooltipStyle = ref<TooltipStyle>({
-  left: '0px',
-  top: '0px',
-})
+const {
+  tooltipStyle,
+  updateTooltipPosition,
+  addPositionListeners,
+  removePositionListeners,
+} = useTooltipPosition(anchorRef, bubbleRef, () => props.placement)
 
 let closeTimer: number | null = null
 let animationFrame: number | null = null
-let hasPositionListeners = false
 
 const clearCloseTimer = () => {
   if (closeTimer !== null) {
@@ -88,105 +88,6 @@ const clearAnimationFrame = () => {
     window.cancelAnimationFrame(animationFrame)
     animationFrame = null
   }
-}
-
-const clamp = (value: number, min: number, max: number) => {
-  if (max < min) {
-    return min
-  }
-
-  return Math.min(Math.max(value, min), max)
-}
-
-const getViewportBounds = () => {
-  const viewport = window.visualViewport
-  const left = viewport?.offsetLeft ?? 0
-  const top = viewport?.offsetTop ?? 0
-
-  return {
-    left,
-    top,
-    right: left + (viewport?.width ?? window.innerWidth),
-    bottom: top + (viewport?.height ?? window.innerHeight),
-  }
-}
-
-const updateTooltipPosition = () => {
-  const anchor = anchorRef.value
-  const bubble = bubbleRef.value
-  if (!anchor || !bubble) {
-    return
-  }
-
-  const rect = anchor.getBoundingClientRect()
-  const bubbleWidth = bubble.offsetWidth
-  const bubbleHeight = bubble.offsetHeight
-  const gap = readCssLengthPx('--tooltip-gap', 8)
-  const padding = readCssLengthPx('--tooltip-viewport-padding', 8)
-  const arrowSize = readCssLengthPx('--tooltip-arrow-size', 7)
-  const viewport = getViewportBounds()
-  const centerX = rect.left + rect.width / 2
-  const centerY = rect.top + rect.height / 2
-  const minLeft = viewport.left + padding
-  const maxLeft = viewport.right - padding - bubbleWidth
-  const minTop = viewport.top + padding
-  const maxTop = viewport.bottom - padding - bubbleHeight
-  let left = centerX - bubbleWidth / 2
-  let top = rect.top - gap - bubbleHeight
-  let arrowOffset = centerX - left
-
-  if (props.placement === 'right') {
-    left = rect.right + gap
-    top = centerY - bubbleHeight / 2
-    left = clamp(left, minLeft, maxLeft)
-    top = clamp(top, minTop, maxTop)
-    arrowOffset = centerY - top
-  } else if (props.placement === 'bottom') {
-    left = centerX - bubbleWidth / 2
-    top = rect.bottom + gap
-    left = clamp(left, minLeft, maxLeft)
-    top = clamp(top, minTop, maxTop)
-    arrowOffset = centerX - left
-  } else if (props.placement === 'left') {
-    left = rect.left - gap - bubbleWidth
-    top = centerY - bubbleHeight / 2
-    left = clamp(left, minLeft, maxLeft)
-    top = clamp(top, minTop, maxTop)
-    arrowOffset = centerY - top
-  } else {
-    left = clamp(left, minLeft, maxLeft)
-    top = clamp(top, minTop, maxTop)
-    arrowOffset = centerX - left
-  }
-
-  const maxArrowOffset = props.placement === 'top' || props.placement === 'bottom'
-    ? bubbleWidth - arrowSize / 2
-    : bubbleHeight - arrowSize / 2
-  tooltipStyle.value = {
-    left: `${left}px`,
-    top: `${top}px`,
-    '--tooltip-arrow-offset': `${clamp(arrowOffset, arrowSize / 2, maxArrowOffset)}px`,
-  }
-}
-
-const addPositionListeners = () => {
-  if (hasPositionListeners) {
-    return
-  }
-
-  window.addEventListener('resize', updateTooltipPosition)
-  window.addEventListener('scroll', updateTooltipPosition, true)
-  hasPositionListeners = true
-}
-
-const removePositionListeners = () => {
-  if (!hasPositionListeners) {
-    return
-  }
-
-  window.removeEventListener('resize', updateTooltipPosition)
-  window.removeEventListener('scroll', updateTooltipPosition, true)
-  hasPositionListeners = false
 }
 
 const openTooltip = async () => {

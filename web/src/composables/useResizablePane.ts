@@ -1,6 +1,6 @@
 import { computed, onBeforeUnmount, ref, type Ref } from 'vue'
 
-type ResizeDirection = 'left' | 'right'
+export type ResizeDirection = 'left' | 'right'
 
 export interface UseResizablePaneOptions {
   initialWidth: number
@@ -10,11 +10,15 @@ export interface UseResizablePaneOptions {
 }
 
 const clamp = (value: number, min: number, max: number) => {
+  if (max < min) {
+    return min
+  }
+
   return Math.min(Math.max(value, min), max)
 }
 
 export const useResizablePane = (options: UseResizablePaneOptions) => {
-  const width = ref(options.initialWidth)
+  const width = ref(clamp(options.initialWidth, options.minWidth, options.maxWidth))
   const isResizing = ref(false)
 
   let removeListeners: (() => void) | null = null

@@ -1,35 +1,35 @@
 <template>
-  <BaseModal 
-    v-model="isVisible" 
+  <BaseModal
+    v-model="isVisible"
     title="Upload File"
   >
-    <div class="upload-modal">
-      
-      <input 
-        type="file" 
-        ref="fileInputRef" 
+    <ModalContentLayout size="md">
+
+      <input
+        type="file"
+        ref="fileInputRef"
         class="upload-file-input"
         @change="handleFileSelect"
       />
 
-      <div 
+      <div
         v-if="!isUploading"
-        class="upload-drop-zone mb-3"
+        class="upload-drop-zone"
         :class="{ 'is-dragover': isDragOver }"
         @click="triggerFileSelect"
         @drop.prevent="handleDrop"
         @dragover.prevent="isDragOver = true"
         @dragleave.prevent="isDragOver = false"
       >
-        <component :is="UploadIcon" class="upload-icon mb-3"></component>
-        <p class="upload-title mb-1">Click or Drag file to this area</p>
-        <p class="upload-subtitle m-0">Upload to: {{ nodeStore.currentPathLabel }}</p>
+        <component :is="UploadIcon" class="upload-icon"></component>
+        <p class="upload-title">Click or Drag file to this area</p>
+        <p class="upload-subtitle">Upload to: {{ nodeStore.currentPathLabel }}</p>
       </div>
 
-      <div v-else class="upload-state mb-3">
-        <div class="d-flex align-items-center gap-3 mb-1">
-          <div class="flex-grow-1 overflow-hidden">
-            <div class="d-flex justify-content-between mb-1">
+      <div v-else class="upload-state">
+        <div class="upload-progress-row">
+          <div class="upload-progress-body">
+            <div class="upload-progress-labels">
               <span class="upload-file-text">{{ currentFileName }}</span>
               <span class="progress-text">{{ uploadPercent }}%</span>
             </div>
@@ -38,35 +38,36 @@
             </div>
           </div>
         </div>
-        <p class="text-center f-s fc-sec">
+        <p class="upload-status-text f-s fc-sec">
           <span>Uploading...</span>
         </p>
       </div>
 
-      <div class="d-flex justify-content-end">
+      <template #actions>
         <GhostButton
-          class="f-s py-0"
+          class="modal-button f-s"
           @click="isVisible = false"
           theme="secondary"
           :disabled="nodeStore.isUploadPending()"
         >
           Cancel
         </GhostButton>
-      </div>
+      </template>
 
-    </div>
+    </ModalContentLayout>
   </BaseModal>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useNodeStore } from '@/stores/note';
-import { useFileUploadTask } from '@/composables/useFileUploadTask';
+import { useNodeStore } from '@/stores/note'
+import { useFileUploadTask } from '@/composables/useFileUploadTask'
 
-import UploadIcon from "@/assets/icons/upload.svg"
+import UploadIcon from '@/assets/icons/upload.svg'
 
 import BaseModal from '@/components/base/BaseModal.vue'
-import GhostButton from '@/components/base/GhostButton.vue';
+import GhostButton from '@/components/base/GhostButton.vue'
+import ModalContentLayout from '@/layouts/ModalContentLayout.vue'
 
 const props = defineProps<{
   modelValue: boolean
@@ -91,9 +92,12 @@ const isDragOver = ref(false)
 const isVisible = computed({
   get: () => props.modelValue,
   set: (value: boolean) => {
-    if (isUploading.value && !value) return
+    if (isUploading.value && !value) {
+      return
+    }
+
     emit('update:modelValue', value)
-  }
+  },
 })
 
 const triggerFileSelect = () => {
@@ -125,17 +129,14 @@ const handleUpload = async (file: File) => {
 
 
 <style scoped>
-
-.upload-modal {
-  width: min(var(--modal-width-md), 100%);
-}
-
 .upload-file-input {
   display: none;
 }
 
 .upload-drop-zone {
-  border: 1.5px dashed var(--color-line);
+  margin-bottom: var(--upload-section-gap);
+  padding-inline: var(--upload-content-padding-x);
+  border: var(--upload-dropzone-border-width) dashed var(--color-line);
   border-radius: var(--radius-2xl);
   background-color: var(--color-bg-sec);
   height: var(--upload-dropzone-height);
@@ -143,6 +144,7 @@ const handleUpload = async (file: File) => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  text-align: center;
   cursor: pointer;
   transition:
     border-color var(--motion-medium-duration) ease,
@@ -165,38 +167,68 @@ const handleUpload = async (file: File) => {
   width: var(--upload-icon-size);
   height: var(--upload-icon-size);
   fill: var(--color-text-sec);
+  margin-bottom: var(--upload-icon-margin-bottom);
 }
 
 .upload-drop-zone .upload-title {
+  max-width: 100%;
   color: var(--color-action);
   font-weight: bold;
-  font-size: 1.1rem;
+  font-size: var(--upload-title-font-size);
+  margin-bottom: var(--upload-title-margin-bottom);
 }
 
 .upload-drop-zone .upload-subtitle {
+  max-width: 100%;
   color: var(--color-text-sec);
-  font-size: 0.9rem;
+  font-size: var(--upload-subtitle-font-size);
+  margin: 0;
+  overflow-wrap: anywhere;
 }
 
 .upload-state {
+  margin-bottom: var(--upload-section-gap);
   height: var(--upload-dropzone-height);
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 0 var(--upload-state-padding-x);
+  padding: 0 var(--upload-content-padding-x);
+}
+
+.upload-progress-row {
+  display: flex;
+  align-items: center;
+  gap: var(--upload-state-row-gap);
+  margin-bottom: var(--upload-state-row-margin-bottom);
+}
+
+.upload-progress-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.upload-progress-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--upload-state-row-margin-bottom);
 }
 
 .upload-file-text {
   color: var(--color-text-sec);
-  font-size: 0.9rem;
+  font-size: var(--upload-progress-font-size);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.upload-status-text {
+  text-align: center;
+}
+
 .progress-text {
   color: var(--color-text-sec);
-  font-size: 0.9rem;
+  font-size: var(--upload-progress-font-size);
 }
 
 .progress-track {

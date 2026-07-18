@@ -3,18 +3,18 @@ import axios, {
   type AxiosRequestConfig,
   type AxiosResponse,
   type InternalAxiosRequestConfig,
-} from "axios"
+} from 'axios'
 import type { ApiResponse } from '@/types/api'
 
 export interface RequestConfig<Data = unknown> extends AxiosRequestConfig<Data> {
-  suppressErrorToast?: boolean;
+  suppressErrorToast?: boolean
 }
 
 export interface RequestError {
-  status: number | string;
-  message: string;
-  raw: unknown;
-  response?: ApiResponse;
+  status: number | string
+  message: string
+  raw: unknown
+  response?: ApiResponse
 }
 
 type RequestErrorHandler = (error: RequestError) => void
@@ -28,7 +28,7 @@ export const setRequestErrorHandler = (handler: RequestErrorHandler | null) => {
 const service = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: 10000,
-  withCredentials: true
+  withCredentials: true,
 })
 
 const isApiResponse = (value: unknown): value is ApiResponse => {

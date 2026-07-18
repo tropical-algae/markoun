@@ -25,7 +25,7 @@
               class="image-preview-skeleton"
               :width="`${displaySize.width}px`"
               :height="`${displaySize.height}px`"
-              radius="10px"
+              radius="var(--image-preview-radius)"
             />
           </template>
 
@@ -39,23 +39,25 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue'
 
-import BaseModal from '@/components/base/BaseModal.vue';
-import BaseSkeleton from '@/components/base/BaseSkeleton.vue';
-import AsyncGate from '@/components/base/AsyncGate.vue';
+import BaseModal from '@/components/base/BaseModal.vue'
+import BaseSkeleton from '@/components/base/BaseSkeleton.vue'
+import AsyncGate from '@/components/base/AsyncGate.vue'
 
-import { useNodeStore } from '@/stores/note';
-import { useViewportSize } from '@/composables/useViewportSize';
-import type { AsyncStatus } from '@/types/async';
-import { readCssNumber } from '@/utils/css';
+import { useNodeStore } from '@/stores/note'
+import { useImagePreviewSize } from '@/composables/useImagePreviewSize'
+import type { AsyncStatus } from '@/types/async'
 
 const nodeStore = useNodeStore()
-const viewportSize = useViewportSize()
-
-const naturalWidth = ref(0)
-const naturalHeight = ref(0)
 const previewLoadState = ref<AsyncStatus>('idle')
+const {
+  displaySize,
+  stageStyle,
+  imageStyle,
+  resetNaturalSize,
+  applyNaturalSize,
+} = useImagePreviewSize()
 
 const isVisible = computed({
   get: () => Boolean(nodeStore.currentPreviewImageNode),
@@ -69,85 +71,14 @@ const isVisible = computed({
 const imageUrl = computed(() => nodeStore.currentPreviewImageUrl)
 const previewTitle = computed(() => nodeStore.currentPreviewImageNode?.name || 'Image Preview')
 
-const readPreviewSizeConfig = () => ({
-  defaultWidth: readCssNumber('--image-preview-default-width', 640),
-  defaultHeight: readCssNumber('--image-preview-default-height', 420),
-  minWidth: readCssNumber('--image-preview-min-width', 280),
-  maxWidth: readCssNumber('--image-preview-max-width', 720),
-  minStageWidth: readCssNumber('--image-preview-min-stage-width', 220),
-  minStageHeight: readCssNumber('--image-preview-min-stage-height', 180),
-  viewportWidthRatio: readCssNumber('--image-preview-viewport-width-ratio', 0.82),
-  viewportHeightRatio: readCssNumber('--image-preview-viewport-height-ratio', 0.72),
-})
-
 const resetPreviewState = () => {
-  naturalWidth.value = 0
-  naturalHeight.value = 0
+  resetNaturalSize()
   previewLoadState.value = imageUrl.value ? 'loading' : 'idle'
 }
 
-const fitImageSize = (width: number, height: number) => {
-  const config = readPreviewSizeConfig()
-  const maxWidth = Math.max(
-    config.minStageWidth,
-    Math.min(config.maxWidth, Math.floor(viewportSize.width.value * config.viewportWidthRatio)),
-  )
-  const maxHeight = Math.max(
-    config.minStageHeight,
-    Math.floor(viewportSize.height.value * config.viewportHeightRatio),
-  )
-  const minWidth = Math.min(config.minWidth, maxWidth)
-
-  let nextWidth = width || Math.min(config.defaultWidth, maxWidth)
-  let nextHeight = height || Math.min(config.defaultHeight, maxHeight)
-
-  if (nextWidth > maxWidth) {
-    const scale = maxWidth / nextWidth
-    nextWidth *= scale
-    nextHeight *= scale
-  }
-
-  if (nextHeight > maxHeight) {
-    const scale = maxHeight / nextHeight
-    nextWidth *= scale
-    nextHeight *= scale
-  }
-
-  if (nextWidth < minWidth) {
-    const scale = minWidth / nextWidth
-    const expandedWidth = nextWidth * scale
-    const expandedHeight = nextHeight * scale
-    if (expandedWidth <= maxWidth && expandedHeight <= maxHeight) {
-      nextWidth = expandedWidth
-      nextHeight = expandedHeight
-    }
-  }
-
-  return {
-    width: Math.round(nextWidth),
-    height: Math.round(nextHeight),
-  }
-}
-
-const displaySize = computed(() => {
-  return fitImageSize(naturalWidth.value, naturalHeight.value)
-})
-
-const stageStyle = computed(() => ({
-  width: `${displaySize.value.width}px`,
-  height: `${displaySize.value.height}px`,
-}))
-
-const imageStyle = computed(() => ({
-  width: `${displaySize.value.width}px`,
-  height: `${displaySize.value.height}px`,
-}))
-
 const handleImageLoad = (event: Event) => {
   const image = event.target as HTMLImageElement
-  const config = readPreviewSizeConfig()
-  naturalWidth.value = image.naturalWidth || config.defaultWidth
-  naturalHeight.value = image.naturalHeight || config.defaultHeight
+  applyNaturalSize(image)
   previewLoadState.value = 'ready'
 }
 

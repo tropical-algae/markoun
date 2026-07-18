@@ -1,0 +1,1 @@
+export const DEFAULT_SEARCH_RESULT_LIMIT = 50

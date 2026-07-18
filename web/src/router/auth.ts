@@ -1,17 +1,17 @@
-import type { RouteLocationNormalized, RouteLocationRaw } from 'vue-router';
+import type { RouteLocationNormalized, RouteLocationRaw } from 'vue-router'
 
-const DEFAULT_AUTH_REDIRECT: RouteLocationRaw = { name: 'Workspace' };
+const DEFAULT_AUTH_REDIRECT: RouteLocationRaw = { name: 'Workspace' }
 
 export const buildLoginRedirectLocation = (
   targetRoute: RouteLocationNormalized,
 ): RouteLocationRaw => {
-  const redirect = targetRoute.fullPath !== '/' ? targetRoute.fullPath : undefined;
+  const redirect = targetRoute.fullPath !== '/' ? targetRoute.fullPath : undefined
   return {
     name: 'Login',
     query: redirect ? { redirect } : undefined,
     replace: true,
-  };
-};
+  }
+}
 
 export const resolvePostAuthRedirect = (rawRedirect: unknown): RouteLocationRaw => {
   if (
@@ -21,11 +21,11 @@ export const resolvePostAuthRedirect = (rawRedirect: unknown): RouteLocationRaw 
     || rawRedirect.startsWith('//')
     || rawRedirect.startsWith('/login')
   ) {
-    return DEFAULT_AUTH_REDIRECT;
+    return DEFAULT_AUTH_REDIRECT
   }
 
   return {
     path: rawRedirect,
     replace: true,
-  };
-};
+  }
+}

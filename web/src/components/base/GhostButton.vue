@@ -19,16 +19,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { useDelayedVisibility } from '@/composables/useDelayedVisibility';
-import { readCssTimeMs } from '@/utils/css';
+import { computed } from 'vue'
+import { useDelayedVisibility } from '@/composables/useDelayedVisibility'
+import { readCssTimeMs } from '@/utils/css'
 
 interface Props {
-  theme?: 'primary' | 'danger' | 'secondary' | 'submit';
-  disabled?: boolean;
-  loading?: boolean;
-  loadingDelayMs?: number;
-  loadingMinDurationMs?: number;
+  theme?: 'primary' | 'danger' | 'secondary' | 'submit'
+  disabled?: boolean
+  loading?: boolean
+  loadingDelayMs?: number
+  loadingMinDurationMs?: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -37,7 +37,7 @@ const props = withDefaults(defineProps<Props>(), {
   loading: false,
   loadingDelayMs: undefined,
   loadingMinDurationMs: undefined,
-});
+})
 
 const visibleLoading = useDelayedVisibility(
   () => props.loading,
@@ -54,9 +54,9 @@ const visibleLoading = useDelayedVisibility(
 
 <style scoped>
 .ghost-btn {
-  --btn-main-color: var(--color-text-pri); 
+  --btn-main-color: var(--color-text-pri);
   --btn-hover-text-color: var(--color-bg-pri);
-  
+
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -65,14 +65,14 @@ const visibleLoading = useDelayedVisibility(
   opacity: 1;
 
   background-color: transparent;
-  box-shadow: inset 0 0 0 1px var(--btn-main-color);
+  box-shadow: inset 0 0 0 var(--ghost-button-outline-width) var(--btn-main-color);
 
   color: var(--btn-main-color);
   border-radius: var(--button-radius);
   overflow: hidden;
-  
+
   cursor: pointer;
-  transition: 
+  transition:
     color var(--motion-soft-duration) ease,
     border-color var(--motion-soft-duration) ease,
     opacity var(--motion-soft-duration) ease;
@@ -81,7 +81,7 @@ const visibleLoading = useDelayedVisibility(
 
 .ghost-btn::before {
   position: absolute;
-  inset: -20px;
+  inset: var(--ghost-button-bg-bleed);
   z-index: 0;
   background-color: var(--btn-main-color);
 
@@ -153,7 +153,7 @@ const visibleLoading = useDelayedVisibility(
 }
 
 .ghost-btn:disabled {
-  opacity: 0.7;
+  opacity: var(--ghost-button-disabled-opacity);
   cursor: not-allowed;
   color: var(--btn-main-color);
 }

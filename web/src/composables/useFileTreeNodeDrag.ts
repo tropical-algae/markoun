@@ -1,4 +1,4 @@
-import { ref, type Ref } from 'vue'
+import { onBeforeUnmount, ref, type Ref } from 'vue'
 import type { FsNode } from '@/types/file-system'
 
 export const FILE_TREE_NODE_MIME = 'application/x-markoun-fs-node'
@@ -47,6 +47,12 @@ export const useFileTreeNodeDrag = (
     isNodeDragging.value = false
     activeDraggedTreeNode = null
   }
+
+  onBeforeUnmount(() => {
+    if (activeDraggedTreeNode?.path === node.value.path) {
+      activeDraggedTreeNode = null
+    }
+  })
 
   return {
     isNodeDragging,

@@ -1,13 +1,14 @@
 <template>
-  <div 
-    class="underlined-input-wrapper" 
-    :class="$attrs.class, { 'is-disabled': disabled, 'is-focused': modelValue || isFocused}"
+  <div
+    class="underlined-input-wrapper"
+    :class="[$attrs.class, { 'is-disabled': disabled, 'is-focused': modelValue || isFocused }]"
   >
-    <label class="underlined-input-label">{{ label }}</label>
-    
+    <label :for="inputId" class="underlined-input-label">{{ label }}</label>
+
     <div class="underlined-input-container">
       <input
         v-bind="inputAttrs"
+        :id="inputId"
         ref="inputRef"
         :type="type"
         :value="modelValue"
@@ -25,52 +26,53 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, useAttrs } from 'vue';
+import { computed, ref, useAttrs, useId } from 'vue'
 
 defineOptions({
   inheritAttrs: false
-});
+})
 
-const attrs = useAttrs();
+const attrs = useAttrs()
+const generatedId = useId()
+const inputId = computed(() => String(attrs.id ?? generatedId))
 const inputAttrs = computed(() => {
-  const rest = { ...attrs };
-  delete rest.class;
-  delete rest.style;
-  return rest;
-});
-const isFocused = ref(false);
+  const rest = { ...attrs }
+  delete rest.class
+  delete rest.style
+  return rest
+})
+const isFocused = ref(false)
 
 interface Props {
-  modelValue: string | number;
-  label?: string;
-  placeholder?: string;
-  type?: string;
-  disabled?: boolean;
+  modelValue: string
+  label?: string
+  placeholder?: string
+  type?: string
+  disabled?: boolean
 }
-const inputRef = ref<HTMLInputElement | null>(null);
+const inputRef = ref<HTMLInputElement | null>(null)
 
 defineExpose({
   focus: () => inputRef.value?.focus(),
   select: () => inputRef.value?.select()
-});
+})
 
 withDefaults(defineProps<Props>(), {
   modelValue: '',
   label: 'Label',
   type: 'text',
   disabled: false
-});
+})
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: string | number): void
-}>();
+  (e: 'update:modelValue', value: string): void
+}>()
 
 const handleInput = (event: Event) => {
-  const target = event.target as HTMLInputElement;
-  emit('update:modelValue', target.value);
-};
+  const target = event.target as HTMLInputElement
+  emit('update:modelValue', target.value)
+}
 </script>
-
 
 <style scoped>
 .underlined-input-wrapper {
@@ -96,7 +98,7 @@ const handleInput = (event: Event) => {
 .underlined-input-container {
   position: relative;
   width: 100%;
-  padding-bottom: 4px; 
+  padding-bottom: var(--underlined-input-padding-bottom);
 }
 
 .underlined-input-content {
@@ -104,15 +106,15 @@ const handleInput = (event: Event) => {
   background: transparent;
   border: none;
   outline: none;
-  
+
   color: var(--color-text-pri);
   font-weight: 400;
-  letter-spacing: 0.5px;
-  
-  &::placeholder {
-    color: var(--color-text-sec);
-    opacity: 0.5;
-  }
+  letter-spacing: var(--underlined-input-letter-spacing);
+}
+
+.underlined-input-content::placeholder {
+  color: var(--color-text-sec);
+  opacity: var(--underlined-input-placeholder-opacity);
 }
 
 .underlined-input-line-base {
@@ -131,11 +133,11 @@ const handleInput = (event: Event) => {
   width: 100%;
   height: var(--underlined-input-line-height);
   background-color: var(--color-text-pri);
-  
+
   transform: scaleX(0);
   transform-origin: left;
   transition: transform var(--motion-medium-duration) ease;
-  
+
   z-index: 1;
 }
 
@@ -150,7 +152,7 @@ const handleInput = (event: Event) => {
 }
 
 .underlined-input-wrapper.is-disabled {
-  opacity: 0.5;
+  opacity: var(--underlined-input-disabled-opacity);
   cursor: not-allowed;
 }
 
@@ -160,12 +162,11 @@ const handleInput = (event: Event) => {
 }
 
 .underlined-input-wrapper.is-disabled .underlined-input-line-base {
-  border-bottom: 1px dashed var(--color-line);
+  border-bottom: var(--underlined-input-line-height) dashed var(--color-line);
   background-color: transparent;
 }
 
 .underlined-input-wrapper.is-disabled .underlined-input-line-active {
   display: none;
 }
-
 </style>

@@ -9,9 +9,9 @@ import {
   registerApi,
   updatePasswordApi,
 } from '@/api/user'
-import { useToastStore } from "@/stores/toast";
-import type { AsyncStatus } from '@/types/async';
-import type { CurrentUserProfile, LoginForm, RegisterForm } from '@/types/auth';
+import { useToastStore } from '@/stores/toast'
+import type { AsyncStatus } from '@/types/async'
+import type { CurrentUserProfile, LoginForm, RegisterForm } from '@/types/auth'
 
 const NAME_MIN_LEN = 3
 const PASSWD_MIN_LEN = 6
@@ -19,13 +19,13 @@ type AuthState = 'unknown' | 'authenticated' | 'anonymous'
 
 export const useUserStore = defineStore('user', () => {
   const authState = ref<AuthState>('unknown')
-  const authBootstrapStatus = ref<AsyncStatus>('idle')
+  const authCheckStatus = ref<AsyncStatus>('idle')
   const currentUserProfile = ref<CurrentUserProfile | null>(null)
   const currentUserProfileState = ref<AsyncStatus>('idle')
   const toastStore = useToastStore()
   const actionLedger = useActionLedger()
 
-  let bootstrapPromise: Promise<AuthState> | null = null
+  let authCheckPromise: Promise<AuthState> | null = null
   let currentUserProfilePromise: Promise<CurrentUserProfile | null> | null = null
 
   const isAuthenticated = computed(() => authState.value === 'authenticated')
@@ -34,12 +34,12 @@ export const useUserStore = defineStore('user', () => {
 
   const markAuthenticated = () => {
     authState.value = 'authenticated'
-    authBootstrapStatus.value = 'ready'
+    authCheckStatus.value = 'ready'
   }
 
   const markAnonymous = () => {
     authState.value = 'anonymous'
-    authBootstrapStatus.value = 'ready'
+    authCheckStatus.value = 'ready'
     currentUserProfile.value = null
     currentUserProfileState.value = 'idle'
   }
@@ -73,7 +73,7 @@ export const useUserStore = defineStore('user', () => {
         return false
       }
       await actionLedger.runAction('register', async () => {
-        await registerApi(registerForm);
+        await registerApi(registerForm)
       })
       toastStore.pushNotice('info', `Account for “${registerForm.username}” has been created.`)
       return true
@@ -87,31 +87,31 @@ export const useUserStore = defineStore('user', () => {
       return authState.value
     }
 
-    if (bootstrapPromise) {
-      return bootstrapPromise
+    if (authCheckPromise) {
+      return authCheckPromise
     }
 
-    bootstrapPromise = (async () => {
-      authBootstrapStatus.value = 'loading'
+    authCheckPromise = (async () => {
+      authCheckStatus.value = 'loading'
       try {
         await checkTokenApi()
         markAuthenticated()
       } catch (_) {
         markAnonymous()
       } finally {
-        bootstrapPromise = null
+        authCheckPromise = null
       }
 
       return authState.value
     })()
 
-    return bootstrapPromise
+    return authCheckPromise
   }
 
   const logout = async (): Promise<boolean> => {
     try {
       await actionLedger.runAction('logout', async () => {
-        await logoutApi();
+        await logoutApi()
       })
       markAnonymous()
       return true
@@ -160,7 +160,7 @@ export const useUserStore = defineStore('user', () => {
   const updatePassword = async (newPasswd: string): Promise<boolean> => {
     try {
       await actionLedger.runAction('update-password', async () => {
-        await updatePasswordApi(newPasswd);
+        await updatePasswordApi(newPasswd)
       })
       toastStore.pushNotice('info', `Password updated successfully.`)
       return true
@@ -171,13 +171,13 @@ export const useUserStore = defineStore('user', () => {
 
   return {
     authState,
-    authBootstrapStatus,
+    authCheckStatus,
     currentUserProfile,
     currentUserProfileState,
     isAuthenticated,
     isAnonymous,
     isAuthKnown,
-    isBootstrappingAuth: () => authBootstrapStatus.value === 'loading',
+    isCheckingAuth: () => authCheckStatus.value === 'loading',
     isLoginPending: () => actionLedger.isActionPending('login'),
     isRegisterPending: () => actionLedger.isActionPending('register'),
     isLogoutPending: () => actionLedger.isActionPending('logout'),

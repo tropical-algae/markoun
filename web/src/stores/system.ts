@@ -1,10 +1,14 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { checkSystemStatusApi, getAvailableSettingApi, isAllowRegisterApi, updateSettingApi } from '@/api/system'
+import {
+  checkSystemStatusApi,
+  getAvailableSettingApi,
+  isAllowRegisterApi,
+  updateSettingApi,
+} from '@/api/system'
 import { useActionLedger } from '@/composables/useActionLedger'
 import type { AsyncStatus } from '@/types/async'
 import { SysSettingType, type SysSettingResponse } from '@/types/system'
-
 
 export const useSysStore = defineStore('sys', () => {
   const version = ref('')
@@ -34,7 +38,7 @@ export const useSysStore = defineStore('sys', () => {
   const refreshSysStatus = async () => {
     sysStatusState.value = version.value === '' ? 'loading' : 'refreshing'
     try {
-      const response = await checkSystemStatusApi();
+      const response = await checkSystemStatusApi()
       version.value = response.data.version
       status.value = response.data.status
       sysStatusState.value = 'ready'
@@ -47,7 +51,7 @@ export const useSysStore = defineStore('sys', () => {
   const refreshSystemSettings = async () => {
     settingsState.value = currentSettings.value.length === 0 ? 'loading' : 'refreshing'
     try {
-      const response = await getAvailableSettingApi();
+      const response = await getAvailableSettingApi()
       currentSettings.value = response.data
       settingsState.value = 'ready'
     } catch (error) {
@@ -71,7 +75,7 @@ export const useSysStore = defineStore('sys', () => {
   }
 
   const updateSystemSetting = async (id: string, newValue: string | boolean): Promise<boolean> => {
-    const setting = currentSettings.value.find((item) => item.id === id);
+    const setting = currentSettings.value.find((item) => item.id === id)
     if (!setting) {
       return false
     }
@@ -88,7 +92,7 @@ export const useSysStore = defineStore('sys', () => {
 
     try {
       await actionLedger.runAction(`setting:${id}`, async () => {
-        await updateSettingApi(id, newValue);
+        await updateSettingApi(id, newValue)
       })
       return true
     } catch (_) {
@@ -99,7 +103,7 @@ export const useSysStore = defineStore('sys', () => {
 
   const isSettingUpdating = (id: string): boolean => actionLedger.isActionPending(`setting:${id}`)
 
-  return { 
+  return {
     version,
     status,
     canUserRegister,
@@ -113,4 +117,4 @@ export const useSysStore = defineStore('sys', () => {
     updateSystemSetting,
     isSettingUpdating,
   }
-});
+})
