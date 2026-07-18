@@ -20,6 +20,11 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Setup | System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ripgrep
+
       - name: Setup | Python Dependencies
         run: |
           python -m pip install --upgrade pip
