@@ -57,6 +57,8 @@
           placeholder="Start typing..."
           spellcheck="false"
           @paste="handlePaste"
+          @keydown.ctrl.s.prevent="saveCurrentFile"
+          @keydown.meta.s.prevent="saveCurrentFile"
         ></textarea>
       </div>
     </AsyncGate>
