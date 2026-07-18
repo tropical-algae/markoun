@@ -1,5 +1,29 @@
 <!-- version list -->
 
+## v0.2.0 (2026-07-18)
+
+### Bug Fixes
+
+- Resolve Ruff version conflict in code checks
+  ([`05b1a8e`](https://github.com/tropical-algae/markoun/commit/05b1a8e83767bdd4acd4577e9c1b707ee84a9d85))
+
+- **ci**: Install ripgrep for CI tests
+  ([`85aef8a`](https://github.com/tropical-algae/markoun/commit/85aef8abf892687b39282cdaa4919501a0718f5b))
+
+- **style**: Improve workspace background color consistency
+  ([`063558c`](https://github.com/tropical-algae/markoun/commit/063558c2e476b454cfb927f130f4037b64764b07))
+
+### Documentation
+
+- Update logo and READEME
+  ([`b285300`](https://github.com/tropical-algae/markoun/commit/b285300fa1f717c72a81f81e01bb5e9817b350b6))
+
+### Features
+
+- **editor**: Support Ctrl+S and Command+S editor saving
+  ([`a2a0997`](https://github.com/tropical-algae/markoun/commit/a2a099728011b050c3856b18e7d1dd9b0428bf47))
+
+
 ## v0.1.4 (2026-05-12)
 
 ### Bug Fixes
