@@ -1,5 +1,58 @@
 <!-- version list -->
 
+## v0.1.4 (2026-05-12)
+
+### Bug Fixes
+
+- [site] align file tree loading height
+  ([`cdd4f9b`](https://github.com/tropical-algae/markoun/commit/cdd4f9bb40fae29bfc885816eebec817d741ec36))
+
+- [site] send password update in body
+  ([`3be141c`](https://github.com/tropical-algae/markoun/commit/3be141c034a570c347440f65831f4ed23b544700))
+
+- Harden auth handling
+  ([`ca9ea52`](https://github.com/tropical-algae/markoun/commit/ca9ea520b3a1371812b05712fdc51ad285b52252))
+
+### Documentation
+
+- Update README
+  ([`3527ee8`](https://github.com/tropical-algae/markoun/commit/3527ee89d6a1f25e02df164e8e215e9dc69f65a0))
+
+### Features
+
+- [site] add wide editor setting
+  ([`a340669`](https://github.com/tropical-algae/markoun/commit/a340669d782ae99be92fe5a848ac1d61b7a62dc2))
+
+### Refactoring
+
+- [site] improve interaction polish
+  ([`2838116`](https://github.com/tropical-algae/markoun/commit/28381166cd2195d32322926cee2ea7651f3d12d7))
+
+
+## v0.1.3 (2026-05-06)
+
+### Chores
+
+- Sync uv.lock
+  ([`1686173`](https://github.com/tropical-algae/markoun/commit/16861736904567e2da894eb203121a7f67f339ef))
+
+### Features
+
+- [site] add configurable bubble hints
+  ([`307f99a`](https://github.com/tropical-algae/markoun/commit/307f99a3debd9f436470d4eb8df93299520567f0))
+
+- [site] add new sidebar to support file retrieval
+  ([`b803216`](https://github.com/tropical-algae/markoun/commit/b8032160b881c43161b88b0d13b16bcb332e0ccb))
+
+- Add markdown content search api
+  ([`594b173`](https://github.com/tropical-algae/markoun/commit/594b173c948225bde6ff8ebc5a3ab992401b0c00))
+
+### Testing
+
+- Improve test cases and add missing dependencies
+  ([`41d6e83`](https://github.com/tropical-algae/markoun/commit/41d6e83ec6f61dd79f18bdad6119f504972feed2))
+
+
 ## v0.1.2 (2026-05-03)
 
 ### Features
