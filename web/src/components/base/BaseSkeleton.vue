@@ -42,7 +42,10 @@ const skeletonStyle = computed(() => ({
 .base-skeleton {
   display: block;
   width: var(--skeleton-width);
+  max-width: 100%;
+  min-width: 0;
   height: var(--skeleton-height);
+  box-sizing: border-box;
   border-radius: var(--skeleton-radius);
   background-color: var(--color-skeleton);
   animation: skeleton-breathe var(--motion-skeleton-duration) ease-in-out infinite;

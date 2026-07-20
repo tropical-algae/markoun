@@ -170,6 +170,8 @@ onBeforeUnmount(() => {
 .tooltip-anchor.is-block {
   display: flex;
   width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .tooltip-bubble {

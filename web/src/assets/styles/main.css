@@ -67,6 +67,7 @@
   --safe-area-right: env(safe-area-inset-right, 0px);
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
   --safe-area-left: env(safe-area-inset-left, 0px);
+  --browser-text-size-adjust: 100%;
 
   --layout-header-height: 48px;
   --workspace-chrome-padding-x: 0.5rem;
@@ -361,7 +362,7 @@
   --search-result-gap: 8px;
   --search-result-padding: 10px;
   --search-result-radius: var(--radius-lg);
-  --search-result-border-width: 1px;
+  --search-result-inset-line-width: 1px;
   --search-result-snippet-line-height: 1.45;
   --search-result-line-width: 34px;
   --search-empty-padding: 22px;
@@ -493,6 +494,8 @@ html {
 
   font-family: var(--font-family-base);
   color: var(--color-text-pri);
+  -webkit-text-size-adjust: var(--browser-text-size-adjust);
+  text-size-adjust: var(--browser-text-size-adjust);
 }
 
 button,

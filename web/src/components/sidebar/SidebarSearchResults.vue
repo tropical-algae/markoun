@@ -66,7 +66,7 @@
               class="search-result-snippet f-xs fc-pri"
             >
               <span class="search-result-line fc-sec">L{{ match.line }}</span>
-              <span>{{ match.snippet }}</span>
+              <span class="search-result-snippet-text">{{ match.snippet }}</span>
             </div>
           </div>
         </button>
@@ -99,17 +99,25 @@ const emit = defineEmits<{
 
 <style scoped>
 .search-body {
+  width: 100%;
+  min-width: 0;
   min-height: 0;
-  flex: 1;
-  overflow-y: scroll;
+  flex: 1 1 auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-x: none;
+  touch-action: pan-y;
 }
 
 .search-result-list,
 .search-skeleton-list {
   display: flex;
   flex-direction: column;
+  width: 100%;
+  min-width: 0;
   gap: var(--search-result-gap);
   padding-bottom: var(--settings-skeleton-padding-bottom);
+  box-sizing: border-box;
 }
 
 .search-skeleton-list {
@@ -118,47 +126,65 @@ const emit = defineEmits<{
 
 .search-result-card {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: var(--hint-gap);
   padding: var(--search-result-padding);
-  border: var(--search-result-border-width) solid var(--color-line);
+  overflow: hidden;
+  box-sizing: border-box;
+  border: 0;
   border-radius: var(--search-result-radius);
   background-color: var(--color-bg-pri);
+  box-shadow: inset 0 0 0 var(--search-result-inset-line-width) var(--color-line);
   text-align: left;
   transition:
     background-color var(--motion-soft-duration) ease,
-    border-color var(--motion-soft-duration) ease,
+    box-shadow var(--motion-soft-duration) ease,
     transform var(--motion-soft-duration) ease;
 }
 
 button.search-result-card:focus-visible {
-  border-color: var(--color-action);
   background-color: var(--color-action-light);
+  box-shadow: inset 0 0 0 var(--search-result-inset-line-width) var(--color-action);
 }
 
 @media (hover: hover) {
   button.search-result-card:hover {
-    border-color: var(--color-action);
     background-color: var(--color-action-light);
+    box-shadow: inset 0 0 0 var(--search-result-inset-line-width) var(--color-action);
   }
 }
 
 .search-result-title-row {
   display: flex;
   align-items: center;
+  width: 100%;
+  max-width: 100%;
   gap: var(--hint-gap);
   min-width: 0;
 }
 
 .search-result-title {
+  display: block;
+  width: 0;
+  max-width: 100%;
+  flex: 1 1 0;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.search-result-title-row .meta-tag {
+  flex: 0 0 auto;
+}
+
 .search-result-path {
+  display: block;
+  width: 100%;
+  max-width: 100%;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -168,16 +194,24 @@ button.search-result-card:focus-visible {
 .search-result-match-list {
   display: flex;
   flex-direction: column;
+  min-width: 0;
   gap: var(--hint-gap);
 }
 
 .search-result-snippet {
   display: grid;
   grid-template-columns: var(--search-result-line-width) minmax(0, 1fr);
+  min-width: 0;
   gap: var(--hint-gap);
   line-height: var(--search-result-snippet-line-height);
   white-space: normal;
   overflow-wrap: anywhere;
+}
+
+.search-result-snippet-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .search-result-line {
