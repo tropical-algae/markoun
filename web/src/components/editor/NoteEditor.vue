@@ -166,6 +166,8 @@ const toggleInspector = (mode: InspectMode) => {
   display: flex;
   flex-direction: column;
   gap: var(--editor-loading-gap);
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .editor-skeleton-line {

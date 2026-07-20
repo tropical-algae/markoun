@@ -133,6 +133,7 @@ onBeforeUnmount(() => {
 <style scoped>
 .user-profile-motion-content {
   width: 100%;
+  min-width: 0;
 }
 
 .user-profile-card,
@@ -140,14 +141,15 @@ onBeforeUnmount(() => {
 .user-profile-empty {
   width: 100%;
   box-sizing: border-box;
-  border: var(--divider-line-width) solid var(--color-line);
+  border: 0;
   border-radius: var(--radius-xl);
   white-space: normal;
   background-color: var(--color-bg-sec);
+  box-shadow: inset 0 0 0 var(--divider-line-width) var(--color-line);
   padding: var(--profile-card-padding);
   transition:
     background-color var(--motion-theme-duration) ease,
-    border-color var(--motion-theme-duration) ease;
+    box-shadow var(--motion-theme-duration) ease;
 }
 
 .user-profile-empty {
@@ -198,10 +200,12 @@ onBeforeUnmount(() => {
 .user-tag-shell {
   display: flex;
   flex-wrap: wrap;
+  min-width: 0;
   gap: var(--hint-gap);
 }
 
 .user-meta-shell-loading {
   margin-top: var(--profile-meta-margin-top);
+  grid-template-columns: minmax(0, 28%) minmax(0, 1fr);
 }
 </style>

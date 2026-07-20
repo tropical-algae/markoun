@@ -12,7 +12,7 @@
 import { computed } from 'vue'
 
 interface Props {
-  width?: string | number
+  width?: string
   height?: string | number
   radius?: string | number
   tag?: string
@@ -32,7 +32,7 @@ const normalizeSize = (value: string | number): string => {
 }
 
 const skeletonStyle = computed(() => ({
-  '--skeleton-width': normalizeSize(props.width),
+  '--skeleton-width': props.width,
   '--skeleton-height': normalizeSize(props.height),
   '--skeleton-radius': normalizeSize(props.radius),
 }))
@@ -41,9 +41,10 @@ const skeletonStyle = computed(() => ({
 <style scoped>
 .base-skeleton {
   display: block;
-  width: var(--skeleton-width);
-  max-width: 100%;
+  inline-size: var(--skeleton-width);
+  max-inline-size: 100%;
   min-width: 0;
+  flex-shrink: 1;
   height: var(--skeleton-height);
   box-sizing: border-box;
   border-radius: var(--skeleton-radius);

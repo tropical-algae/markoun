@@ -12,7 +12,8 @@
     >
       <span v-if="isNested" class="file-tree-skeleton-spacer"></span>
       <BaseSkeleton
-        width="var(--tree-skeleton-icon-size)"
+        class="file-tree-skeleton-icon"
+        width="auto"
         height="var(--tree-skeleton-icon-size)"
         radius="var(--tree-skeleton-icon-radius)"
       />
@@ -57,7 +58,10 @@ const resolveTextWidth = (index: number) => {
 .file-tree-skeleton-list {
   display: flex;
   flex-direction: column;
+  width: 100%;
+  min-width: 0;
   gap: var(--tree-skeleton-gap);
+  box-sizing: border-box;
 }
 
 .file-tree-skeleton-list.is-root {
@@ -70,6 +74,12 @@ const resolveTextWidth = (index: number) => {
   gap: var(--tree-skeleton-row-gap);
   padding: var(--tree-row-padding);
   box-sizing: border-box;
+  min-width: 0;
+}
+
+.file-tree-skeleton-icon {
+  aspect-ratio: 1;
+  flex: 0 0 auto;
 }
 
 .file-tree-skeleton-row.is-nested {

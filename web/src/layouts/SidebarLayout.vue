@@ -80,6 +80,7 @@ const {
 
 .sub-sidebar-container {
   overflow: hidden;
+  min-width: 0;
   height: 100%;
   position: relative;
   transition: border-color var(--motion-theme-duration) ease;
@@ -95,9 +96,10 @@ const {
   display: flex;
   flex-direction: column;
   height: 100%;
+  max-width: 100%;
   min-width: var(--layout-sidebar-inner-min-width);
   padding-inline: var(--layout-sub-sidebar-padding-x);
-  white-space: nowrap;
+  overflow-x: hidden;
   box-sizing: border-box;
 }
 

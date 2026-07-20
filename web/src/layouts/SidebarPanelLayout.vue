@@ -34,13 +34,25 @@ const props = defineProps<{
 
 .sidebar-panel-layout :deep(.sidebar-panel-body) {
   flex: 1 1 auto;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   min-height: 0;
   margin-block: var(--sidebar-panel-body-margin-y);
+  overflow-x: hidden;
   overflow-y: scroll;
+  overscroll-behavior-x: none;
+  touch-action: pan-y;
+  box-sizing: border-box;
 }
 
 .sidebar-panel-layout :deep(.sidebar-panel-footer) {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   flex-shrink: 0;
   padding-block: var(--sidebar-panel-footer-padding-y);
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 </style>

@@ -25,7 +25,8 @@
       <div class="links-row">
         <div class="auth-register-slot f-s">
           <AsyncGate
-            tag="span"
+            tag="div"
+            class="auth-register-gate"
             :status="sysStore.registrationAllowedState"
             :is-empty="!sysStore.canUserRegister"
           >
@@ -149,8 +150,15 @@ onMounted(async () => {
 }
 
 .auth-register-slot {
+  flex: 1 1 0;
+  min-width: 0;
   padding: 0;
   margin: 0;
+}
+
+.auth-register-gate {
+  width: 100%;
+  min-width: 0;
 }
 
 .auth-form .links-row button::after {

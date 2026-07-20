@@ -93,7 +93,10 @@ const emit = defineEmits<{
 .preview-skeleton {
   display: flex;
   flex-direction: column;
+  width: 100%;
+  min-width: 0;
   gap: var(--editor-inspector-skeleton-gap);
+  box-sizing: border-box;
 }
 
 .meta-grid {

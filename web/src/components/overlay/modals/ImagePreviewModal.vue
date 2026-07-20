@@ -23,8 +23,7 @@
           <template #loading>
             <BaseSkeleton
               class="image-preview-skeleton"
-              :width="`${displaySize.width}px`"
-              :height="`${displaySize.height}px`"
+              height="100%"
               radius="var(--image-preview-radius)"
             />
           </template>
@@ -52,7 +51,6 @@ import type { AsyncStatus } from '@/types/async'
 const nodeStore = useNodeStore()
 const previewLoadState = ref<AsyncStatus>('idle')
 const {
-  displaySize,
   stageStyle,
   imageStyle,
   resetNaturalSize,
@@ -135,7 +133,6 @@ watch(imageUrl, () => {
 }
 
 .image-preview-skeleton {
-  max-width: 100%;
   max-height: 100%;
 }
 </style>

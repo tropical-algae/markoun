@@ -99,6 +99,20 @@ export const useCurrentFileState = () => {
     return requestId
   }
 
+  const beginFileSwitch = () => {
+    currentFileStatus.value = 'loading'
+  }
+
+  const cancelFileSwitch = (sourcePath: string) => {
+    if (
+      currentFileStatus.value === 'loading'
+      && currentFileNode.value?.path === sourcePath
+      && isCurrentFileInitialized.value
+    ) {
+      currentFileStatus.value = 'ready'
+    }
+  }
+
   const isStaleFileRequest = (requestId: number, node: FsNode): boolean => {
     return requestId !== currentFileRequestId || currentFileNode.value?.path !== node.path
   }
@@ -194,6 +208,8 @@ export const useCurrentFileState = () => {
     beginWelcomeNoteLoad,
     completeWelcomeNoteLoad,
     failWelcomeNoteLoad,
+    beginFileSwitch,
+    cancelFileSwitch,
     beginFileLoad,
     isStaleFileRequest,
     completeFileLoad,

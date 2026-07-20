@@ -87,7 +87,6 @@ export const useImagePreviewSize = () => {
   }
 
   return {
-    displaySize,
     stageStyle,
     imageStyle,
     resetNaturalSize,

@@ -333,7 +333,7 @@
   --auth-submit-width: 220px;
   --auth-submit-current-width: var(--auth-submit-width);
   --auth-submit-padding: 8px;
-  --auth-register-placeholder-width: 116px;
+  --auth-register-placeholder-width: 58%;
   --auth-register-placeholder-height: 0.9rem;
   --setting-text-input-width: 120px;
   --setting-text-input-current-width: var(--setting-text-input-width);
@@ -348,8 +348,8 @@
   --setting-item-gap: var(--settings-skeleton-gap);
   --setting-control-width: auto;
   --settings-footer-value-min-width: 88px;
-  --settings-footer-version-skeleton-width: 72px;
-  --settings-footer-status-skeleton-width: 88px;
+  --settings-footer-version-skeleton-width: 82%;
+  --settings-footer-status-skeleton-width: 100%;
   --settings-footer-skeleton-radius: var(--meta-tag-radius);
   --settings-skeleton-gap: 16px;
   --settings-skeleton-text-gap: 8px;
@@ -358,6 +358,7 @@
   --settings-skeleton-title-height: 0.85rem;
   --settings-skeleton-desc-height: 0.7rem;
   --settings-skeleton-control-height: 1.8rem;
+  --settings-skeleton-control-width: 32%;
 
   --search-result-gap: 8px;
   --search-result-padding: 10px;
@@ -385,13 +386,13 @@
   --profile-skeleton-name-height: 1.1rem;
   --profile-skeleton-label-height: 0.7rem;
   --profile-skeleton-value-height: 0.8rem;
-  --profile-skeleton-scopes-label-width: 60px;
-  --profile-skeleton-scope-primary-width: 56px;
-  --profile-skeleton-scope-secondary-width: 44px;
-  --profile-skeleton-status-label-width: 46px;
-  --profile-skeleton-status-value-width: 72px;
-  --profile-skeleton-joined-label-width: 50px;
-  --profile-skeleton-joined-value-width: 110px;
+  --profile-skeleton-scopes-label-width: 88%;
+  --profile-skeleton-scope-primary-width: 34%;
+  --profile-skeleton-scope-secondary-width: 27%;
+  --profile-skeleton-status-label-width: 70%;
+  --profile-skeleton-status-value-width: 42%;
+  --profile-skeleton-joined-label-width: 78%;
+  --profile-skeleton-joined-value-width: 64%;
   --profile-meta-gap-x: 12px;
   --profile-meta-gap-y: 8px;
   --profile-meta-margin-top: 1rem;

@@ -53,6 +53,8 @@ export const useNodeStore = defineStore('note', () => {
 
   const toastStore = useToastStore()
   const actionLedger = useActionLedger()
+  let currentSelectionId = 0
+  let pendingFileSwitchSave: Promise<void> | null = null
   const {
     loadDirectory,
     getDirectoryChildren,
@@ -167,12 +169,32 @@ export const useNodeStore = defineStore('note', () => {
   }
 
   const setCurrentNode = async (node: FsNode): Promise<void> => {
+    const selectionId = ++currentSelectionId
     const normalizedNode = normalizeFsNode(node)
     if (isMarkdownNode(normalizedNode)) {
       if (fileState.currentFileNode.value?.path !== normalizedNode.path) {
+        const sourceNode = fileState.currentFileNode.value
+        const sourcePath = sourceNode?.path ?? ''
+        const shouldSave = fileState.isCurrentFileDirty.value
+
+        currentNode.value = normalizedNode
+        closeImagePreview()
+        fileState.beginFileSwitch()
+
         try {
-          await saveCurrentFileIfDirty()
+          if (shouldSave || pendingFileSwitchSave) {
+            await saveCurrentFileForSwitch()
+          }
         } catch (_) {
+          fileState.cancelFileSwitch(sourcePath)
+          if (selectionId === currentSelectionId) {
+            currentNode.value = sourceNode
+          }
+          return
+        }
+
+        if (selectionId !== currentSelectionId) {
+          fileState.cancelFileSwitch(sourcePath)
           return
         }
       }
@@ -221,12 +243,11 @@ export const useNodeStore = defineStore('note', () => {
       return
     }
     const savedPath = fileState.currentFile.value.path
+    const savedContent = fileState.currentFile.value.content
     const response = await actionLedger.runAction('save-current-file', async () => {
-      const path = savedPath
-      const content = fileState.currentFile.value.content
-      const saveResponse = await saveNoteApi(path, content)
-      if (fileState.currentFile.value.path === path) {
-        fileState.markSavedContent(content)
+      const saveResponse = await saveNoteApi(savedPath, savedContent)
+      if (fileState.currentFile.value.path === savedPath) {
+        fileState.markSavedContent(savedContent)
       }
       return saveResponse
     })
@@ -236,6 +257,23 @@ export const useNodeStore = defineStore('note', () => {
     if (!options.silent) {
       toastStore.pushNotice('info', 'The note has been saved.')
     }
+  }
+
+  const saveCurrentFileForSwitch = (): Promise<void> => {
+    if (pendingFileSwitchSave) {
+      return pendingFileSwitchSave
+    }
+
+    const operation = saveCurrentFile({ silent: false })
+    pendingFileSwitchSave = operation
+
+    const clearPendingSave = () => {
+      if (pendingFileSwitchSave === operation) {
+        pendingFileSwitchSave = null
+      }
+    }
+    void operation.then(clearPendingSave, clearPendingSave)
+    return operation
   }
 
   const saveCurrentFileIfDirty = async (): Promise<void> => {

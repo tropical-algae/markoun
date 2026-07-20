@@ -25,7 +25,7 @@
                 />
               </div>
               <BaseSkeleton
-                width="var(--setting-text-input-width)"
+                width="var(--settings-skeleton-control-width)"
                 height="var(--settings-skeleton-control-height)"
                 radius="var(--setting-text-input-radius)"
               />
@@ -147,6 +147,8 @@ const handleUpdateSetting = async (id: string, newValue: string | boolean) => {
 
 .settings-footer-gate {
   display: inline-flex;
+  width: 100%;
+  min-width: 0;
   align-items: center;
   justify-content: flex-end;
   min-height: var(--meta-tag-height);
@@ -167,6 +169,7 @@ const handleUpdateSetting = async (id: string, newValue: string | boolean) => {
 
 .setting-skeleton-text {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: var(--settings-skeleton-text-gap);
