@@ -57,6 +57,10 @@ class Constant(BaseSettings):
         "status_code": status.HTTP_401_UNAUTHORIZED,
         "detail": "User does not exist",
     }
+    RESP_AUTH_DISABLED: dict = {
+        "status_code": status.HTTP_403_FORBIDDEN,
+        "detail": "Authentication is disabled",
+    }
 
     # 业务
     SERV_READ_FILE_FAIL: dict = {

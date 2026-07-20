@@ -27,6 +27,8 @@ class SysSetting(BaseSettings):
 
 
 class BasicSetting(BaseSettings):
+    AUTH_REQUIRED: bool = True
+
     # database
     SQL_DATABASE_URI: str = "sqlite+aiosqlite:///database.db"
     SQL_POOL_PRE_PING: bool = True

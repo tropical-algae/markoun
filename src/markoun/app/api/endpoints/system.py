@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, Response, Security
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from markoun.app.api.deps import get_current_user, get_db
+from markoun.app.api.deps import WorkspaceAccess, get_db, get_workspace_access
 from markoun.app.services.system_service import (
     get_allow_user_register_setting,
     get_system_setting_by_scopes,
@@ -11,8 +11,6 @@ from markoun.app.services.system_service import (
 from markoun.app.utils.constant import CONSTANT, MSG_SUCCESS
 from markoun.common.config import settings
 from markoun.common.decorator import exception_handling
-from markoun.common.util import str_to_json
-from markoun.core.db.models import UserAccount
 from markoun.core.model.base import (
     SysSettingResponse,
     SysSettingUpdateRequest,
@@ -26,20 +24,23 @@ router = APIRouter()
 
 @router.get("/status", response_model=SysStatus)
 async def api_check_system_status() -> SysStatus:
-    return SysStatus(status=SysStatusType.HEALTH.value, version=settings.VERSION)
+    return SysStatus(
+        status=SysStatusType.HEALTH.value,
+        version=settings.VERSION,
+        auth_required=settings.AUTH_REQUIRED,
+    )
 
 
 @router.get("/settings")
 @exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_get_all_settings(
     db: AsyncSession = Depends(get_db),
-    current_user: UserAccount = Security(
-        get_current_user, scopes=[ScopeType.ADMIN, ScopeType.USER]
+    access: WorkspaceAccess = Security(
+        get_workspace_access, scopes=[ScopeType.ADMIN, ScopeType.USER]
     ),
 ) -> list[SysSettingResponse]:
-    scopes: list[str] = str_to_json(current_user.scopes)
     configs: list[SysSettingResponse] = await get_system_setting_by_scopes(
-        db=db, scopes=scopes
+        db=db, scopes=list(access.scopes)
     )
     return configs
 
@@ -49,12 +50,11 @@ async def api_get_all_settings(
 async def api_update_setting(
     data: SysSettingUpdateRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: UserAccount = Security(
-        get_current_user, scopes=[ScopeType.ADMIN, ScopeType.USER]
+    access: WorkspaceAccess = Security(
+        get_workspace_access, scopes=[ScopeType.ADMIN, ScopeType.USER]
     ),
 ):
-    scopes: list[str] = str_to_json(current_user.scopes)
-    await update_system_setting(db=db, scopes=scopes, data=data)
+    await update_system_setting(db=db, scopes=list(access.scopes), data=data)
     return MSG_SUCCESS
 
 

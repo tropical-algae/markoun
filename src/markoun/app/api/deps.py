@@ -1,4 +1,5 @@
 from collections.abc import AsyncGenerator, Awaitable, Callable
+from dataclasses import dataclass
 
 from fastapi import Body, Depends, Header, HTTPException, Request, Security
 from fastapi.security import OAuth2PasswordBearer, SecurityScopes
@@ -9,12 +10,19 @@ from markoun.app.utils.security import verift_access_token
 from markoun.common.config import settings
 from markoun.common.decorator import exception_handling
 from markoun.common.logging import logger
+from markoun.common.util import str_to_json
 from markoun.core.db.crud import select_user_by_full_name
 from markoun.core.db.models import UserAccount
 from markoun.core.db.session import LocalSession
 from markoun.core.model.user import ScopeType
 
 AUTHENTICATE_HEADER = "WWW-Authenticate"
+
+
+@dataclass(frozen=True)
+class WorkspaceAccess:
+    scopes: tuple[str, ...]
+    user: UserAccount | None = None
 
 
 reusable_oauth2 = OAuth2PasswordBearer(
@@ -36,6 +44,11 @@ async def get_db() -> AsyncGenerator:
     finally:
         if db:
             await db.close()
+
+
+def require_auth_enabled() -> None:
+    if not settings.AUTH_REQUIRED:
+        raise HTTPException(**CONSTANT.RESP_AUTH_DISABLED)
 
 
 @exception_handling(CONSTANT.RESP_SERVER_ERROR)
@@ -65,3 +78,24 @@ async def get_current_user(
     ):
         raise HTTPException(headers=headers, **CONSTANT.RESP_USER_FORBIDDEN)
     return user
+
+
+async def get_workspace_access(
+    request: Request,
+    security_scopes: SecurityScopes,
+    db: AsyncSession = Depends(get_db),
+) -> WorkspaceAccess:
+    if not settings.AUTH_REQUIRED:
+        return WorkspaceAccess(
+            scopes=(ScopeType.ADMIN.value, ScopeType.USER.value),
+        )
+
+    user = await get_current_user(
+        request=request,
+        security_scopes=security_scopes,
+        db=db,
+    )
+    return WorkspaceAccess(
+        scopes=tuple(str_to_json(user.scopes)),
+        user=user,
+    )

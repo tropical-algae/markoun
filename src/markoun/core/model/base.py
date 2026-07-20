@@ -12,6 +12,7 @@ class SysStatusType(StrEnum):
 class SysStatus(BaseModel):
     status: str
     version: str
+    auth_required: bool
 
 
 class FsNodeType(StrEnum):

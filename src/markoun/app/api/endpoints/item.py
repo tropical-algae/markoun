@@ -3,7 +3,7 @@ from typing import cast
 
 from fastapi import APIRouter, Security
 
-from markoun.app.api.deps import get_current_user
+from markoun.app.api.deps import WorkspaceAccess, get_workspace_access
 from markoun.app.services.item_service import (
     get_directory_children,
     get_file_tree,
@@ -15,7 +15,6 @@ from markoun.app.utils.constant import CONSTANT, MSG_SUCCESS
 from markoun.common.config import settings
 from markoun.common.decorator import exception_handling
 from markoun.common.util import abs_path_to_relative_path, relative_path_to_abs_path
-from markoun.core.db.models import UserAccount
 from markoun.core.model.file import (
     DirectoryChildrenResponse,
     DirNode,
@@ -35,7 +34,9 @@ DISPLAYED_FILE_TYPES = set(settings.DISPLAYED_FILE_TYPES)
 @router.get("/tree")
 @exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_load_tree(
-    _: UserAccount = Security(get_current_user, scopes=[ScopeType.ADMIN, ScopeType.USER]),
+    _: WorkspaceAccess = Security(
+        get_workspace_access, scopes=[ScopeType.ADMIN, ScopeType.USER]
+    ),
 ) -> list[FileNode | DirNode]:
     file_tree = cast(
         DirNode,
@@ -48,7 +49,9 @@ async def api_load_tree(
 @exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_load_directory_children(
     path: str = ".",
-    _: UserAccount = Security(get_current_user, scopes=[ScopeType.ADMIN, ScopeType.USER]),
+    _: WorkspaceAccess = Security(
+        get_workspace_access, scopes=[ScopeType.ADMIN, ScopeType.USER]
+    ),
 ) -> DirectoryChildrenResponse:
     abs_path = relative_path_to_abs_path(Path(path))
     children = await get_directory_children(abs_path, DISPLAYED_FILE_TYPES)
@@ -62,7 +65,9 @@ async def api_load_directory_children(
 @exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_remove_path(
     filepath: str,
-    _: UserAccount = Security(get_current_user, scopes=[ScopeType.ADMIN, ScopeType.USER]),
+    _: WorkspaceAccess = Security(
+        get_workspace_access, scopes=[ScopeType.ADMIN, ScopeType.USER]
+    ),
 ):
     abs_path = relative_path_to_abs_path(Path(filepath))
     remove_item(abs_path)
@@ -73,7 +78,9 @@ async def api_remove_path(
 @exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_item_rename(
     data: ItemRenameRequest,
-    _: UserAccount = Security(get_current_user, scopes=[ScopeType.ADMIN, ScopeType.USER]),
+    _: WorkspaceAccess = Security(
+        get_workspace_access, scopes=[ScopeType.ADMIN, ScopeType.USER]
+    ),
 ):
     abs_path = relative_path_to_abs_path(Path(data.path))
     rename_item(abs_path, data.new_name)
@@ -84,7 +91,9 @@ async def api_item_rename(
 @exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_item_move(
     data: ItemMoveRequest,
-    _: UserAccount = Security(get_current_user, scopes=[ScopeType.ADMIN, ScopeType.USER]),
+    _: WorkspaceAccess = Security(
+        get_workspace_access, scopes=[ScopeType.ADMIN, ScopeType.USER]
+    ),
 ) -> FileNode:
     abs_path = relative_path_to_abs_path(Path(data.path))
     abs_target_dir = relative_path_to_abs_path(Path(data.target_dir))

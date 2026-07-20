@@ -13,7 +13,13 @@ from fastapi import (
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from markoun.app.api.deps import get_current_user, get_db
+from markoun.app.api.deps import (
+    WorkspaceAccess,
+    get_current_user,
+    get_db,
+    get_workspace_access,
+    require_auth_enabled,
+)
 from markoun.app.services.user_service import (
     get_current_user_profile,
     user_login,
@@ -39,6 +45,7 @@ router = APIRouter()
 @exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_user_login(
     response: Response,
+    _: None = Depends(require_auth_enabled),
     db: AsyncSession = Depends(get_db),
     form_data: OAuth2PasswordRequestForm = Depends(),
     remember_me: bool = Form(False),
@@ -71,8 +78,9 @@ async def api_user_logout(response: Response):
 
 @router.get("/check")
 async def api_check_token(
-    _: UserAccount = Security(
-        get_current_user, scopes=[ScopeType.ADMIN, ScopeType.USER, ScopeType.GUEST]
+    _: WorkspaceAccess = Security(
+        get_workspace_access,
+        scopes=[ScopeType.ADMIN, ScopeType.USER, ScopeType.GUEST],
     ),
 ) -> str:
     """
@@ -83,6 +91,7 @@ async def api_check_token(
 
 @router.get("/me", response_model=CurrentUserProfile)
 async def api_get_current_user_profile(
+    _: None = Depends(require_auth_enabled),
     current_user: UserAccount = Security(
         get_current_user, scopes=[ScopeType.ADMIN, ScopeType.USER, ScopeType.GUEST]
     ),
@@ -94,6 +103,7 @@ async def api_get_current_user_profile(
 @exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_user_register(
     user: UserBasicInfo,
+    _: None = Depends(require_auth_enabled),
     db: AsyncSession = Depends(get_db),
 ) -> Any:
     """
@@ -107,6 +117,7 @@ async def api_user_register(
 @exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_update_setting(
     payload: PasswordUpdateRequest,
+    _: None = Depends(require_auth_enabled),
     db: AsyncSession = Depends(get_db),
     current_user: UserAccount = Security(
         get_current_user, scopes=[ScopeType.ADMIN, ScopeType.USER]
