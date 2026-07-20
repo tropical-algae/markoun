@@ -103,13 +103,22 @@ const handleInput = (event: Event) => {
 
 .underlined-input-content {
   width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
   background: transparent;
   border: none;
   outline: none;
 
   color: var(--color-text-pri);
+  font-family: inherit;
+  font-size: var(--underlined-input-content-font-size);
   font-weight: 400;
+  line-height: var(--underlined-input-content-line-height);
   letter-spacing: var(--underlined-input-letter-spacing);
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .underlined-input-content::placeholder {

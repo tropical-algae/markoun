@@ -2,6 +2,7 @@
   <AsyncGate
     :status="status"
     :is-empty="hasSearched && results.length === 0"
+    :show-delay-ms="searchAsyncGateDelayMs"
     tag="div"
     class="search-body touch-scroll"
   >
@@ -82,6 +83,7 @@
 <script setup lang="ts">
 import type { AsyncStatus } from '@/types/async'
 import type { FileSearchResult } from '@/types/file-system'
+import { readCssTimeMs } from '@/utils/css'
 import AsyncGate from '@/components/base/AsyncGate.vue'
 import BaseSkeleton from '@/components/base/BaseSkeleton.vue'
 import BaseTooltip from '@/components/base/BaseTooltip.vue'
@@ -91,6 +93,8 @@ defineProps<{
   hasSearched: boolean
   results: FileSearchResult[]
 }>()
+
+const searchAsyncGateDelayMs = readCssTimeMs('--search-async-gate-delay-ms', 0)
 
 const emit = defineEmits<{
   (event: 'open', result: FileSearchResult): void

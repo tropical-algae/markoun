@@ -148,6 +148,6 @@ onMounted(async () => {
 
 .file-tree-root.is-root-dragover {
   background-color: var(--color-action-light);
-  box-shadow: 0 0 0 var(--divider-line-width) var(--color-action);
+  box-shadow: inset 0 0 0 var(--divider-line-width) var(--color-action);
 }
 </style>

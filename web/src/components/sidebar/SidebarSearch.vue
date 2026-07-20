@@ -6,7 +6,7 @@
         class="f-s"
         label="Keyword"
         placeholder="Search markdown files..."
-        :disabled="status === 'loading'"
+        :readonly="status === 'loading'"
       />
 
       <button type="submit" class="icon-btn">
@@ -57,7 +57,6 @@ const openSearchResult = async (result: FileSearchResult) => {
   flex-shrink: 0;
   align-items: flex-end;
   gap: var(--sidebar-form-gap);
-  padding-block: var(--sidebar-form-padding-y);
+  margin-bottom: var(--sidebar-form-margin-bottom);
 }
-
 </style>

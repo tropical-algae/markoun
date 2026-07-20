@@ -68,6 +68,7 @@
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
   --safe-area-left: env(safe-area-inset-left, 0px);
   --browser-text-size-adjust: 100%;
+  --mobile-text-input-font-size: 1rem;
 
   --layout-header-height: 48px;
   --workspace-chrome-padding-x: 0.5rem;
@@ -87,14 +88,14 @@
   --layout-mobile-layer-z-index: 30;
   --layout-mobile-editor-padding-y: 18px;
   --layout-mobile-editor-padding-x-min: 14px;
-  --sidebar-panel-body-margin-y: 1rem;
+  --sidebar-panel-content-margin-y: 1rem;
   --sidebar-panel-footer-padding-y: 1rem;
   --sidebar-section-margin-bottom: 1.5rem;
   --sidebar-section-title-margin-bottom: 0.5rem;
   --sidebar-toolbar-gap: 0.5rem;
   --sidebar-toolbar-padding-y: 0.5rem;
   --sidebar-form-gap: 0.25rem;
-  --sidebar-form-padding-y: 1rem;
+  --sidebar-form-margin-bottom: 1rem;
   --sidebar-footer-row-gap: 0.25rem;
   --sidebar-settings-list-extra-gap: 0.5rem;
 
@@ -217,6 +218,7 @@
     var(--tree-node-text-slot-padding-y) * 2 +
     var(--tree-row-padding-y) * 2
   );
+  --tree-rename-input-font-size: inherit;
   --tree-long-press-delay-ms: 600;
   --tree-node-dragging-opacity: 0.45;
 
@@ -244,8 +246,11 @@
   --filled-input-label-font-size: 0.75rem;
   --filled-input-label-bg-bleed-bottom: -20px;
   --filled-input-content-font-size: 0.9rem;
+  --filled-input-content-line-height: 1.25;
   --underlined-input-gap: 6px;
   --underlined-input-padding-bottom: 4px;
+  --underlined-input-content-font-size: inherit;
+  --underlined-input-content-line-height: 1.25;
   --underlined-input-letter-spacing: 0.5px;
   --underlined-input-line-height: 1px;
   --underlined-input-placeholder-opacity: 0.5;
@@ -367,6 +372,7 @@
   --search-result-snippet-line-height: 1.45;
   --search-result-line-width: 34px;
   --search-empty-padding: 22px;
+  --search-async-gate-delay-ms: 0;
   --search-skeleton-gap: 10px;
   --search-skeleton-title-width: 58%;
   --search-skeleton-title-height: 0.85rem;
@@ -447,6 +453,11 @@
 @media (max-width: 768px) {
   :root {
     --icon-button-size: var(--icon-button-mobile-size);
+    --editor-font-size: var(--mobile-text-input-font-size);
+    --filled-input-content-font-size: var(--mobile-text-input-font-size);
+    --underlined-input-content-font-size: var(--mobile-text-input-font-size);
+    --setting-text-input-font-size: var(--mobile-text-input-font-size);
+    --tree-rename-input-font-size: var(--mobile-text-input-font-size);
     --modal-card-current-max-width: calc(
       100vw -
       var(--modal-mobile-viewport-gap) * 2 -

@@ -6,7 +6,9 @@
       </slot>
     </BaseHeader>
 
-    <slot></slot>
+    <div class="sidebar-panel-content">
+      <slot></slot>
+    </div>
 
     <slot name="footer"></slot>
   </section>
@@ -38,11 +40,21 @@ const props = defineProps<{
   max-width: 100%;
   min-width: 0;
   min-height: 0;
-  margin-block: var(--sidebar-panel-body-margin-y);
   overflow-x: hidden;
   overflow-y: scroll;
   overscroll-behavior-x: none;
-  touch-action: pan-y;
+  box-sizing: border-box;
+}
+
+.sidebar-panel-content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 0;
+  margin-block: var(--sidebar-panel-content-margin-y);
   box-sizing: border-box;
 }
 

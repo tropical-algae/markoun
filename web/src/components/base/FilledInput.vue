@@ -108,14 +108,22 @@ const handleInput = (event: Event) => {
 
 .filled-input-content {
   position: relative;
+  display: block;
   width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
   border: none;
   background: transparent;
   outline: none;
   font-size: var(--filled-input-content-font-size);
+  line-height: var(--filled-input-content-line-height);
   border-radius: var(--input-radius);
   color: var(--color-text-pri);
   font-family: inherit;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
   z-index: 2;
 }
 

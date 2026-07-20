@@ -148,6 +148,17 @@ const handleRenameInput = (event: Event) => {
     background-color var(--motion-soft-duration) ease;
 }
 
+.node-content::after {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border: var(--divider-line-width) solid transparent;
+  border-radius: inherit;
+  box-sizing: border-box;
+  content: "";
+  pointer-events: none;
+}
+
 .node-content > .meta-tag {
   flex-shrink: 0;
 }
@@ -226,13 +237,13 @@ const handleRenameInput = (event: Event) => {
   opacity: 1;
 }
 
-.node-content.is-dragover {
-  box-shadow: inset 0 0 0 var(--divider-line-width) var(--color-action);
-}
-
 .node-content.is-dragover::before {
   background-color: var(--color-action-light);
   opacity: 1;
+}
+
+.node-content.is-dragover::after {
+  border-color: var(--color-action);
 }
 
 .node-content.is-node-dragging {
@@ -258,6 +269,7 @@ const handleRenameInput = (event: Event) => {
   border-radius: var(--tree-row-radius);
   color: var(--color-text-pri);
   font-family: inherit;
+  font-size: var(--tree-rename-input-font-size);
   box-sizing: border-box;
   line-height: var(--tree-node-text-line-height);
 }

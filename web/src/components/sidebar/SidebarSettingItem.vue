@@ -154,6 +154,7 @@ const commitDraft = () => {
   font-size: var(--setting-text-input-font-size);
   line-height: var(--setting-text-input-line-height);
   text-align: end;
+  box-sizing: border-box;
   transition:
     background-color var(--motion-soft-duration) ease,
     border-color var(--motion-soft-duration) ease,
