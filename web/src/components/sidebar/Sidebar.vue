@@ -57,6 +57,7 @@
 import { computed, ref } from 'vue'
 import { SidebarMode } from '@/types/ui'
 import { useWorkspaceLayout } from '@/layouts/workspace-context'
+import { useSysStore } from '@/stores/system'
 
 import SidebarToggleIcon from '@/assets/icons/sidebar.svg'
 import FileTreeIcon from '@/assets/icons/rectangle-list.svg'
@@ -77,6 +78,7 @@ const {
   setSidebarPanelOpen,
   closeSidebarPanelOnCompact,
 } = useWorkspaceLayout()
+const sysStore = useSysStore()
 
 const showSubSidebar = computed({
   get: () => isSidebarPanelOpen.value,
@@ -103,12 +105,14 @@ const handleContentOpen = () => {
   closeSidebarPanelOnCompact()
 }
 
-const sideBtns = [
+const sideBtns = computed(() => [
   { icon: FileTreeIcon, label: 'Files', mode: SidebarMode.FileTree },
   { icon: SearchIcon, label: 'Search', mode: SidebarMode.Search },
-  { icon: UserIcon, label: 'Profile', mode: SidebarMode.User },
+  ...(sysStore.authRequired
+    ? [{ icon: UserIcon, label: 'Profile', mode: SidebarMode.User }]
+    : []),
   { icon: SettingIcon, label: 'Settings', mode: SidebarMode.Settings },
-] as const
+])
 
 </script>
 

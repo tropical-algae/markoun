@@ -7,6 +7,7 @@ export type SysSettingType = typeof SysSettingType[keyof typeof SysSettingType]
 export interface SysStatusResponse {
   status: string
   version: string
+  auth_required: boolean
 }
 
 export interface BaseSysSetting {

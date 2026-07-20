@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useSysStore } from '@/stores/system'
 import { useUserStore } from '@/stores/user'
 import { buildLoginRedirectLocation, resolvePostAuthRedirect } from '@/router/auth'
 
@@ -41,7 +42,22 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
+  const sysStore = useSysStore()
   const userStore = useUserStore()
+
+  if (to.meta.requiresAuth || to.meta.guestOnly) {
+    try {
+      await sysStore.ensureSysStatus()
+    } catch (_) {
+    }
+  }
+
+  if (!sysStore.authRequired) {
+    if (to.meta.guestOnly) {
+      return { name: 'Workspace' }
+    }
+    return true
+  }
 
   if (to.meta.requiresAuth || to.meta.guestOnly) {
     await userStore.ensureAuthKnown()

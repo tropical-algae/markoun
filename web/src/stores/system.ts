@@ -13,12 +13,14 @@ import { SysSettingType, type SysSettingResponse } from '@/types/system'
 export const useSysStore = defineStore('sys', () => {
   const version = ref('')
   const status = ref('')
+  const authRequired = ref(true)
   const canUserRegister = ref(false)
   const currentSettings = ref<SysSettingResponse[]>([])
   const sysStatusState = ref<AsyncStatus>('idle')
   const settingsState = ref<AsyncStatus>('idle')
   const registrationAllowedState = ref<AsyncStatus>('idle')
   const actionLedger = useActionLedger()
+  let sysStatusPromise: Promise<void> | null = null
 
   const withUpdatedSettingValue = (
     setting: SysSettingResponse,
@@ -35,17 +37,35 @@ export const useSysStore = defineStore('sys', () => {
     return null
   }
 
-  const refreshSysStatus = async () => {
-    sysStatusState.value = version.value === '' ? 'loading' : 'refreshing'
-    try {
-      const response = await checkSystemStatusApi()
-      version.value = response.data.version
-      status.value = response.data.status
-      sysStatusState.value = 'ready'
-    } catch (error) {
-      sysStatusState.value = 'error'
-      throw error
+  const refreshSysStatus = async (): Promise<void> => {
+    if (sysStatusPromise) {
+      return sysStatusPromise
     }
+
+    sysStatusState.value = version.value === '' ? 'loading' : 'refreshing'
+    sysStatusPromise = (async () => {
+      try {
+        const response = await checkSystemStatusApi()
+        version.value = response.data.version
+        status.value = response.data.status
+        authRequired.value = response.data.auth_required
+        sysStatusState.value = 'ready'
+      } catch (error) {
+        sysStatusState.value = 'error'
+        throw error
+      } finally {
+        sysStatusPromise = null
+      }
+    })()
+
+    return sysStatusPromise
+  }
+
+  const ensureSysStatus = async (): Promise<void> => {
+    if (sysStatusState.value === 'ready') {
+      return
+    }
+    await refreshSysStatus()
   }
 
   const refreshSystemSettings = async () => {
@@ -106,12 +126,14 @@ export const useSysStore = defineStore('sys', () => {
   return {
     version,
     status,
+    authRequired,
     canUserRegister,
     currentSettings,
     sysStatusState,
     settingsState,
     registrationAllowedState,
     refreshSysStatus,
+    ensureSysStatus,
     refreshSystemSettings,
     refreshUserRegistrationAllowed,
     updateSystemSetting,

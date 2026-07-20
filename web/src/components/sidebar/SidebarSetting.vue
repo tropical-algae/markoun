@@ -99,7 +99,7 @@ const sysStore = useSysStore()
 
 onMounted(async () => {
   await Promise.allSettled([
-    sysStore.refreshSysStatus(),
+    sysStore.ensureSysStatus(),
     sysStore.refreshSystemSettings(),
   ])
 })

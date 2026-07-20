@@ -1,6 +1,6 @@
 <template>
   <div class="workspace-shell">
-    <header class="workspace-header f-m fw-bold fc-pri">
+    <header class="workspace-header f-m fw-9 fc-pri">
       <slot name="header">
         <span class="workspace-brand-logo" aria-hidden="true"></span>
         <span>Markoun</span>
