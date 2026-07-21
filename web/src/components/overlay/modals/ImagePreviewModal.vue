@@ -24,7 +24,7 @@
             <BaseSkeleton
               class="image-preview-skeleton"
               height="100%"
-              radius="var(--image-preview-radius)"
+              radius="var(--radius-lg)"
             />
           </template>
 
@@ -102,7 +102,7 @@ watch(imageUrl, () => {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  border-radius: var(--image-preview-radius);
+  border-radius: var(--radius-lg);
   background-color: var(--color-bg-sec);
 }
 
@@ -129,7 +129,7 @@ watch(imageUrl, () => {
 .image-preview-error {
   color: var(--color-text-sec);
   text-align: center;
-  padding: var(--modal-body-padding);
+  padding: var(--space-xl);
 }
 
 .image-preview-skeleton {

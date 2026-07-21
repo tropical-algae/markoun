@@ -16,7 +16,7 @@
           :text="currentNotice.message"
           :icon="config.icon"
           :color="config.textColor"
-          font-size="var(--toast-font-size)"
+          font-size="var(--font-size-md)"
         />
       </div>
     </Transition>
@@ -142,7 +142,7 @@ const onLeave = (el: Element, done: () => void) => {
   z-index: var(--toast-z-index);
 
   padding: var(--toast-padding);
-  border-radius: var(--toast-radius);
+  border-radius: var(--radius-md);
 
   max-width: var(--toast-max-width);
   backdrop-filter: blur(var(--toast-backdrop-blur));

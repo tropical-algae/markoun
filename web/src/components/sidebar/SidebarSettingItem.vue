@@ -115,11 +115,11 @@ const commitDraft = () => {
 <style scoped>
 .setting-item {
   display: flex;
-  flex-direction: var(--setting-item-direction);
+  flex-direction: row;
   justify-content: space-between;
-  align-items: var(--setting-item-align-items);
-  gap: var(--setting-item-gap);
-  padding-bottom: var(--setting-item-padding-bottom);
+  align-items: center;
+  gap: var(--space-lg);
+  padding-bottom: var(--space-sm);
 }
 
 .setting-copy {
@@ -137,18 +137,18 @@ const commitDraft = () => {
   display: flex;
   justify-content: flex-end;
   flex-shrink: 0;
-  width: var(--setting-control-width);
+  width: auto;
 }
 
 .setting-control > div {
-  width: var(--setting-control-width);
+  width: auto;
 }
 
 .setting-text-input {
-  width: var(--setting-text-input-current-width);
-  padding: var(--setting-text-input-padding);
-  border: var(--divider-line-width) solid var(--color-line);
-  border-radius: var(--setting-text-input-radius);
+  width: var(--setting-text-input-width);
+  padding: var(--space-xs) var(--space-sm);
+  border: var(--line-width) solid var(--color-line);
+  border-radius: var(--radius-sm);
   background-color: var(--color-bg-field);
   color: var(--color-text-pri);
   font-size: var(--setting-text-input-font-size);
@@ -169,6 +169,6 @@ const commitDraft = () => {
 
 .setting-text-input:disabled {
   cursor: not-allowed;
-  opacity: var(--setting-text-input-disabled-opacity);
+  opacity: var(--opacity-disabled);
 }
 </style>

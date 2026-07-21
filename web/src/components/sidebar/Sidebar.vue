@@ -121,9 +121,9 @@ const sideBtns = computed(() => [
   display: flex;
   flex: 0 0 auto;
   flex-direction: column;
-  gap: var(--layout-sidebar-nav-gap);
+  gap: var(--space-sm);
   justify-content: flex-start;
-  margin-block: var(--layout-sidebar-nav-margin-y);
+  margin-block: var(--space-lg);
 }
 
 .sidebar-nav-button.is-active {

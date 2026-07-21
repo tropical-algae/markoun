@@ -41,5 +41,21 @@ export const readCssNumber = (name: string, fallback: number): number => {
 }
 
 export const readCssLengthPx = (name: string, fallbackPx: number): number => {
-  return readCssNumber(name, fallbackPx)
+  if (typeof window === 'undefined') {
+    return fallbackPx
+  }
+
+  const styles = window.getComputedStyle(document.documentElement)
+  const value = styles.getPropertyValue(name).trim()
+  const parsed = Number.parseFloat(value)
+  if (!Number.isFinite(parsed)) {
+    return fallbackPx
+  }
+
+  if (value.endsWith('rem')) {
+    const rootFontSize = Number.parseFloat(styles.fontSize)
+    return Number.isFinite(rootFontSize) ? parsed * rootFontSize : fallbackPx
+  }
+
+  return parsed
 }

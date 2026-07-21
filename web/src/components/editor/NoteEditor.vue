@@ -23,26 +23,26 @@
       <template #loading>
         <div class="editor-loading-state">
           <BaseSkeleton
-            width="var(--editor-loading-title-width)"
-            height="var(--editor-loading-title-height)"
+            width="var(--skeleton-width-sm)"
+            height="var(--skeleton-text-height-lg)"
             class="editor-skeleton-line"
           />
           <BaseSkeleton
-            height="var(--editor-loading-line-height)"
+            height="var(--skeleton-height-default)"
             class="editor-skeleton-line"
           />
           <BaseSkeleton
-            width="var(--editor-loading-line-short-width)"
-            height="var(--editor-loading-line-height)"
+            width="var(--skeleton-width-md)"
+            height="var(--skeleton-height-default)"
             class="editor-skeleton-line"
           />
           <BaseSkeleton
-            height="var(--editor-loading-line-height)"
+            height="var(--skeleton-height-default)"
             class="editor-skeleton-line"
           />
           <BaseSkeleton
-            width="var(--editor-loading-line-medium-width)"
-            height="var(--editor-loading-line-height)"
+            width="var(--skeleton-width-lg)"
+            height="var(--skeleton-height-default)"
             class="editor-skeleton-line"
           />
         </div>
@@ -165,7 +165,7 @@ const toggleInspector = (mode: InspectMode) => {
   padding: var(--editor-content-padding-y) var(--editor-content-padding-x);
   display: flex;
   flex-direction: column;
-  gap: var(--editor-loading-gap);
+  gap: var(--space-md);
   min-width: 0;
   box-sizing: border-box;
 }

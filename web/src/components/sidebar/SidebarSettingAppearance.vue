@@ -74,20 +74,20 @@ const handleBoolSettingUpdate = (id: string, value: string | boolean) => {
 .theme-options {
   display: flex;
   align-items: center;
-  gap: var(--theme-option-gap);
+  gap: var(--space-sm);
   flex-wrap: wrap;
   flex-shrink: 0;
-  width: var(--theme-options-width);
+  width: auto;
 }
 
 .theme-option {
-  border: var(--divider-line-width) solid var(--color-line);
-  border-radius: var(--theme-option-radius);
+  border: var(--line-width) solid var(--color-line);
+  border-radius: var(--radius-md);
   background: var(--color-bg-field);
   color: var(--color-text-sec);
-  padding: var(--theme-option-padding-y) var(--theme-option-padding-x);
+  padding: var(--space-2xs) var(--space-sm);
   display: inline-flex;
-  flex: var(--theme-option-flex);
+  flex: 0 1 auto;
   align-items: center;
   justify-content: center;
   cursor: pointer;

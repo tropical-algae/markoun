@@ -1,6 +1,8 @@
 .separator-line {
   width: 100%;
   color: var(--color-text-pri);
+  border: none;
+  border-top: 1px solid var(--color-text-pri);
   transition: border-color var(--motion-theme-duration) ease;
 } 
 
@@ -16,12 +18,12 @@
 }
 
 .vertical-line.turn-left {
-  border-left: var(--divider-line-width) solid var(--color-line);
+  border-left: var(--line-width) solid var(--color-line);
   left: 0;
 }
 
 .vertical-line.turn-right {
-  border-right: var(--divider-line-width) solid var(--color-line);
+  border-right: var(--line-width) solid var(--color-line);
   right: 0;
 }
 
@@ -35,6 +37,6 @@
 }
 
 .horizontal-line-top {
-  border-top: var(--divider-line-width) solid var(--color-line);
+  border-top: var(--line-width) solid var(--color-line);
   transition: border-color var(--motion-theme-duration) ease;
 }

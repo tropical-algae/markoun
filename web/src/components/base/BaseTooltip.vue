@@ -131,7 +131,7 @@ const closeTooltip = () => {
   closeTimer = window.setTimeout(() => {
     closeTimer = null
     isRendered.value = false
-  }, readCssTimeMs('--motion-tooltip-duration', 400))
+  }, readCssTimeMs('--motion-slow-duration', 400))
 }
 
 const handleFocusIn = (event: FocusEvent) => {
@@ -181,11 +181,11 @@ onBeforeUnmount(() => {
   width: max-content;
   max-width: var(--tooltip-max-width);
   padding: var(--tooltip-padding);
-  border-radius: var(--tooltip-radius);
+  border-radius: var(--radius-md);
   background-color: var(--color-tooltip-bg);
   color: var(--color-tooltip-text);
   box-shadow: 0 var(--tooltip-shadow-y) var(--tooltip-shadow-blur) var(--color-text-pri-shadow);
-  font-size: var(--tooltip-font-size);
+  font-size: var(--font-size-sm);
   line-height: var(--tooltip-line-height);
   white-space: normal;
   word-break: keep-all;
@@ -199,9 +199,9 @@ onBeforeUnmount(() => {
   will-change: transform, opacity;
   backface-visibility: hidden;
   transition:
-    opacity var(--motion-tooltip-duration) ease,
-    transform var(--motion-tooltip-duration) cubic-bezier(0.16, 1.35, 0.38, 1),
-    visibility var(--motion-tooltip-duration) ease;
+    opacity var(--motion-slow-duration) ease,
+    transform var(--motion-slow-duration) cubic-bezier(0.16, 1.35, 0.38, 1),
+    visibility var(--motion-slow-duration) ease;
 }
 
 .tooltip-bubble.is-open {

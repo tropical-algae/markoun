@@ -54,7 +54,7 @@ const props = defineProps<{
   max-width: 100%;
   min-width: 0;
   min-height: 0;
-  margin-block: var(--sidebar-panel-content-margin-y);
+  margin-block: var(--space-lg);
   box-sizing: border-box;
 }
 
@@ -63,7 +63,7 @@ const props = defineProps<{
   max-width: 100%;
   min-width: 0;
   flex-shrink: 0;
-  padding-block: var(--sidebar-panel-footer-padding-y);
+  padding-block: var(--space-lg);
   overflow-x: hidden;
   box-sizing: border-box;
 }

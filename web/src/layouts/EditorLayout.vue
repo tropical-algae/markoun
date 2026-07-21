@@ -88,7 +88,7 @@ const closeInspector = () => {
   flex-direction: column;
   position: relative;
   min-width: 0;
-  padding-inline: var(--editor-shell-padding-x);
+  padding-inline: var(--space-lg);
   background-color: var(--color-bg-sec);
   overflow: hidden;
   transition: background-color var(--motion-theme-duration) ease;
@@ -119,7 +119,7 @@ const closeInspector = () => {
 .inspector-container {
   height: 100%;
   min-width: 0;
-  padding-inline: var(--editor-inspector-padding-x);
+  padding-inline: var(--space-lg);
   box-sizing: border-box;
   display: flex;
   flex-direction: column;

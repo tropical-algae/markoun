@@ -11,16 +11,16 @@
     <template #loading>
       <div class="inspector-skeleton">
         <BaseSkeleton
-          width="var(--editor-inspector-skeleton-line-short-width)"
-          height="var(--editor-inspector-skeleton-line-height)"
+          width="var(--skeleton-width-sm)"
+          height="var(--skeleton-text-height-sm)"
         />
         <BaseSkeleton
-          width="var(--editor-inspector-skeleton-line-long-width)"
-          height="var(--editor-inspector-skeleton-line-height)"
+          width="var(--skeleton-width-lg)"
+          height="var(--skeleton-text-height-sm)"
         />
         <BaseSkeleton
-          width="var(--editor-inspector-skeleton-line-medium-width)"
-          height="var(--editor-inspector-skeleton-line-height)"
+          width="var(--skeleton-width-md)"
+          height="var(--skeleton-text-height-sm)"
         />
       </div>
     </template>
@@ -49,17 +49,17 @@
     <template #loading>
       <div class="preview-skeleton">
         <BaseSkeleton
-          width="var(--editor-preview-skeleton-title-width)"
-          height="var(--editor-preview-skeleton-title-height)"
+          width="var(--skeleton-width-sm)"
+          height="var(--skeleton-text-height-sm)"
         />
-        <BaseSkeleton height="var(--editor-preview-skeleton-line-height)" />
+        <BaseSkeleton height="var(--skeleton-text-height-sm)" />
         <BaseSkeleton
-          width="var(--editor-preview-skeleton-line-width)"
-          height="var(--editor-preview-skeleton-line-height)"
+          width="var(--skeleton-width-lg)"
+          height="var(--skeleton-text-height-sm)"
         />
         <BaseSkeleton
           height="var(--editor-preview-skeleton-media-height)"
-          radius="var(--editor-preview-skeleton-media-radius)"
+          radius="var(--radius-lg)"
         />
       </div>
     </template>
@@ -95,15 +95,15 @@ const emit = defineEmits<{
   flex-direction: column;
   width: 100%;
   min-width: 0;
-  gap: var(--editor-inspector-skeleton-gap);
+  gap: var(--space-md);
   box-sizing: border-box;
 }
 
 .meta-grid {
   display: grid;
   grid-template-columns: max-content 1fr;
-  row-gap: var(--editor-meta-row-gap);
-  column-gap: var(--editor-meta-column-gap);
+  row-gap: var(--space-sm);
+  column-gap: var(--space-lg);
   align-items: start;
 }
 

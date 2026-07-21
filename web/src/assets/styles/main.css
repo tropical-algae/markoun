@@ -36,21 +36,36 @@
 
   --color-action: #569ce2;
   --color-action-light: #ecf5ff;
-  --color-accent-alt: var(--color-action);
   --brand-logo-aspect-ratio: 60.325 / 70.136;
 
-  --radius-xs: 4px;
-  --radius-sm: 5px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
-  --radius-xl: 10px;
-  --radius-2xl: 12px;
+  --space-2xs: 0.125rem;
+  --space-xs: 0.25rem;
+  --space-compact: 0.375rem;
+  --space-sm: 0.5rem;
+  --space-md: 0.75rem;
+  --space-lg: 1rem;
+  --space-xl: 1.5rem;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
   --radius-image: 15px;
   --radius-pill: 999px;
 
+  --line-width: 1px;
+  --control-line-width: 1.5px;
+  --opacity-disabled: 0.6;
+
+  --font-size-xs: 0.55rem;
+  --font-size-sm: 0.75rem;
+  --font-size-md: 0.9rem;
+  --font-size-lg: 1.15rem;
+  --font-size-xl: 1.25rem;
+  --input-line-height: 1.25;
+
   --motion-soft-duration: 0.2s;
   --motion-medium-duration: 0.3s;
-  --motion-modal-duration: 0.4s;
+  --motion-slow-duration: 0.4s;
   --motion-height-duration: 0.4;
   --motion-height-user-duration: 0.35;
   --motion-toast-enter-duration: 0.4;
@@ -58,7 +73,6 @@
   --motion-spinner-duration: 0.5s;
   --motion-theme-duration: 0.5s;
   --motion-skeleton-duration: 1.35s;
-  --motion-tooltip-duration: 0.4s;
   --soft-swap-y: 4px;
   --async-gate-delay-ms: 150;
   --async-gate-min-visible-ms: 400;
@@ -71,68 +85,27 @@
   --mobile-text-input-font-size: 1rem;
 
   --layout-header-height: 48px;
-  --workspace-chrome-padding-x: 0.5rem;
   --workspace-brand-logo-height: 18px;
-  --workspace-brand-logo-gap: 6px;
   --layout-sidebar-width-default: 250;
   --layout-sidebar-width-min: 240;
   --layout-sidebar-width-max: 500;
   --layout-sidebar-inner-min-width: 220px;
-  --layout-sidebar-rail-padding-x: 0.5rem;
-  --layout-sidebar-nav-gap: 0.5rem;
-  --layout-sidebar-nav-margin-y: 1rem;
-  --layout-sub-sidebar-padding-x: 1rem;
   --layout-inspector-width-default: 250;
   --layout-inspector-width-min: 200;
   --layout-inspector-width-max: 700;
   --layout-mobile-layer-z-index: 30;
   --layout-mobile-editor-padding-y: 18px;
   --layout-mobile-editor-padding-x-min: 14px;
-  --sidebar-panel-content-margin-y: 1rem;
-  --sidebar-panel-footer-padding-y: 1rem;
-  --sidebar-section-margin-bottom: 1.5rem;
-  --sidebar-section-title-margin-bottom: 0.5rem;
-  --sidebar-toolbar-gap: 0.5rem;
-  --sidebar-toolbar-padding-y: 0.5rem;
-  --sidebar-form-gap: 0.25rem;
-  --sidebar-form-margin-bottom: 1rem;
-  --sidebar-footer-row-gap: 0.25rem;
-  --sidebar-settings-list-extra-gap: 0.5rem;
 
   --editor-content-max-width: 800px;
   --editor-content-padding-y: 30px;
   --editor-content-padding-x-min: 20px;
-  --editor-shell-padding-x: 1rem;
   --editor-font-size: 16px;
   --editor-line-height: 1.6;
   --editor-async-gate-delay-ms: 0;
-  --editor-header-actions-gap: 8px;
-  --editor-header-side-padding-x: 0.25rem;
-  --editor-header-title-padding-x: 1rem;
-  --editor-loading-gap: 14px;
-  --editor-loading-title-width: 48%;
-  --editor-loading-title-height: 1.15rem;
-  --editor-loading-line-height: 0.95rem;
-  --editor-loading-line-short-width: 62%;
-  --editor-loading-line-medium-width: 78%;
-  --editor-inspector-content-margin-top: 12px;
-  --editor-inspector-padding-x: 1rem;
   --editor-inspector-meta-font-size: 0.875em;
-  --editor-inspector-skeleton-gap: 12px;
-  --editor-inspector-skeleton-line-height: 0.85rem;
-  --editor-inspector-skeleton-line-short-width: 46%;
-  --editor-inspector-skeleton-line-medium-width: 52%;
-  --editor-inspector-skeleton-line-long-width: 68%;
-  --editor-preview-skeleton-title-width: 42%;
-  --editor-preview-skeleton-title-height: 0.9rem;
-  --editor-preview-skeleton-line-height: 0.85rem;
-  --editor-preview-skeleton-line-width: 74%;
   --editor-preview-skeleton-media-height: 180px;
-  --editor-preview-skeleton-media-radius: var(--radius-2xl);
-  --editor-meta-row-gap: 8px;
-  --editor-meta-column-gap: 16px;
   --editor-meta-value-min-width: 40px;
-  --editor-action-pending-opacity: 0.55;
   --markdown-table-margin-y: 1em;
   --markdown-table-cell-padding: 0.15rem 0.5rem;
 
@@ -142,35 +115,21 @@
   --modal-max-height: 90vh;
   --modal-card-current-max-width: var(--modal-max-width);
   --modal-card-current-max-height: var(--modal-max-height);
-  --modal-radius: var(--radius-2xl);
   --modal-card-shadow-y: 10px;
   --modal-card-shadow-blur: 40px;
   --modal-z-index: 999;
   --modal-header-padding: 10px 24px;
-  --modal-body-padding: 24px;
-  --modal-body-current-padding: var(--modal-body-padding);
+  --modal-body-current-padding: var(--space-xl);
   --modal-mobile-viewport-gap: 14px;
   --modal-mobile-body-padding: 18px;
-  --modal-form-field-gap: 0.5rem;
-  --modal-form-field-gap-lg: 1.5rem;
-  --modal-hint-margin-bottom: 1rem;
-  --modal-actions-gap: 0.5rem;
-  --modal-button-padding-y: 0;
   --modal-motion-y: 10px;
 
   --icon-button-size: 28px;
-  --icon-button-mobile-size: 28px;
-  --icon-button-padding: 6px;
-  --icon-button-radius: var(--radius-sm);
 
   --tooltip-z-index: 40;
-  --tooltip-gap: 8px;
   --tooltip-padding: 6px 9px;
-  --tooltip-radius: var(--radius-lg);
-  --tooltip-font-size: 0.72rem;
   --tooltip-line-height: 1.2;
   --tooltip-max-width: 180px;
-  --tooltip-viewport-padding: 8px;
   --tooltip-arrow-size: 7px;
   --tooltip-bounce-start-scale: 0.82;
   --tooltip-bounce-end-scale: 1;
@@ -180,31 +139,26 @@
 
   --skeleton-height-default: 1rem;
   --skeleton-radius-default: var(--radius-pill);
+  --skeleton-text-height-xs: 0.7rem;
+  --skeleton-text-height-sm: 0.85rem;
+  --skeleton-text-height-lg: 1.1rem;
+  --skeleton-width-xs: 28%;
+  --skeleton-width-sm: 46%;
+  --skeleton-width-md: 58%;
+  --skeleton-width-lg: 72%;
+  --skeleton-width-xl: 88%;
+  --skeleton-width-full: 100%;
   --skeleton-opacity-min: 0.56;
   --skeleton-opacity-max: 0.88;
 
   --meta-tag-height: 1rem;
   --meta-tag-padding-x: 5px;
-  --meta-tag-radius: var(--radius-xs);
-  --meta-tag-font-size: 0.55rem;
 
   --tree-indent-step: 12px;
   --tree-row-padding-y: 2px;
-  --tree-row-padding-x: 6px;
+  --tree-row-padding-x: var(--space-compact);
   --tree-row-padding: var(--tree-row-padding-y) var(--tree-row-padding-x);
-  --tree-row-radius: var(--radius-sm);
   --tree-icon-size: 1rem;
-  --tree-font-size: 0.8rem;
-  --tree-skeleton-gap: 4px;
-  --tree-skeleton-row-gap: 6px;
-  --tree-skeleton-icon-size: var(--tree-icon-size);
-  --tree-skeleton-icon-radius: var(--radius-xs);
-  --tree-skeleton-text-height: 1rem;
-  --tree-skeleton-text-width: 58%;
-  --tree-skeleton-text-short-width: 54%;
-  --tree-skeleton-text-long-width: 68%;
-  --tree-skeleton-text-radius: var(--radius-md);
-  --tree-toggle-gap: 4px;
   --tree-rename-max-width: 260px;
   --tree-node-text-line-height: 1rem;
   --tree-node-text-slot-padding-y: 1px;
@@ -222,14 +176,9 @@
   --tree-long-press-delay-ms: 600;
   --tree-node-dragging-opacity: 0.45;
 
-  --hint-icon-size: 0.7rem;
-  --hint-font-size: 0.7rem;
-  --hint-gap: 6px;
 
-  --input-radius: var(--radius-lg);
   --control-focus-ring-size: 3px;
   --choice-checkbox-size: 14px;
-  --choice-checkbox-radius: var(--radius-xs);
   --choice-check-width: 3px;
   --choice-check-height: 8px;
   --switch-width: 34px;
@@ -241,38 +190,22 @@
   --filled-input-padding: 7px 12px;
   --filled-input-label-padding-x: 14px;
   --filled-input-label-top: -14px;
-  --filled-input-label-left: 0px;
-  --filled-input-label-height: 28px;
-  --filled-input-label-font-size: 0.75rem;
+  --filled-input-label-height: 24px;
   --filled-input-label-bg-bleed-bottom: -20px;
-  --filled-input-content-font-size: 0.9rem;
-  --filled-input-content-line-height: 1.25;
-  --underlined-input-gap: 6px;
-  --underlined-input-padding-bottom: 4px;
+  --filled-input-content-font-size: var(--font-size-md);
   --underlined-input-content-font-size: inherit;
-  --underlined-input-content-line-height: 1.25;
   --underlined-input-letter-spacing: 0.5px;
-  --underlined-input-line-height: 1px;
   --underlined-input-placeholder-opacity: 0.5;
-  --underlined-input-disabled-opacity: 0.5;
-  --divider-line-width: 1px;
   --resize-line-width: 2px;
-  --password-hint-opacity-duration: 0.2s;
 
-  --button-radius: var(--radius-md);
   --ghost-button-padding: 2px 16px;
-  --ghost-button-outline-width: 1px;
-  --ghost-button-border-width: 1.5px;
   --ghost-button-bg-bleed: -20px;
-  --ghost-button-disabled-opacity: 0.7;
   --ghost-button-spinner-size: 0.85rem;
   --ghost-button-spinner-border-width: 2px;
 
   --toast-bottom: 42px;
   --toast-z-index: 9999;
   --toast-padding: 10px 16px;
-  --toast-radius: var(--radius-lg);
-  --toast-font-size: 0.9rem;
   --toast-shadow-blur: 15px;
   --toast-backdrop-blur: 2px;
   --toast-max-width: 80vw;
@@ -283,20 +216,8 @@
   --toast-motion-scale-from: 0.95;
 
   --upload-dropzone-height: 180px;
-  --upload-dropzone-border-width: 1.5px;
-  --upload-section-gap: 1rem;
   --upload-icon-size: 42px;
-  --upload-icon-margin-bottom: 1rem;
-  --upload-title-font-size: 1.1rem;
-  --upload-title-margin-bottom: 0.25rem;
-  --upload-subtitle-font-size: 0.9rem;
-  --upload-progress-font-size: 0.9rem;
-  --upload-content-padding-x: 20px;
-  --upload-state-row-gap: 1rem;
-  --upload-state-row-margin-bottom: 0.25rem;
   --progress-track-height: 6px;
-  --progress-track-radius: 3px;
-  --progress-transition-duration: 0.2s;
 
   --auth-wrapper-padding: 0 80px 80px 80px;
   --auth-wrapper-mobile-padding: 0 16px 18px 16px;
@@ -308,17 +229,14 @@
   --auth-brand-mobile-font-size: 1.55rem;
   --auth-brand-current-font-size: var(--auth-brand-font-size);
   --auth-brand-logo-height: 32px;
-  --auth-brand-logo-gap: 10px;
   --auth-container-padding: 20px;
   --auth-container-mobile-padding: 18px;
   --auth-container-current-padding: var(--auth-container-padding);
   --auth-container-current-align-items: center;
   --auth-container-radius-large: 120px;
-  --auth-container-radius-small: var(--radius-sm);
-  --auth-container-mobile-radius: var(--radius-2xl);
-  --auth-container-current-radius-top-left: var(--auth-container-radius-small);
+  --auth-container-current-radius-top-left: var(--radius-sm);
   --auth-container-current-radius-top-right: var(--auth-container-radius-large);
-  --auth-container-current-radius-bottom-right: var(--auth-container-radius-small);
+  --auth-container-current-radius-bottom-right: var(--radius-sm);
   --auth-container-current-radius-bottom-left: var(--auth-container-radius-large);
   --auth-panel-max-width: 480px;
   --auth-panel-min-width: 300px;
@@ -330,84 +248,27 @@
   --auth-title-mobile-margin-bottom: 34px;
   --auth-title-current-margin-bottom: var(--auth-title-margin-bottom);
   --auth-title-letter-spacing: -1px;
-  --auth-field-gap: 1rem;
   --auth-links-margin-bottom: 3rem;
   --auth-links-direction: row;
   --auth-links-align-items: stretch;
   --auth-links-gap: 0;
+  --auth-register-order: 0;
+  --auth-hr-margin-block: 1rem;
   --auth-submit-width: 220px;
   --auth-submit-current-width: var(--auth-submit-width);
-  --auth-submit-padding: 8px;
-  --auth-register-placeholder-width: 58%;
-  --auth-register-placeholder-height: 0.9rem;
   --setting-text-input-width: 120px;
-  --setting-text-input-current-width: var(--setting-text-input-width);
-  --setting-text-input-padding: 0.25rem 0.5rem;
-  --setting-text-input-font-size: 0.875rem;
+  --setting-text-input-font-size: var(--font-size-md);
   --setting-text-input-line-height: 1.5;
-  --setting-text-input-radius: var(--radius-sm);
-  --setting-text-input-disabled-opacity: 0.65;
-  --setting-item-padding-bottom: 0.5rem;
-  --setting-item-direction: row;
-  --setting-item-align-items: center;
-  --setting-item-gap: var(--settings-skeleton-gap);
-  --setting-control-width: auto;
   --settings-footer-value-min-width: 88px;
-  --settings-footer-version-skeleton-width: 82%;
-  --settings-footer-status-skeleton-width: 100%;
-  --settings-footer-skeleton-radius: var(--meta-tag-radius);
-  --settings-skeleton-gap: 16px;
-  --settings-skeleton-text-gap: 8px;
-  --settings-skeleton-padding-bottom: 14px;
-  --settings-skeleton-title-width: 46%;
-  --settings-skeleton-title-height: 0.85rem;
-  --settings-skeleton-desc-height: 0.7rem;
   --settings-skeleton-control-height: 1.8rem;
-  --settings-skeleton-control-width: 32%;
 
-  --search-result-gap: 8px;
-  --search-result-padding: 10px;
-  --search-result-radius: var(--radius-lg);
-  --search-result-inset-line-width: 1px;
   --search-result-snippet-line-height: 1.45;
   --search-result-line-width: 34px;
-  --search-empty-padding: 22px;
   --search-async-gate-delay-ms: 0;
-  --search-skeleton-gap: 10px;
-  --search-skeleton-title-width: 58%;
-  --search-skeleton-title-height: 0.85rem;
-  --search-skeleton-line-height: 0.75rem;
-  --search-skeleton-line-short-width: 46%;
-  --search-skeleton-line-long-width: 72%;
 
-  --theme-option-radius: var(--radius-md);
-  --theme-option-padding-x: 8px;
-  --theme-option-padding-y: 2px;
-  --theme-option-gap: 8px;
-  --theme-options-width: auto;
-  --theme-option-flex: 0 1 auto;
 
-  --profile-card-padding: 14px;
-  --profile-skeleton-name-width: 52%;
-  --profile-skeleton-name-height: 1.1rem;
-  --profile-skeleton-label-height: 0.7rem;
-  --profile-skeleton-value-height: 0.8rem;
-  --profile-skeleton-scopes-label-width: 88%;
-  --profile-skeleton-scope-primary-width: 34%;
-  --profile-skeleton-scope-secondary-width: 27%;
-  --profile-skeleton-status-label-width: 70%;
-  --profile-skeleton-status-value-width: 42%;
-  --profile-skeleton-joined-label-width: 78%;
-  --profile-skeleton-joined-value-width: 64%;
-  --profile-meta-gap-x: 12px;
-  --profile-meta-gap-y: 8px;
-  --profile-meta-margin-top: 1rem;
   --profile-name-line-height: 1.25;
-  --profile-email-line-height: 1.35;
-  --profile-meta-value-line-height: 1.35;
-  --profile-password-fields-margin-bottom: 1rem;
-  --profile-password-input-gap: 1rem;
-  --profile-password-hint-gap: 0.25rem;
+  --profile-meta-line-height: 1.35;
 
   --image-preview-default-width: 640;
   --image-preview-default-height: 420;
@@ -418,7 +279,6 @@
   --image-preview-shell-min-width: min(82vw, 320px);
   --image-preview-min-stage-width: 220;
   --image-preview-min-stage-height: 180;
-  --image-preview-radius: var(--radius-xl);
 }
 
 :root[data-theme="dark"] {
@@ -440,19 +300,14 @@
 
   /* 阴影色 */
   --color-bg-pri-shadow: rgba(45, 35, 45, 0.2);
-  --color-bg-error-shadow: rgba(244, 107, 107, 0.2);
-  --color-bg-warning-shadow: rgba(243, 162, 69, 0.2);
-  --color-text-pri-shadow: rgba(22, 22, 22, 0.2);
 
   --color-action: #daae95;
   --color-action-light: #523c2f;
-  --color-accent-alt: var(--color-action);
 
 }
 
 @media (max-width: 768px) {
   :root {
-    --icon-button-size: var(--icon-button-mobile-size);
     --editor-font-size: var(--mobile-text-input-font-size);
     --filled-input-content-font-size: var(--mobile-text-input-font-size);
     --underlined-input-content-font-size: var(--mobile-text-input-font-size);
@@ -476,16 +331,17 @@
     --auth-brand-current-font-size: var(--auth-brand-mobile-font-size);
     --auth-container-current-padding: var(--auth-container-mobile-padding);
     --auth-container-current-align-items: flex-start;
-    --auth-container-current-radius-top-left: var(--auth-container-mobile-radius);
-    --auth-container-current-radius-top-right: var(--auth-container-mobile-radius);
-    --auth-container-current-radius-bottom-right: var(--auth-container-mobile-radius);
-    --auth-container-current-radius-bottom-left: var(--auth-container-mobile-radius);
+    --auth-container-current-radius-top-left: var(--radius-lg);
+    --auth-container-current-radius-top-right: var(--radius-lg);
+    --auth-container-current-radius-bottom-right: var(--radius-lg);
+    --auth-container-current-radius-bottom-left: var(--radius-lg);
     --auth-panel-current-min-width: 0;
     --auth-title-current-font-size: var(--auth-title-mobile-font-size);
     --auth-title-current-margin-bottom: var(--auth-title-mobile-margin-bottom);
     --auth-links-direction: column;
     --auth-links-align-items: flex-start;
-    --auth-links-gap: var(--hint-gap);
+    --auth-links-gap: var(--space-compact);
+    --auth-register-order: 1;
     --auth-submit-current-width: 100%;
   }
 }

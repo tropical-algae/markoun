@@ -71,13 +71,13 @@ const inspectActions = [
 .editor-header-actions {
   display: flex;
   flex: 0 0 auto;
-  gap: var(--editor-header-actions-gap);
+  gap: var(--space-sm);
 }
 
 .editor-title-slot {
   flex: 1 1 auto;
   min-width: 0;
-  padding-inline: var(--editor-header-title-padding-x);
+  padding-inline: var(--space-lg);
 }
 
 .editor-title-text {
@@ -89,6 +89,6 @@ const inspectActions = [
 }
 
 .icon-btn.is-pending {
-  opacity: var(--editor-action-pending-opacity);
+  opacity: var(--opacity-disabled);
 }
 </style>

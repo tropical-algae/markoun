@@ -134,10 +134,10 @@ const handleUpload = async (file: File) => {
 }
 
 .upload-drop-zone {
-  margin-bottom: var(--upload-section-gap);
-  padding-inline: var(--upload-content-padding-x);
-  border: var(--upload-dropzone-border-width) dashed var(--color-line);
-  border-radius: var(--radius-2xl);
+  margin-bottom: var(--space-lg);
+  padding-inline: var(--space-xl);
+  border: var(--control-line-width) dashed var(--color-line);
+  border-radius: var(--radius-lg);
   background-color: var(--color-bg-sec);
   height: var(--upload-dropzone-height);
   display: flex;
@@ -167,39 +167,39 @@ const handleUpload = async (file: File) => {
   width: var(--upload-icon-size);
   height: var(--upload-icon-size);
   fill: var(--color-text-sec);
-  margin-bottom: var(--upload-icon-margin-bottom);
+  margin-bottom: var(--space-lg);
 }
 
 .upload-drop-zone .upload-title {
   max-width: 100%;
   color: var(--color-action);
   font-weight: bold;
-  font-size: var(--upload-title-font-size);
-  margin-bottom: var(--upload-title-margin-bottom);
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--space-xs);
 }
 
 .upload-drop-zone .upload-subtitle {
   max-width: 100%;
   color: var(--color-text-sec);
-  font-size: var(--upload-subtitle-font-size);
+  font-size: var(--font-size-md);
   margin: 0;
   overflow-wrap: anywhere;
 }
 
 .upload-state {
-  margin-bottom: var(--upload-section-gap);
+  margin-bottom: var(--space-lg);
   height: var(--upload-dropzone-height);
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 0 var(--upload-content-padding-x);
+  padding: 0 var(--space-xl);
 }
 
 .upload-progress-row {
   display: flex;
   align-items: center;
-  gap: var(--upload-state-row-gap);
-  margin-bottom: var(--upload-state-row-margin-bottom);
+  gap: var(--space-lg);
+  margin-bottom: var(--space-xs);
 }
 
 .upload-progress-body {
@@ -211,12 +211,12 @@ const handleUpload = async (file: File) => {
 .upload-progress-labels {
   display: flex;
   justify-content: space-between;
-  margin-bottom: var(--upload-state-row-margin-bottom);
+  margin-bottom: var(--space-xs);
 }
 
 .upload-file-text {
   color: var(--color-text-sec);
-  font-size: var(--upload-progress-font-size);
+  font-size: var(--font-size-md);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -228,19 +228,19 @@ const handleUpload = async (file: File) => {
 
 .progress-text {
   color: var(--color-text-sec);
-  font-size: var(--upload-progress-font-size);
+  font-size: var(--font-size-md);
 }
 
 .progress-track {
   height: var(--progress-track-height);
   background-color: var(--color-bg-field);
-  border-radius: var(--progress-track-radius);
+  border-radius: var(--radius-pill);
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
   background-color: var(--color-action);
-  transition: width var(--progress-transition-duration) linear;
+  transition: width var(--motion-soft-duration) linear;
 }
 </style>

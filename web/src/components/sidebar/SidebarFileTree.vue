@@ -139,15 +139,15 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   transition: background-color var(--motion-soft-duration) ease;
-  border-radius: var(--tree-row-radius);
+  border-radius: var(--radius-sm);
 }
 
 .file-tree-list {
-  margin-bottom: var(--sidebar-section-margin-bottom);
+  margin-bottom: var(--space-xl);
 }
 
 .file-tree-root.is-root-dragover {
   background-color: var(--color-action-light);
-  box-shadow: inset 0 0 0 var(--divider-line-width) var(--color-action);
+  box-shadow: inset 0 0 0 var(--line-width) var(--color-action);
 }
 </style>

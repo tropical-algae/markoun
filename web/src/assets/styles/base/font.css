@@ -1,22 +1,22 @@
 
 .f-xs {
-    font-size: 0.55rem;
+    font-size: var(--font-size-xs);
 }
 
 .f-s {
-    font-size: 0.75rem;
+    font-size: var(--font-size-sm);
 }
 
 .f-m {
-    font-size: 0.9rem;
+    font-size: var(--font-size-md);
 }
 
 .f-l {
-    font-size: 1.15rem;
+    font-size: var(--font-size-lg);
 }
 
 .f-xl {
-    font-size: 1.25rem;
+    font-size: var(--font-size-xl);
 }
 
 .fc-pri {

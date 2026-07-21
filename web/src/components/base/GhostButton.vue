@@ -65,10 +65,10 @@ const visibleLoading = useDelayedVisibility(
   opacity: 1;
 
   background-color: transparent;
-  box-shadow: inset 0 0 0 var(--ghost-button-outline-width) var(--btn-main-color);
+  box-shadow: inset 0 0 0 var(--line-width) var(--btn-main-color);
 
   color: var(--btn-main-color);
-  border-radius: var(--button-radius);
+  border-radius: var(--radius-md);
   overflow: hidden;
 
   cursor: pointer;
@@ -153,7 +153,7 @@ const visibleLoading = useDelayedVisibility(
 }
 
 .ghost-btn:disabled {
-  opacity: var(--ghost-button-disabled-opacity);
+  opacity: var(--opacity-disabled);
   cursor: not-allowed;
   color: var(--btn-main-color);
 }

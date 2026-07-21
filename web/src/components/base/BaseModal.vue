@@ -135,7 +135,7 @@ onBeforeUnmount(() => {
 .base-modal-card {
   background-color: var(--color-bg-pri);
   box-shadow: 0 var(--modal-card-shadow-y) var(--modal-card-shadow-blur) var(--color-bg-pri-shadow);
-  border-radius: var(--modal-radius);
+  border-radius: var(--radius-lg);
   overflow: hidden;
 
   width: fit-content;
@@ -152,7 +152,7 @@ onBeforeUnmount(() => {
 
 .base-modal-header {
   padding: var(--modal-header-padding);
-  border-bottom: var(--divider-line-width) solid var(--color-line);
+  border-bottom: var(--line-width) solid var(--color-line);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -173,15 +173,15 @@ onBeforeUnmount(() => {
 
 .modal-enter-active,
 .modal-leave-active {
-  transition: opacity var(--motion-modal-duration) ease;
+  transition: opacity var(--motion-slow-duration) ease;
 }
 
 .modal-enter-active .base-modal-card {
-  animation: card-enter var(--motion-modal-duration) ease forwards;
+  animation: card-enter var(--motion-slow-duration) ease forwards;
 }
 
 .modal-leave-active .base-modal-card {
-  animation: card-leave var(--motion-modal-duration) ease-in forwards;
+  animation: card-leave var(--motion-slow-duration) ease-in forwards;
 }
 
 .modal-enter-from,

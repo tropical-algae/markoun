@@ -81,7 +81,7 @@ const emit = defineEmits<{
 
 .inspector-panel-body {
   flex: 1;
-  margin-top: var(--editor-inspector-content-margin-top);
+  margin-top: var(--space-md);
   content-visibility: auto;
   contain: layout paint style;
   overflow-y: scroll;

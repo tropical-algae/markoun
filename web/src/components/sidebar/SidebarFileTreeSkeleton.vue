@@ -14,14 +14,14 @@
       <BaseSkeleton
         class="file-tree-skeleton-icon"
         width="auto"
-        height="var(--tree-skeleton-icon-size)"
-        radius="var(--tree-skeleton-icon-radius)"
+        height="var(--tree-icon-size)"
+        radius="var(--radius-sm)"
       />
       <BaseSkeleton
         class="file-tree-skeleton-text"
         :width="resolveTextWidth(index)"
-        height="var(--tree-skeleton-text-height)"
-        radius="var(--tree-skeleton-text-radius)"
+        height="var(--tree-node-text-line-height)"
+        radius="var(--radius-md)"
       />
     </div>
   </div>
@@ -45,12 +45,12 @@ const rowStyle = computed(() => {
 
 const resolveTextWidth = (index: number) => {
   if (isNested.value) {
-    return 'var(--tree-skeleton-text-width)'
+    return 'var(--skeleton-width-md)'
   }
 
   return index % 2 === 0
-    ? 'var(--tree-skeleton-text-long-width)'
-    : 'var(--tree-skeleton-text-short-width)'
+    ? 'var(--skeleton-width-lg)'
+    : 'var(--skeleton-width-sm)'
 }
 </script>
 
@@ -60,18 +60,18 @@ const resolveTextWidth = (index: number) => {
   flex-direction: column;
   width: 100%;
   min-width: 0;
-  gap: var(--tree-skeleton-gap);
+  gap: var(--space-xs);
   box-sizing: border-box;
 }
 
 .file-tree-skeleton-list.is-root {
-  padding-block: var(--sidebar-toolbar-padding-y);
+  padding-block: var(--space-sm);
 }
 
 .file-tree-skeleton-row {
   display: flex;
   align-items: center;
-  gap: var(--tree-skeleton-row-gap);
+  gap: var(--space-compact);
   padding: var(--tree-row-padding);
   box-sizing: border-box;
   min-width: 0;
@@ -83,7 +83,7 @@ const resolveTextWidth = (index: number) => {
 }
 
 .file-tree-skeleton-row.is-nested {
-  gap: var(--hint-gap);
+  gap: var(--space-compact);
   min-height: var(--tree-node-row-height);
   padding-left: calc(
     var(--tree-depth) * var(--tree-indent-step) +

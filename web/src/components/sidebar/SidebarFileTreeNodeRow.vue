@@ -112,7 +112,7 @@ const handleRenameInput = (event: Event) => {
 
 <style scoped>
 .node-wrapper {
-  font-size: var(--tree-font-size);
+  font-size: var(--font-size-sm);
   color: var(--color-text-pri);
   width: 100%;
   box-sizing: border-box;
@@ -123,11 +123,11 @@ const handleRenameInput = (event: Event) => {
   position: relative;
   padding: var(--tree-row-padding);
   cursor: pointer;
-  border-radius: var(--tree-row-radius);
+  border-radius: var(--radius-sm);
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  gap: var(--hint-gap);
+  gap: var(--space-compact);
   width: 100%;
   min-width: 0;
   background-color: transparent;
@@ -152,7 +152,7 @@ const handleRenameInput = (event: Event) => {
   position: absolute;
   inset: 0;
   z-index: 1;
-  border: var(--divider-line-width) solid transparent;
+  border: var(--line-width) solid transparent;
   border-radius: inherit;
   box-sizing: border-box;
   content: "";
@@ -193,7 +193,7 @@ const handleRenameInput = (event: Event) => {
   padding: 0;
   display: inline-flex;
   align-items: center;
-  gap: var(--tree-toggle-gap);
+  gap: var(--space-xs);
   cursor: pointer;
 }
 
@@ -266,7 +266,7 @@ const handleRenameInput = (event: Event) => {
   outline: none;
   padding: 0 var(--tree-node-text-padding-x);
   margin: 0;
-  border-radius: var(--tree-row-radius);
+  border-radius: var(--radius-sm);
   color: var(--color-text-pri);
   font-family: inherit;
   font-size: var(--tree-rename-input-font-size);

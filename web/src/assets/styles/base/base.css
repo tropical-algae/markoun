@@ -19,12 +19,12 @@
   justify-content: center;
   background-color: var(--color-text-sec);
   color: var(--color-text-inverse);
-  font-size: var(--meta-tag-font-size);
+  font-size: var(--font-size-xs);
   font-weight: 700;
   min-height: var(--meta-tag-height);
   padding: 0 var(--meta-tag-padding-x);
   margin: 0;
-  border-radius: var(--meta-tag-radius);
+  border-radius: var(--radius-sm);
   white-space: nowrap;
   vertical-align: middle;
   box-sizing: border-box;
@@ -33,7 +33,7 @@
 
 .container-header {
   height: var(--layout-header-height);
-  border-bottom: var(--divider-line-width) solid var(--color-line);
+  border-bottom: var(--line-width) solid var(--color-line);
   box-sizing: border-box;
   display: flex;
   align-items: center;
@@ -44,11 +44,11 @@
 }
 
 .sidebar-section {
-  margin-bottom: var(--sidebar-section-margin-bottom);
+  margin-bottom: var(--space-xl);
 }
 
 .sidebar-section-title {
-  margin-bottom: var(--sidebar-section-title-margin-bottom);
+  margin-bottom: var(--space-sm);
   color: var(--color-text-pri);
   font-weight: 700;
   text-transform: uppercase;
@@ -59,30 +59,30 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  gap: var(--sidebar-toolbar-gap);
-  padding-block: var(--sidebar-toolbar-padding-y);
+  gap: var(--space-sm);
+  padding-block: var(--space-sm);
 }
 
 .modal-field {
-  margin-bottom: var(--modal-form-field-gap);
+  margin-bottom: var(--space-sm);
 }
 
 .modal-field.is-last {
-  margin-bottom: var(--modal-form-field-gap-lg);
+  margin-bottom: var(--space-xl);
 }
 
 .modal-hint {
-  margin-bottom: var(--modal-hint-margin-bottom);
+  margin-bottom: var(--space-lg);
 }
 
 .modal-actions {
   display: flex;
   justify-content: flex-end;
-  gap: var(--modal-actions-gap);
+  gap: var(--space-sm);
 }
 
 .modal-button {
-  padding-block: var(--modal-button-padding-y);
+  padding-block: 0;
 }
 
 .choice-control,
@@ -98,13 +98,13 @@
 }
 
 .choice-control {
-  gap: var(--hint-gap);
+  gap: var(--space-compact);
 }
 
 .choice-control.is-disabled,
 .switch-control.is-disabled {
   cursor: not-allowed;
-  opacity: 0.55;
+  opacity: var(--opacity-disabled);
 }
 
 .choice-input,
@@ -121,8 +121,8 @@
   width: var(--choice-checkbox-size);
   height: var(--choice-checkbox-size);
   flex-shrink: 0;
-  border: 1.5px solid var(--color-line);
-  border-radius: var(--choice-checkbox-radius);
+  border: var(--control-line-width) solid var(--color-line);
+  border-radius: var(--radius-sm);
   background-color: var(--color-bg-field);
   box-sizing: border-box;
   transition:
@@ -139,7 +139,7 @@
   width: var(--choice-check-width);
   height: var(--choice-check-height);
   border: solid var(--color-text-inverse);
-  border-width: 0 1.5px 1.5px 0;
+  border-width: 0 var(--control-line-width) var(--control-line-width) 0;
   opacity: 0;
   transform: translate(-50%, -50%) rotate(45deg) scale(0.75);
   transition:
@@ -167,7 +167,7 @@
   width: var(--switch-width);
   height: var(--switch-height);
   flex-shrink: 0;
-  border: 1.5px solid var(--color-line);
+  border: var(--control-line-width) solid var(--color-line);
   border-radius: var(--radius-pill);
   background-color: var(--color-bg-field);
   box-sizing: border-box;

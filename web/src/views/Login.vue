@@ -32,8 +32,8 @@
           >
             <template #loading>
               <BaseSkeleton
-                width="var(--auth-register-placeholder-width)"
-                height="var(--auth-register-placeholder-height)"
+                width="var(--skeleton-width-md)"
+                height="var(--skeleton-text-height-sm)"
               />
             </template>
 
@@ -125,6 +125,10 @@ onMounted(async () => {
   letter-spacing: var(--auth-title-letter-spacing);
 }
 
+.auth-field {
+  margin-bottom: var(--space-lg);
+}
+
 .auth-form .links-row {
   display: flex;
   flex-direction: var(--auth-links-direction);
@@ -134,8 +138,8 @@ onMounted(async () => {
   margin-bottom: var(--auth-links-margin-bottom);
 }
 
-.auth-field {
-  margin-bottom: var(--auth-field-gap);
+.auth-form .separator-line {
+  margin-block: var(--auth-hr-margin-block);
 }
 
 .auth-form .links-row button,
@@ -150,15 +154,21 @@ onMounted(async () => {
 }
 
 .auth-register-slot {
+  order: var(--auth-register-order);
+  align-self: stretch;
   flex: 1 1 0;
   min-width: 0;
+  min-height: var(--skeleton-height-default);
   padding: 0;
   margin: 0;
 }
 
 .auth-register-gate {
+  display: flex;
+  align-items: center;
   width: 100%;
   min-width: 0;
+  min-height: inherit;
 }
 
 .auth-form .links-row button::after {
@@ -167,7 +177,7 @@ onMounted(async () => {
   left: 0;
   bottom: 0;
   width: 100%;
-  height: var(--divider-line-width);
+  height: var(--line-width);
   background-color: var(--color-text-sec);
 
   transform: scaleX(0);
@@ -176,9 +186,9 @@ onMounted(async () => {
 }
 
 .register-link-placeholder {
-  display: inline-block;
-  width: var(--auth-register-placeholder-width);
-  height: var(--auth-register-placeholder-height);
+  display: block;
+  width: var(--skeleton-width-md);
+  height: var(--skeleton-text-height-sm);
 }
 
 .auth-submit-row {
@@ -188,7 +198,7 @@ onMounted(async () => {
 
 .auth-submit-button {
   width: var(--auth-submit-current-width);
-  padding: var(--auth-submit-padding);
+  padding: var(--space-sm);
 }
 
 @media (hover: hover) {

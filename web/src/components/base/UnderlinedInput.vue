@@ -78,7 +78,7 @@ const handleInput = (event: Event) => {
 .underlined-input-wrapper {
   display: flex;
   flex-direction: column;
-  gap: var(--underlined-input-gap);
+  gap: var(--space-compact);
   width: 100%;
   position: relative;
 }
@@ -98,7 +98,7 @@ const handleInput = (event: Event) => {
 .underlined-input-container {
   position: relative;
   width: 100%;
-  padding-bottom: var(--underlined-input-padding-bottom);
+  padding-bottom: var(--space-xs);
 }
 
 .underlined-input-content {
@@ -114,7 +114,7 @@ const handleInput = (event: Event) => {
   font-family: inherit;
   font-size: var(--underlined-input-content-font-size);
   font-weight: 400;
-  line-height: var(--underlined-input-content-line-height);
+  line-height: var(--input-line-height);
   letter-spacing: var(--underlined-input-letter-spacing);
   box-sizing: border-box;
   -webkit-appearance: none;
@@ -131,7 +131,7 @@ const handleInput = (event: Event) => {
   bottom: 0;
   left: 0;
   width: 100%;
-  height: var(--underlined-input-line-height);
+  height: var(--line-width);
   background-color: var(--color-line);
 }
 
@@ -140,7 +140,7 @@ const handleInput = (event: Event) => {
   bottom: 0;
   left: 0;
   width: 100%;
-  height: var(--underlined-input-line-height);
+  height: var(--line-width);
   background-color: var(--color-text-pri);
 
   transform: scaleX(0);
@@ -161,7 +161,7 @@ const handleInput = (event: Event) => {
 }
 
 .underlined-input-wrapper.is-disabled {
-  opacity: var(--underlined-input-disabled-opacity);
+  opacity: var(--opacity-disabled);
   cursor: not-allowed;
 }
 
@@ -171,7 +171,7 @@ const handleInput = (event: Event) => {
 }
 
 .underlined-input-wrapper.is-disabled .underlined-input-line-base {
-  border-bottom: var(--underlined-input-line-height) dashed var(--color-line);
+  border-bottom: var(--line-width) dashed var(--color-line);
   background-color: transparent;
 }
 

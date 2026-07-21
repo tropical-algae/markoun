@@ -96,15 +96,15 @@ const updatePassword = async () => {
 
 <style scoped>
 .password-fields {
-  margin-bottom: var(--profile-password-fields-margin-bottom);
+  margin-bottom: var(--space-lg);
 }
 
 .password-input {
-  margin-bottom: var(--profile-password-input-gap);
+  margin-bottom: var(--space-lg);
 }
 
 .password-input.is-confirm {
-  margin-bottom: var(--profile-password-hint-gap);
+  margin-bottom: var(--space-xs);
 }
 
 .user-action-button {
@@ -113,7 +113,7 @@ const updatePassword = async () => {
 
 .password-hint {
   opacity: 0;
-  transition: opacity var(--password-hint-opacity-duration) ease;
+  transition: opacity var(--motion-soft-duration) ease;
 }
 
 .password-hint.is-visible {

@@ -70,9 +70,9 @@ const {
 
 .sidebar-container {
   z-index: 2;
-  padding-inline: var(--layout-sidebar-rail-padding-x);
+  padding-inline: var(--space-sm);
   background-color: var(--color-bg-sec);
-  border-right: var(--divider-line-width) solid var(--color-line);
+  border-right: var(--line-width) solid var(--color-line);
   transition:
     background-color var(--motion-theme-duration) ease,
     border-color var(--motion-theme-duration) ease;
@@ -96,7 +96,7 @@ const {
   flex-direction: column;
   height: 100%;
   min-width: var(--layout-sidebar-inner-min-width);
-  padding-inline: var(--layout-sub-sidebar-padding-x);
+  padding-inline: var(--space-lg);
   white-space: nowrap;
   box-sizing: border-box;
 }
@@ -119,7 +119,7 @@ const {
     align-items: center;
     flex-shrink: 0;
     height: 100%;
-    border-right: var(--divider-line-width) solid var(--color-line);
+    border-right: var(--line-width) solid var(--color-line);
     border-bottom: 0;
   }
 

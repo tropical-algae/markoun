@@ -63,7 +63,7 @@ const handleInput = (event: Event) => {
 
 .filled-input-wrapper {
   position: relative;
-  border-radius: var(--input-radius);
+  border-radius: var(--radius-md);
   padding: var(--filled-input-padding);
   transition: background-color var(--motion-medium-duration) ease;
   background-color: var(--color-bg-field);
@@ -81,12 +81,12 @@ const handleInput = (event: Event) => {
   position: absolute;
   padding: 0 var(--filled-input-label-padding-x);
   top: var(--filled-input-label-top);
-  left: var(--filled-input-label-left);
+  left: 0;
   height: var(--filled-input-label-height);
   display: flex;
   align-items: center;
   pointer-events: none;
-  font-size: var(--filled-input-label-font-size);
+  font-size: var(--font-size-sm);
   color: var(--color-text-sec);
   font-weight: 600;
   z-index: 1;
@@ -99,7 +99,7 @@ const handleInput = (event: Event) => {
   bottom: var(--filled-input-label-bg-bleed-bottom);
   left: 0;
   right: 0;
-  border-radius: var(--input-radius);
+  border-radius: var(--radius-md);
   pointer-events: none;
   z-index: -1;
   transition: background-color var(--motion-medium-duration) ease;
@@ -117,8 +117,8 @@ const handleInput = (event: Event) => {
   background: transparent;
   outline: none;
   font-size: var(--filled-input-content-font-size);
-  line-height: var(--filled-input-content-line-height);
-  border-radius: var(--input-radius);
+  line-height: var(--input-line-height);
+  /* border-radius: var(--radius-md); */
   color: var(--color-text-pri);
   font-family: inherit;
   box-sizing: border-box;

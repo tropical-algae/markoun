@@ -8,42 +8,42 @@
         <template #loading>
           <div class="user-profile-shell">
             <BaseSkeleton
-              width="var(--profile-skeleton-name-width)"
-              height="var(--profile-skeleton-name-height)"
+              width="var(--skeleton-width-md)"
+              height="var(--skeleton-text-height-lg)"
             />
 
             <div class="user-meta-shell user-meta-shell-loading">
               <BaseSkeleton
-                width="var(--profile-skeleton-scopes-label-width)"
-                height="var(--profile-skeleton-label-height)"
+                width="var(--skeleton-width-xl)"
+                height="var(--skeleton-text-height-xs)"
               />
               <div class="user-tag-shell">
                 <BaseSkeleton
-                  width="var(--profile-skeleton-scope-primary-width)"
+                  width="var(--skeleton-width-xs)"
                   height="var(--meta-tag-height)"
                 />
                 <BaseSkeleton
-                  width="var(--profile-skeleton-scope-secondary-width)"
+                  width="var(--skeleton-width-xs)"
                   height="var(--meta-tag-height)"
                 />
               </div>
 
               <BaseSkeleton
-                width="var(--profile-skeleton-status-label-width)"
-                height="var(--profile-skeleton-label-height)"
+                width="var(--skeleton-width-lg)"
+                height="var(--skeleton-text-height-xs)"
               />
               <BaseSkeleton
-                width="var(--profile-skeleton-status-value-width)"
-                height="var(--profile-skeleton-value-height)"
+                width="var(--skeleton-width-sm)"
+                height="var(--skeleton-text-height-sm)"
               />
 
               <BaseSkeleton
-                width="var(--profile-skeleton-joined-label-width)"
-                height="var(--profile-skeleton-label-height)"
+                width="var(--skeleton-width-lg)"
+                height="var(--skeleton-text-height-xs)"
               />
               <BaseSkeleton
-                width="var(--profile-skeleton-joined-value-width)"
-                height="var(--profile-skeleton-value-height)"
+                width="var(--skeleton-width-md)"
+                height="var(--skeleton-text-height-sm)"
               />
             </div>
           </div>
@@ -142,11 +142,11 @@ onBeforeUnmount(() => {
   width: 100%;
   box-sizing: border-box;
   border: 0;
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-lg);
   white-space: normal;
   background-color: var(--color-bg-sec);
-  box-shadow: inset 0 0 0 var(--divider-line-width) var(--color-line);
-  padding: var(--profile-card-padding);
+  box-shadow: inset 0 0 0 var(--line-width) var(--color-line);
+  padding: var(--space-lg);
   transition:
     background-color var(--motion-theme-duration) ease,
     box-shadow var(--motion-theme-duration) ease;
@@ -162,26 +162,26 @@ onBeforeUnmount(() => {
 
 .user-email {
   color: var(--color-text-sec);
-  line-height: var(--profile-email-line-height);
+  line-height: var(--profile-meta-line-height);
   overflow-wrap: anywhere;
 }
 
 .user-scopes {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--hint-gap);
+  gap: var(--space-compact);
 }
 
 .user-meta-grid,
 .user-meta-shell {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: var(--profile-meta-gap-y) var(--profile-meta-gap-x);
+  gap: var(--space-sm) var(--space-md);
   align-items: center;
 }
 
 .user-meta-grid {
-  margin-top: var(--profile-meta-margin-top);
+  margin-top: var(--space-lg);
 }
 
 .user-meta-label {
@@ -193,7 +193,7 @@ onBeforeUnmount(() => {
 .user-meta-value {
   min-width: 0;
   color: var(--color-text-pri);
-  line-height: var(--profile-meta-value-line-height);
+  line-height: var(--profile-meta-line-height);
   word-break: break-word;
 }
 
@@ -201,11 +201,11 @@ onBeforeUnmount(() => {
   display: flex;
   flex-wrap: wrap;
   min-width: 0;
-  gap: var(--hint-gap);
+  gap: var(--space-compact);
 }
 
 .user-meta-shell-loading {
-  margin-top: var(--profile-meta-margin-top);
+  margin-top: var(--space-lg);
   grid-template-columns: minmax(0, 28%) minmax(0, 1fr);
 }
 </style>

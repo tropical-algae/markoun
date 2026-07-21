@@ -6,7 +6,7 @@
 .note-preview h5,
 .note-preview h6 {
   margin-top: 1.3rem;
-  color: var(--color-accent-alt);
+  color: var(--color-action);
 }
 
 /*********** 代码标 ***********/
@@ -19,7 +19,7 @@
   white-space: pre-wrap;
   word-wrap: break-word;
   background-color: var(--color-bg-dark);
-  border-radius: var(--radius-xs);
+  border-radius: var(--radius-sm);
 
 }
 
@@ -90,7 +90,8 @@
 }
 
 .note-preview hr {
-  border-color: var(--color-line);
+  border: none;
+  border-top: 1px solid var(--color-text-pri);
   opacity: 1.0;
 }
 
@@ -125,5 +126,5 @@
 .note-preview td {
   padding: var(--markdown-table-cell-padding);
   text-align: left;
-  border: var(--divider-line-width) solid var(--color-line);
+  border: var(--line-width) solid var(--color-line);
 }

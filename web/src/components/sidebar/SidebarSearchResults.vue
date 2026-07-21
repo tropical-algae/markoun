@@ -10,15 +10,15 @@
       <div class="search-skeleton-list">
         <div v-for="index in 4" :key="index" class="search-result-card">
           <BaseSkeleton
-            width="var(--search-skeleton-title-width)"
-            height="var(--search-skeleton-title-height)"
+            width="var(--skeleton-width-md)"
+            height="var(--skeleton-text-height-sm)"
           />
-          <BaseSkeleton height="var(--search-skeleton-line-height)" />
+          <BaseSkeleton height="var(--skeleton-text-height-xs)" />
           <BaseSkeleton
             :width="index % 2 === 0
-              ? 'var(--search-skeleton-line-long-width)'
-              : 'var(--search-skeleton-line-short-width)'"
-            height="var(--search-skeleton-line-height)"
+              ? 'var(--skeleton-width-lg)'
+              : 'var(--skeleton-width-sm)'"
+            height="var(--skeleton-text-height-xs)"
           />
         </div>
       </div>
@@ -119,13 +119,13 @@ const emit = defineEmits<{
   flex-direction: column;
   width: 100%;
   min-width: 0;
-  gap: var(--search-result-gap);
-  padding-bottom: var(--settings-skeleton-padding-bottom);
+  gap: var(--space-sm);
+  padding-bottom: var(--space-lg);
   box-sizing: border-box;
 }
 
 .search-skeleton-list {
-  gap: var(--search-skeleton-gap);
+  gap: var(--space-md);
 }
 
 .search-result-card {
@@ -134,14 +134,14 @@ const emit = defineEmits<{
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--hint-gap);
-  padding: var(--search-result-padding);
+  gap: var(--space-compact);
+  padding: var(--space-md);
   overflow: hidden;
   box-sizing: border-box;
   border: 0;
-  border-radius: var(--search-result-radius);
+  border-radius: var(--radius-md);
   background-color: var(--color-bg-pri);
-  box-shadow: inset 0 0 0 var(--search-result-inset-line-width) var(--color-line);
+  box-shadow: inset 0 0 0 var(--line-width) var(--color-line);
   text-align: left;
   transition:
     background-color var(--motion-soft-duration) ease,
@@ -151,13 +151,13 @@ const emit = defineEmits<{
 
 button.search-result-card:focus-visible {
   background-color: var(--color-action-light);
-  box-shadow: inset 0 0 0 var(--search-result-inset-line-width) var(--color-action);
+  box-shadow: inset 0 0 0 var(--line-width) var(--color-action);
 }
 
 @media (hover: hover) {
   button.search-result-card:hover {
     background-color: var(--color-action-light);
-    box-shadow: inset 0 0 0 var(--search-result-inset-line-width) var(--color-action);
+    box-shadow: inset 0 0 0 var(--line-width) var(--color-action);
   }
 }
 
@@ -166,7 +166,7 @@ button.search-result-card:focus-visible {
   align-items: center;
   width: 100%;
   max-width: 100%;
-  gap: var(--hint-gap);
+  gap: var(--space-compact);
   min-width: 0;
 }
 
@@ -199,14 +199,14 @@ button.search-result-card:focus-visible {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  gap: var(--hint-gap);
+  gap: var(--space-compact);
 }
 
 .search-result-snippet {
   display: grid;
   grid-template-columns: var(--search-result-line-width) minmax(0, 1fr);
   min-width: 0;
-  gap: var(--hint-gap);
+  gap: var(--space-compact);
   line-height: var(--search-result-snippet-line-height);
   white-space: normal;
   overflow-wrap: anywhere;
@@ -223,7 +223,7 @@ button.search-result-card:focus-visible {
 }
 
 .search-empty-state {
-  padding: var(--search-empty-padding) 0;
+  padding: var(--space-xl) 0;
   white-space: normal;
   text-align: center;
 }

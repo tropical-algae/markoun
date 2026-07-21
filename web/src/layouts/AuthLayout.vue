@@ -35,7 +35,7 @@
   color: var(--color-text-pri);
   font-weight: bold;
   font-size: var(--auth-brand-current-font-size);
-  gap: var(--auth-brand-logo-gap);
+  gap: var(--space-md);
 }
 
 .site-brand-logo {
@@ -53,7 +53,7 @@
   justify-content: center;
   width: 100%;
   background-color: var(--color-bg-sec);
-  border: var(--divider-line-width) solid var(--color-line);
+  border: var(--line-width) solid var(--color-line);
   box-sizing: border-box;
   padding: var(--auth-container-current-padding);
   border-top-left-radius: var(--auth-container-current-radius-top-left);

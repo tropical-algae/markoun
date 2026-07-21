@@ -15,19 +15,19 @@
             <div v-for="index in 4" :key="index" class="setting-skeleton-row">
               <div class="setting-skeleton-text">
                 <BaseSkeleton
-                  width="var(--settings-skeleton-title-width)"
-                  height="var(--settings-skeleton-title-height)"
+                  width="var(--skeleton-width-sm)"
+                  height="var(--skeleton-text-height-sm)"
                   class="setting-skeleton-line"
                 />
                 <BaseSkeleton
-                  height="var(--settings-skeleton-desc-height)"
+                  height="var(--skeleton-text-height-xs)"
                   class="setting-skeleton-line"
                 />
               </div>
               <BaseSkeleton
-                width="var(--settings-skeleton-control-width)"
+                width="var(--skeleton-width-xs)"
                 height="var(--settings-skeleton-control-height)"
-                radius="var(--setting-text-input-radius)"
+                radius="var(--radius-sm)"
               />
             </div>
           </section>
@@ -53,9 +53,9 @@
             <AsyncGate :status="sysStore.sysStatusState" class="settings-footer-gate">
               <template #loading>
                 <BaseSkeleton
-                  width="var(--settings-footer-version-skeleton-width)"
+                  width="var(--skeleton-width-xl)"
                   height="var(--meta-tag-height)"
-                  radius="var(--settings-footer-skeleton-radius)"
+                  radius="var(--radius-sm)"
                 />
               </template>
 
@@ -70,9 +70,9 @@
             <AsyncGate :status="sysStore.sysStatusState" class="settings-footer-gate">
               <template #loading>
                 <BaseSkeleton
-                  width="var(--settings-footer-status-skeleton-width)"
+                  width="var(--skeleton-width-full)"
                   height="var(--meta-tag-height)"
-                  radius="var(--settings-footer-skeleton-radius)"
+                  radius="var(--radius-sm)"
                 />
               </template>
 
@@ -115,10 +115,7 @@ const handleUpdateSetting = async (id: string, newValue: string | boolean) => {
 }
 
 .settings-list-section {
-  margin-bottom: calc(
-    var(--sidebar-section-margin-bottom) +
-    var(--sidebar-settings-list-extra-gap)
-  );
+  margin-bottom: calc(var(--space-xl) + var(--space-sm));
 }
 
 .settings-footer {
@@ -133,7 +130,7 @@ const handleUpdateSetting = async (id: string, newValue: string | boolean) => {
 }
 
 .settings-footer-row + .settings-footer-row {
-  margin-top: var(--sidebar-footer-row-gap);
+  margin-top: var(--space-xs);
 }
 
 .settings-footer-value-slot {
@@ -163,8 +160,8 @@ const handleUpdateSetting = async (id: string, newValue: string | boolean) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: var(--settings-skeleton-gap);
-  padding-bottom: var(--settings-skeleton-padding-bottom);
+  gap: var(--space-lg);
+  padding-bottom: var(--space-lg);
 }
 
 .setting-skeleton-text {
@@ -172,7 +169,7 @@ const handleUpdateSetting = async (id: string, newValue: string | boolean) => {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--settings-skeleton-text-gap);
+  gap: var(--space-sm);
 }
 
 .setting-skeleton-line {

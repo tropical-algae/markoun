@@ -56,7 +56,7 @@ const openSearchResult = async (result: FileSearchResult) => {
   flex-direction: row;
   flex-shrink: 0;
   align-items: flex-end;
-  gap: var(--sidebar-form-gap);
-  margin-bottom: var(--sidebar-form-margin-bottom);
+  gap: var(--space-xs);
+  margin-bottom: var(--space-lg);
 }
 </style>

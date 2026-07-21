@@ -21,7 +21,7 @@ const props = withDefaults(defineProps<{
   fontSize?: string
   color?: string
 }>(), {
-  fontSize: 'var(--hint-font-size)',
+  fontSize: 'var(--font-size-sm)',
   color: 'var(--color-text-muted)'
 })
 
@@ -36,17 +36,17 @@ const hintStyle = computed<CSSProperties>(() => ({
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  gap: var(--hint-gap);
+  gap: var(--space-compact);
 
-  font-size: var(--hint-font-size);
-  line-height: var(--hint-font-size);
+  font-size: var(--font-size-sm);
+  line-height: var(--font-size-sm);
   width: 100%;
 }
 
 .hint-icon {
   flex-shrink: 0;
-  width: var(--hint-icon-size);
-  height: var(--hint-icon-size);
+  width: var(--font-size-sm);
+  height: var(--font-size-sm);
   display: flex;
   align-items: center;
   justify-content: center;
