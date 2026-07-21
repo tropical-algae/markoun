@@ -22,6 +22,7 @@ def test_system_status(client: TestClient):
 
     assert response.status_code == 200
     assert response.json()["data"]["status"] == SysStatusType.HEALTH.value
+    assert response.json()["data"]["auth_required"] is True
 
 
 @pytest.mark.run(order=2)
