@@ -154,6 +154,8 @@ onMounted(async () => {
 
 .auth-form .links-row button {
   position: relative;
+  font-size: inherit;
+  line-height: inherit;
 }
 
 .auth-register-slot {
@@ -161,7 +163,7 @@ onMounted(async () => {
   align-self: stretch;
   flex: 1 1 0;
   min-width: 0;
-  min-height: var(--skeleton-height-default);
+  height: var(--skeleton-height-default);
   padding: 0;
   margin: 0;
 }
@@ -170,8 +172,8 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   width: 100%;
+  height: inherit;
   min-width: 0;
-  min-height: inherit;
 }
 
 .auth-form .links-row button::after {

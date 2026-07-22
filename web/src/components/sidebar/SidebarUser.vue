@@ -28,6 +28,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import router from '@/router'
+import { useNodeStore } from '@/stores/note'
 import { useUserStore } from '@/stores/user'
 
 import GhostButton from '@/components/base/GhostButton.vue'
@@ -36,6 +37,7 @@ import SidebarUserSecurity from '@/components/sidebar/SidebarUserSecurity.vue'
 import SidebarPanelLayout from '@/layouts/SidebarPanelLayout.vue'
 
 const userStore = useUserStore()
+const nodeStore = useNodeStore()
 const isLogoutFlowPending = ref(false)
 const isLogoutButtonPending = computed(() =>
   isLogoutFlowPending.value || userStore.isLogoutPending()
@@ -48,10 +50,12 @@ const handleLogout = async () => {
 
   isLogoutFlowPending.value = true
   try {
+    await nodeStore.saveCurrentFileIfDirty()
     const isDone = await userStore.logout()
     if (isDone) {
       await router.replace({ name: 'Login' })
     }
+  } catch (_) {
   } finally {
     isLogoutFlowPending.value = false
   }
