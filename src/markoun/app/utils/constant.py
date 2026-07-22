@@ -111,6 +111,18 @@ class Constant(BaseSettings):
         "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
         "detail": "Failed to search file",
     }
+    SERV_INVALID_WORKSPACE_PATH: dict = {
+        "status_code": status.HTTP_400_BAD_REQUEST,
+        "detail": "Invalid workspace path",
+    }
+    SERV_INVALID_WORKSPACE_USER: dict = {
+        "status_code": status.HTTP_400_BAD_REQUEST,
+        "detail": "Username cannot be used as a workspace directory",
+    }
+    SERV_MEDIA_FILE_NOT_FOUND: dict = {
+        "status_code": status.HTTP_404_NOT_FOUND,
+        "detail": "Media file does not exist",
+    }
     SERV_SETTING_UPDATE_FAIL: dict = {
         "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
         "detail": "Failed to update system settings",

@@ -3,7 +3,7 @@ from typing import cast
 
 from fastapi import APIRouter, Security
 
-from markoun.app.api.deps import WorkspaceAccess, get_workspace_access
+from markoun.app.api.deps import get_workspace_context
 from markoun.app.services.item_service import (
     get_directory_children,
     get_file_tree,
@@ -11,10 +11,10 @@ from markoun.app.services.item_service import (
     remove_item,
     rename_item,
 )
+from markoun.app.services.workspace_service import WorkspaceContext
 from markoun.app.utils.constant import CONSTANT, MSG_SUCCESS
 from markoun.common.config import settings
 from markoun.common.decorator import exception_handling
-from markoun.common.util import abs_path_to_relative_path, relative_path_to_abs_path
 from markoun.core.model.file import (
     DirectoryChildrenResponse,
     DirNode,
@@ -27,20 +27,19 @@ from markoun.core.model.user import ScopeType
 router = APIRouter()
 
 
-DOUCMENT_ABS_ROOT = Path(settings.DOCUMENT_ROOT).absolute()
 DISPLAYED_FILE_TYPES = set(settings.DISPLAYED_FILE_TYPES)
 
 
 @router.get("/tree")
 @exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_load_tree(
-    _: WorkspaceAccess = Security(
-        get_workspace_access, scopes=[ScopeType.ADMIN, ScopeType.USER]
+    workspace: WorkspaceContext = Security(
+        get_workspace_context, scopes=[ScopeType.ADMIN, ScopeType.USER]
     ),
 ) -> list[FileNode | DirNode]:
     file_tree = cast(
         DirNode,
-        await get_file_tree(DOUCMENT_ABS_ROOT, DISPLAYED_FILE_TYPES),
+        await get_file_tree(workspace, workspace.root, DISPLAYED_FILE_TYPES),
     )
     return file_tree.children
 
@@ -49,14 +48,14 @@ async def api_load_tree(
 @exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_load_directory_children(
     path: str = ".",
-    _: WorkspaceAccess = Security(
-        get_workspace_access, scopes=[ScopeType.ADMIN, ScopeType.USER]
+    workspace: WorkspaceContext = Security(
+        get_workspace_context, scopes=[ScopeType.ADMIN, ScopeType.USER]
     ),
 ) -> DirectoryChildrenResponse:
-    abs_path = relative_path_to_abs_path(Path(path))
-    children = await get_directory_children(abs_path, DISPLAYED_FILE_TYPES)
+    abs_path = workspace.resolve(Path(path))
+    children = await get_directory_children(workspace, abs_path, DISPLAYED_FILE_TYPES)
     return DirectoryChildrenResponse(
-        path=str(abs_path_to_relative_path(abs_path)),
+        path=str(workspace.relative(abs_path)),
         children=children,
     )
 
@@ -65,11 +64,11 @@ async def api_load_directory_children(
 @exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_remove_path(
     filepath: str,
-    _: WorkspaceAccess = Security(
-        get_workspace_access, scopes=[ScopeType.ADMIN, ScopeType.USER]
+    workspace: WorkspaceContext = Security(
+        get_workspace_context, scopes=[ScopeType.ADMIN, ScopeType.USER]
     ),
 ):
-    abs_path = relative_path_to_abs_path(Path(filepath))
+    abs_path = workspace.resolve(Path(filepath), allow_root=False)
     remove_item(abs_path)
     return MSG_SUCCESS
 
@@ -78,12 +77,12 @@ async def api_remove_path(
 @exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_item_rename(
     data: ItemRenameRequest,
-    _: WorkspaceAccess = Security(
-        get_workspace_access, scopes=[ScopeType.ADMIN, ScopeType.USER]
+    workspace: WorkspaceContext = Security(
+        get_workspace_context, scopes=[ScopeType.ADMIN, ScopeType.USER]
     ),
 ):
-    abs_path = relative_path_to_abs_path(Path(data.path))
-    rename_item(abs_path, data.new_name)
+    abs_path = workspace.resolve(Path(data.path), allow_root=False)
+    rename_item(workspace, abs_path, data.new_name)
     return MSG_SUCCESS
 
 
@@ -91,10 +90,10 @@ async def api_item_rename(
 @exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_item_move(
     data: ItemMoveRequest,
-    _: WorkspaceAccess = Security(
-        get_workspace_access, scopes=[ScopeType.ADMIN, ScopeType.USER]
+    workspace: WorkspaceContext = Security(
+        get_workspace_context, scopes=[ScopeType.ADMIN, ScopeType.USER]
     ),
 ) -> FileNode:
-    abs_path = relative_path_to_abs_path(Path(data.path))
-    abs_target_dir = relative_path_to_abs_path(Path(data.target_dir))
-    return await move_item(abs_path, abs_target_dir, DISPLAYED_FILE_TYPES)
+    abs_path = workspace.resolve(Path(data.path), allow_root=False)
+    abs_target_dir = workspace.resolve(Path(data.target_dir))
+    return await move_item(workspace, abs_path, abs_target_dir, DISPLAYED_FILE_TYPES)

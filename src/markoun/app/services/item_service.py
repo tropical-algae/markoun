@@ -3,11 +3,12 @@ from pathlib import Path
 
 from fastapi import HTTPException
 
+from markoun.app.services.workspace_service import WorkspaceContext
 from markoun.app.utils.constant import CONSTANT
 from markoun.common.config import settings
 from markoun.common.decorator import exception_handling
 from markoun.common.logging import logger
-from markoun.common.util import abs_path_to_relative_path, file_suffix
+from markoun.common.util import file_suffix
 from markoun.core.model.base import FsNodeType
 from markoun.core.model.file import DirNode, FileNode
 
@@ -25,20 +26,26 @@ async def _directory_has_children(
     current_path: Path, displayed_file_types: set[str]
 ) -> bool:
     for item_path in current_path.iterdir():
+        if item_path.is_symlink():
+            continue
         if item_path.is_dir() or file_suffix(item_path) in displayed_file_types:
             return True
     return False
 
 
 async def _get_node_summary(
-    current_path: Path, displayed_file_types: set[str]
+    workspace: WorkspaceContext,
+    current_path: Path,
+    displayed_file_types: set[str],
 ) -> FileNode | None:
+    if current_path.is_symlink():
+        return None
     is_dir = current_path.is_dir()
     suffix = "" if is_dir else file_suffix(current_path)
     node_name = current_path.name if is_dir else current_path.stem
     basic_info = {
         "name": node_name,
-        "path": str(abs_path_to_relative_path(current_path.resolve())),
+        "path": str(workspace.relative(current_path)),
         "type": FsNodeType.DIR if is_dir else FsNodeType.FILE,
         "suffix": suffix,
     }
@@ -56,7 +63,9 @@ async def _get_node_summary(
 
 @exception_handling(CONSTANT.SERV_LOAD_TREE_FAIL)
 async def get_directory_children(
-    current_path: Path, displayed_file_types: set[str]
+    workspace: WorkspaceContext,
+    current_path: Path,
+    displayed_file_types: set[str],
 ) -> list[FileNode]:
     if not current_path.exists() or not current_path.is_dir():
         logger.error(f"[Directory {current_path} is not existed]")
@@ -64,7 +73,7 @@ async def get_directory_children(
 
     children: list[FileNode] = []
     for item_path in current_path.iterdir():
-        child_node = await _get_node_summary(item_path, displayed_file_types)
+        child_node = await _get_node_summary(workspace, item_path, displayed_file_types)
         if child_node:
             children.append(child_node)
 
@@ -74,9 +83,11 @@ async def get_directory_children(
 
 @exception_handling(CONSTANT.SERV_LOAD_TREE_FAIL)
 async def get_file_tree(
-    current_path: Path, displayed_file_types: set[str]
+    workspace: WorkspaceContext,
+    current_path: Path,
+    displayed_file_types: set[str],
 ) -> FileNode | DirNode | None:
-    node_summary = await _get_node_summary(current_path, displayed_file_types)
+    node_summary = await _get_node_summary(workspace, current_path, displayed_file_types)
     if node_summary is None:
         return None
 
@@ -90,7 +101,7 @@ async def get_file_tree(
             children=[],
         )
         for item_path in current_path.iterdir():
-            child_node = await get_file_tree(item_path, displayed_file_types)
+            child_node = await get_file_tree(workspace, item_path, displayed_file_types)
             if child_node:
                 path_node.children.append(child_node)
         path_node.has_children = bool(path_node.children)
@@ -113,6 +124,7 @@ def remove_item(abs_path: Path) -> None:
 
 
 async def move_item(
+    workspace: WorkspaceContext,
     source_path: str | Path,
     target_dir: str | Path,
     displayed_file_types: set[str],
@@ -131,7 +143,7 @@ async def move_item(
         raise HTTPException(**CONSTANT.SERV_FILE_NOT_EXISTED)
 
     if source_path.parent == target_dir:
-        node = await _get_node_summary(source_path, displayed_file_types)
+        node = await _get_node_summary(workspace, source_path, displayed_file_types)
         if node is None:
             raise HTTPException(**CONSTANT.SERV_FILE_NOT_EXISTED)
         return node
@@ -140,23 +152,25 @@ async def move_item(
         logger.error(f"Failed to move {source_path} into itself or child {target_dir}")
         raise HTTPException(**CONSTANT.SERV_ITEM_MOVE_FORBIDDEN)
 
-    new_path = target_dir / source_path.name
+    new_path = workspace.resolve_child(target_dir, source_path.name)
     if new_path.exists():
         logger.error(f"Failed to move {source_path}, target {new_path} existed!")
         raise HTTPException(**CONSTANT.SERV_FILE_EXISTED)
 
     source_path.rename(new_path)
-    node = await _get_node_summary(new_path, displayed_file_types)
+    node = await _get_node_summary(workspace, new_path, displayed_file_types)
     if node is None:
         raise HTTPException(**CONSTANT.SERV_FILE_NOT_EXISTED)
     return node
 
 
-def rename_item(path: str | Path, new_name: str) -> None:
+def rename_item(workspace: WorkspaceContext, path: str | Path, new_name: str) -> None:
     path = Path(path)
     if not path.exists():
         logger.error(f"Failed to rename {path}, file not existed!")
         raise HTTPException(**CONSTANT.SERV_FILE_NOT_EXISTED)
 
-    new_path = path.with_stem(new_name)
+    new_path = workspace.resolve_child(path.parent, f"{new_name}{path.suffix}")
+    if new_path.exists():
+        raise HTTPException(**CONSTANT.SERV_FILE_EXISTED)
     path.rename(new_path)

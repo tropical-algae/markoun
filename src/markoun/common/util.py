@@ -13,12 +13,10 @@ import yaml
 from fastapi import HTTPException
 
 from markoun.app.utils.constant import CONSTANT
-from markoun.common.config import settings
 from markoun.common.logging import logger
 from markoun.core.db.session import LocalSession
 
 TOKEN_SEQUENCE = string.ascii_uppercase + string.digits
-DOUCMENT_ABS_ROOT = Path(settings.DOCUMENT_ROOT).absolute()
 SIZE_UNITS = ["B", "KB", "MB", "GB"]
 
 
@@ -50,14 +48,6 @@ async def awrite_file(filepath: Path, content: str) -> None:
     except Exception as err:
         logger.exception(f"[Failed to write file {filepath}] {err}")
         raise HTTPException(**CONSTANT.SERV_FILE_SAVE_FAIL) from err
-
-
-def abs_path_to_relative_path(abs_path: Path) -> Path:
-    return abs_path.relative_to(DOUCMENT_ABS_ROOT)
-
-
-def relative_path_to_abs_path(relative_path: Path) -> Path:
-    return (DOUCMENT_ABS_ROOT / relative_path).resolve()
 
 
 def file_suffix(path: Path) -> str:

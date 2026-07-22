@@ -2,7 +2,7 @@ import json
 from datetime import datetime, timezone
 from enum import StrEnum
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from markoun.common.util import generate_random_token
 from markoun.core.db.models import UserAccount
@@ -61,6 +61,15 @@ class UserBasicInfo(BaseModel):
         description="The scope for user, include ADMIN, USER, GUEST",
     )
 
+    @field_validator("full_name")
+    @classmethod
+    def validate_full_name(cls, value: str) -> str:
+        if not is_workspace_username(value):
+            raise ValueError(
+                "Username must be 3-32 ASCII letters, numbers, underscores, or hyphens"
+            )
+        return value
+
     def build_user(self) -> UserAccount:
         is_superuser = ScopeType.ADMIN in self.scopes
         return UserAccount(
@@ -72,3 +81,9 @@ class UserBasicInfo(BaseModel):
             is_superuser=is_superuser,
             is_active=True,
         )
+
+
+def is_workspace_username(value: str) -> bool:
+    if not 3 <= len(value) <= 32 or not value[0].isalnum():
+        return False
+    return value.isascii() and all(char.isalnum() or char in "_-" for char in value)

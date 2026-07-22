@@ -2,15 +2,15 @@ import json
 from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import pytz
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette import status
-from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
-from starlette.responses import JSONResponse, Response
+from starlette.responses import JSONResponse, Response, StreamingResponse
 
 from markoun.app.services.system_service import insert_default_system_setting
 from markoun.app.services.user_service import insert_default_user
@@ -61,20 +61,32 @@ async def lifespan(app: FastAPI):
 
 
 def add_middleware(app: FastAPI):
-    async def log_response(request: Request, call_next):
-        response = await call_next(request)
+    async def log_response(
+        request: Request,
+        call_next: RequestResponseEndpoint,
+    ) -> Response:
+        response: StreamingResponse = cast(
+            StreamingResponse,
+            await call_next(request),
+        )
 
         is_not_api: bool = not request.url.path.startswith(settings.API_PREFIX)
         is_access: bool = request.url.path.endswith("auth/login")
-        is_stream: bool = request.url.path.endswith("stream")
+        is_media: bool = request.url.path.endswith("/file/media")
+        is_successful_media: bool = (
+            is_media and response.status_code < status.HTTP_400_BAD_REQUEST
+        )
 
-        if is_access or is_not_api or is_stream:
+        if is_access or is_not_api or is_successful_media:
             return response
 
-        body_bytes = b""
-        async for chunk in response.body_iterator:
-            body_bytes += chunk
+        body_chunks: list[bytes] = [
+            chunk.encode() if isinstance(chunk, str) else bytes(chunk)
+            async for chunk in response.body_iterator
+        ]
+        body_bytes = b"".join(body_chunks)
 
+        response_body: Any
         try:
             response_body = {} if not body_bytes else json.loads(body_bytes.decode())
         except json.JSONDecodeError:
@@ -86,7 +98,7 @@ def add_middleware(app: FastAPI):
             )
 
         if isinstance(response_body, dict) and response_body.get("is_exception", False):
-            new_response = resp_error(response_body)
+            new_response: Response = resp_error(response_body)
         else:
             new_response = resp_success(response_body)
 

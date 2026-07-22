@@ -5,6 +5,10 @@ from fastapi import Body, Depends, Header, HTTPException, Request, Security
 from fastapi.security import OAuth2PasswordBearer, SecurityScopes
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+from markoun.app.services.workspace_service import (
+    WorkspaceContext,
+    create_workspace_context,
+)
 from markoun.app.utils.constant import CONSTANT
 from markoun.app.utils.security import verift_access_token
 from markoun.common.config import settings
@@ -99,3 +103,16 @@ async def get_workspace_access(
         scopes=tuple(str_to_json(user.scopes)),
         user=user,
     )
+
+
+async def get_workspace_context(
+    request: Request,
+    security_scopes: SecurityScopes,
+    db: AsyncSession = Depends(get_db),
+) -> WorkspaceContext:
+    access = await get_workspace_access(
+        request=request,
+        security_scopes=security_scopes,
+        db=db,
+    )
+    return create_workspace_context(access.user)

@@ -1,4 +1,5 @@
 import secrets
+from typing import Literal
 
 from pydantic_settings import (
     BaseSettings,
@@ -28,6 +29,7 @@ class SysSetting(BaseSettings):
 
 class BasicSetting(BaseSettings):
     AUTH_REQUIRED: bool = True
+    USER_WORKSPACE_ISOLATION: bool = False
 
     # database
     SQL_DATABASE_URI: str = "sqlite+aiosqlite:///database.db"
@@ -44,6 +46,7 @@ class BasicSetting(BaseSettings):
     ACCESS_TOKEN_COOKIE_SECURE: bool = False
 
     DOCUMENT_ROOT: str = "./data"
+    MEDIA_DELIVERY_MODE: Literal["application", "nginx"] = "nginx"
     WELCOME_NOTE_PATH: str = "./welcome.md"
     DISPLAYED_FILE_TYPES: list = ["md", "png", "jpg", "jpeg", "bmp", "svg"]
 

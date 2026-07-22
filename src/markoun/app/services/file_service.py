@@ -3,19 +3,18 @@ import json
 import uuid
 from datetime import datetime
 from pathlib import Path
+from urllib.parse import quote
 
 import aiofiles
 from fastapi import HTTPException, UploadFile
+from fastapi.responses import FileResponse, Response
 
+from markoun.app.services.workspace_service import WorkspaceContext
 from markoun.app.utils.constant import CONSTANT
 from markoun.common.config import settings
 from markoun.common.decorator import exception_handling
 from markoun.common.logging import logger
-from markoun.common.util import (
-    abs_path_to_relative_path,
-    file_suffix,
-    formated_file_size,
-)
+from markoun.common.util import file_suffix, formated_file_size
 from markoun.core.model.base import FsNodeType
 from markoun.core.model.file import (
     FileMeta,
@@ -30,9 +29,11 @@ NOTE_SUFFIX = "md"
 DISPLAYED_FILE_TYPES = set(settings.DISPLAYED_FILE_TYPES)
 DEFAULT_SEARCH_LIMIT = 20
 MAX_SEARCH_LIMIT = 200
+MEDIA_FILE_TYPES = {"png", "jpg", "jpeg", "bmp", "svg"}
+INTERNAL_MEDIA_PREFIX = "/_protected_media"
 
 
-def get_file_meta(abs_filepath: Path) -> FileMeta:
+def get_file_meta(workspace: WorkspaceContext, abs_filepath: Path) -> FileMeta:
     if not abs_filepath.exists():
         # raise FileNotFoundError(f"Error: {abs_filepath} is not existed")
         logger.error(f"[Failed to read file {abs_filepath}]")
@@ -43,7 +44,7 @@ def get_file_meta(abs_filepath: Path) -> FileMeta:
 
     stat = abs_filepath.stat()
     return FileMeta(
-        path=str(abs_path_to_relative_path(abs_filepath)),
+        path=str(workspace.relative(abs_filepath)),
         suffix=file_suffix(abs_filepath),
         size=formated_file_size(stat.st_size),
         modified=fmt(stat.st_mtime),
@@ -54,7 +55,7 @@ def get_file_meta(abs_filepath: Path) -> FileMeta:
 
 async def search_markdown_files(
     keyword: str,
-    abs_root: Path,
+    workspace: WorkspaceContext,
     limit: int = DEFAULT_SEARCH_LIMIT,
 ) -> list[FileSearchResult]:
     normalized_keyword = keyword.strip()
@@ -70,7 +71,7 @@ async def search_markdown_files(
         "--glob",
         f"*.{NOTE_SUFFIX}",
         normalized_keyword,
-        str(abs_root),
+        str(workspace.root),
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )
@@ -90,7 +91,7 @@ async def search_markdown_files(
             if not filepath.is_file() or file_suffix(filepath) != NOTE_SUFFIX:
                 continue
 
-            relative_path = str(abs_path_to_relative_path(filepath))
+            relative_path = str(workspace.relative(filepath))
             result = results_by_path.get(relative_path)
             if result is None:
                 if len(results_by_path) >= safe_limit:
@@ -127,8 +128,10 @@ async def search_markdown_files(
 
 
 @exception_handling(CONSTANT.SERV_FILE_CREATE_FAIL)
-def create_note(abs_filepath: Path, file_name: str) -> FileNode:
-    filepath = abs_filepath / f"{file_name}.{NOTE_SUFFIX}"
+def create_note(
+    workspace: WorkspaceContext, parent_path: Path, file_name: str
+) -> FileNode:
+    filepath = workspace.resolve_child(parent_path, f"{file_name}.{NOTE_SUFFIX}")
 
     if filepath.exists():
         logger.error(f"[{filepath} is existed]")
@@ -137,15 +140,17 @@ def create_note(abs_filepath: Path, file_name: str) -> FileNode:
     filepath.touch()
     return FileNode(
         name=file_name,
-        path=str(abs_path_to_relative_path(filepath)),
+        path=str(workspace.relative(filepath)),
         type=FsNodeType.FILE,
         suffix=NOTE_SUFFIX,
     )
 
 
-async def upload_file(abs_path: Path, file: UploadFile) -> UploadedFileResponse:
+async def upload_file(
+    workspace: WorkspaceContext, abs_path: Path, file: UploadFile
+) -> UploadedFileResponse:
     filename = file.filename or f"file_{uuid.uuid4().hex[:8]}.unknown"
-    filepath = abs_path / filename
+    filepath = workspace.resolve_child(abs_path, filename)
     try:
         async with aiofiles.open(filepath, "xb") as f:
             while content := await file.read(1024 * 1024):
@@ -164,9 +169,27 @@ async def upload_file(abs_path: Path, file: UploadFile) -> UploadedFileResponse:
     if suffix in DISPLAYED_FILE_TYPES:
         node = FileNode(
             name=filepath.stem,
-            path=str(abs_path_to_relative_path(filepath)),
+            path=str(workspace.relative(filepath)),
             type=FsNodeType.FILE,
             suffix=suffix,
         )
 
     return UploadedFileResponse(filename=filename, node=node)
+
+
+def get_media_response(
+    workspace: WorkspaceContext, relative_path: str
+) -> FileResponse | Response:
+    filepath = workspace.resolve(relative_path, allow_root=False)
+    if not filepath.is_file() or file_suffix(filepath) not in MEDIA_FILE_TYPES:
+        raise HTTPException(**CONSTANT.SERV_MEDIA_FILE_NOT_FOUND)
+
+    if settings.MEDIA_DELIVERY_MODE == "nginx":
+        internal_path = quote(workspace.document_relative(filepath).as_posix(), safe="/")
+        return Response(
+            headers={
+                "X-Accel-Redirect": f"{INTERNAL_MEDIA_PREFIX}/{internal_path}",
+            }
+        )
+
+    return FileResponse(filepath)

@@ -1,20 +1,22 @@
 from pathlib import Path
 
 from fastapi import APIRouter, File, Query, Security, UploadFile
+from fastapi.responses import FileResponse, Response
 
-from markoun.app.api.deps import WorkspaceAccess, get_workspace_access
+from markoun.app.api.deps import get_workspace_context
 from markoun.app.services.file_service import (
     DEFAULT_SEARCH_LIMIT,
     MAX_SEARCH_LIMIT,
     create_note,
     get_file_meta,
+    get_media_response,
     search_markdown_files,
     upload_file,
 )
+from markoun.app.services.workspace_service import WorkspaceContext
 from markoun.app.utils.constant import CONSTANT
-from markoun.common.config import settings
 from markoun.common.decorator import exception_handling
-from markoun.common.util import aread_file, awrite_file, relative_path_to_abs_path
+from markoun.common.util import aread_file, awrite_file
 from markoun.core.model.file import (
     BasicNode,
     FileContentResponse,
@@ -27,20 +29,19 @@ from markoun.core.model.file import (
 from markoun.core.model.user import ScopeType
 
 router = APIRouter()
-DOCUMENT_ABS_ROOT = Path(settings.DOCUMENT_ROOT).absolute()
 
 
 @router.get("/load", response_model=FileContentResponse)
 @exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_load_note(
     filepath: str,
-    _: WorkspaceAccess = Security(
-        get_workspace_access, scopes=[ScopeType.ADMIN, ScopeType.USER]
+    workspace: WorkspaceContext = Security(
+        get_workspace_context, scopes=[ScopeType.ADMIN, ScopeType.USER]
     ),
 ) -> FileContentResponse:
-    abs_filepath = relative_path_to_abs_path(Path(filepath))
+    abs_filepath = workspace.resolve(Path(filepath), allow_root=False)
     content = await aread_file(abs_filepath)
-    meta = get_file_meta(abs_filepath)
+    meta = get_file_meta(workspace, abs_filepath)
     return FileContentResponse(content=content, meta=meta)
 
 
@@ -49,23 +50,34 @@ async def api_load_note(
 async def api_search_notes(
     keyword: str,
     limit: int = Query(DEFAULT_SEARCH_LIMIT, ge=1, le=MAX_SEARCH_LIMIT),
-    _: WorkspaceAccess = Security(
-        get_workspace_access, scopes=[ScopeType.ADMIN, ScopeType.USER]
+    workspace: WorkspaceContext = Security(
+        get_workspace_context, scopes=[ScopeType.ADMIN, ScopeType.USER]
     ),
 ) -> list[FileSearchResult]:
-    return await search_markdown_files(keyword, DOCUMENT_ABS_ROOT, limit)
+    return await search_markdown_files(keyword, workspace, limit)
+
+
+@router.get("/media", response_model=None)
+@exception_handling(CONSTANT.RESP_SERVER_ERROR)
+async def api_get_media(
+    path: str,
+    workspace: WorkspaceContext = Security(
+        get_workspace_context, scopes=[ScopeType.ADMIN, ScopeType.USER]
+    ),
+) -> FileResponse | Response:
+    return get_media_response(workspace, path)
 
 
 @router.post("/create", response_model=FileNode)
 @exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_create_note(
     note: BasicNode,
-    _: WorkspaceAccess = Security(
-        get_workspace_access, scopes=[ScopeType.ADMIN, ScopeType.USER]
+    workspace: WorkspaceContext = Security(
+        get_workspace_context, scopes=[ScopeType.ADMIN, ScopeType.USER]
     ),
 ) -> FileNode:
-    abs_filepath = relative_path_to_abs_path(Path(note.path))
-    file_node = create_note(abs_filepath, note.name)
+    abs_filepath = workspace.resolve(Path(note.path))
+    file_node = create_note(workspace, abs_filepath, note.name)
     return file_node
 
 
@@ -73,13 +85,13 @@ async def api_create_note(
 @exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_save_note(
     data: FileSaveRequest,
-    _: WorkspaceAccess = Security(
-        get_workspace_access, scopes=[ScopeType.ADMIN, ScopeType.USER]
+    workspace: WorkspaceContext = Security(
+        get_workspace_context, scopes=[ScopeType.ADMIN, ScopeType.USER]
     ),
 ):
-    abs_filepath = relative_path_to_abs_path(Path(data.filepath))
+    abs_filepath = workspace.resolve(Path(data.filepath), allow_root=False)
     await awrite_file(abs_filepath, data.content)
-    meta = get_file_meta(abs_filepath)
+    meta = get_file_meta(workspace, abs_filepath)
     return meta
 
 
@@ -88,9 +100,9 @@ async def api_save_note(
 async def api_upload_file(
     path: str,
     file: UploadFile = File(...),
-    _: WorkspaceAccess = Security(
-        get_workspace_access, scopes=[ScopeType.ADMIN, ScopeType.USER]
+    workspace: WorkspaceContext = Security(
+        get_workspace_context, scopes=[ScopeType.ADMIN, ScopeType.USER]
     ),
 ):
-    abs_path = relative_path_to_abs_path(Path(path))
-    return await upload_file(abs_path, file)
+    abs_path = workspace.resolve(Path(path))
+    return await upload_file(workspace, abs_path, file)
