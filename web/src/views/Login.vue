@@ -6,6 +6,7 @@
         v-model="loginForm.username"
         label="Name"
         type="text"
+        name="username"
         autocomplete="username"
         class="auth-field"
         :disabled="userStore.isLoginPending()"
@@ -16,6 +17,7 @@
         v-model="loginForm.password"
         label="Password"
         type="password"
+        name="password"
         autocomplete="current-password"
         class="auth-field"
         :disabled="userStore.isLoginPending()"
@@ -56,6 +58,7 @@
           <input
             class="choice-input"
             type="checkbox"
+            name="remember_me"
             v-model="loginForm.remember_me"
             :disabled="userStore.isLoginPending()"
           >

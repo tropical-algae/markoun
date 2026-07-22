@@ -1,6 +1,7 @@
 <template>
   <button
     class="ghost-btn"
+    :type="type"
     :class="[`type-${theme}`, { 'is-loading': loading }]"
     :disabled="disabled || loading"
     :aria-busy="loading"
@@ -24,6 +25,7 @@ import { useDelayedVisibility } from '@/composables/useDelayedVisibility'
 import { readCssTimeMs } from '@/utils/css'
 
 interface Props {
+  type?: 'button' | 'submit' | 'reset'
   theme?: 'primary' | 'danger' | 'secondary' | 'submit'
   disabled?: boolean
   loading?: boolean
@@ -32,6 +34,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  type: 'button',
   theme: 'primary',
   disabled: false,
   loading: false,

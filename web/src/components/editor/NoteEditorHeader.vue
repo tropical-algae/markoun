@@ -3,6 +3,7 @@
     <div class="editor-header-actions">
       <BaseTooltip text="Save note" placement="bottom">
         <button
+          type="button"
           class="icon-btn"
           :class="{ 'is-pending': savePending }"
           @click="emit('save')"
@@ -28,6 +29,7 @@
         placement="bottom"
       >
         <button
+          type="button"
           class="icon-btn"
           :class="{ active: inspectorOpen && activeMode === item.mode }"
           @click="emit('toggleInspector', item.mode)"

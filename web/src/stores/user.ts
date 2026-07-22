@@ -10,7 +10,6 @@ import {
   updatePasswordApi,
 } from '@/api/user'
 import { useToastStore } from '@/stores/toast'
-import { useNodeStore } from '@/stores/note'
 import type { AsyncStatus } from '@/types/async'
 import type { CurrentUserProfile, LoginForm, RegisterForm } from '@/types/auth'
 
@@ -24,7 +23,6 @@ export const useUserStore = defineStore('user', () => {
   const currentUserProfile = ref<CurrentUserProfile | null>(null)
   const currentUserProfileState = ref<AsyncStatus>('idle')
   const toastStore = useToastStore()
-  const nodeStore = useNodeStore()
   const actionLedger = useActionLedger()
 
   let authCheckPromise: Promise<AuthState> | null = null
@@ -40,16 +38,15 @@ export const useUserStore = defineStore('user', () => {
     authCheckStatus.value = 'ready'
   }
 
-  const resetUserScopedState = () => {
+  const resetUserProfileState = () => {
     profileGeneration += 1
     currentUserProfilePromise = null
     currentUserProfile.value = null
     currentUserProfileState.value = 'idle'
-    nodeStore.resetWorkspaceState()
   }
 
   const markAnonymous = () => {
-    resetUserScopedState()
+    resetUserProfileState()
     authState.value = 'anonymous'
     authCheckStatus.value = 'ready'
   }
@@ -63,7 +60,7 @@ export const useUserStore = defineStore('user', () => {
 
       return await actionLedger.runAction('login', async () => {
         const res = await loginApi(loginForm)
-        resetUserScopedState()
+        resetUserProfileState()
         markAuthenticated()
         return res
       })

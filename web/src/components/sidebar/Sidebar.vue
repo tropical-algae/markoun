@@ -5,6 +5,7 @@
         <div class="sidebar-toolbar">
           <BaseTooltip text="Toggle sidebar" :placement="sidebarTooltipPlacement">
             <button
+              type="button"
               class="icon-btn"
               @click="toggleSubSidebar()"
               aria-label="Toggle sidebar"
@@ -26,6 +27,7 @@
           :placement="sidebarTooltipPlacement"
         >
           <button
+            type="button"
             class="sidebar-nav-button icon-btn"
             :class="{ 'is-active': currentMode === item.mode && showSubSidebar }"
             @click="toggleSubSidebar(item.mode)"

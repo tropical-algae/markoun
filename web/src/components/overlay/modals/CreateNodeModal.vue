@@ -4,39 +4,48 @@
     :title="title"
     @opened="handleOpened"
   >
-    <ModalContentLayout>
-      <UnderlinedInput
-        v-model="nodeName"
-        :label="inputLabel"
-        ref="inputRef"
-        type="text"
-        class="modal-field f-s"
-        :disabled="isPending"
-        :placeholder="placeholder"
-        @keyup.enter="handleConfirm"
-      />
-
-      <BaseIconText :icon="InfoIcon" :text="hint" class="modal-hint" color="var(--color-text-muted)"/>
-
-      <template #actions>
-        <GhostButton
-          class="modal-button f-s"
-          @click="isVisible = false"
-          theme="secondary"
+    <form @submit.prevent="handleConfirm">
+      <ModalContentLayout>
+        <UnderlinedInput
+          v-model="nodeName"
+          :label="inputLabel"
+          ref="inputRef"
+          type="text"
+          name="node_name"
+          autocomplete="off"
+          class="modal-field f-s"
           :disabled="isPending"
-        >
-          Cancel
-        </GhostButton>
-        <GhostButton
-          class="modal-button f-s"
-          @click="handleConfirm"
-          :disabled="!nodeName.trim() || isPending"
-          :loading="isPending"
-        >
-          Create
-        </GhostButton>
-      </template>
-    </ModalContentLayout>
+          :placeholder="placeholder"
+        />
+
+        <BaseIconText
+          :icon="InfoIcon"
+          :text="hint"
+          class="modal-hint"
+          color="var(--color-text-muted)"
+        />
+
+        <template #actions>
+          <GhostButton
+            type="button"
+            class="modal-button f-s"
+            @click="isVisible = false"
+            theme="secondary"
+            :disabled="isPending"
+          >
+            Cancel
+          </GhostButton>
+          <GhostButton
+            type="submit"
+            class="modal-button f-s"
+            :disabled="!nodeName.trim() || isPending"
+            :loading="isPending"
+          >
+            Create
+          </GhostButton>
+        </template>
+      </ModalContentLayout>
+    </form>
   </BaseModal>
 </template>
 

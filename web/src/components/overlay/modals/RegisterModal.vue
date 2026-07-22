@@ -4,56 +4,67 @@
     title="Registration"
     @opened="handleOpened"
   >
-    <ModalContentLayout>
-      <UnderlinedInput
-        v-model="registerForm.username"
-        label="Full Name"
-        ref="firstInputRef"
-        type="text"
-        class="modal-field f-s"
-        placeholder="e.g. John Doe"
-        @keyup.enter="focusNext('emailInputRef')"
-      />
+    <form @submit.prevent="handleConfirm">
+      <ModalContentLayout>
+        <UnderlinedInput
+          v-model="registerForm.username"
+          label="Full Name"
+          ref="firstInputRef"
+          type="text"
+          name="username"
+          autocomplete="username"
+          required
+          class="modal-field f-s"
+          placeholder="e.g. John Doe"
+          @keydown.enter.prevent="focusNext('emailInputRef')"
+        />
 
-      <UnderlinedInput
-        v-model="registerForm.email"
-        label="Email"
-        ref="emailInputRef"
-        type="email"
-        class="modal-field f-s"
-        placeholder="name@example.com"
-        @keyup.enter="focusNext('passwordInputRef')"
-      />
+        <UnderlinedInput
+          v-model="registerForm.email"
+          label="Email"
+          ref="emailInputRef"
+          type="email"
+          name="email"
+          autocomplete="email"
+          required
+          class="modal-field f-s"
+          placeholder="name@example.com"
+          @keydown.enter.prevent="focusNext('passwordInputRef')"
+        />
 
-      <UnderlinedInput
-        v-model="registerForm.password"
-        label="Password"
-        ref="passwordInputRef"
-        type="password"
-        class="modal-field is-last f-s"
-        placeholder="Enter your password"
-        @keyup.enter="handleConfirm"
-      />
+        <UnderlinedInput
+          v-model="registerForm.password"
+          label="Password"
+          ref="passwordInputRef"
+          type="password"
+          name="password"
+          autocomplete="new-password"
+          required
+          class="modal-field is-last f-s"
+          placeholder="Enter your password"
+        />
 
-      <template #actions>
-        <GhostButton
-          class="modal-button f-s"
-          @click="isVisible = false"
-          theme="secondary"
-          :disabled="userStore.isRegisterPending()"
-        >
-          Cancel
-        </GhostButton>
-        <GhostButton
-          class="modal-button f-s"
-          @click="handleConfirm"
-          :disabled="!isFormValid || userStore.isRegisterPending()"
-          :loading="userStore.isRegisterPending()"
-        >
-          Create Account
-        </GhostButton>
-      </template>
-    </ModalContentLayout>
+        <template #actions>
+          <GhostButton
+            type="button"
+            class="modal-button f-s"
+            @click="isVisible = false"
+            theme="secondary"
+            :disabled="userStore.isRegisterPending()"
+          >
+            Cancel
+          </GhostButton>
+          <GhostButton
+            type="submit"
+            class="modal-button f-s"
+            :disabled="!isFormValid || userStore.isRegisterPending()"
+            :loading="userStore.isRegisterPending()"
+          >
+            Create Account
+          </GhostButton>
+        </template>
+      </ModalContentLayout>
+    </form>
   </BaseModal>
 </template>
 
@@ -71,7 +82,6 @@ const userStore = useUserStore()
 const props = defineProps<{ modelValue: boolean }>()
 const emit = defineEmits<{
   (event: 'update:modelValue', value: boolean): void
-  (event: 'submit'): void
 }>()
 
 const isVisible = useModelProxy(props, emit)
@@ -106,6 +116,10 @@ const focusNext = (refName: 'emailInputRef' | 'passwordInputRef') => {
 }
 
 const handleConfirm = async () => {
+  if (!isFormValid.value || userStore.isRegisterPending()) {
+    return
+  }
+
   const isDone = await userStore.register(registerForm)
   if (isDone) {
     isVisible.value = false

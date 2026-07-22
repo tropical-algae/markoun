@@ -20,6 +20,7 @@
       @drop.prevent.stop="emit('drop', $event)"
     >
       <button
+        type="button"
         v-if="isDirectory"
         class="node-toggle-btn"
         :class="{ 'is-opened': opened, 'is-disabled': !canExpand }"
@@ -36,6 +37,9 @@
         <div class="node-text-slot">
           <input
             v-if="renaming"
+            name="node_name"
+            autocomplete="off"
+            :aria-label="`Rename ${name}`"
             :ref="setRenameInputRef"
             :value="editName"
             class="rename-input"

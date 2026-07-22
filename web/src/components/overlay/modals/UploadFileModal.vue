@@ -6,17 +6,18 @@
     <ModalContentLayout size="md">
 
       <input
+        :id="fileInputId"
+        name="file"
         type="file"
-        ref="fileInputRef"
         class="upload-file-input"
         @change="handleFileSelect"
       />
 
-      <div
+      <label
         v-if="!isUploading"
+        :for="fileInputId"
         class="upload-drop-zone"
         :class="{ 'is-dragover': isDragOver }"
-        @click="triggerFileSelect"
         @drop.prevent="handleDrop"
         @dragover.prevent="isDragOver = true"
         @dragleave.prevent="isDragOver = false"
@@ -24,7 +25,7 @@
         <component :is="UploadIcon" class="upload-icon"></component>
         <p class="upload-title">Click or Drag file to this area</p>
         <p class="upload-subtitle">Upload to: {{ nodeStore.currentPathLabel }}</p>
-      </div>
+      </label>
 
       <div v-else class="upload-state">
         <div class="upload-progress-row">
@@ -59,7 +60,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, useId } from 'vue'
 import { useNodeStore } from '@/stores/note'
 import { useFileUploadTask } from '@/composables/useFileUploadTask'
 
@@ -85,8 +86,7 @@ const {
   uploadFile,
 } = useFileUploadTask()
 
-// 状态管理
-const fileInputRef = ref<HTMLInputElement | null>(null)
+const fileInputId = useId()
 const isDragOver = ref(false)
 
 const isVisible = computed({
@@ -99,10 +99,6 @@ const isVisible = computed({
     emit('update:modelValue', value)
   },
 })
-
-const triggerFileSelect = () => {
-  fileInputRef.value?.click()
-}
 
 const handleFileSelect = async (e: Event) => {
   const input = e.target as HTMLInputElement

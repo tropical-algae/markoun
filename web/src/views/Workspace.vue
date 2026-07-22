@@ -26,6 +26,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('pagehide', handlePageHide)
+  nodeStore.resetWorkspaceState()
 })
 
 onBeforeRouteLeave(async () => {

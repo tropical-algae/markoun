@@ -6,6 +6,7 @@
     <template #control>
       <div class="theme-options">
         <button
+          type="button"
           v-for="option in appearanceStore.themeOptions"
           :key="option.id"
           class="theme-option f-s"

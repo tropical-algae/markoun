@@ -17,6 +17,7 @@
           <input
             class="switch-input"
             type="checkbox"
+            :name="boolSetting.id"
             :id="boolSetting.id"
             :checked="boolSetting.value"
             :disabled="pending"
@@ -29,6 +30,9 @@
       <div v-else-if="strSetting">
         <input
           type="text"
+          :name="strSetting.id"
+          :aria-label="settingName"
+          autocomplete="off"
           class="setting-text-input"
           :value="draftValue"
           :disabled="pending"

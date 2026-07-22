@@ -5,11 +5,13 @@
         v-model="keyword"
         class="f-s"
         label="Keyword"
+        name="keyword"
+        autocomplete="off"
         placeholder="Search markdown files..."
         :readonly="status === 'loading'"
       />
 
-      <button type="submit" class="icon-btn">
+      <button type="submit" class="icon-btn" aria-label="Search notes">
         <component :is="SearchIcon"></component>
       </button>
     </form>

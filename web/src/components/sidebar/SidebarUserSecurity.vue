@@ -1,12 +1,23 @@
 <template>
-  <section class="sidebar-section">
+  <form class="sidebar-section" @submit.prevent="updatePassword">
     <div class="sidebar-section-title f-m">Security</div>
+
+    <input
+      type="text"
+      name="username"
+      autocomplete="username"
+      :value="userStore.currentUserProfile?.full_name || ''"
+      hidden
+      readonly
+    />
 
     <div class="password-fields">
       <UnderlinedInput
         v-model="passwordForm.newPassword"
         label="New password"
         type="password"
+        name="new_password"
+        autocomplete="new-password"
         class="password-input f-s"
         placeholder="Enter new password"
       />
@@ -14,6 +25,8 @@
         v-model="passwordForm.confirmPassword"
         label="Confirm password"
         type="password"
+        name="confirm_password"
+        autocomplete="new-password"
         class="password-input is-confirm f-s"
         placeholder="Confirm new password"
       />
@@ -28,14 +41,14 @@
     </div>
 
     <GhostButton
+      type="submit"
       class="user-action-button f-s"
       :disabled="!isPasswordValid || isUpdatePending"
       :loading="isUpdatePending"
-      @click="updatePassword"
     >
       Update Password
     </GhostButton>
-  </section>
+  </form>
 </template>
 
 <script setup lang="ts">

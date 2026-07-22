@@ -8,7 +8,12 @@
           :text="item.label"
           placement="bottom"
         >
-          <button class="icon-btn" @click="item.func()" :aria-label="item.label">
+          <button
+            type="button"
+            class="icon-btn"
+            @click="item.func()"
+            :aria-label="item.label"
+          >
             <component :is="item.icon"></component>
           </button>
         </BaseTooltip>
