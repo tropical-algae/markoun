@@ -1,42 +1,77 @@
-name: detection
+name: CI
 
 on:
   push:
-    branches-ignore:
-      - main
+    branches:
+      - "**"
   pull_request:
-    branches-ignore:
-      - main
+    branches:
+      - "**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
-  detection:
+  backend:
+    name: Backend Checks
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+
     steps:
-      - name: Checkout repository setup
-        uses: actions/checkout@v4
+      - name: Setup | Checkout Repository
+        uses: actions/checkout@v6
 
-      - name: Python 3.11 setup
-        uses: actions/setup-python@v5
+      - name: Setup | Python 3.13
+        uses: actions/setup-python@v6
         with:
-          python-version: '3.11'
+          python-version: "3.13"
 
-      - name: Install system dependencies
+      - name: Setup | System Dependencies
         run: |
-          sudo apt-get update && sudo apt-get install -y git ripgrep
+          sudo apt-get update
+          sudo apt-get install -y ripgrep
 
-      - name: Install project dependencies
-        run: |
-          pip install --upgrade pip
-          pip install uv==0.9.7
-          uv sync --dev --frozen
+      - name: Setup | uv
+        uses: astral-sh/setup-uv@v8
+        with:
+          version: "0.11.21"
+          enable-cache: true
 
-      - name: Run pre-commit checks
-        run: |
-          uv run pre-commit run --all-files --show-diff-on-failure
+      - name: Setup | Python Dependencies
+        run: uv sync --dev --frozen
 
-      - name: Run pytest
-        run: |
-          uv run poe test
+      - name: Check | Pre-commit
+        run: uv run pre-commit run --all-files --show-diff-on-failure
+
+      - name: Check | Backend Tests
+        run: uv run poe test
+
+  frontend:
+    name: Frontend Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    defaults:
+      run:
+        working-directory: web
+
+    steps:
+      - name: Setup | Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Setup | Node.js 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Setup | Frontend Dependencies
+        run: npm ci
+
+      - name: Check | Frontend Build
+        run: npm run build
