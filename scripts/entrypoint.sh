@@ -2,7 +2,7 @@
 set -e
 
 echo "Starting Backend..."
-uv run python -m markoun.main &
+.venv/bin/python -m markoun.main &
 
 echo "Starting Nginx..."
 exec nginx -g "daemon off;"

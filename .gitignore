@@ -62,6 +62,7 @@ target/
 
 # DotEnv configuration
 .env
+config.yaml
 
 # Database
 *.db

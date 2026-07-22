@@ -3,7 +3,7 @@ default_stages: [pre-commit]
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks.git
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: check-added-large-files
         args: ['--maxkb=1024']
@@ -30,23 +30,23 @@ repos:
         exclude: ^web/
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.12.0
+    rev: v0.15.22
     hooks:
-      - id: ruff
+      - id: ruff-check
         args: [--fix, --exit-non-zero-on-fix]
         exclude: ^web/
       - id: ruff-format
         exclude: ^web/
 
   - repo: https://github.com/codespell-project/codespell.git
-    rev: v2.4.1
+    rev: v2.4.3
     hooks:
       - id: codespell
         files: \.(py)$
         exclude: ^web/
 
   - repo: https://github.com/hukkin/mdformat
-    rev: 0.7.22
+    rev: 1.0.0
     hooks:
       - id: mdformat
         files: ^(?!CHANGELOG\.md$).*\.(md|markdown)$
