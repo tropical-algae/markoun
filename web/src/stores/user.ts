@@ -10,11 +10,12 @@ import {
   updatePasswordApi,
 } from '@/api/user'
 import { useToastStore } from '@/stores/toast'
+import { useNodeStore } from '@/stores/note'
 import type { AsyncStatus } from '@/types/async'
 import type { CurrentUserProfile, LoginForm, RegisterForm } from '@/types/auth'
 
-const NAME_MIN_LEN = 3
 const PASSWD_MIN_LEN = 6
+const USERNAME_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]{2,31}$/
 type AuthState = 'unknown' | 'authenticated' | 'anonymous'
 
 export const useUserStore = defineStore('user', () => {
@@ -23,10 +24,12 @@ export const useUserStore = defineStore('user', () => {
   const currentUserProfile = ref<CurrentUserProfile | null>(null)
   const currentUserProfileState = ref<AsyncStatus>('idle')
   const toastStore = useToastStore()
+  const nodeStore = useNodeStore()
   const actionLedger = useActionLedger()
 
   let authCheckPromise: Promise<AuthState> | null = null
   let currentUserProfilePromise: Promise<CurrentUserProfile | null> | null = null
+  let profileGeneration = 0
 
   const isAuthenticated = computed(() => authState.value === 'authenticated')
   const isAnonymous = computed(() => authState.value === 'anonymous')
@@ -37,11 +40,18 @@ export const useUserStore = defineStore('user', () => {
     authCheckStatus.value = 'ready'
   }
 
-  const markAnonymous = () => {
-    authState.value = 'anonymous'
-    authCheckStatus.value = 'ready'
+  const resetUserScopedState = () => {
+    profileGeneration += 1
+    currentUserProfilePromise = null
     currentUserProfile.value = null
     currentUserProfileState.value = 'idle'
+    nodeStore.resetWorkspaceState()
+  }
+
+  const markAnonymous = () => {
+    resetUserScopedState()
+    authState.value = 'anonymous'
+    authCheckStatus.value = 'ready'
   }
 
   const login = async (loginForm: LoginForm) => {
@@ -53,6 +63,7 @@ export const useUserStore = defineStore('user', () => {
 
       return await actionLedger.runAction('login', async () => {
         const res = await loginApi(loginForm)
+        resetUserScopedState()
         markAuthenticated()
         return res
       })
@@ -68,8 +79,11 @@ export const useUserStore = defineStore('user', () => {
         toastStore.pushNotice('warning', `Password must be longer than ${PASSWD_MIN_LEN}.`)
         return false
       }
-      if (registerForm.username.length < NAME_MIN_LEN) {
-        toastStore.pushNotice('warning', `Username must be longer than ${NAME_MIN_LEN}.`)
+      if (!USERNAME_PATTERN.test(registerForm.username)) {
+        toastStore.pushNotice(
+          'warning',
+          'Username must start with a letter or number and use 3-32 letters, numbers, underscores, or hyphens.',
+        )
         return false
       }
       await actionLedger.runAction('register', async () => {
@@ -120,6 +134,10 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  const handleUnauthorized = () => {
+    markAnonymous()
+  }
+
   const refreshCurrentUserProfile = async (
     force = false
   ): Promise<CurrentUserProfile | null> => {
@@ -138,23 +156,30 @@ export const useUserStore = defineStore('user', () => {
     }
 
     currentUserProfileState.value = currentUserProfile.value ? 'refreshing' : 'loading'
-    currentUserProfilePromise = (async () => {
+    const requestGeneration = profileGeneration
+    const operation = (async () => {
       try {
         const profile = await getCurrentUserProfileApi()
-
+        if (requestGeneration !== profileGeneration) {
+          return null
+        }
         currentUserProfile.value = profile.data
         currentUserProfileState.value = 'ready'
         return profile.data
       } catch (error) {
+        if (requestGeneration !== profileGeneration) {
+          return null
+        }
         currentUserProfileState.value = 'error'
         throw error
       } finally {
-        currentUserProfilePromise = null
+        if (requestGeneration === profileGeneration) {
+          currentUserProfilePromise = null
+        }
       }
     })()
-
-
-    return currentUserProfilePromise
+    currentUserProfilePromise = operation
+    return operation
   }
 
   const updatePassword = async (newPasswd: string): Promise<boolean> => {
@@ -186,6 +211,7 @@ export const useUserStore = defineStore('user', () => {
     register,
     ensureAuthKnown,
     logout,
+    handleUnauthorized,
     refreshCurrentUserProfile,
     updatePassword,
   }

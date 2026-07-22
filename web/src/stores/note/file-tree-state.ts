@@ -15,6 +15,7 @@ export const useFileTreeState = () => {
   const directoryLoadStateByPath = ref<Record<string, DirectoryLoadState>>({})
   const expandedDirPaths = ref<Record<string, boolean>>({})
   const directoryRequests = new Map<string, Promise<FsNode[]>>()
+  let workspaceGeneration = 0
 
   const rootNodes = computed(() => directoryChildrenByPath.value[ROOT_DIRECTORY_PATH] || [])
 
@@ -46,6 +47,7 @@ export const useFileTreeState = () => {
     force: boolean = false,
   ): Promise<FsNode[]> => {
     const normalizedPath = normalizeNodePath(path)
+    const requestGeneration = workspaceGeneration
     if (!force && getDirectoryLoadState(normalizedPath) === 'loaded') {
       return getDirectoryChildren(normalizedPath)
     }
@@ -64,6 +66,9 @@ export const useFileTreeState = () => {
 
     const request = getDirectoryChildrenApi(normalizedPath)
       .then((response) => {
+        if (requestGeneration !== workspaceGeneration) {
+          return []
+        }
         const responsePath = normalizeNodePath(response.data.path)
         const children = replaceDirectoryChildren(responsePath, response.data.children)
         directoryLoadStateByPath.value = {
@@ -73,6 +78,9 @@ export const useFileTreeState = () => {
         return children
       })
       .catch((error) => {
+        if (requestGeneration !== workspaceGeneration) {
+          return []
+        }
         directoryLoadStateByPath.value = {
           ...directoryLoadStateByPath.value,
           [normalizedPath]: 'error',
@@ -80,7 +88,9 @@ export const useFileTreeState = () => {
         throw error
       })
       .finally(() => {
-        directoryRequests.delete(normalizedPath)
+        if (requestGeneration === workspaceGeneration) {
+          directoryRequests.delete(normalizedPath)
+        }
       })
 
     directoryRequests.set(normalizedPath, request)
@@ -231,6 +241,14 @@ export const useFileTreeState = () => {
     return normalizedNode
   }
 
+  const resetFileTree = () => {
+    workspaceGeneration += 1
+    directoryRequests.clear()
+    directoryChildrenByPath.value = {}
+    directoryLoadStateByPath.value = {}
+    expandedDirPaths.value = {}
+  }
+
   return {
     rootNodes,
     getDirectoryChildren,
@@ -245,5 +263,6 @@ export const useFileTreeState = () => {
     remapDirectoryTreePathPrefix,
     removeNodeFromDirectoryTree,
     moveNodeToDirectory,
+    resetFileTree,
   }
 }

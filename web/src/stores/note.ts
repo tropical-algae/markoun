@@ -218,6 +218,15 @@ export const useNodeStore = defineStore('note', () => {
     closeImagePreview()
   }
 
+  const resetWorkspaceState = () => {
+    currentSelectionId += 1
+    pendingFileSwitchSave = null
+    fileTree.resetFileTree()
+    fileState.resetCurrentFileState()
+    currentNode.value = null
+    currentPreviewImageNode.value = null
+  }
+
   const uploadFile = async (
     file: File,
     uploadPercent: Ref<number, number>,
@@ -418,6 +427,7 @@ export const useNodeStore = defineStore('note', () => {
     addNewNode,
     setCurrentNode,
     clearCurrentNode,
+    resetWorkspaceState,
     openImagePreview,
     closeImagePreview,
     uploadFile,

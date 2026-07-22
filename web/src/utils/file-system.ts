@@ -1,4 +1,5 @@
 import type { FsNode } from '@/types/file-system'
+import { resolveApiUrl } from '@/utils/api-url'
 import { getLocalTime } from '@/utils/datetime'
 
 export const ROOT_DIRECTORY_PATH = '.'
@@ -40,16 +41,19 @@ export const insertTimeToFileName = (filename: string) => {
 }
 
 export const getMediaPath = (rootPath: string, relativeFilePath: string): string => {
-  // abs path
-  if (relativeFilePath.startsWith('/')) {
-    return ('/media' + relativeFilePath).replace(/\/+/g, '/')
-  }
-  // relative path
   const normalizedRootPath = normalizeNodePath(rootPath)
   const fakeBase = 'http://n'
   const basePath = normalizedRootPath === ROOT_DIRECTORY_PATH ? '/' : `/${normalizedRootPath}/`
   const fullUrl = new URL(relativeFilePath, fakeBase + basePath)
-  return ('/media' + fullUrl.pathname).replace(/\/+/g, '/')
+  let decodedPath = fullUrl.pathname
+  try {
+    decodedPath = decodeURIComponent(decodedPath)
+  } catch (_) {
+    // A literal percent sign is valid in a filename even though it is not URI-encoded.
+  }
+  const workspacePath = decodedPath.replace(/^\/+/, '')
+  const query = new URLSearchParams({ path: workspacePath })
+  return resolveApiUrl(`/api/v1/file/media?${query.toString()}`)
 }
 
 export const joinRelativePath = (parentPath: string, childName: string): string => {

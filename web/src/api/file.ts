@@ -6,11 +6,7 @@ import type {
   UploadResponse,
 } from '@/types/file-system'
 import request from '@/utils/request'
-
-const resolveApiUrl = (path: string): string => {
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || ''
-  return baseUrl ? `${baseUrl.replace(/\/$/, '')}${path}` : path
-}
+import { resolveApiUrl } from '@/utils/api-url'
 
 /**
  * 获取文件信息接口
