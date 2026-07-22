@@ -1,8 +1,6 @@
 import json
-from datetime import datetime
 from typing import Any
 
-import pytz
 from fastapi import (
     APIRouter,
     Depends,
@@ -29,6 +27,7 @@ from markoun.app.services.user_service import (
 )
 from markoun.app.utils.constant import CONSTANT, MSG_SUCCESS
 from markoun.common.decorator import exception_handling
+from markoun.common.util import local_now
 from markoun.core.db.models import UserAccount
 from markoun.core.model.user import (
     CurrentUserProfile,
@@ -60,9 +59,7 @@ async def api_user_login(
         **CONSTANT.RESP_SUCCESS,
         user_id=user.id,
         scopes=json.loads(str(user.scopes)),
-        timestamp=pytz.timezone("Asia/Shanghai")
-        .localize(datetime.now())
-        .strftime("%Y-%m-%d %H:%M:%S"),
+        timestamp=local_now().strftime("%Y-%m-%d %H:%M:%S"),
     )
 
 

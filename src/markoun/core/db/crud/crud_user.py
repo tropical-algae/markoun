@@ -1,13 +1,8 @@
-from sqlmodel import func, select
+from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from markoun.app.utils.security import get_password_hash
 from markoun.core.db.models import UserAccount
-
-
-async def select_user_count(db: AsyncSession) -> int:
-    result = await db.exec(select(func.count()).select_from(UserAccount))
-    return result.one()
 
 
 async def select_all_user(db: AsyncSession) -> list[UserAccount]:
@@ -16,23 +11,31 @@ async def select_all_user(db: AsyncSession) -> list[UserAccount]:
 
 
 async def select_user_by_full_name(
-    db: AsyncSession, full_name: str | None
+    db: AsyncSession,
+    full_name: str | None,
+    *,
+    active_only: bool = True,
 ) -> UserAccount | None:
     if full_name:
-        user_result = await db.exec(
-            select(UserAccount).where(
-                UserAccount.full_name == full_name, UserAccount.is_active
-            )
-        )
+        statement = select(UserAccount).where(UserAccount.full_name == full_name)
+        if active_only:
+            statement = statement.where(UserAccount.is_active)
+        user_result = await db.exec(statement)
         return user_result.first()
     return None
 
 
-async def select_user_by_email(db: AsyncSession, email: str | None) -> UserAccount | None:
+async def select_user_by_email(
+    db: AsyncSession,
+    email: str | None,
+    *,
+    active_only: bool = True,
+) -> UserAccount | None:
     if email:
-        user_result = await db.exec(
-            select(UserAccount).where(UserAccount.email == email, UserAccount.is_active)
-        )
+        statement = select(UserAccount).where(UserAccount.email == email)
+        if active_only:
+            statement = statement.where(UserAccount.is_active)
+        user_result = await db.exec(statement)
         return user_result.first()
     return None
 

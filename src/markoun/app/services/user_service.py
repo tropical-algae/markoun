@@ -1,5 +1,4 @@
 import json
-import uuid
 from datetime import timedelta
 
 from fastapi import HTTPException, Response
@@ -15,7 +14,6 @@ from markoun.core.db.crud.crud_user import (
     insert_user,
     select_user_by_email,
     select_user_by_full_name,
-    select_user_count,
     update_user,
 )
 from markoun.core.db.models import UserAccount
@@ -26,24 +24,39 @@ from markoun.core.model.user import (
     UserBasicInfo,
 )
 
-DEFAULT_USER = {
-    "email": "admin@admin.com",
-    "scopes": [ScopeType.ADMIN, ScopeType.USER],
-    "full_name": "admin",
-}
+DEFAULT_ADMIN_SCOPES = [ScopeType.ADMIN, ScopeType.USER]
 
 
 async def insert_default_user(db: AsyncSession) -> None:
-    user_count = await select_user_count(db)
-    if user_count == 0:
-        logger.warning("Preparing to create system admin user")
-        password = uuid.uuid4().hex[:12]
-        new_user = UserBasicInfo(password=password, **DEFAULT_USER).build_user()
-        await insert_user(db=db, user=new_user)
-        logger.warning(f"Username: {new_user.full_name}")
-        logger.warning(f"password: {password}")
-    else:
-        logger.info("Default user already exist. Initialization skipped.")
+    existing_name = await select_user_by_full_name(
+        db,
+        full_name=settings.DEFAULT_ADMIN_NAME,
+        active_only=False,
+    )
+    existing_email = await select_user_by_email(
+        db,
+        email=settings.DEFAULT_ADMIN_EMAIL,
+        active_only=False,
+    )
+    if existing_name is not None or existing_email is not None:
+        logger.info(
+            "Default administrator username or email already exists. "
+            "Initialization skipped."
+        )
+        return
+
+    new_user = UserBasicInfo(
+        full_name=settings.DEFAULT_ADMIN_NAME,
+        email=settings.DEFAULT_ADMIN_EMAIL,
+        password=settings.DEFAULT_ADMIN_PASSWORD,
+        scopes=DEFAULT_ADMIN_SCOPES,
+    ).build_user()
+
+    logger.warning("Preparing to create system admin user")
+    await insert_user(db=db, user=new_user)
+    logger.warning(f"Username: {new_user.full_name}")
+    if "DEFAULT_ADMIN_PASSWORD" not in settings.model_fields_set:
+        logger.warning(f"Generated password: {settings.DEFAULT_ADMIN_PASSWORD}")
 
 
 async def user_login(
@@ -97,11 +110,19 @@ async def user_register(user: UserBasicInfo, db: AsyncSession) -> UserAccount:
     if not can_user_regis:
         raise HTTPException(**CONSTANT.SERV_DISABLE_REGISTRATION)
 
-    existed_user = await select_user_by_full_name(db, full_name=user.full_name)
+    existed_user = await select_user_by_full_name(
+        db,
+        full_name=user.full_name,
+        active_only=False,
+    )
     if existed_user is not None:
         raise HTTPException(**CONSTANT.RESP_USER_EXISTS)
 
-    existed_user = await select_user_by_email(db, email=user.email)
+    existed_user = await select_user_by_email(
+        db,
+        email=user.email,
+        active_only=False,
+    )
     if existed_user is not None:
         raise HTTPException(**CONSTANT.RESP_USER_EMAIL_EXISTS)
 

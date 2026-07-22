@@ -1,10 +1,10 @@
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import StrEnum
 
 from pydantic import BaseModel, Field, field_validator
 
-from markoun.common.util import generate_random_token
+from markoun.common.util import generate_random_token, is_valid_username
 from markoun.core.db.models import UserAccount
 
 
@@ -38,7 +38,7 @@ class TokenPayload(BaseModel):
     userid: str
     username: str
     scopes: list[ScopeType]
-    exp: datetime = datetime.now(timezone.utc)
+    exp: datetime = datetime.now(UTC)
 
     def to_dict(self) -> dict:
         data = self.model_dump()
@@ -64,9 +64,9 @@ class UserBasicInfo(BaseModel):
     @field_validator("full_name")
     @classmethod
     def validate_full_name(cls, value: str) -> str:
-        if not is_workspace_username(value):
+        if not is_valid_username(value):
             raise ValueError(
-                "Username must be 3-32 ASCII letters, numbers, underscores, or hyphens"
+                "Username must be 3-32 letters, numbers, _ or -; start with a letter or number"
             )
         return value
 
@@ -81,9 +81,3 @@ class UserBasicInfo(BaseModel):
             is_superuser=is_superuser,
             is_active=True,
         )
-
-
-def is_workspace_username(value: str) -> bool:
-    if not 3 <= len(value) <= 32 or not value[0].isalnum():
-        return False
-    return value.isascii() and all(char.isalnum() or char in "_-" for char in value)

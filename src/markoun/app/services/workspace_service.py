@@ -5,8 +5,8 @@ from fastapi import HTTPException
 
 from markoun.app.utils.constant import CONSTANT
 from markoun.common.config import settings
+from markoun.common.util import is_valid_username
 from markoun.core.db.models import UserAccount
-from markoun.core.model.user import is_workspace_username
 
 
 @dataclass(frozen=True)
@@ -60,7 +60,7 @@ def create_workspace_context(user: UserAccount | None) -> WorkspaceContext:
 
     if settings.AUTH_REQUIRED and settings.USER_WORKSPACE_ISOLATION:
         username = user.full_name if user else None
-        if username is None or not is_workspace_username(username):
+        if username is None or not is_valid_username(username):
             raise HTTPException(**CONSTANT.SERV_INVALID_WORKSPACE_USER)
         workspace_root = document_root / username
 

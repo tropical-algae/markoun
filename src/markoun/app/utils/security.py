@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from fastapi import HTTPException
 from jose import ExpiredSignatureError, exceptions, jwt
@@ -14,7 +14,7 @@ from markoun.core.model.user import TokenPayload
 def get_access_token(
     data: TokenPayload, expires_delta: timedelta = timedelta(minutes=30)
 ) -> str:
-    data.exp = datetime.now(timezone.utc) + expires_delta
+    data.exp = datetime.now(UTC) + expires_delta
     encoded_jwt = jwt.encode(
         data.to_dict(), settings.ACCESS_TOKEN_SECRET_KEY, algorithm="HS256"
     )

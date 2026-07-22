@@ -1,9 +1,12 @@
+import asyncio
 import importlib
 import json
 import pkgutil
+import re
 import secrets
 import string
 from collections.abc import Callable
+from datetime import datetime
 from pathlib import Path
 from types import ModuleType
 from typing import Any
@@ -17,7 +20,13 @@ from markoun.common.logging import logger
 from markoun.core.db.session import LocalSession
 
 TOKEN_SEQUENCE = string.ascii_uppercase + string.digits
+USERNAME_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{2,31}$")
 SIZE_UNITS = ["B", "KB", "MB", "GB"]
+
+
+def local_now() -> datetime:
+    """Return the current time using the operating system's local timezone."""
+    return datetime.now().astimezone()
 
 
 async def async_db_wrapper(func: Callable, *args, **kwargs) -> Any:
@@ -39,7 +48,7 @@ async def aread_file(filepath: Path) -> str:
 
 
 async def awrite_file(filepath: Path, content: str) -> None:
-    if not filepath.exists():
+    if not await asyncio.to_thread(filepath.exists):
         logger.error(f"[File {filepath} is not existed]")
         raise HTTPException(**CONSTANT.SERV_FILE_NOT_EXISTED)
     try:
@@ -97,6 +106,10 @@ def generate_random_token(prefix: str = "", length: int = 32) -> str:
     key_length = length - len(prefix)
     assert key_length > 0, "The length of the token must greater than the prefix."
     return prefix + "".join(secrets.choice(TOKEN_SEQUENCE) for _ in range(key_length))
+
+
+def is_valid_username(value: str) -> bool:
+    return USERNAME_PATTERN.fullmatch(value) is not None
 
 
 def str_to_json(text: str) -> list:

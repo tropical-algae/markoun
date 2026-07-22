@@ -1,3 +1,4 @@
+import asyncio
 import shutil
 from pathlib import Path
 
@@ -22,9 +23,7 @@ def _sort_key(node: FileNode | DirNode) -> tuple[bool, bool, str, str]:
     )
 
 
-async def _directory_has_children(
-    current_path: Path, displayed_file_types: set[str]
-) -> bool:
+def _directory_has_children(current_path: Path, displayed_file_types: set[str]) -> bool:
     for item_path in current_path.iterdir():
         if item_path.is_symlink():
             continue
@@ -33,7 +32,7 @@ async def _directory_has_children(
     return False
 
 
-async def _get_node_summary(
+def _get_node_summary(
     workspace: WorkspaceContext,
     current_path: Path,
     displayed_file_types: set[str],
@@ -52,17 +51,14 @@ async def _get_node_summary(
 
     if is_dir:
         return FileNode(
-            has_children=await _directory_has_children(
-                current_path, displayed_file_types
-            ),
+            has_children=_directory_has_children(current_path, displayed_file_types),
             **basic_info,
         )
 
     return FileNode(**basic_info) if suffix in displayed_file_types else None
 
 
-@exception_handling(CONSTANT.SERV_LOAD_TREE_FAIL)
-async def get_directory_children(
+def _get_directory_children(
     workspace: WorkspaceContext,
     current_path: Path,
     displayed_file_types: set[str],
@@ -73,7 +69,7 @@ async def get_directory_children(
 
     children: list[FileNode] = []
     for item_path in current_path.iterdir():
-        child_node = await _get_node_summary(workspace, item_path, displayed_file_types)
+        child_node = _get_node_summary(workspace, item_path, displayed_file_types)
         if child_node:
             children.append(child_node)
 
@@ -82,12 +78,22 @@ async def get_directory_children(
 
 
 @exception_handling(CONSTANT.SERV_LOAD_TREE_FAIL)
-async def get_file_tree(
+async def get_directory_children(
+    workspace: WorkspaceContext,
+    current_path: Path,
+    displayed_file_types: set[str],
+) -> list[FileNode]:
+    return await asyncio.to_thread(
+        _get_directory_children, workspace, current_path, displayed_file_types
+    )
+
+
+def _get_file_tree(
     workspace: WorkspaceContext,
     current_path: Path,
     displayed_file_types: set[str],
 ) -> FileNode | DirNode | None:
-    node_summary = await _get_node_summary(workspace, current_path, displayed_file_types)
+    node_summary = _get_node_summary(workspace, current_path, displayed_file_types)
     if node_summary is None:
         return None
 
@@ -101,7 +107,7 @@ async def get_file_tree(
             children=[],
         )
         for item_path in current_path.iterdir():
-            child_node = await get_file_tree(workspace, item_path, displayed_file_types)
+            child_node = _get_file_tree(workspace, item_path, displayed_file_types)
             if child_node:
                 path_node.children.append(child_node)
         path_node.has_children = bool(path_node.children)
@@ -109,6 +115,17 @@ async def get_file_tree(
         return path_node
 
     return node_summary
+
+
+@exception_handling(CONSTANT.SERV_LOAD_TREE_FAIL)
+async def get_file_tree(
+    workspace: WorkspaceContext,
+    current_path: Path,
+    displayed_file_types: set[str],
+) -> FileNode | DirNode | None:
+    return await asyncio.to_thread(
+        _get_file_tree, workspace, current_path, displayed_file_types
+    )
 
 
 @exception_handling(CONSTANT.SERV_REMOVE_ITEM_FAIL)
@@ -123,7 +140,7 @@ def remove_item(abs_path: Path) -> None:
         shutil.rmtree(abs_path)
 
 
-async def move_item(
+def _move_item(
     workspace: WorkspaceContext,
     source_path: str | Path,
     target_dir: str | Path,
@@ -143,7 +160,7 @@ async def move_item(
         raise HTTPException(**CONSTANT.SERV_FILE_NOT_EXISTED)
 
     if source_path.parent == target_dir:
-        node = await _get_node_summary(workspace, source_path, displayed_file_types)
+        node = _get_node_summary(workspace, source_path, displayed_file_types)
         if node is None:
             raise HTTPException(**CONSTANT.SERV_FILE_NOT_EXISTED)
         return node
@@ -158,10 +175,25 @@ async def move_item(
         raise HTTPException(**CONSTANT.SERV_FILE_EXISTED)
 
     source_path.rename(new_path)
-    node = await _get_node_summary(workspace, new_path, displayed_file_types)
+    node = _get_node_summary(workspace, new_path, displayed_file_types)
     if node is None:
         raise HTTPException(**CONSTANT.SERV_FILE_NOT_EXISTED)
     return node
+
+
+async def move_item(
+    workspace: WorkspaceContext,
+    source_path: str | Path,
+    target_dir: str | Path,
+    displayed_file_types: set[str],
+) -> FileNode:
+    return await asyncio.to_thread(
+        _move_item,
+        workspace,
+        source_path,
+        target_dir,
+        displayed_file_types,
+    )
 
 
 def rename_item(workspace: WorkspaceContext, path: str | Path, new_name: str) -> None:

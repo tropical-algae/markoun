@@ -1,10 +1,9 @@
+import asyncio
 import json
 from contextlib import asynccontextmanager
-from datetime import datetime
 from pathlib import Path
 from typing import Any, cast
 
-import pytz
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette import status
@@ -17,6 +16,7 @@ from markoun.app.services.user_service import insert_default_user
 from markoun.app.utils.constant import CONSTANT
 from markoun.common.config import settings
 from markoun.common.logging import logger
+from markoun.common.util import local_now
 from markoun.core.db.session import LocalSession, init_db_models
 
 # ALLOW_ORIGINS = ["*"]
@@ -27,7 +27,7 @@ def resp_success(response_body: Any) -> Response:
         status_code=status.HTTP_200_OK,
         content={
             **CONSTANT.RESP_SUCCESS,
-            "timestamp": str(datetime.now(tz=pytz.timezone("Asia/Shanghai"))),
+            "timestamp": str(local_now()),
             "data": response_body,
         },
     )
@@ -39,7 +39,7 @@ def resp_error(response_body: dict) -> Response:
         content={
             "status": response_body["status"],
             "message": response_body["message"],
-            "timestamp": str(datetime.now(tz=pytz.timezone("Asia/Shanghai"))),
+            "timestamp": str(local_now()),
             "data": response_body["data"],
         },
     )
@@ -54,7 +54,9 @@ async def lifespan(app: FastAPI):
         await insert_default_system_setting(db)
         await insert_default_user(db)
 
-    Path(settings.DOCUMENT_ROOT).mkdir(parents=True, exist_ok=True)
+    await asyncio.to_thread(
+        Path(settings.DOCUMENT_ROOT).mkdir, parents=True, exist_ok=True
+    )
 
     yield
     logger.info("Shut down and clear cache...")

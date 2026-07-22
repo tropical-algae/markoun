@@ -1,13 +1,13 @@
-from datetime import datetime
 from typing import Union
 
-import pytz
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from starlette import status
 from starlette.exceptions import HTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse, Response
+
+from markoun.common.util import local_now
 
 
 def resp_http_error(exc: HTTPException, data: Union[list, dict, str] = "") -> Response:
@@ -16,7 +16,7 @@ def resp_http_error(exc: HTTPException, data: Union[list, dict, str] = "") -> Re
         content={
             "status": exc.status_code,
             "message": str(exc.detail),
-            "timestamp": str(datetime.now(tz=pytz.timezone("Asia/Shanghai"))),
+            "timestamp": str(local_now()),
             "is_exception": True,
             "data": data,
         },
@@ -25,11 +25,11 @@ def resp_http_error(exc: HTTPException, data: Union[list, dict, str] = "") -> Re
 
 def resp_validation_error(exc: RequestValidationError) -> Response:
     return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
         content={
-            "status": status.HTTP_422_UNPROCESSABLE_ENTITY,
+            "status": status.HTTP_422_UNPROCESSABLE_CONTENT,
             "message": str(exc.errors()),
-            "timestamp": str(datetime.now(tz=pytz.timezone("Asia/Shanghai"))),
+            "timestamp": str(local_now()),
             "is_exception": True,
             "data": exc.body,
         },
@@ -42,7 +42,7 @@ def resp_error() -> Response:
         content={
             "status": status.HTTP_500_INTERNAL_SERVER_ERROR,
             "message": "Something is wrong with the server...",
-            "timestamp": str(datetime.now(tz=pytz.timezone("Asia/Shanghai"))),
+            "timestamp": str(local_now()),
             "is_exception": True,
             "data": "",
         },

@@ -1,6 +1,7 @@
 import secrets
-from typing import Literal
+from typing import Any, Literal
 
+from pydantic import Field
 from pydantic_settings import (
     BaseSettings,
     PydanticBaseSettingsSource,
@@ -12,6 +13,15 @@ from markoun import __version__
 
 CONFIG_FILE = "config.yaml"
 ENV_FILE = ".env"
+
+
+class SensitiveSetting(BaseSettings):
+    DEFAULT_ADMIN_NAME: str = "admin"
+    DEFAULT_ADMIN_EMAIL: str = "admin@admin.com"
+    DEFAULT_ADMIN_PASSWORD: str = Field(
+        default_factory=lambda: secrets.token_urlsafe(16),
+        min_length=1,
+    )
 
 
 class SysSetting(BaseSettings):
@@ -59,7 +69,17 @@ class LogSetting(BaseSettings):
     LOG_CONSOLE_OUTPUT: bool = True
 
 
-class Setting(SysSetting, BasicSetting, LogSetting):
+class RestrictedYamlConfigSettingsSource(YamlConfigSettingsSource):
+    def __call__(self) -> dict[str, Any]:
+        values = super().__call__()
+        return {
+            key: value
+            for key, value in values.items()
+            if key not in SensitiveSetting.model_fields
+        }
+
+
+class Setting(SysSetting, BasicSetting, SensitiveSetting, LogSetting):
     model_config = SettingsConfigDict(
         env_file=ENV_FILE,
         case_sensitive=True,
@@ -76,7 +96,7 @@ class Setting(SysSetting, BasicSetting, LogSetting):
         file_secret_settings: PydanticBaseSettingsSource,
     ) -> tuple[PydanticBaseSettingsSource, ...]:
         _ = init_settings
-        yaml_settings = YamlConfigSettingsSource(
+        yaml_settings = RestrictedYamlConfigSettingsSource(
             settings_cls=settings_cls, yaml_file=CONFIG_FILE, yaml_file_encoding="utf-8"
         )
         return yaml_settings, env_settings, dotenv_settings, file_secret_settings

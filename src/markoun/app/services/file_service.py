@@ -84,11 +84,11 @@ async def search_markdown_files(
     reached_limit = False
 
     while line := await process.stdout.readline():
-        data = json.loads(line.decode("utf-8"))
+        data: dict = json.loads(line.decode("utf-8"))
         if data.get("type") == "match":
             match_data = data["data"]
-            filepath = Path(match_data["path"]["text"]).resolve()
-            if not filepath.is_file() or file_suffix(filepath) != NOTE_SUFFIX:
+            filepath = Path(match_data["path"]["text"])
+            if file_suffix(filepath) != NOTE_SUFFIX:
                 continue
 
             relative_path = str(workspace.relative(filepath))
