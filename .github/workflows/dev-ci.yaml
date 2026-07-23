@@ -52,7 +52,7 @@ jobs:
 
       - name: Upload | Coverage Report
         if: >-
-          github.repository == 'tropicalalgae/markoun' &&
+          github.repository == 'tropical-algae/markoun' &&
           (github.event_name == 'push' ||
           github.event.pull_request.head.repo.full_name == github.repository)
         uses: codecov/codecov-action@v5
