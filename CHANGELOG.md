@@ -1,5 +1,26 @@
 <!-- version list -->
 
+## v0.2.2 (2026-07-23)
+
+### Bug Fixes
+
+- **ci**: Pin setup-uv to a valid release tag
+  ([`adce265`](https://github.com/tropical-algae/markoun/commit/adce265f8f1a357043361dfb77554c7d2f8e69bf))
+
+### Features
+
+- **api**: Support configurable pasted image directories (refs #15)
+  ([`9875daa`](https://github.com/tropical-algae/markoun/commit/9875daa0ee7416030399f64ccfd1445ad19a191d))
+
+- **editor**: Integrate configurable pasted image uploads (refs #15)
+  ([`decf35e`](https://github.com/tropical-algae/markoun/commit/decf35ee6395ce76385d4a5756d4c46d28914fa3))
+
+### Testing
+
+- **file**: Add tests for configurable pasted image directories
+  ([`574c0f4`](https://github.com/tropical-algae/markoun/commit/574c0f4855acab7b0faf697e809cd5272106e137))
+
+
 ## v0.2.1 (2026-07-21)
 
 
