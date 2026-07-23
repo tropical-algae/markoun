@@ -5,6 +5,7 @@ import pytest
 from fastapi import HTTPException
 from fastapi.testclient import TestClient
 
+from markoun.app.services import file_service
 from markoun.app.services.workspace_service import create_workspace_context
 from markoun.common.config import settings
 from markoun.core.db.models import UserAccount
@@ -61,16 +62,25 @@ def test_authenticated_users_have_isolated_workspaces(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ):
+    async def grouping_enabled(*_args, **_kwargs) -> bool:
+        return True
+
     suffix = uuid4().hex[:8]
     first_user = f"first-{suffix}"
     second_user = f"second-{suffix}"
     note_path = "notes/shared-name.md"
     image_path = "images/shared-name.png"
+    pasted_image_path = "notes/shared-name/pasted.png"
 
     monkeypatch.setattr(settings, "DOCUMENT_ROOT", str(tmp_path))
     monkeypatch.setattr(settings, "AUTH_REQUIRED", True)
     monkeypatch.setattr(settings, "USER_WORKSPACE_ISOLATION", True)
     monkeypatch.setattr(settings, "MEDIA_DELIVERY_MODE", "application")
+    monkeypatch.setattr(
+        file_service,
+        "get_paste_image_note_dir_setting",
+        grouping_enabled,
+    )
 
     for username, content in (
         (first_user, "first-user-content"),
@@ -90,6 +100,14 @@ def test_authenticated_users_have_isolated_workspaces(
         )
         assert create_response.status_code == 200
         assert create_response.json()["data"]["path"] == note_path
+
+        pasted_image_response = client.post(
+            f"{settings.API_PREFIX}/file/paste-image",
+            data={"note_path": note_path},
+            files={"file": ("pasted.png", content.encode(), "image/png")},
+        )
+        assert pasted_image_response.status_code == 200
+        assert pasted_image_response.json()["data"]["path"] == pasted_image_path
 
         save_response = client.post(
             f"{settings.API_PREFIX}/file/save",
@@ -184,6 +202,13 @@ def test_authenticated_users_have_isolated_workspaces(
         assert media_response.status_code == 200
         assert media_response.content == content.encode()
 
+        pasted_media_response = client.get(
+            f"{settings.API_PREFIX}/file/media",
+            params={"path": pasted_image_path},
+        )
+        assert pasted_media_response.status_code == 200
+        assert pasted_media_response.content == content.encode()
+
         traversal_response = client.get(
             f"{settings.API_PREFIX}/file/load",
             params={"filepath": f"../{other_user}/{note_path}"},
@@ -209,6 +234,7 @@ def test_authenticated_users_have_isolated_workspaces(
         assert remove_root_response.status_code == 400
 
         assert (tmp_path / username / note_path).read_text() == content
+        assert (tmp_path / username / pasted_image_path).read_bytes() == content.encode()
 
 
 def test_workspace_rejects_absolute_and_symlink_escape(

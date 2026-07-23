@@ -62,6 +62,30 @@ def test_optional_auth_allows_workspace_but_protects_account(
 
         settings_response = client.get(f"{settings.API_PREFIX}/system/settings")
         assert settings_response.status_code == 200
+        image_setting = next(
+            setting
+            for setting in settings_response.json()["data"]
+            if setting["id"] == "paste_image_note_dir"
+        )
+        original_image_setting = image_setting["value"]
+
+        enable_image_setting_response = client.patch(
+            f"{settings.API_PREFIX}/system/settings",
+            json={"id": "paste_image_note_dir", "value": not original_image_setting},
+        )
+        assert enable_image_setting_response.status_code == 200
+        updated_settings_response = client.get(f"{settings.API_PREFIX}/system/settings")
+        updated_image_setting = next(
+            setting
+            for setting in updated_settings_response.json()["data"]
+            if setting["id"] == "paste_image_note_dir"
+        )
+        assert updated_image_setting["value"] is not original_image_setting
+        disable_image_setting_response = client.patch(
+            f"{settings.API_PREFIX}/system/settings",
+            json={"id": "paste_image_note_dir", "value": original_image_setting},
+        )
+        assert disable_image_setting_response.status_code == 200
 
         disabled_auth_responses = [
             client.post(

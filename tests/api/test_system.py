@@ -3,7 +3,19 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
+from markoun.app.services.system_service import (
+    DEFAULT_SETTING,
+    PASTE_IMAGE_NOTE_DIR_SETTING_ID,
+)
 from markoun.common.config import settings
+
+
+def test_pasted_image_grouping_is_disabled_by_default():
+    image_setting = next(
+        item for item in DEFAULT_SETTING if item["key"] == PASTE_IMAGE_NOTE_DIR_SETTING_ID
+    )
+
+    assert image_setting["value"] is False
 
 
 @pytest.mark.run(order=14)
