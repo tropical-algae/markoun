@@ -1,4 +1,4 @@
-name: CI
+name: Quality Gate
 
 on:
   push:
@@ -49,6 +49,18 @@ jobs:
 
       - name: Check | Backend Tests
         run: uv run poe test
+
+      - name: Upload | Coverage Report
+        if: >-
+          github.repository == 'tropicalalgae/markoun' &&
+          (github.event_name == 'push' ||
+          github.event.pull_request.head.repo.full_name == github.repository)
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./cov.xml
+          disable_search: true
+          fail_ci_if_error: true
 
   frontend:
     name: Frontend Build

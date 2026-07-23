@@ -40,6 +40,14 @@ jobs:
       - name: Check | Backend Tests
         run: uv run poe test
 
+      - name: Upload | Coverage Report
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./cov.xml
+          disable_search: true
+          fail_ci_if_error: true
+
   release:
     name: Semantic Release
     runs-on: ubuntu-latest
