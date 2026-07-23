@@ -37,6 +37,10 @@ export const useFileTreeState = () => {
     return directoryLoadStateByPath.value[normalizeNodePath(path)] || 'idle'
   }
 
+  const isDirectoryLoaded = (path: string): boolean => {
+    return getDirectoryLoadState(path) === 'loaded'
+  }
+
   const isDirectoryExpanded = (path: string): boolean => {
     const normalizedPath = normalizeNodePath(path)
     return normalizedPath === ROOT_DIRECTORY_PATH || Boolean(expandedDirPaths.value[normalizedPath])
@@ -155,6 +159,29 @@ export const useFileTreeState = () => {
     return normalizedNode
   }
 
+  const markDirectoryHasChildren = (path: string) => {
+    const normalizedPath = normalizeNodePath(path)
+    if (normalizedPath === ROOT_DIRECTORY_PATH) {
+      return
+    }
+
+    const parentPath = getParentPath(normalizedPath)
+    if (!isDirectoryLoaded(parentPath)) {
+      return
+    }
+
+    const children = getDirectoryChildren(parentPath)
+    const targetIndex = children.findIndex((node) => node.path === normalizedPath)
+    const target = children[targetIndex]
+    if (!target || target.type !== 'dir' || target.has_children) {
+      return
+    }
+
+    const nextChildren = [...children]
+    nextChildren[targetIndex] = { ...target, has_children: true }
+    replaceDirectoryChildren(parentPath, nextChildren)
+  }
+
   const removeNodeFromParentDirectory = (path: string) => {
     const normalizedPath = normalizeNodePath(path)
     const parentPath = getParentPath(normalizedPath)
@@ -253,6 +280,7 @@ export const useFileTreeState = () => {
     rootNodes,
     getDirectoryChildren,
     getDirectoryLoadState,
+    isDirectoryLoaded,
     isDirectoryExpanded,
     loadDirectory,
     expandDirectory,
@@ -260,6 +288,7 @@ export const useFileTreeState = () => {
     toggleDirectory,
     ensureDirectoryVisible,
     upsertNode,
+    markDirectoryHasChildren,
     remapDirectoryTreePathPrefix,
     removeNodeFromDirectoryTree,
     moveNodeToDirectory,

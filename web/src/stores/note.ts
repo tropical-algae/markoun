@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref, type Ref } from 'vue'
 import { useActionLedger } from '@/composables/useActionLedger'
-import type { FsNode } from '@/types/file-system'
+import type { FsNode, PastedImageResponse, UploadResponse } from '@/types/file-system'
 import { useToastStore } from '@/stores/toast'
 import {
   getMediaPath,
@@ -20,6 +20,7 @@ import {
 import {
   getFileContentApi,
   createNoteApi,
+  uploadPastedImageApi,
   uploadFileApi,
   saveNoteApi,
   saveNoteKeepalive,
@@ -59,6 +60,8 @@ export const useNodeStore = defineStore('note', () => {
     loadDirectory,
     getDirectoryChildren,
     getDirectoryLoadState,
+    isDirectoryLoaded,
+    markDirectoryHasChildren,
     isDirectoryExpanded,
     expandDirectory,
     collapseDirectory,
@@ -231,7 +234,7 @@ export const useNodeStore = defineStore('note', () => {
     file: File,
     uploadPercent: Ref<number, number>,
     destinationPath: string = currentParentPath.value,
-  ): Promise<string> => {
+  ): Promise<UploadResponse> => {
     const parentPath = normalizeNodePath(destinationPath)
     const response = await actionLedger.runAction('upload-file', async () => {
       return await uploadFileApi(parentPath, file, (percent) => {
@@ -243,7 +246,37 @@ export const useNodeStore = defineStore('note', () => {
       upsertNode(parentPath, response.data.node)
     }
     toastStore.pushNotice('info', `File upload successfully.`)
-    return response.data.filename
+    return response.data
+  }
+
+  const uploadPastedImage = async (
+    file: File,
+    notePath: string,
+    uploadPercent: Ref<number, number>,
+  ): Promise<PastedImageResponse> => {
+    const response = await actionLedger.runAction('upload-file', async () => {
+      return await uploadPastedImageApi(notePath, file, (percent) => {
+        uploadPercent.value = percent
+      })
+    })
+
+    const createdDirectory = response.data.created_directory
+    if (createdDirectory) {
+      const directoryParent = getParentPath(createdDirectory.path)
+      if (isDirectoryLoaded(directoryParent)) {
+        upsertNode(directoryParent, createdDirectory)
+      }
+    }
+
+    const uploadedNode = response.data.node
+    const uploadParent = getParentPath(response.data.path)
+    markDirectoryHasChildren(uploadParent)
+    if (uploadedNode && isDirectoryLoaded(uploadParent)) {
+      upsertNode(uploadParent, uploadedNode)
+    }
+
+    toastStore.pushNotice('info', `Image upload successfully.`)
+    return response.data
   }
 
   const saveCurrentFile = async (options: { silent?: boolean } = {}): Promise<void> => {
@@ -431,6 +464,7 @@ export const useNodeStore = defineStore('note', () => {
     openImagePreview,
     closeImagePreview,
     uploadFile,
+    uploadPastedImage,
     saveCurrentFile,
     saveCurrentFileIfDirty,
     saveCurrentFileBeforeUnload,

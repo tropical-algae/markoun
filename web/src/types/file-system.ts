@@ -39,5 +39,11 @@ export interface FileSearchResult {
 
 export interface UploadResponse {
   filename: string
+  path: string
   node: FsNode | null
+}
+
+export interface PastedImageResponse extends UploadResponse {
+  markdown_path: string
+  created_directory: FsNode | null
 }

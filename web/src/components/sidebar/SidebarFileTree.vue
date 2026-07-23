@@ -141,10 +141,24 @@ onMounted(async () => {
 
 <style scoped>
 .file-tree-root {
+  position: relative;
   display: flex;
   flex-direction: column;
   transition: background-color var(--motion-soft-duration) ease;
   border-radius: var(--radius-sm);
+  isolation: isolate;
+}
+
+.file-tree-root::after {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border: var(--line-width) solid transparent;
+  border-radius: inherit;
+  box-sizing: border-box;
+  content: "";
+  pointer-events: none;
+  transition: border-color var(--motion-soft-duration) ease;
 }
 
 .file-tree-list {
@@ -153,6 +167,9 @@ onMounted(async () => {
 
 .file-tree-root.is-root-dragover {
   background-color: var(--color-action-light);
-  box-shadow: inset 0 0 0 var(--line-width) var(--color-action);
+}
+
+.file-tree-root.is-root-dragover::after {
+  border-color: var(--color-action);
 }
 </style>

@@ -3,6 +3,7 @@ import type {
   FileDetailResponse,
   FileSearchResult,
   FsNode,
+  PastedImageResponse,
   UploadResponse,
 } from '@/types/file-system'
 import request from '@/utils/request'
@@ -82,6 +83,30 @@ export const uploadFileApi = (
         onProgress(percent)
       }
     }
+  })
+}
+
+export const uploadPastedImageApi = (
+  notePath: string,
+  file: File,
+  onProgress?: (percent: number) => void,
+): Promise<ApiResponse<PastedImageResponse>> => {
+  const formData = new FormData()
+  formData.append('note_path', notePath)
+  formData.append('file', file)
+
+  return request({
+    url: '/api/v1/file/paste-image',
+    method: 'post',
+    data: formData,
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+    onUploadProgress: (progressEvent) => {
+      if (progressEvent.total && onProgress) {
+        onProgress(Math.round((progressEvent.loaded * 100) / progressEvent.total))
+      }
+    },
   })
 }
 

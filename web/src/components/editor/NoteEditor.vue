@@ -106,7 +106,7 @@ const { handlePaste } = useMarkdownPasteUpload({
   setContent: (content) => {
     nodeStore.currentFile.content = content
   },
-  getUploadPath: () => nodeStore.currentFileParentPath,
+  getFilePath: () => nodeStore.currentFile.path,
 })
 
 const saveCurrentFile = async () => {
