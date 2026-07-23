@@ -8,11 +8,12 @@ ______________________________________________________________________
 
 **Useful shortcuts and gestures**
 
-| Action                     | How                          |
-| -------------------------- | ---------------------------- |
-| Rename a file or folder    | Long-press its name          |
-| Upload into a folder       | Drag a file onto the folder  |
-| Paste an image into a note | Press `Ctrl+V` in the editor |
+| Action                     | How                                          |
+| -------------------------- | -------------------------------------------- |
+| Rename a file or folder    | Long-press its name                          |
+| Upload into a folder       | Drag a file onto the folder                  |
+| Paste an image into a note | Press `Ctrl+V` / `Command + V` in the editor |
+| Paste an image into a note | Press `Ctrl+S` / `Command + S` in the editor |
 
 Only Markdown files and supported image files appear in the file tree by default.\
 To expose more file types, update `DISPLAYED_FILE_TYPES` in your configuration.
