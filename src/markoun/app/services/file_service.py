@@ -8,19 +8,23 @@ from urllib.parse import quote
 import aiofiles
 from fastapi import HTTPException, UploadFile
 from fastapi.responses import FileResponse, Response
+from sqlmodel.ext.asyncio.session import AsyncSession
 
+from markoun.app.services.system_service import get_paste_image_note_dir_setting
 from markoun.app.services.workspace_service import WorkspaceContext
 from markoun.app.utils.constant import CONSTANT
 from markoun.common.config import settings
 from markoun.common.decorator import exception_handling
 from markoun.common.logging import logger
-from markoun.common.util import file_suffix, formated_file_size
+from markoun.common.util import file_suffix, formated_file_size, relative_path_from_file
 from markoun.core.model.base import FsNodeType
 from markoun.core.model.file import (
+    DirNode,
     FileMeta,
     FileNode,
     FileSearchMatch,
     FileSearchResult,
+    PastedImageResponse,
     UploadedFileResponse,
 )
 
@@ -169,12 +173,74 @@ async def upload_file(
     if suffix in DISPLAYED_FILE_TYPES:
         node = FileNode(
             name=filepath.stem,
-            path=str(workspace.relative(filepath)),
+            path=workspace.relative(filepath).as_posix(),
             type=FsNodeType.FILE,
             suffix=suffix,
         )
 
-    return UploadedFileResponse(filename=filename, node=node)
+    return UploadedFileResponse(
+        filename=filename,
+        path=workspace.relative(filepath).as_posix(),
+        node=node,
+    )
+
+
+async def upload_pasted_image(
+    db: AsyncSession,
+    workspace: WorkspaceContext,
+    note_path: Path,
+    file: UploadFile,
+) -> PastedImageResponse:
+    try:
+        if not note_path.is_file() or file_suffix(note_path) != NOTE_SUFFIX:  # noqa: ASYNC240
+            raise HTTPException(**CONSTANT.SERV_INVALID_SOURCE_NOTE)
+
+        filename = file.filename or ""
+        image_suffix = file_suffix(Path(filename))
+        if image_suffix not in MEDIA_FILE_TYPES or not (
+            file.content_type or ""
+        ).startswith("image/"):
+            raise HTTPException(**CONSTANT.SERV_INVALID_PASTED_IMAGE)
+
+        target_dir = note_path.parent
+        created_directory: DirNode | None = None
+        if await get_paste_image_note_dir_setting(db):
+            target_dir = workspace.resolve_child(note_path.parent, note_path.stem)
+            try:
+                target_dir.mkdir()
+                directory_created = True
+            except FileExistsError:
+                directory_created = False
+                if not target_dir.is_dir():
+                    raise HTTPException(**CONSTANT.SERV_IMAGE_DIR_CONFLICT) from None
+
+            uploaded = await upload_file(workspace, target_dir, file)
+            if directory_created:
+                children = [uploaded.node] if uploaded.node else []
+                created_directory = DirNode(
+                    name=target_dir.name,
+                    path=workspace.relative(target_dir).as_posix(),
+                    type=FsNodeType.DIR,
+                    suffix="",
+                    children=children,
+                    has_children=bool(children),
+                )
+        else:
+            uploaded = await upload_file(workspace, target_dir, file)
+
+        uploaded_path = workspace.resolve(uploaded.path, allow_root=False)
+        markdown_path = quote(
+            relative_path_from_file(note_path, uploaded_path),
+            safe="/",
+        )
+        return PastedImageResponse(
+            **uploaded.model_dump(),
+            markdown_path=markdown_path,
+            created_directory=created_directory,
+        )
+    except Exception:
+        await file.close()
+        raise
 
 
 def get_media_response(

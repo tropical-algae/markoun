@@ -1,6 +1,7 @@
 import asyncio
 import importlib
 import json
+import os
 import pkgutil
 import re
 import secrets
@@ -61,6 +62,11 @@ async def awrite_file(filepath: Path, content: str) -> None:
 
 def file_suffix(path: Path) -> str:
     return path.suffix.lower().lstrip(".")
+
+
+def relative_path_from_file(source_file: Path, target_path: Path) -> str:
+    relative_path = os.path.relpath(target_path, start=source_file.parent)
+    return Path(relative_path).as_posix()
 
 
 def formated_file_size(size: int) -> str:

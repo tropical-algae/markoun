@@ -67,4 +67,10 @@ class ItemMoveRequest(BaseModel):
 
 class UploadedFileResponse(BaseModel):
     filename: str
+    path: str
     node: FileNode | None = None
+
+
+class PastedImageResponse(UploadedFileResponse):
+    markdown_path: str
+    created_directory: DirNode | None = None

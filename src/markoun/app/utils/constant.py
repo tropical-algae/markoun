@@ -91,6 +91,18 @@ class Constant(BaseSettings):
         "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
         "detail": "File upload failed",
     }
+    SERV_INVALID_PASTED_IMAGE: dict = {
+        "status_code": status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+        "detail": "Pasted file must be a supported image",
+    }
+    SERV_INVALID_SOURCE_NOTE: dict = {
+        "status_code": status.HTTP_400_BAD_REQUEST,
+        "detail": "Source note must be an existing Markdown file",
+    }
+    SERV_IMAGE_DIR_CONFLICT: dict = {
+        "status_code": status.HTTP_409_CONFLICT,
+        "detail": "A file already uses the image folder name",
+    }
     SERV_FILE_NOT_EXISTED: dict = {
         "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
         "detail": "File does not exist",

@@ -22,6 +22,7 @@ from markoun.core.model.base import (
 from markoun.core.model.user import ScopeType
 
 ALLOW_REGISTER_SETTING_ID = "allow_regis"
+PASTE_IMAGE_NOTE_DIR_SETTING_ID = "paste_image_note_dir"
 TYPE_CHECK_MAP = {
     SysSettingType.BOOL: bool,
     SysSettingType.STR: str,
@@ -33,6 +34,14 @@ DEFAULT_SETTING = [
         "type": SysSettingType.BOOL,
         "name": "Allow Registration",
         "desc": "Enable or disable user self-registration.",
+        "scope": ScopeType.ADMIN,
+    },
+    {
+        "key": PASTE_IMAGE_NOTE_DIR_SETTING_ID,
+        "value": False,
+        "type": SysSettingType.BOOL,
+        "name": "Group Pasted Images",
+        "desc": "Store pasted images in a folder named after the current note.",
         "scope": ScopeType.ADMIN,
     },
     # {"key": "allowed_file_exten", "value": [], "name": "Allowed File Extensions"},
@@ -85,13 +94,23 @@ async def update_system_setting(
         raise HTTPException(**CONSTANT.SERV_SETTING_UPDATE_FAIL) from err
 
 
-async def get_allow_user_register_setting(db: AsyncSession) -> bool:
-    setting = await get_system_settings(db=db, id=ALLOW_REGISTER_SETTING_ID)
+async def get_bool_system_setting(db: AsyncSession, setting_id: str) -> bool:
+    setting = await get_system_settings(db=db, id=setting_id)
     if setting is None:
         raise HTTPException(**CONSTANT.SERV_SETTING_NOT_EXISTED)
 
-    result: bool = setting.value
-    return result
+    if not isinstance(setting.value, bool):
+        logger.error(f"[System setting {setting_id} is not a boolean]")
+        raise HTTPException(**CONSTANT.SERV_SETTING_UPDATE_FAIL)
+    return setting.value
+
+
+async def get_allow_user_register_setting(db: AsyncSession) -> bool:
+    return await get_bool_system_setting(db, ALLOW_REGISTER_SETTING_ID)
+
+
+async def get_paste_image_note_dir_setting(db: AsyncSession) -> bool:
+    return await get_bool_system_setting(db, PASTE_IMAGE_NOTE_DIR_SETTING_ID)
 
 
 def get_welcome_note_content() -> str:
