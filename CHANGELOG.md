@@ -1,5 +1,13 @@
 <!-- version list -->
 
+## v0.2.4 (2026-07-26)
+
+### Bug Fixes
+
+- **nginx**: Correct nginx alias for image assets
+  ([`e86a5fb`](https://github.com/tropical-algae/markoun/commit/e86a5fbb91487cb487fadb3154e8efd65be83ba0))
+
+
 ## v0.2.3 (2026-07-26)
 
 ### Bug Fixes
