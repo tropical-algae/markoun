@@ -1,4 +1,7 @@
+import os
 import secrets
+from pathlib import Path
+from shutil import copyfile
 from typing import Any, Literal
 
 from pydantic import Field
@@ -11,8 +14,11 @@ from pydantic_settings import (
 
 from markoun import __version__
 
-CONFIG_FILE = "config.yaml"
-ENV_FILE = ".env"
+CONFIG_FILE_ENV = "MARKOUN_CONFIG_PATH_ENV"
+
+DEFAULT_ENV_FILE = ".env"
+DEFAULT_CONFIG_FILE = os.getenv(CONFIG_FILE_ENV, "./config.yaml")
+DEFAULT_WELCOME_FILE = "./welcome.md"
 
 
 class SensitiveSetting(BaseSettings):
@@ -57,7 +63,7 @@ class BasicSetting(BaseSettings):
 
     DOCUMENT_ROOT: str = "./data"
     MEDIA_DELIVERY_MODE: Literal["application", "nginx"] = "nginx"
-    WELCOME_NOTE_PATH: str = "./welcome.md"
+    WELCOME_NOTE_PATH: str = DEFAULT_WELCOME_FILE
     DISPLAYED_FILE_TYPES: list = ["md", "png", "jpg", "jpeg", "bmp", "svg"]
 
 
@@ -81,7 +87,7 @@ class RestrictedYamlConfigSettingsSource(YamlConfigSettingsSource):
 
 class Setting(SysSetting, BasicSetting, SensitiveSetting, LogSetting):
     model_config = SettingsConfigDict(
-        env_file=ENV_FILE,
+        env_file=DEFAULT_ENV_FILE,
         case_sensitive=True,
         extra="ignore",
     )
@@ -97,9 +103,31 @@ class Setting(SysSetting, BasicSetting, SensitiveSetting, LogSetting):
     ) -> tuple[PydanticBaseSettingsSource, ...]:
         _ = init_settings
         yaml_settings = RestrictedYamlConfigSettingsSource(
-            settings_cls=settings_cls, yaml_file=CONFIG_FILE, yaml_file_encoding="utf-8"
+            settings_cls=settings_cls,
+            yaml_file=DEFAULT_CONFIG_FILE,
+            yaml_file_encoding="utf-8",
         )
         return yaml_settings, env_settings, dotenv_settings, file_secret_settings
+
+
+def init_system_file(settings: Setting):
+    config_filepath = Path(DEFAULT_CONFIG_FILE)
+    default_welcome_filepath = Path(DEFAULT_WELCOME_FILE)
+    welcome_filepath = Path(settings.WELCOME_NOTE_PATH)
+
+    if not config_filepath.is_file():
+        config_filepath.parent.mkdir(parents=True, exist_ok=True)
+        config_filepath.touch(exist_ok=True)
+
+    if not default_welcome_filepath.is_file():
+        raise FileNotFoundError(
+            f"Default welcome file does not exist or is not a file: "
+            f"{default_welcome_filepath}"
+        )
+
+    if not welcome_filepath.is_file():
+        welcome_filepath.parent.mkdir(parents=True, exist_ok=True)
+        copyfile(default_welcome_filepath, welcome_filepath)
 
 
 settings = Setting()

@@ -14,12 +14,10 @@ from starlette.responses import JSONResponse, Response, StreamingResponse
 from markoun.app.services.system_service import insert_default_system_setting
 from markoun.app.services.user_service import insert_default_user
 from markoun.app.utils.constant import CONSTANT
-from markoun.common.config import settings
+from markoun.common.config import init_system_file, settings
 from markoun.common.logging import logger
 from markoun.common.util import local_now
 from markoun.core.db.session import LocalSession, init_db_models
-
-# ALLOW_ORIGINS = ["*"]
 
 
 def resp_success(response_body: Any) -> Response:
@@ -49,6 +47,8 @@ def resp_error(response_body: dict) -> Response:
 async def lifespan(app: FastAPI):
     logger.info("Starting service...")
     _ = app
+
+    init_system_file(settings)
     await init_db_models()
     async with LocalSession() as db:
         await insert_default_system_setting(db)
