@@ -1,5 +1,36 @@
 <!-- version list -->
 
+## v0.2.3 (2026-07-26)
+
+### Bug Fixes
+
+- **ci**: Correct Codecov repository matching
+  ([`9b2922e`](https://github.com/tropical-algae/markoun/commit/9b2922e181baa2a9781db5bd2e2c823b036c7bc8))
+
+### Chores
+
+- **ci**: Integrate Codecov and improve coverage checks
+  ([`daabf73`](https://github.com/tropical-algae/markoun/commit/daabf7320ee5d43bf500091ae63b5d98ce2685bf))
+
+### Documentation
+
+- Improve deployment documentation (refs #16)
+  ([`65f09d4`](https://github.com/tropical-algae/markoun/commit/65f09d46d9f63dd9092deb16002c6157d1e27f4e))
+
+- Update README
+  ([`be5a3d5`](https://github.com/tropical-algae/markoun/commit/be5a3d503b3aac589f514c7c1f891853eab4c3a0))
+
+### Features
+
+- **file**: Initialize workspace files on startup
+  ([`d0a9416`](https://github.com/tropical-algae/markoun/commit/d0a94165f921c9cb1c546ec974a7235afb2447d2))
+
+### Refactoring
+
+- **docker**: Optimize dockerfile and add docker compose support (refs #16)
+  ([`7148cfc`](https://github.com/tropical-algae/markoun/commit/7148cfccc0964b771f7c14e48a521ad10befb291))
+
+
 ## v0.2.2 (2026-07-23)
 
 ### Bug Fixes
