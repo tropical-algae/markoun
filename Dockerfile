@@ -21,8 +21,12 @@ COPY --from=ghcr.io/astral-sh/uv:0.11.21 /uv /uvx /bin/
 
 LABEL org.opencontainers.image.authors="tropical-algae tropicalalgae@gmail.com"
 
-ENV PYTHONUNBUFFERED=1
-ENV MEDIA_DELIVERY_MODE=nginx
+ENV PYTHONUNBUFFERED=1 \
+    MEDIA_DELIVERY_MODE=nginx \
+    DOCUMENT_ROOT=/markoun/data \
+    WELCOME_NOTE_PATH=/markoun/welcome.md \
+    LOG_ROOT=/markoun/log \
+    MARKOUN_CONFIG_FILE=/markoun/config.yaml
 
 WORKDIR /app
 
@@ -30,8 +34,7 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends nginx ripgrep && \
     rm -rf /var/lib/apt/lists/*
 
-COPY pyproject.toml uv.lock poe_tasks.toml README.md ./
-COPY welcome.md ./
+COPY pyproject.toml uv.lock poe_tasks.toml README.md welcome.md ./
 
 RUN uv sync --frozen --no-default-groups --no-install-project
 

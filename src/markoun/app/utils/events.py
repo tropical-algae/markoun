@@ -15,16 +15,14 @@ from starlette.responses import JSONResponse, Response, StreamingResponse
 from markoun.app.services.system_service import insert_default_system_setting
 from markoun.app.services.user_service import insert_default_user
 from markoun.app.utils.constant import CONSTANT
-from markoun.common.config import CONFIG_FILE, settings
+from markoun.common.config import DEFAULT_CONFIG_FILE, init_system_file, settings
 from markoun.common.logging import logger
 from markoun.common.util import local_now
 from markoun.core.db.session import LocalSession, init_db_models
 
-# ALLOW_ORIGINS = ["*"]
 
-
-def _prepare_runtime_directories() -> None:
-    CONFIG_FILE.expanduser().resolve().parent.mkdir(parents=True, exist_ok=True)
+def init_runtime_items() -> None:
+    DEFAULT_CONFIG_FILE.expanduser().resolve().parent.mkdir(parents=True, exist_ok=True)
     Path(settings.DOCUMENT_ROOT).expanduser().resolve().mkdir(
         parents=True,
         exist_ok=True,
@@ -70,7 +68,9 @@ def resp_error(response_body: dict) -> Response:
 async def lifespan(app: FastAPI):
     logger.info("Starting service...")
     _ = app
-    await asyncio.to_thread(_prepare_runtime_directories)
+
+    init_system_file(settings)
+    await asyncio.to_thread(init_runtime_items)
 
     await init_db_models()
     async with LocalSession() as db:

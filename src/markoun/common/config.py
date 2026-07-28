@@ -1,6 +1,7 @@
 import os
 import secrets
 from pathlib import Path
+from shutil import copyfile
 from typing import Any, Literal, cast
 
 from pydantic import Field
@@ -13,9 +14,8 @@ from pydantic_settings import (
 
 from markoun import __project_name__, __version__
 
-ENV_FILE = ".env"
-DEPLOYMENT_MODE_ENV = "MARKOUN_DEPLOYMENT_MODE"
 CONFIG_FILE_ENV = "MARKOUN_CONFIG_FILE"
+DEPLOYMENT_MODE_ENV = "MARKOUN_DEPLOYMENT_MODE"
 
 _deployment_mode = os.getenv(DEPLOYMENT_MODE_ENV, "server").strip().lower()
 if _deployment_mode not in ("server", "nix"):
@@ -35,12 +35,14 @@ _nix_config_root = _config_home / __project_name__
 _nix_data_root = _data_home / __project_name__
 _nix_state_root = _state_home / __project_name__
 _nix_resource_root = Path(__file__).resolve().parents[1] / "_standalone"
-
 _default_config_file = _deployment_default(
-    Path("config.yaml"),
-    _nix_config_root / "config.yaml",
+    "config.yaml", _nix_config_root / "config.yaml"
 )
-CONFIG_FILE = Path(os.getenv(CONFIG_FILE_ENV, _default_config_file)).expanduser()
+
+
+DEFAULT_ENV_FILE = ".env"
+DEFAULT_WELCOME_FILE = "./welcome.md"
+DEFAULT_CONFIG_FILE = Path(os.getenv(CONFIG_FILE_ENV, _default_config_file)).expanduser()
 
 
 class SensitiveSetting(BaseSettings):
@@ -96,7 +98,7 @@ class BasicSetting(BaseSettings):
         "application",
     )
     WELCOME_NOTE_PATH: str = _deployment_default(
-        "./welcome.md",
+        DEFAULT_WELCOME_FILE,
         str(_nix_resource_root / "welcome.md"),
     )
     DISPLAYED_FILE_TYPES: list = ["md", "png", "jpg", "jpeg", "bmp", "svg"]
@@ -122,7 +124,7 @@ class RestrictedYamlConfigSettingsSource(YamlConfigSettingsSource):
 
 class Setting(SysSetting, BasicSetting, SensitiveSetting, LogSetting):
     model_config = SettingsConfigDict(
-        env_file=ENV_FILE,
+        env_file=DEFAULT_ENV_FILE,
         case_sensitive=True,
         extra="ignore",
     )
@@ -138,9 +140,30 @@ class Setting(SysSetting, BasicSetting, SensitiveSetting, LogSetting):
     ) -> tuple[PydanticBaseSettingsSource, ...]:
         _ = init_settings
         yaml_settings = RestrictedYamlConfigSettingsSource(
-            settings_cls=settings_cls, yaml_file=CONFIG_FILE, yaml_file_encoding="utf-8"
+            settings_cls=settings_cls,
+            yaml_file=str(DEFAULT_CONFIG_FILE),
+            yaml_file_encoding="utf-8",
         )
         return yaml_settings, env_settings, dotenv_settings, file_secret_settings
+
+
+def init_system_file(settings: Setting):
+    default_welcome_filepath = Path(DEFAULT_WELCOME_FILE)
+    welcome_filepath = Path(settings.WELCOME_NOTE_PATH)
+
+    if not DEFAULT_CONFIG_FILE.is_file():
+        DEFAULT_CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True)
+        DEFAULT_CONFIG_FILE.touch(exist_ok=True)
+
+    if not default_welcome_filepath.is_file():
+        raise FileNotFoundError(
+            f"Default welcome file does not exist or is not a file: "
+            f"{default_welcome_filepath}"
+        )
+
+    if not welcome_filepath.is_file():
+        welcome_filepath.parent.mkdir(parents=True, exist_ok=True)
+        copyfile(default_welcome_filepath, welcome_filepath)
 
 
 settings = Setting()

@@ -24,15 +24,21 @@ Markoun 是一款轻量、可自托管且完全基于文件的 Markdown 编辑�
 
 - **丰富配置**：通过 `config.yaml` 灵活配置日志、身份认证和文件管理
 
-## 部署
+## 快速开始
 
-可以使用 Docker 部署 Markoun：
+目前支持通过 `docker` 或 `docker compose` 部署。
+
+<details>
+
+<summary><strong>🐳 Docker 部署</strong> - 点击展开</summary>
+
+</br>
+
+**启动**
 
 ```bash
 export MARKOUN_PORT=10000
 export MARKOUN_ROOT=./
-
-touch ${MARKOUN_ROOT:-./}/config.yaml
 
 docker run -itd --name markoun \
   --restart unless-stopped \
@@ -40,29 +46,69 @@ docker run -itd --name markoun \
   -e DEFAULT_ADMIN_NAME=admin \
   -e DEFAULT_ADMIN_EMAIL=admin@example.com \
   -e DEFAULT_ADMIN_PASSWORD=change-this-password \
-  -v ${MARKOUN_ROOT:-$(pwd)}/data:/app/data \
-  -v ${MARKOUN_ROOT:-$(pwd)}/config.yaml:/app/config.yaml \
+  -v ${MARKOUN_ROOT:-$(pwd)}:/markoun \
   tropicalalgae/markoun:latest
-
 ```
 
-> [!WARNING]
-> 启动容器前，请替换示例中的管理员凭据。如果没有提供这些环境变量，系统会自动创建默认管理员并生成随机密码。
-> 运行 `docker logs -f markoun` 从日志查看生成的账户凭据。
+> `DEFAULT_ADMIN_*` 环境变量为可选项。
+>
+> 如果未提供管理员账号信息，Markoun 会在首次启动时自动创建一个默认管理员账号，并随机生成密码。
+>
+> 可通过以下命令查看生成的账号信息：`docker logs -f markoun`
 
-也可以在首页创建新的普通用户。
+**挂载目录说明**
 
-### 挂载目录说明
+容器首次启动后，Markoun 会自动在 `MARKOUN_ROOT` 下创建以下文件和目录：
 
-| **路径**           | **说明**                       |
-| ------------------ | ------------------------------ |
-| `/app/data`        | 存放 Markdown 文件的目录。     |
-| `/app/config.yaml` | 主配置文件。                   |
-| `/app/welcome.md`  | 未打开文件时显示的可选欢迎页。 |
+| 路径          | 说明                                     |
+| ------------- | ---------------------------------------- |
+| `config.yaml` | 应用配置文件。                           |
+| `welcome.md`  | 默认欢迎页面，当没有打开任何文档时显示。 |
+| `data/`       | 存放所有 Markdown 文档及工作区数据。     |
+| `log/`        | 应用日志目录。                           |
 
-如需自定义 Docker 中的默认欢迎页，可以将自己的 Markdown 文件挂载到 `/app/welcome.md`，或者将 `WELCOME_NOTE_PATH` 指向其他已挂载的文件。
+如果你正在从 **v0.2.2** 或更早版本升级，或想了解新版与旧版 Docker 挂载方式的区别，请参考 [Docker 迁移指南](./docs/cn/docker_migration.md)。
 
-## 配置
+</details>
+
+<details>
+
+<summary><strong>📦 Docker Compose 部署</strong> - 点击展开</summary>
+
+</br>
+
+**启动**
+
+将 [docker-compose.yaml](./docker-compose.yaml) 复制到本地目录，并在同级目录创建 `.env` 文件：
+
+```.env
+MARKOUN_PORT=10000                    # Markoun 对外暴露端口
+MARKOUN_ROOT=.                        # 数据持久化目录
+DEFAULT_ADMIN_NAME=admin              # 默认管理员用户名
+DEFAULT_ADMIN_EMAIL=admin@example.com # 默认管理员邮箱
+DEFAULT_ADMIN_PASSWORD=change-this-password # 默认管理员密码
+```
+
+然后执行：
+
+```bash
+docker compose up -d
+```
+
+**挂载目录说明**
+
+容器首次启动后，Markoun 会自动在 `MARKOUN_ROOT` 下创建以下文件和目录：
+
+| 路径          | 说明                                     |
+| ------------- | ---------------------------------------- |
+| `config.yaml` | 应用配置文件。                           |
+| `welcome.md`  | 默认欢迎页面，当没有打开任何文档时显示。 |
+| `data/`       | 存放所有 Markdown 文档及工作区数据。     |
+| `log/`        | 应用日志目录。                           |
+
+</details>
+
+## 配置说明
 
 Markoun 通过 `config.yaml` 进行配置。修改该文件后需要重启服务才能生效。以下是部分重要选项：
 
@@ -77,6 +123,8 @@ Markoun 通过 `config.yaml` 进行配置。修改该文件后需要重启服务
 | `ACCESS_TOKEN_COOKIE_SECURE`           | 是否仅通过 HTTPS 发送身份认证 Cookie。公网使用 HTTPS 时应启用。               | false                                      | `v0.1.4`     |
 | `DISPLAYED_FILE_TYPES`                 | 允许编辑器显示的文件扩展名列表。                                              | ["md", "png", "jpg", "jpeg", "bmp", "svg"] | `v0.0.1`     |
 | `WELCOME_NOTE_PATH`                    | 默认欢迎页显示内容的 Markdown 文件路径。                                      | `./welcome.md`                             | `v0.1.0`     |
+
+所有配置项都可以通过环境变量在启动时初始化，之后再通过 `config.yaml` 进行修改。
 
 更多配置选项请参阅 [config.py](src/markoun/common/config.py)。
 

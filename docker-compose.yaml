@@ -1,0 +1,16 @@
+services:
+  markoun:
+    image: tropicalalgae/markoun:latest
+    container_name: markoun
+    restart: unless-stopped
+
+    ports:
+      - "${MARKOUN_PORT:-10000}:80"
+
+    environment:
+      DEFAULT_ADMIN_NAME: "${DEFAULT_ADMIN_NAME}"
+      DEFAULT_ADMIN_EMAIL: "${DEFAULT_ADMIN_EMAIL}"
+      DEFAULT_ADMIN_PASSWORD: "${DEFAULT_ADMIN_PASSWORD}"
+
+    volumes:
+      - "${MARKOUN_ROOT:-.}:/markoun"

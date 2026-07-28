@@ -24,15 +24,21 @@ Markoun is a lightweight, self-hosted, and entirely file-based Markdown editor d
 
 - **Rich Configuration**: Flexible config.yaml options for logging, authentication, and file control
 
-## Deployment
+## Quick Start
 
-You can deploy Markoun using Docker:
+You can deploy Markoun using `docker`, `docker compose`:
+
+<details>
+
+<summary><strong>🐳 Docker Setup</strong> - Click to expand</summary>
+
+</br>
+
+**Setup**
 
 ```bash
 export MARKOUN_PORT=10000
 export MARKOUN_ROOT=./
-
-touch ${MARKOUN_ROOT:-./}/config.yaml
 
 docker run -itd --name markoun \
   --restart unless-stopped \
@@ -40,28 +46,68 @@ docker run -itd --name markoun \
   -e DEFAULT_ADMIN_NAME=admin \
   -e DEFAULT_ADMIN_EMAIL=admin@example.com \
   -e DEFAULT_ADMIN_PASSWORD=change-this-password \
-  -v ${MARKOUN_ROOT:-$(pwd)}/data:/app/data \
-  -v ${MARKOUN_ROOT:-$(pwd)}/config.yaml:/app/config.yaml \
+  -v ${MARKOUN_ROOT:-$(pwd)}:/markoun \
   tropicalalgae/markoun:latest
 
 ```
 
-> [!WARNING]
-> Replace the example administrator credentials before starting the container.
-> On a new installation, omitting these environment variables creates the default administrator with a randomly generated password.
-> Run `docker logs -f markoun` to find the generated account credentials.
+> The `DEFAULT_ADMIN_*` environment variables are optional.
+>
+> If no administrator credentials are provided, Markoun will automatically create a default administrator account with a randomly generated password on the first startup.
+>
+> To view the generated credentials, run: `docker logs -f markoun`
 
-You can also create a new regular user from the homepage.
+**Volume Explanation**
 
-### Volume Explanation
+After the container starts for the first time, Markoun will automatically create the following files and directories under `MARKOUN_ROOT`:
 
-| **Path**           | **Description**                                   |
-| ------------------ | ------------------------------------------------- |
-| `/app/data `       | Directory where Markdown files are stored.        |
-| `/app/config.yaml` | Main configuration file.                          |
-| `/app/welcome.md`  | Optional welcome note shown when no file is open. |
+| Path          | Description                                       |
+| ------------- | ------------------------------------------------- |
+| `config.yaml` | Application configuration file.                   |
+| `welcome.md`  | Default welcome page displayed to new users.      |
+| `data/`       | Stores all Markdown documents and workspace data. |
+| `log/`        | Application log files.                            |
 
-If you want to customize the default welcome page in Docker, mount your own Markdown file to `/app/welcome.md`, or point `WELCOME_NOTE_PATH` at a different mounted location.
+If you are upgrading from `v0.2.2` or earlier, or would like to learn more about the changes to the Docker mounting layout, please refer to the [Docker Migration Guide](./docs/en/docker_migration.md).
+
+</details>
+
+<details>
+
+<summary><strong>📦 Docker Compose Setup</strong> - Click to expand</summary>
+
+</br>
+
+**Setup**
+
+Copy [docker-compose.yaml](./docker-compose.yaml) to your local machine, then create a `.env` file in the same directory:
+
+```.env
+MARKOUN_PORT=10000                    # Port exposed by Markoun
+MARKOUN_ROOT=.                        # Directory for persistent data
+DEFAULT_ADMIN_NAME=admin              # Default administrator username
+DEFAULT_ADMIN_EMAIL=admin@example.com # Default administrator email
+DEFAULT_ADMIN_PASSWORD=change-this-password # Default administrator password
+```
+
+Then start Markoun by:
+
+```
+docker compose up -d
+```
+
+**Volume Explanation**
+
+After the container starts for the first time, Markoun will automatically create the following files and directories under `MARKOUN_ROOT`:
+
+| Path          | Description                                       |
+| ------------- | ------------------------------------------------- |
+| `config.yaml` | Application configuration file.                   |
+| `welcome.md`  | Default welcome page displayed to new users.      |
+| `data/`       | Stores all Markdown documents and workspace data. |
+| `log/`        | Application log files.                            |
+
+</details>
 
 ## Configuration
 
@@ -79,6 +125,8 @@ modifying this file for changes to take effect. Below are some important options
 | `ACCESS_TOKEN_COOKIE_SECURE`           | Sends the auth cookie only over HTTPS. Enable this when the public site is served through HTTPS.          | false                                      | `v0.1.4`  |
 | `DISPLAYED_FILE_TYPES`                 | **File Filter**: A list of file extensions that the editor is permitted to display.                       | ["md", "png", "jpg", "jpeg", "bmp", "svg"] | `v0.0.1`  |
 | `WELCOME_NOTE_PATH`                    | Path to the Markdown file used as the default welcome page when no document is open.                      | `./welcome.md`                             | `v0.1.0`  |
+
+All configuration options can be initialized via environment variables at startup, and then modified at runtime through `config.yaml`.
 
 For more configurable options, see [config.py](src/markoun/common/config.py)
 
