@@ -64,7 +64,6 @@
           };
           backend = import ./nix/backend.nix {
             inherit
-              frontend
               lib
               pkgs
               pyproject-nix
@@ -74,7 +73,7 @@
               ;
           };
           markoun = pkgs.callPackage ./nix/package.nix {
-            inherit backend;
+            inherit backend frontend;
             version = projectVersion;
           };
         in

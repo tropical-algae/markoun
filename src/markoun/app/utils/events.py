@@ -18,7 +18,7 @@ from markoun.app.services.user_service import insert_default_user
 from markoun.app.utils.constant import CONSTANT
 from markoun.common.config import (
     DEFAULT_CONFIG_FILE,
-    DEFAULT_WELCOME_FILE,
+    WELCOME_TEMPLATE_FILE,
     settings,
 )
 from markoun.common.logging import logger
@@ -34,13 +34,12 @@ def init_runtime_items() -> None:
 
     welcome_file = Path(settings.WELCOME_NOTE_PATH).expanduser().resolve()
     if not welcome_file.is_file():
-        welcome_template = DEFAULT_WELCOME_FILE.expanduser().resolve()
-        if not welcome_template.is_file():
-            raise FileNotFoundError(
-                f"Default welcome file does not exist: {welcome_template}"
-            )
+        welcome_template = WELCOME_TEMPLATE_FILE.resolve()
         welcome_file.parent.mkdir(parents=True, exist_ok=True)
-        copyfile(welcome_template, welcome_file)
+        if welcome_template.is_file() and welcome_template != welcome_file:
+            copyfile(welcome_template, welcome_file)
+        else:
+            welcome_file.touch()
 
     Path(settings.DOCUMENT_ROOT).expanduser().resolve().mkdir(
         parents=True,

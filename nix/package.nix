@@ -1,23 +1,37 @@
 {
   backend,
+  frontend,
   lib,
   makeWrapper,
   ripgrep,
-  symlinkJoin,
+  stdenvNoCC,
   version,
 }:
-symlinkJoin {
+stdenvNoCC.mkDerivation {
   name = "markoun-${version}";
-  paths = [
-    backend
-  ];
+  dontUnpack = true;
 
   nativeBuildInputs = [ makeWrapper ];
 
-  postBuild = ''
-    wrapProgram $out/bin/markoun \
+  installPhase = ''
+    runHook preInstall
+
+    resourceRoot="$out/share/markoun"
+    mkdir -p "$out/bin" "$resourceRoot/web"
+    cp -r ${frontend}/share/markoun/web/. "$resourceRoot/web/"
+    cp ${../welcome.md} "$resourceRoot/welcome.md"
+
+    makeWrapper ${backend}/bin/markoun "$out/bin/markoun" \
       --prefix PATH : ${lib.makeBinPath [ ripgrep ]} \
-      --set-default MARKOUN_DEPLOYMENT_MODE "nix"
+      --set-default HOST "127.0.0.1" \
+      --set-default PORT "8000" \
+      --set-default MEDIA_DELIVERY_MODE "application" \
+      --set-default WEB_ROOT "$resourceRoot/web" \
+      --set-default WELCOME_NOTE_PATH "$resourceRoot/welcome.md" \
+      --set-default MARKOUN_WELCOME_TEMPLATE_FILE "$resourceRoot/welcome.md" \
+      --run ". ${../scripts/nix-runtime-defaults.sh}"
+
+    runHook postInstall
   '';
 
   meta = {

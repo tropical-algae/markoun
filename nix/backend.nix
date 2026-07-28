@@ -1,7 +1,6 @@
 {
   lib,
   pkgs,
-  frontend,
   pyproject-nix,
   pyproject-build-systems,
   workspace,
@@ -16,16 +15,6 @@ let
     lib.composeManyExtensions [
       pyproject-build-systems.overlays.wheel
       workspaceOverlay
-      (final: prev: {
-        markoun = prev.markoun.overrideAttrs (old: {
-          postInstall = (old.postInstall or "") + ''
-            resourceRoot="$out/${python.sitePackages}/markoun/_standalone"
-            mkdir -p "$resourceRoot/web"
-            cp -r ${frontend}/share/markoun/web/. "$resourceRoot/web/"
-            cp ${../welcome.md} "$resourceRoot/welcome.md"
-          '';
-        });
-      })
     ]
   );
   venv = pythonSet.mkVirtualEnv "markoun-env" { markoun = [ ]; };

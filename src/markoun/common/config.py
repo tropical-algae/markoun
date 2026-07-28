@@ -1,7 +1,7 @@
 import os
 import secrets
 from pathlib import Path
-from typing import Any, Literal, cast
+from typing import Any, Literal
 
 from pydantic import Field
 from pydantic_settings import (
@@ -14,36 +14,14 @@ from pydantic_settings import (
 from markoun import __project_name__, __version__
 
 CONFIG_FILE_ENV = "MARKOUN_CONFIG_FILE"
-DEPLOYMENT_MODE_ENV = "MARKOUN_DEPLOYMENT_MODE"
-
-_deployment_mode = os.getenv(DEPLOYMENT_MODE_ENV, "server").strip().lower()
-if _deployment_mode not in ("server", "nix"):
-    raise ValueError(f"{DEPLOYMENT_MODE_ENV} must be 'server' or 'nix'")
-DEPLOYMENT_MODE = cast(Literal["server", "nix"], _deployment_mode)
-
-
-def _deployment_default[T](server: T, nix: T) -> T:
-    return nix if DEPLOYMENT_MODE == "nix" else server
-
-
-_home = Path.home()
-_config_home = Path(os.getenv("XDG_CONFIG_HOME", _home / ".config")).expanduser()
-_data_home = Path(os.getenv("XDG_DATA_HOME", _home / ".local/share")).expanduser()
-_state_home = Path(os.getenv("XDG_STATE_HOME", _home / ".local/state")).expanduser()
-_nix_config_root = _config_home / __project_name__
-_nix_data_root = _data_home / __project_name__
-_nix_state_root = _state_home / __project_name__
-_nix_resource_root = Path(__file__).resolve().parents[1] / "_standalone"
-_default_config_file = _deployment_default(
-    Path("config.yaml"), _nix_config_root / "config.yaml"
-)
-
+WELCOME_TEMPLATE_FILE_ENV = "MARKOUN_WELCOME_TEMPLATE_FILE"
 
 DEFAULT_ENV_FILE = ".env"
-DEFAULT_WELCOME_FILE = _deployment_default(
-    Path("welcome.md"), _nix_resource_root / "welcome.md"
-)
-DEFAULT_CONFIG_FILE = Path(os.getenv(CONFIG_FILE_ENV, _default_config_file)).expanduser()
+DEFAULT_WELCOME_FILE = "welcome.md"
+DEFAULT_CONFIG_FILE = Path(os.getenv(CONFIG_FILE_ENV, "config.yaml")).expanduser()
+WELCOME_TEMPLATE_FILE = Path(
+    os.getenv(WELCOME_TEMPLATE_FILE_ENV, DEFAULT_WELCOME_FILE)
+).expanduser()
 
 
 class SensitiveSetting(BaseSettings):
@@ -59,12 +37,12 @@ class SysSetting(BaseSettings):
     # FastAPI
     VERSION: str = __version__
     PROJECT_NAME: str = __project_name__
-    HOST: str = _deployment_default("0.0.0.0", "127.0.0.1")
-    PORT: int = _deployment_default(8080, 8000)
+    HOST: str = "0.0.0.0"
+    PORT: int = 8080
     WORKERS: int = 2
     API_PREFIX: str = "/api/v1"
     DEBUG: bool = False
-    WEB_ROOT: str | None = _deployment_default(None, str(_nix_resource_root / "web"))
+    WEB_ROOT: str | None = None
 
     TRUSTED_ORIGINS: list[str] = ["http://localhost:8000"]
 
@@ -74,10 +52,7 @@ class BasicSetting(BaseSettings):
     USER_WORKSPACE_ISOLATION: bool = False
 
     # database
-    SQL_DATABASE_URI: str = _deployment_default(
-        "sqlite+aiosqlite:///database.db",
-        f"sqlite+aiosqlite:///{_nix_data_root / 'database.db'}",
-    )
+    SQL_DATABASE_URI: str = "sqlite+aiosqlite:///database.db"
     SQL_POOL_PRE_PING: bool = True
     SQL_POOL_SIZE: int = 10
     SQL_MAX_OVERFLOW: int = 20
@@ -90,24 +65,15 @@ class BasicSetting(BaseSettings):
     ACCESS_TOKEN_SECRET_KEY: str = secrets.token_hex(32)
     ACCESS_TOKEN_COOKIE_SECURE: bool = False
 
-    DOCUMENT_ROOT: str = _deployment_default(
-        "./data",
-        str(_nix_data_root / "documents"),
-    )
-    MEDIA_DELIVERY_MODE: Literal["application", "nginx"] = _deployment_default(
-        "nginx",
-        "application",
-    )
-    WELCOME_NOTE_PATH: str = _deployment_default(
-        str(DEFAULT_WELCOME_FILE),
-        str(_nix_resource_root / "welcome.md"),
-    )
+    DOCUMENT_ROOT: str = "./data"
+    MEDIA_DELIVERY_MODE: Literal["application", "nginx"] = "nginx"
+    WELCOME_NOTE_PATH: str = DEFAULT_WELCOME_FILE
     DISPLAYED_FILE_TYPES: list = ["md", "png", "jpg", "jpeg", "bmp", "svg"]
 
 
 class LogSetting(BaseSettings):
     # logger
-    LOG_ROOT: str = _deployment_default("./log", str(_nix_state_root / "log"))
+    LOG_ROOT: str = "./log"
     LOG_LEVEL: str = "INFO"
     LOG_FILE_ENCODING: str = "utf-8"
     LOG_CONSOLE_OUTPUT: bool = True
