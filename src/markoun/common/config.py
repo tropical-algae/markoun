@@ -1,7 +1,6 @@
 import os
 import secrets
 from pathlib import Path
-from shutil import copyfile
 from typing import Any, Literal, cast
 
 from pydantic import Field
@@ -36,12 +35,14 @@ _nix_data_root = _data_home / __project_name__
 _nix_state_root = _state_home / __project_name__
 _nix_resource_root = Path(__file__).resolve().parents[1] / "_standalone"
 _default_config_file = _deployment_default(
-    "config.yaml", _nix_config_root / "config.yaml"
+    Path("config.yaml"), _nix_config_root / "config.yaml"
 )
 
 
 DEFAULT_ENV_FILE = ".env"
-DEFAULT_WELCOME_FILE = "./welcome.md"
+DEFAULT_WELCOME_FILE = _deployment_default(
+    Path("welcome.md"), _nix_resource_root / "welcome.md"
+)
 DEFAULT_CONFIG_FILE = Path(os.getenv(CONFIG_FILE_ENV, _default_config_file)).expanduser()
 
 
@@ -98,7 +99,7 @@ class BasicSetting(BaseSettings):
         "application",
     )
     WELCOME_NOTE_PATH: str = _deployment_default(
-        DEFAULT_WELCOME_FILE,
+        str(DEFAULT_WELCOME_FILE),
         str(_nix_resource_root / "welcome.md"),
     )
     DISPLAYED_FILE_TYPES: list = ["md", "png", "jpg", "jpeg", "bmp", "svg"]
@@ -145,25 +146,6 @@ class Setting(SysSetting, BasicSetting, SensitiveSetting, LogSetting):
             yaml_file_encoding="utf-8",
         )
         return yaml_settings, env_settings, dotenv_settings, file_secret_settings
-
-
-def init_system_file(settings: Setting):
-    default_welcome_filepath = Path(DEFAULT_WELCOME_FILE)
-    welcome_filepath = Path(settings.WELCOME_NOTE_PATH)
-
-    if not DEFAULT_CONFIG_FILE.is_file():
-        DEFAULT_CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True)
-        DEFAULT_CONFIG_FILE.touch(exist_ok=True)
-
-    if not default_welcome_filepath.is_file():
-        raise FileNotFoundError(
-            f"Default welcome file does not exist or is not a file: "
-            f"{default_welcome_filepath}"
-        )
-
-    if not welcome_filepath.is_file():
-        welcome_filepath.parent.mkdir(parents=True, exist_ok=True)
-        copyfile(default_welcome_filepath, welcome_filepath)
 
 
 settings = Setting()

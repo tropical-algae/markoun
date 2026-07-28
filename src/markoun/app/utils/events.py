@@ -2,6 +2,7 @@ import asyncio
 import json
 from contextlib import asynccontextmanager
 from pathlib import Path
+from shutil import copyfile
 from typing import Any, cast
 
 from fastapi import FastAPI
@@ -15,14 +16,32 @@ from starlette.responses import JSONResponse, Response, StreamingResponse
 from markoun.app.services.system_service import insert_default_system_setting
 from markoun.app.services.user_service import insert_default_user
 from markoun.app.utils.constant import CONSTANT
-from markoun.common.config import DEFAULT_CONFIG_FILE, init_system_file, settings
+from markoun.common.config import (
+    DEFAULT_CONFIG_FILE,
+    DEFAULT_WELCOME_FILE,
+    settings,
+)
 from markoun.common.logging import logger
 from markoun.common.util import local_now
 from markoun.core.db.session import LocalSession, init_db_models
 
 
 def init_runtime_items() -> None:
-    DEFAULT_CONFIG_FILE.expanduser().resolve().parent.mkdir(parents=True, exist_ok=True)
+    config_file = DEFAULT_CONFIG_FILE.expanduser().resolve()
+    if not config_file.is_file():
+        config_file.parent.mkdir(parents=True, exist_ok=True)
+        config_file.touch()
+
+    welcome_file = Path(settings.WELCOME_NOTE_PATH).expanduser().resolve()
+    if not welcome_file.is_file():
+        welcome_template = DEFAULT_WELCOME_FILE.expanduser().resolve()
+        if not welcome_template.is_file():
+            raise FileNotFoundError(
+                f"Default welcome file does not exist: {welcome_template}"
+            )
+        welcome_file.parent.mkdir(parents=True, exist_ok=True)
+        copyfile(welcome_template, welcome_file)
+
     Path(settings.DOCUMENT_ROOT).expanduser().resolve().mkdir(
         parents=True,
         exist_ok=True,
@@ -69,7 +88,6 @@ async def lifespan(app: FastAPI):
     logger.info("Starting service...")
     _ = app
 
-    init_system_file(settings)
     await asyncio.to_thread(init_runtime_items)
 
     await init_db_models()
