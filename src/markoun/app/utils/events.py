@@ -6,6 +6,7 @@ from typing import Any, cast
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.engine import make_url
 from starlette import status
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
@@ -14,12 +15,32 @@ from starlette.responses import JSONResponse, Response, StreamingResponse
 from markoun.app.services.system_service import insert_default_system_setting
 from markoun.app.services.user_service import insert_default_user
 from markoun.app.utils.constant import CONSTANT
-from markoun.common.config import settings
+from markoun.common.config import CONFIG_FILE, settings
 from markoun.common.logging import logger
 from markoun.common.util import local_now
 from markoun.core.db.session import LocalSession, init_db_models
 
 # ALLOW_ORIGINS = ["*"]
+
+
+def _prepare_runtime_directories() -> None:
+    CONFIG_FILE.expanduser().resolve().parent.mkdir(parents=True, exist_ok=True)
+    Path(settings.DOCUMENT_ROOT).expanduser().resolve().mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+    database_url = make_url(settings.SQL_DATABASE_URI)
+    if database_url.get_backend_name() != "sqlite" or database_url.database in {
+        None,
+        "",
+        ":memory:",
+    }:
+        return
+
+    Path(database_url.database).expanduser().resolve().parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
 
 
 def resp_success(response_body: Any) -> Response:
@@ -49,14 +70,12 @@ def resp_error(response_body: dict) -> Response:
 async def lifespan(app: FastAPI):
     logger.info("Starting service...")
     _ = app
+    await asyncio.to_thread(_prepare_runtime_directories)
+
     await init_db_models()
     async with LocalSession() as db:
         await insert_default_system_setting(db)
         await insert_default_user(db)
-
-    await asyncio.to_thread(
-        Path(settings.DOCUMENT_ROOT).mkdir, parents=True, exist_ok=True
-    )
 
     yield
     logger.info("Shut down and clear cache...")
