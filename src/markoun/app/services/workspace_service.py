@@ -8,6 +8,8 @@ from markoun.common.config import settings
 from markoun.common.util import is_valid_username
 from markoun.core.db.models import UserAccount
 
+WORKSPACE_DATA_DIRECTORY = ".markoun"
+
 
 @dataclass(frozen=True)
 class WorkspaceContext:
@@ -23,8 +25,12 @@ class WorkspaceContext:
             raise HTTPException(**CONSTANT.SERV_INVALID_WORKSPACE_PATH)
 
         candidate = (self.root / path).resolve(strict=False)
-        if not candidate.is_relative_to(self.root) or (
-            not allow_root and candidate == self.root
+        if not candidate.is_relative_to(self.root):
+            raise HTTPException(**CONSTANT.SERV_INVALID_WORKSPACE_PATH)
+
+        workspace_path = candidate.relative_to(self.root)
+        if (not allow_root and candidate == self.root) or (
+            workspace_path.parts and workspace_path.parts[0] == WORKSPACE_DATA_DIRECTORY
         ):
             raise HTTPException(**CONSTANT.SERV_INVALID_WORKSPACE_PATH)
         return candidate

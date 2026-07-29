@@ -163,6 +163,26 @@ class Constant(BaseSettings):
         "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
         "detail": "Failed to read welcome note file",
     }
+    SERV_HISTORY_DISABLED: dict = {
+        "status_code": status.HTTP_409_CONFLICT,
+        "detail": "File history is disabled",
+    }
+    SERV_HISTORY_NOT_FOUND: dict = {
+        "status_code": status.HTTP_404_NOT_FOUND,
+        "detail": "File history does not exist",
+    }
+    SERV_HISTORY_NODE_NOT_FOUND: dict = {
+        "status_code": status.HTTP_404_NOT_FOUND,
+        "detail": "History revision does not exist",
+    }
+    SERV_HISTORY_FILE_UNSUPPORTED: dict = {
+        "status_code": status.HTTP_400_BAD_REQUEST,
+        "detail": "File type does not support history",
+    }
+    SERV_HISTORY_CORRUPTED: dict = {
+        "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+        "detail": "File history is damaged",
+    }
 
 
 CONSTANT = Constant()

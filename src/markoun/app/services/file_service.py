@@ -11,7 +11,10 @@ from fastapi.responses import FileResponse, Response
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from markoun.app.services.system_service import get_paste_image_note_dir_setting
-from markoun.app.services.workspace_service import WorkspaceContext
+from markoun.app.services.workspace_service import (
+    WORKSPACE_DATA_DIRECTORY,
+    WorkspaceContext,
+)
 from markoun.app.utils.constant import CONSTANT
 from markoun.common.config import settings
 from markoun.common.decorator import exception_handling
@@ -74,6 +77,8 @@ async def search_markdown_files(
         "--no-ignore",
         "--glob",
         f"*.{NOTE_SUFFIX}",
+        "--glob",
+        f"!{WORKSPACE_DATA_DIRECTORY}/**",
         normalized_keyword,
         str(workspace.root),
         stdout=asyncio.subprocess.PIPE,

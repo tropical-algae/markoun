@@ -4,6 +4,10 @@ from typing import cast
 from fastapi import APIRouter, Security
 
 from markoun.app.api.deps import get_workspace_context
+from markoun.app.services.history_service import (
+    mark_file_history_deleted,
+    move_file_history,
+)
 from markoun.app.services.item_service import (
     get_directory_children,
     get_file_tree,
@@ -64,12 +68,19 @@ async def api_load_directory_children(
 @exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_remove_path(
     filepath: str,
+    purge_history: bool = False,
     workspace: WorkspaceContext = Security(
         get_workspace_context, scopes=[ScopeType.ADMIN, ScopeType.USER]
     ),
 ):
     abs_path = workspace.resolve(Path(filepath), allow_root=False)
+    relative_path = workspace.relative(abs_path).as_posix()
     remove_item(abs_path)
+    await mark_file_history_deleted(
+        workspace,
+        relative_path,
+        purge=purge_history,
+    )
     return MSG_SUCCESS
 
 
@@ -82,7 +93,13 @@ async def api_item_rename(
     ),
 ):
     abs_path = workspace.resolve(Path(data.path), allow_root=False)
-    rename_item(workspace, abs_path, data.new_name)
+    source_path = workspace.relative(abs_path).as_posix()
+    new_path = rename_item(workspace, abs_path, data.new_name)
+    await move_file_history(
+        workspace,
+        source_path,
+        workspace.relative(new_path).as_posix(),
+    )
     return MSG_SUCCESS
 
 
@@ -96,4 +113,12 @@ async def api_item_move(
 ) -> FileNode:
     abs_path = workspace.resolve(Path(data.path), allow_root=False)
     abs_target_dir = workspace.resolve(Path(data.target_dir))
-    return await move_item(workspace, abs_path, abs_target_dir, DISPLAYED_FILE_TYPES)
+    source_path = workspace.relative(abs_path).as_posix()
+    node = await move_item(
+        workspace,
+        abs_path,
+        abs_target_dir,
+        DISPLAYED_FILE_TYPES,
+    )
+    await move_file_history(workspace, source_path, node.path)
+    return node

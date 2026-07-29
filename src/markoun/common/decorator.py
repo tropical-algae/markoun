@@ -1,85 +1,65 @@
 import functools
 import inspect
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable, Mapping
+from typing import Any, NoReturn, cast
 
 from fastapi import HTTPException
 
 from markoun.common.logging import logger
 
+HttpResponse = Mapping[str, Any]
 
-def exception_handling(http_response: dict):
-    def decorator(inner_func: Callable):
-        is_coroutine = inspect.iscoroutinefunction(inner_func)
+
+class _ExceptionHandler:
+    def __init__(
+        self,
+        default_response: HttpResponse,
+        exception_responses: Mapping[type[Exception], HttpResponse] | None,
+    ) -> None:
+        self.default_response = default_response
+        self.exception_responses = exception_responses or {}
+
+    def __call__[**P, R](self, inner_func: Callable[P, R]) -> Callable[P, R]:
         func_path = inner_func.__qualname__
 
-        @functools.wraps(inner_func)
-        async def async_wrapper(*args, **kwargs):
-            try:
-                return await inner_func(*args, **kwargs)
-            except HTTPException as err:
-                logger.error(f"[Failed to run {func_path}] {err.detail}")
-                raise
-            except Exception as err:
-                logger.exception(f"[Failed to run {func_path}] {err}")
-                raise HTTPException(**http_response) from err
+        if inspect.iscoroutinefunction(inner_func):
+            async_func = cast(Callable[P, Awaitable[Any]], inner_func)
+
+            @functools.wraps(inner_func)
+            async def async_wrapper(*args: P.args, **kwargs: P.kwargs) -> Any:
+                try:
+                    return await async_func(*args, **kwargs)
+                except Exception as err:
+                    self._raise_http_exception(func_path, err)
+
+            return cast(Callable[P, R], async_wrapper)
 
         @functools.wraps(inner_func)
-        def sync_wrapper(*args, **kwargs):
+        def sync_wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
             try:
                 return inner_func(*args, **kwargs)
-            except HTTPException as err:
-                logger.error(f"[Failed to run {func_path}] {err.detail}")
-                raise
             except Exception as err:
-                logger.exception(f"[Failed to run {func_path}] {err}")
-                raise HTTPException(**http_response) from err
+                self._raise_http_exception(func_path, err)
 
-        return async_wrapper if is_coroutine else sync_wrapper
+        return sync_wrapper
 
-    return decorator
+    def _raise_http_exception(self, func_path: str, error: Exception) -> NoReturn:
+        if isinstance(error, HTTPException):
+            logger.error(f"[Failed to run {func_path}] {error.detail}")
+            raise error
+
+        for error_type, response in self.exception_responses.items():
+            if isinstance(error, error_type):
+                logger.error(f"[Failed to run {func_path}] {error}")
+                raise HTTPException(**dict(response)) from error
+
+        logger.exception(f"[Failed to run {func_path}] {error}")
+        raise HTTPException(**dict(self.default_response)) from error
 
 
-# def exception_handling(http_response: dict):
-#     """异常捕获装饰器，可用于函数/类方法，支持同步和异步函数
-
-#     Args:
-#         func (Callable | None, optional): _description_. Defaults to None.
-#         default_return (Any, optional): _description_. Defaults to None.
-#     """
-
-#     def decorator(inner_func: Callable):
-#         is_coroutine = asyncio.iscoroutinefunction(inner_func)
-
-#         @functools.wraps(inner_func)
-#         async def async_wrapper(*args, **kwargs):
-#             is_method = len(args) > 0 and inspect.isclass(type(args[0]))
-#             self = args[0] if is_method else None
-#             func_path = (
-#                 f"{type(self).__name__ + '.' if self else ''}{inner_func.__name__}"
-#             )
-#             try:
-#                 return await inner_func(*args, **kwargs)
-#             except HTTPException:
-#                 raise
-#             except Exception as err:
-#                 logger.exception(f"[Failed to run {func_path}] {err}")
-#                 raise HTTPException(**http_response) from err
-
-#         @functools.wraps(inner_func)
-#         def sync_wrapper(*args, **kwargs):
-#             is_method = len(args) > 0 and inspect.isclass(type(args[0]))
-#             self = args[0] if is_method else None
-#             func_path = (
-#                 f"{type(self).__name__ + '.' if self else ''}{inner_func.__name__}"
-#             )
-#             try:
-#                 return inner_func(*args, **kwargs)
-#             except HTTPException:
-#                 raise
-#             except Exception as err:
-#                 logger.exception(f"[Failed to run {func_path}] {err}")
-#                 raise HTTPException(**http_response) from err
-
-#         return async_wrapper if is_coroutine else sync_wrapper
-
-#     return decorator
+def exception_handling(
+    http_response: HttpResponse,
+    *,
+    exception_responses: Mapping[type[Exception], HttpResponse] | None = None,
+) -> _ExceptionHandler:
+    return _ExceptionHandler(http_response, exception_responses)

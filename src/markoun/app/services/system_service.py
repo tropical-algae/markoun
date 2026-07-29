@@ -23,6 +23,7 @@ from markoun.core.model.user import ScopeType
 
 ALLOW_REGISTER_SETTING_ID = "allow_regis"
 PASTE_IMAGE_NOTE_DIR_SETTING_ID = "paste_image_note_dir"
+FILE_HISTORY_SETTING_ID = "file_history"
 TYPE_CHECK_MAP = {
     SysSettingType.BOOL: bool,
     SysSettingType.STR: str,
@@ -42,6 +43,14 @@ DEFAULT_SETTING = [
         "type": SysSettingType.BOOL,
         "name": "Group Pasted Images",
         "desc": "Store pasted images in a folder named after the current note.",
+        "scope": ScopeType.ADMIN,
+    },
+    {
+        "key": FILE_HISTORY_SETTING_ID,
+        "value": True,
+        "type": SysSettingType.BOOL,
+        "name": "File History",
+        "desc": "Record branching edit history for Markdown files.",
         "scope": ScopeType.ADMIN,
     },
     # {"key": "allowed_file_exten", "value": [], "name": "Allowed File Extensions"},
@@ -111,6 +120,10 @@ async def get_allow_user_register_setting(db: AsyncSession) -> bool:
 
 async def get_paste_image_note_dir_setting(db: AsyncSession) -> bool:
     return await get_bool_system_setting(db, PASTE_IMAGE_NOTE_DIR_SETTING_ID)
+
+
+async def get_file_history_setting(db: AsyncSession) -> bool:
+    return await get_bool_system_setting(db, FILE_HISTORY_SETTING_ID)
 
 
 def get_welcome_note_content() -> str:

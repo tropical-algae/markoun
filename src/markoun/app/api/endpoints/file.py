@@ -1,6 +1,15 @@
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, File, Form, Query, Security, UploadFile
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Query,
+    Security,
+    UploadFile,
+)
 from fastapi.responses import FileResponse, Response
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -15,6 +24,11 @@ from markoun.app.services.file_service import (
     upload_file,
     upload_pasted_image,
 )
+from markoun.app.services.history_service import (
+    get_file_history_tree,
+    save_file_history,
+)
+from markoun.app.services.system_service import get_file_history_setting
 from markoun.app.services.workspace_service import WorkspaceContext
 from markoun.app.utils.constant import CONSTANT
 from markoun.common.decorator import exception_handling
@@ -25,6 +39,7 @@ from markoun.core.model.file import (
     FileMeta,
     FileNode,
     FileSaveRequest,
+    FileSaveResponse,
     FileSearchResult,
     PastedImageResponse,
     UploadedFileResponse,
@@ -38,6 +53,7 @@ router = APIRouter()
 @exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_load_note(
     filepath: str,
+    db: AsyncSession = Depends(get_db),
     workspace: WorkspaceContext = Security(
         get_workspace_context, scopes=[ScopeType.ADMIN, ScopeType.USER]
     ),
@@ -45,7 +61,26 @@ async def api_load_note(
     abs_filepath = workspace.resolve(Path(filepath), allow_root=False)
     content = await aread_file(abs_filepath)
     meta = get_file_meta(workspace, abs_filepath)
-    return FileContentResponse(content=content, meta=meta)
+    history_enabled = (
+        abs_filepath.suffix.lower() == ".md" and await get_file_history_setting(db)
+    )
+    default_revision_id = None
+    if history_enabled:
+        try:
+            tree = await get_file_history_tree(
+                workspace,
+                workspace.relative(abs_filepath).as_posix(),
+            )
+            default_revision_id = tree.default_revision_id
+        except HTTPException as err:
+            if err.status_code != CONSTANT.SERV_HISTORY_NOT_FOUND["status_code"]:
+                raise
+    return FileContentResponse(
+        content=content,
+        meta=meta,
+        history_enabled=history_enabled,
+        default_revision_id=default_revision_id,
+    )
 
 
 @router.get("/search", response_model=list[FileSearchResult])
@@ -84,18 +119,42 @@ async def api_create_note(
     return file_node
 
 
-@router.post("/save", response_model=FileMeta)
+@router.post("/save", response_model=FileSaveResponse)
 @exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_save_note(
     data: FileSaveRequest,
+    db: AsyncSession = Depends(get_db),
     workspace: WorkspaceContext = Security(
         get_workspace_context, scopes=[ScopeType.ADMIN, ScopeType.USER]
     ),
-):
+) -> FileSaveResponse:
     abs_filepath = workspace.resolve(Path(data.filepath), allow_root=False)
-    await awrite_file(abs_filepath, data.content)
+    relative_path = workspace.relative(abs_filepath).as_posix()
+    history_enabled = (
+        abs_filepath.suffix.lower() == ".md" and await get_file_history_setting(db)
+    )
+    revision_id = None
+    default_revision_id = None
+    if history_enabled:
+        result = await save_file_history(
+            workspace,
+            relative_path,
+            data.content,
+            base_revision_id=data.base_revision_id,
+            operation_id=data.operation_id,
+        )
+        revision_id = result.revision_id
+        default_revision_id = result.default_revision_id
+    else:
+        await awrite_file(abs_filepath, data.content)
+
     meta = get_file_meta(workspace, abs_filepath)
-    return meta
+    return FileSaveResponse(
+        **meta.model_dump(),
+        history_enabled=history_enabled,
+        revision_id=revision_id,
+        default_revision_id=default_revision_id,
+    )
 
 
 @router.post("/upload", response_model=UploadedFileResponse)
