@@ -23,11 +23,10 @@ stdenvNoCC.mkDerivation {
 
     makeWrapper ${backend}/bin/markoun "$out/bin/markoun" \
       --prefix PATH : ${lib.makeBinPath [ ripgrep ]} \
-      --set-default HOST "127.0.0.1" \
+      --set-default HOST "0.0.0.0" \
       --set-default PORT "8000" \
       --set-default MEDIA_DELIVERY_MODE "application" \
       --set-default WEB_ROOT "$resourceRoot/web" \
-      --set-default WELCOME_NOTE_PATH "$resourceRoot/welcome.md" \
       --set-default MARKOUN_WELCOME_TEMPLATE_FILE "$resourceRoot/welcome.md" \
       --run ". ${../scripts/nix-runtime-defaults.sh}"
 

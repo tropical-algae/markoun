@@ -4,6 +4,7 @@ state_home="${XDG_STATE_HOME:-$HOME/.local/state}/markoun"
 
 export MARKOUN_CONFIG_FILE="${MARKOUN_CONFIG_FILE:-$config_home/config.yaml}"
 export DOCUMENT_ROOT="${DOCUMENT_ROOT:-$data_home/data}"
+export WELCOME_NOTE_PATH="${WELCOME_NOTE_PATH:-$data_home/welcome.md}"
 export SQL_DATABASE_URI="${SQL_DATABASE_URI:-sqlite+aiosqlite:///$data_home/database.db}"
 export LOG_ROOT="${LOG_ROOT:-$state_home/log}"
 
