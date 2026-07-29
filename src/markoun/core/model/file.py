@@ -38,6 +38,8 @@ class FileMeta(BaseModel):
 class FileContentResponse(BaseModel):
     content: str
     meta: FileMeta
+    history_enabled: bool = False
+    default_revision_id: str | None = None
 
 
 class FileSearchMatch(BaseModel):
@@ -53,6 +55,14 @@ class FileSearchResult(BaseModel):
 class FileSaveRequest(BaseModel):
     filepath: str
     content: str
+    base_revision_id: str | None = None
+    operation_id: str | None = None
+
+
+class FileSaveResponse(FileMeta):
+    history_enabled: bool = False
+    revision_id: str | None = None
+    default_revision_id: str | None = None
 
 
 class ItemRenameRequest(BaseModel):
