@@ -25,6 +25,9 @@ dependencies = [
   "aiofiles>=25.1.0,<26",
 ]
 
+[project.scripts]
+markoun = "markoun.main:run"
+
 [project.urls]
 Repository = "https://github.com/tropical-algae/markoun.git"
 

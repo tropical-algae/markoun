@@ -23,10 +23,11 @@ LABEL org.opencontainers.image.authors="tropical-algae tropicalalgae@gmail.com"
 
 ENV PYTHONUNBUFFERED=1 \
     MEDIA_DELIVERY_MODE=nginx \
+    SQL_DATABASE_URI=sqlite+aiosqlite:////markoun/database.db \
     DOCUMENT_ROOT=/markoun/data \
     WELCOME_NOTE_PATH=/markoun/welcome.md \
     LOG_ROOT=/markoun/log \
-    MARKOUN_CONFIG_PATH_ENV=/markoun/config.yaml
+    MARKOUN_CONFIG_FILE=/markoun/config.yaml
 
 WORKDIR /app
 

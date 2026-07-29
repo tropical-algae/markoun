@@ -26,7 +26,7 @@ Markoun is a lightweight, self-hosted, and entirely file-based Markdown editor d
 
 ## Quick Start
 
-You can deploy Markoun using `docker`, `docker compose`:
+You can deploy Markoun using `docker`, `docker compose`, or `Nix`:
 
 <details>
 
@@ -106,6 +106,68 @@ After the container starts for the first time, Markoun will automatically create
 | `welcome.md`  | Default welcome page displayed to new users.      |
 | `data/`       | Stores all Markdown documents and workspace data. |
 | `log/`        | Application log files.                            |
+
+</details>
+
+<details>
+
+<summary><strong>❄️ Nix Setup</strong> - Click to expand</summary>
+
+</br>
+
+**Setup**
+
+With [Nix](https://nixos.org/download/) installed and flakes enabled, run Markoun directly from the repository's default branch:
+
+```bash
+export PORT=10000
+export DEFAULT_ADMIN_NAME=admin
+export DEFAULT_ADMIN_EMAIL=admin@example.com
+export DEFAULT_ADMIN_PASSWORD=change-this-password
+
+nix run github:tropical-algae/markoun
+```
+
+To run the source currently checked out in this repository instead:
+
+```bash
+nix run .
+```
+
+Alternatively, install Markoun into your user profile and run it as a regular command:
+
+```bash
+nix profile install github:tropical-algae/markoun#markoun
+markoun
+```
+
+Markoun serves the complete web application at [`http://localhost:10000`](http://localhost:10000). The process runs in the foreground; use your preferred process or service manager for a persistent server.
+
+> The `DEFAULT_ADMIN_*` environment variables are optional.
+>
+> If they are omitted, the first startup creates an administrator with a random password and prints the credentials in the terminal output.
+
+**Runtime Path Explanation**
+
+Markoun keeps editable files in the standard XDG user directories:
+
+| Path                                                                                  | Description                                                    |
+| ------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `$XDG_CONFIG_HOME/markoun/config.yaml` <br/>default: `~/.config/markoun/config.yaml`  | Application configuration file.                                |
+| `$XDG_DATA_HOME/markoun/welcome.md` <br/>default: `~/.local/share/markoun/welcome.md` | Editable welcome page, initialized from the packaged template. |
+| `$XDG_DATA_HOME/markoun/data/` <br/>default: `~/.local/share/markoun/data/`           | Stores all Markdown documents and workspace data.              |
+| `$XDG_STATE_HOME/markoun/log/` <br/>default: `~/.local/state/markoun/log/`            | Application log files.                                         |
+
+The runtime paths can be overridden before starting Markoun:
+
+```bash
+export MARKOUN_CONFIG_FILE=/path/to/config.yaml
+export DOCUMENT_ROOT=/path/to/documents
+export WELCOME_NOTE_PATH=/path/to/welcome.md
+export LOG_ROOT=/path/to/log
+
+nix run github:tropical-algae/markoun
+```
 
 </details>
 

@@ -1,7 +1,6 @@
 import os
 import secrets
 from pathlib import Path
-from shutil import copyfile
 from typing import Any, Literal
 
 from pydantic import Field
@@ -12,13 +11,17 @@ from pydantic_settings import (
     YamlConfigSettingsSource,
 )
 
-from markoun import __version__
+from markoun import __project_name__, __version__
 
-CONFIG_FILE_ENV = "MARKOUN_CONFIG_PATH_ENV"
+CONFIG_FILE_ENV = "MARKOUN_CONFIG_FILE"
+WELCOME_TEMPLATE_FILE_ENV = "MARKOUN_WELCOME_TEMPLATE_FILE"
 
 DEFAULT_ENV_FILE = ".env"
-DEFAULT_CONFIG_FILE = os.getenv(CONFIG_FILE_ENV, "./config.yaml")
-DEFAULT_WELCOME_FILE = "./welcome.md"
+DEFAULT_WELCOME_FILE = "welcome.md"
+DEFAULT_CONFIG_FILE = Path(os.getenv(CONFIG_FILE_ENV, "config.yaml")).expanduser()
+WELCOME_TEMPLATE_FILE = Path(
+    os.getenv(WELCOME_TEMPLATE_FILE_ENV, DEFAULT_WELCOME_FILE)
+).expanduser()
 
 
 class SensitiveSetting(BaseSettings):
@@ -33,12 +36,13 @@ class SensitiveSetting(BaseSettings):
 class SysSetting(BaseSettings):
     # FastAPI
     VERSION: str = __version__
-    PROJECT_NAME: str = "markoun"
+    PROJECT_NAME: str = __project_name__
     HOST: str = "0.0.0.0"
     PORT: int = 8080
     WORKERS: int = 2
     API_PREFIX: str = "/api/v1"
     DEBUG: bool = False
+    WEB_ROOT: str | None = None
 
     TRUSTED_ORIGINS: list[str] = ["http://localhost:8000"]
 
@@ -104,30 +108,10 @@ class Setting(SysSetting, BasicSetting, SensitiveSetting, LogSetting):
         _ = init_settings
         yaml_settings = RestrictedYamlConfigSettingsSource(
             settings_cls=settings_cls,
-            yaml_file=DEFAULT_CONFIG_FILE,
+            yaml_file=str(DEFAULT_CONFIG_FILE),
             yaml_file_encoding="utf-8",
         )
         return yaml_settings, env_settings, dotenv_settings, file_secret_settings
-
-
-def init_system_file(settings: Setting):
-    config_filepath = Path(DEFAULT_CONFIG_FILE)
-    default_welcome_filepath = Path(DEFAULT_WELCOME_FILE)
-    welcome_filepath = Path(settings.WELCOME_NOTE_PATH)
-
-    if not config_filepath.is_file():
-        config_filepath.parent.mkdir(parents=True, exist_ok=True)
-        config_filepath.touch(exist_ok=True)
-
-    if not default_welcome_filepath.is_file():
-        raise FileNotFoundError(
-            f"Default welcome file does not exist or is not a file: "
-            f"{default_welcome_filepath}"
-        )
-
-    if not welcome_filepath.is_file():
-        welcome_filepath.parent.mkdir(parents=True, exist_ok=True)
-        copyfile(default_welcome_filepath, welcome_filepath)
 
 
 settings = Setting()

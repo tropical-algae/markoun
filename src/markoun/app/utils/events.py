@@ -2,10 +2,12 @@ import asyncio
 import json
 from contextlib import asynccontextmanager
 from pathlib import Path
+from shutil import copyfile
 from typing import Any, cast
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.engine import make_url
 from starlette import status
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
@@ -14,10 +16,47 @@ from starlette.responses import JSONResponse, Response, StreamingResponse
 from markoun.app.services.system_service import insert_default_system_setting
 from markoun.app.services.user_service import insert_default_user
 from markoun.app.utils.constant import CONSTANT
-from markoun.common.config import init_system_file, settings
+from markoun.common.config import (
+    DEFAULT_CONFIG_FILE,
+    WELCOME_TEMPLATE_FILE,
+    settings,
+)
 from markoun.common.logging import logger
 from markoun.common.util import local_now
 from markoun.core.db.session import LocalSession, init_db_models
+
+
+def init_runtime_items() -> None:
+    config_file = DEFAULT_CONFIG_FILE.expanduser().resolve()
+    if not config_file.is_file():
+        config_file.parent.mkdir(parents=True, exist_ok=True)
+        config_file.touch()
+
+    welcome_file = Path(settings.WELCOME_NOTE_PATH).expanduser().resolve()
+    if not welcome_file.is_file():
+        welcome_template = WELCOME_TEMPLATE_FILE.resolve()
+        welcome_file.parent.mkdir(parents=True, exist_ok=True)
+        if welcome_template.is_file() and welcome_template != welcome_file:
+            copyfile(welcome_template, welcome_file)
+        else:
+            welcome_file.touch()
+
+    Path(settings.DOCUMENT_ROOT).expanduser().resolve().mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+    database_url = make_url(settings.SQL_DATABASE_URI)
+    if database_url.get_backend_name() != "sqlite" or database_url.database in {
+        None,
+        "",
+        ":memory:",
+    }:
+        return
+
+    Path(database_url.database).expanduser().resolve().parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
 
 
 def resp_success(response_body: Any) -> Response:
@@ -48,15 +87,12 @@ async def lifespan(app: FastAPI):
     logger.info("Starting service...")
     _ = app
 
-    init_system_file(settings)
+    await asyncio.to_thread(init_runtime_items)
+
     await init_db_models()
     async with LocalSession() as db:
         await insert_default_system_setting(db)
         await insert_default_user(db)
-
-    await asyncio.to_thread(
-        Path(settings.DOCUMENT_ROOT).mkdir, parents=True, exist_ok=True
-    )
 
     yield
     logger.info("Shut down and clear cache...")

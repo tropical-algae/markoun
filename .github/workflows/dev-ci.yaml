@@ -55,7 +55,7 @@ jobs:
           github.repository == 'tropical-algae/markoun' &&
           (github.event_name == 'push' ||
           github.event.pull_request.head.repo.full_name == github.repository)
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./cov.xml
@@ -87,3 +87,36 @@ jobs:
 
       - name: Check | Frontend Build
         run: npm run build
+
+  nix:
+    name: Nix Build (${{ matrix.system }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            system: x86_64-linux
+            evaluate-all-systems: true
+          - runner: macos-15
+            system: aarch64-darwin
+            evaluate-all-systems: false
+
+    steps:
+      - name: Setup | Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Setup | Nix
+        uses: DeterminateSystems/determinate-nix-action@v3
+
+      - name: Check | Flake Evaluation
+        if: matrix.evaluate-all-systems
+        run: nix flake show --all-systems
+
+      - name: Check | Flake
+        run: nix flake check --print-build-logs
+
+      - name: Check | Nix Build
+        run: nix build --print-build-logs .#packages.${{ matrix.system }}.default
