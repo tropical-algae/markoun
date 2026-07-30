@@ -1,5 +1,36 @@
 <!-- version list -->
 
+## v0.2.5 (2026-07-30)
+
+### Bug Fixes
+
+- **file**: Fix potential filepath errors of sql and welcome.md
+  ([`b09c9de`](https://github.com/tropical-algae/markoun/commit/b09c9debb448c355c0e673bb7f1a1662851f2f12))
+
+### Chores
+
+- **ci**: Validate nix packages across supported platforms
+  ([`2739c1c`](https://github.com/tropical-algae/markoun/commit/2739c1c21f20cfc09646696857ff09e4edb22d78))
+
+- **nix**: Update default deployment env (refs #14)
+  ([`a2a2ee0`](https://github.com/tropical-algae/markoun/commit/a2a2ee099211c1b7a7dfed8b4b258ad924773c6d))
+
+### Documentation
+
+- Update README
+  ([`c41d1dd`](https://github.com/tropical-algae/markoun/commit/c41d1dd2249f551f34577bf651be972c49e892c6))
+
+### Refactoring
+
+- **site**: Simplify Nix runtime configuration (refs #14)
+  ([`caf46fd`](https://github.com/tropical-algae/markoun/commit/caf46fd9281de43d7cb3a3e57b9b418e3efa354e))
+
+### Testing
+
+- **site**: Cover Nix runtime configuration
+  ([`416bdf3`](https://github.com/tropical-algae/markoun/commit/416bdf31c5879a3594cf381b54c342009b1ecc0d))
+
+
 ## v0.2.4 (2026-07-26)
 
 ### Bug Fixes
