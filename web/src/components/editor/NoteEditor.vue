@@ -1,16 +1,15 @@
 <template>
   <EditorLayout
-    v-model:inspector-open="showInspector"
     :wide-lines="appearanceStore.useWideEditorLines"
   >
     <template #header>
       <NoteEditorHeader
         :title="nodeStore.currentFileDisplayName"
         :save-pending="nodeStore.isSavePending()"
-        :inspector-open="showInspector"
-        :active-mode="currentMode"
+        :inspector-open="inspectorOpen"
+        :active-mode="inspectorMode"
         @save="saveCurrentFile"
-        @toggle-inspector="toggleInspector"
+        @toggle-inspector="emit('toggleInspector', $event)"
       />
     </template>
 
@@ -62,18 +61,6 @@
         ></textarea>
       </div>
     </AsyncGate>
-
-    <template #inspector="{ closeInspector }">
-      <NoteInspectorPanels
-        :mode="currentMode"
-        :status="nodeStore.currentFileStatus"
-        :show-delay-ms="editorAsyncGateDelayMs"
-        :content-length="nodeStore.currentFile.content.length"
-        :meta="nodeStore.currentFile.meta"
-        :rendered-html="nodeStore.currentRenderedFile"
-        @close="closeInspector"
-      />
-    </template>
   </EditorLayout>
 </template>
 
@@ -82,21 +69,26 @@ import { ref } from 'vue'
 
 import { useNodeStore } from '@/stores/note'
 import { useAppearanceStore } from '@/stores/appearance'
-import { InspectMode } from '@/types/ui'
+import type { InspectorMode } from '@/types/ui'
 import { readCssTimeMs } from '@/utils/css'
 import { useMarkdownPasteUpload } from '@/composables/useMarkdownPasteUpload'
 
 import EditorLayout from '@/layouts/EditorLayout.vue'
 import NoteEditorHeader from '@/components/editor/NoteEditorHeader.vue'
-import NoteInspectorPanels from '@/components/editor/NoteInspectorPanels.vue'
 import BaseSkeleton from '@/components/base/BaseSkeleton.vue'
 import AsyncGate from '@/components/base/AsyncGate.vue'
 
+defineProps<{
+  inspectorOpen: boolean
+  inspectorMode: InspectorMode
+}>()
+
+const emit = defineEmits<{
+  (event: 'toggleInspector', mode: InspectorMode): void
+}>()
+
 const nodeStore = useNodeStore()
 const appearanceStore = useAppearanceStore()
-
-const showInspector = ref(false)
-const currentMode = ref<InspectMode>(InspectMode.Meta)
 
 const markdownEditorRef = ref<HTMLTextAreaElement | null>(null)
 const editorAsyncGateDelayMs = readCssTimeMs('--editor-async-gate-delay-ms', 0)
@@ -111,14 +103,6 @@ const { handlePaste } = useMarkdownPasteUpload({
 
 const saveCurrentFile = async () => {
   await nodeStore.saveCurrentFile()
-}
-
-const toggleInspector = (mode: InspectMode) => {
-  const shouldExpand = currentMode.value !== mode || !showInspector.value
-  showInspector.value = shouldExpand
-  if (shouldExpand) {
-    currentMode.value = mode
-  }
 }
 
 </script>

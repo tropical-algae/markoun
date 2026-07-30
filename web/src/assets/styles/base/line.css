@@ -6,36 +6,6 @@
   transition: border-color var(--motion-theme-duration) ease;
 } 
 
-.vertical-line {
-  width: var(--resize-line-width);
-  top: 0;
-  bottom: 0;
-  position: absolute;
-  background-color: transparent;
-
-  transition: border-color var(--motion-theme-duration) ease;
-  z-index: 9;
-}
-
-.vertical-line.turn-left {
-  border-left: var(--line-width) solid var(--color-line);
-  left: 0;
-}
-
-.vertical-line.turn-right {
-  border-right: var(--line-width) solid var(--color-line);
-  right: 0;
-}
-
-.vertical-line.col-drag {
-  cursor: col-resize;
-  touch-action: none;
-}
-
-.vertical-line.col-drag.is-resizing {
-  cursor: default;
-}
-
 .horizontal-line-top {
   border-top: var(--line-width) solid var(--color-line);
   transition: border-color var(--motion-theme-duration) ease;

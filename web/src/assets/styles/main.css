@@ -65,6 +65,8 @@
 
   --motion-soft-duration: 0.2s;
   --motion-medium-duration: 0.3s;
+  --motion-pane-duration: 0.72s;
+  --motion-pane-easing: cubic-bezier(0.2, 0.8, 0.2, 1);
   --motion-slow-duration: 0.4s;
   --motion-height-duration: 0.4;
   --motion-height-user-duration: 0.35;
@@ -86,6 +88,7 @@
 
   --layout-header-height: 48px;
   --workspace-brand-logo-height: 18px;
+  --layout-sidebar-rail-width: 45;
   --layout-sidebar-width-default: 250;
   --layout-sidebar-width-min: 240;
   --layout-sidebar-width-max: 500;
@@ -93,6 +96,9 @@
   --layout-inspector-width-default: 250;
   --layout-inspector-width-min: 200;
   --layout-inspector-width-max: 700;
+  --layout-editor-width-min: 280;
+  --layout-pane-resize-hit-width: 10px;
+  --layout-pane-resize-step: 10;
   --layout-mobile-layer-z-index: 30;
   --layout-mobile-editor-padding-y: 18px;
   --layout-mobile-editor-padding-x-min: 14px;
@@ -103,9 +109,9 @@
   --editor-font-size: 16px;
   --editor-line-height: 1.6;
   --editor-async-gate-delay-ms: 0;
-  --editor-inspector-meta-font-size: 0.875em;
-  --editor-preview-skeleton-media-height: 180px;
-  --editor-meta-value-min-width: 40px;
+  --inspector-meta-font-size: 0.875em;
+  --inspector-preview-skeleton-media-height: 180px;
+  --inspector-meta-value-min-width: 40px;
   --markdown-table-margin-y: 1em;
   --markdown-table-cell-padding: 0.15rem 0.5rem;
 
@@ -196,8 +202,6 @@
   --underlined-input-content-font-size: inherit;
   --underlined-input-letter-spacing: 0.5px;
   --underlined-input-placeholder-opacity: 0.5;
-  --resize-line-width: 2px;
-
   --ghost-button-padding: 2px 16px;
   --ghost-button-bg-bleed: -20px;
   --ghost-button-spinner-size: 0.85rem;

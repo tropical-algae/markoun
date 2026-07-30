@@ -1,15 +1,13 @@
 <template>
-  <EditorInspectorPanel
-    v-if="mode === InspectMode.Meta"
+  <InspectorPanel
+    class="file-meta-panel"
     title="File Meta"
     :status="status"
     :show-delay-ms="showDelayMs"
-    body-class="note-meta"
-    meta
     @close="emit('close')"
   >
     <template #loading>
-      <div class="inspector-skeleton">
+      <div class="meta-skeleton">
         <BaseSkeleton
           width="var(--skeleton-width-sm)"
           height="var(--skeleton-text-height-sm)"
@@ -36,51 +34,19 @@
         <div class="meta-value fc-sec">{{ value }}</div>
       </template>
     </div>
-  </EditorInspectorPanel>
-
-  <EditorInspectorPanel
-    v-else-if="mode === InspectMode.Preview"
-    title="Preview"
-    :status="status"
-    :show-delay-ms="showDelayMs"
-    body-class="note-preview"
-    @close="emit('close')"
-  >
-    <template #loading>
-      <div class="preview-skeleton">
-        <BaseSkeleton
-          width="var(--skeleton-width-sm)"
-          height="var(--skeleton-text-height-sm)"
-        />
-        <BaseSkeleton height="var(--skeleton-text-height-sm)" />
-        <BaseSkeleton
-          width="var(--skeleton-width-lg)"
-          height="var(--skeleton-text-height-sm)"
-        />
-        <BaseSkeleton
-          height="var(--editor-preview-skeleton-media-height)"
-          radius="var(--radius-lg)"
-        />
-      </div>
-    </template>
-
-    <div v-html="renderedHtml" class="fc-pri"></div>
-  </EditorInspectorPanel>
+  </InspectorPanel>
 </template>
 
 <script setup lang="ts">
 import type { AsyncStatus } from '@/types/async'
-import { InspectMode } from '@/types/ui'
-import EditorInspectorPanel from '@/components/editor/EditorInspectorPanel.vue'
 import BaseSkeleton from '@/components/base/BaseSkeleton.vue'
+import InspectorPanel from '@/components/inspector/InspectorPanel.vue'
 
 defineProps<{
-  mode: InspectMode
   status: AsyncStatus
   showDelayMs: number
   contentLength: number
   meta: Record<string, string>
-  renderedHtml: string
 }>()
 
 const emit = defineEmits<{
@@ -89,8 +55,11 @@ const emit = defineEmits<{
 </script>
 
 <style scoped>
-.inspector-skeleton,
-.preview-skeleton {
+.file-meta-panel {
+  font-size: var(--inspector-meta-font-size);
+}
+
+.meta-skeleton {
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -114,7 +83,7 @@ const emit = defineEmits<{
 }
 
 .meta-value {
-  min-width: var(--editor-meta-value-min-width);
+  min-width: var(--inspector-meta-value-min-width);
   white-space: normal;
   word-break: break-word;
   overflow-wrap: break-word;
