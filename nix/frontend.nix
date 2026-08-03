@@ -1,6 +1,6 @@
 {
   buildNpmPackage,
-  lib,
+  importNpmLock,
   nodejs_24,
   version,
 }:
@@ -9,7 +9,8 @@
   inherit version;
 
   src = ../web;
-  npmDepsHash = "sha256-LXqF6qyMm+ngQPB7BPY4JI9VRGBQR8OAZBxINROWE2A=";
+  npmDeps = importNpmLock { npmRoot = ../web; };
+  npmConfigHook = importNpmLock.npmConfigHook;
 
   npmBuildScript = "build";
 
