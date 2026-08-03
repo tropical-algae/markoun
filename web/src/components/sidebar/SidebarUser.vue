@@ -1,13 +1,24 @@
 <template>
   <SidebarPanelLayout class="user-sidebar" title="Account">
-    <div class="user-sidebar-body sidebar-panel-body">
-      <section class="sidebar-section">
-        <div class="sidebar-section-title f-m">Profile</div>
-        <SidebarUserProfile />
-      </section>
+    <LazyMotion :features="loadMotionFeatures" strict>
+      <MotionConfig
+        reduced-motion="user"
+        :transition="{ layout: profileLayoutTransition }"
+      >
+        <LayoutGroup id="user-profile">
+          <div class="user-sidebar-body sidebar-panel-body">
+            <section class="sidebar-section">
+              <div class="sidebar-section-title f-m">Profile</div>
+              <SidebarUserProfile />
+            </section>
 
-      <SidebarUserSecurity :after-update="handleLogout" />
-    </div>
+            <m.div layout="position" class="user-security-layout">
+              <SidebarUserSecurity :after-update="handleLogout" />
+            </m.div>
+          </div>
+        </LayoutGroup>
+      </MotionConfig>
+    </LazyMotion>
 
     <template #footer>
       <div class="user-sidebar-footer sidebar-panel-footer horizontal-line-top fc-pri">
@@ -27,18 +38,33 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import {
+  LayoutGroup,
+  LazyMotion,
+  m,
+  MotionConfig,
+} from 'motion-v'
 import router from '@/router'
 import { useNodeStore } from '@/stores/note'
 import { useUserStore } from '@/stores/user'
+import { readCssCubicBezier, readCssTimeMs } from '@/utils/css'
 
 import GhostButton from '@/components/base/GhostButton.vue'
 import SidebarUserProfile from '@/components/sidebar/SidebarUserProfile.vue'
 import SidebarUserSecurity from '@/components/sidebar/SidebarUserSecurity.vue'
 import SidebarPanelLayout from '@/layouts/SidebarPanelLayout.vue'
 
+const loadMotionFeatures = () => import('@/utils/motion-features')
+  .then((module) => module.default)
+
 const userStore = useUserStore()
 const nodeStore = useNodeStore()
 const isLogoutFlowPending = ref(false)
+const profileLayoutTransition = {
+  type: 'tween',
+  duration: readCssTimeMs('--motion-profile-duration', 0) / 1000,
+  ease: readCssCubicBezier('--motion-profile-easing', [0, 0, 1, 1]),
+}
 const isLogoutButtonPending = computed(() =>
   isLogoutFlowPending.value || userStore.isLogoutPending()
 )
@@ -65,6 +91,12 @@ const handleLogout = async () => {
 <style scoped>
 .user-sidebar-body {
   min-height: 0;
+}
+
+.user-security-layout {
+  width: 100%;
+  min-width: 0;
+  display: flow-root;
 }
 
 .user-action-button {

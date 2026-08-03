@@ -67,9 +67,12 @@
   --motion-medium-duration: 0.3s;
   --motion-pane-duration: 0.72s;
   --motion-pane-easing: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --motion-tree-duration: 0.42s;
+  --motion-tree-easing: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --motion-tree-offset-y: -4px;
+  --motion-profile-duration: 0.35s;
+  --motion-profile-easing: cubic-bezier(0.2, 0.8, 0.2, 1);
   --motion-slow-duration: 0.4s;
-  --motion-height-duration: 0.4;
-  --motion-height-user-duration: 0.35;
   --motion-toast-enter-duration: 0.4;
   --motion-toast-leave-duration: 0.25;
   --motion-spinner-duration: 0.5s;

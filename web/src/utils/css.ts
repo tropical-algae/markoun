@@ -40,6 +40,32 @@ export const readCssNumber = (name: string, fallback: number): number => {
   return Number.isFinite(parsed) ? parsed : fallback
 }
 
+export type CssCubicBezier = [number, number, number, number]
+
+export const readCssCubicBezier = (
+  name: string,
+  fallback: CssCubicBezier,
+): CssCubicBezier => {
+  if (typeof window === 'undefined') {
+    return fallback
+  }
+
+  const value = window.getComputedStyle(document.documentElement)
+    .getPropertyValue(name)
+    .trim()
+  const match = value.match(/^cubic-bezier\(([^)]+)\)$/)
+  if (!match) {
+    return fallback
+  }
+
+  const values = match[1]?.split(',').map((part) => Number.parseFloat(part.trim()))
+  if (values?.length !== 4 || values.some((part) => !Number.isFinite(part))) {
+    return fallback
+  }
+
+  return values as CssCubicBezier
+}
+
 export const readCssLengthPx = (name: string, fallbackPx: number): number => {
   if (typeof window === 'undefined') {
     return fallbackPx

@@ -34,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, useAttrs, useSlots } from 'vue'
+import { computed, useAttrs, useSlots, type Component } from 'vue'
 import { useAsyncGate } from '@/composables/useAsyncGate'
 import type { AsyncStatus } from '@/types/async'
 
@@ -48,7 +48,7 @@ interface Props {
   showDelayMs?: number
   minVisibleMs?: number
   loadingOnRefreshing?: boolean
-  tag?: string
+  tag?: string | Component
   transitionName?: string
   transitionMode?: 'out-in' | 'in-out'
 }

@@ -20,30 +20,37 @@
       </div>
     </template>
 
-    <div
-      class="file-tree-root sidebar-panel-body"
-      :class="{ 'is-root-dragover': isRootDirectoryDragOver }"
-      @dragenter.prevent="handleRootDirectoryDragEnter"
-      @dragover.prevent="handleRootDirectoryDragOver"
-      @dragleave.prevent="handleRootDirectoryDragLeave"
-      @drop.prevent="handleRootDirectoryDrop"
-    >
-      <AsyncGate :status="rootLoadStatus">
-        <template #loading>
-          <SidebarFileTreeSkeleton :rows="6" />
-        </template>
+    <LazyMotion :features="loadMotionFeatures" strict>
+      <MotionConfig reduced-motion="user">
+        <m.div
+          layout-scroll
+          class="file-tree-root sidebar-panel-body"
+          :class="{ 'is-root-dragover': isRootDirectoryDragOver }"
+          @dragenter.prevent="handleRootDirectoryDragEnter"
+          @dragover.prevent="handleRootDirectoryDragOver"
+          @dragleave.prevent="handleRootDirectoryDragLeave"
+          @drop.prevent="handleRootDirectoryDrop"
+        >
+          <LayoutGroup id="file-tree">
+            <AsyncGate :status="rootLoadStatus">
+              <template #loading>
+                <SidebarFileTreeSkeleton :rows="6" />
+              </template>
 
-        <div class="file-tree-list">
-          <SidebarFileTreeItem
-            v-for="item in nodeStore.rootNodes"
-            :key="item.path"
-            :node="item"
-            :depth="0"
-            @node-opened="emit('nodeOpened')"
-          />
-        </div>
-      </AsyncGate>
-    </div>
+              <div class="file-tree-list">
+                <SidebarFileTreeItem
+                  v-for="item in nodeStore.rootNodes"
+                  :key="item.path"
+                  :node="item"
+                  :depth="0"
+                  @node-opened="emit('nodeOpened')"
+                />
+              </div>
+            </AsyncGate>
+          </LayoutGroup>
+        </m.div>
+      </MotionConfig>
+    </LazyMotion>
 
     <CreateNodeModal
       v-model="showNewNote"
@@ -61,6 +68,12 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import {
+  LayoutGroup,
+  LazyMotion,
+  m,
+  MotionConfig,
+} from 'motion-v'
 
 import CreateNodeModal from '@/components/overlay/modals/CreateNodeModal.vue'
 import UploadFileModal from '@/components/overlay/modals/UploadFileModal.vue'
@@ -81,7 +94,11 @@ import TrashIcon from '@/assets/icons/trash.svg'
 import { useNodeStore } from '@/stores/note'
 import type { AsyncStatus } from '@/types/async'
 import { useFileTreeDropTarget } from '@/composables/useFileTreeDropTarget'
+import { provideFileTreeMotion } from '@/composables/useFileTreeMotion'
 import { ROOT_DIRECTORY_PATH } from '@/utils/file-system'
+
+const loadMotionFeatures = () => import('@/utils/motion-features')
+  .then((module) => module.default)
 
 const emit = defineEmits<{
   (event: 'nodeOpened'): void
@@ -92,6 +109,7 @@ const showNewFolder = ref(false)
 const showUpload = ref(false)
 const deleteItem = ref(false)
 const nodeStore = useNodeStore()
+provideFileTreeMotion()
 const rootLoadStatus = computed<AsyncStatus>(() => {
   const state = nodeStore.getDirectoryLoadState(ROOT_DIRECTORY_PATH)
   if (state === 'loaded') {
