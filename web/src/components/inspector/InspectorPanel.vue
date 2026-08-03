@@ -1,7 +1,6 @@
 <template>
   <section
     class="inspector-panel"
-    :class="{ 'is-meta': props.meta }"
   >
     <BaseHeader>
       <div class="inspector-header-content">
@@ -47,7 +46,6 @@ const props = defineProps<{
   title: string
   status: AsyncStatus
   showDelayMs: number
-  meta?: boolean
   bodyClass?: string
 }>()
 
@@ -68,15 +66,15 @@ const emit = defineEmits<{
   box-sizing: border-box;
 }
 
-.inspector-panel.is-meta {
-  font-size: var(--editor-inspector-meta-font-size);
-}
-
 .inspector-header-content {
   display: flex;
   align-items: center;
   width: 100%;
   min-width: 0;
+}
+
+.inspector-close-control {
+  display: none;
 }
 
 .inspector-panel-body {
@@ -87,5 +85,16 @@ const emit = defineEmits<{
   overflow-y: scroll;
   overflow-x: hidden;
   white-space: normal;
+}
+
+@media (max-width: 768px) {
+  .inspector-close-control {
+    display: inline-flex;
+    margin-left: auto;
+  }
+
+  .inspector-close-button:active {
+    background-color: var(--color-bg-selected);
+  }
 }
 </style>

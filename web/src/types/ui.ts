@@ -6,8 +6,8 @@ export const SidebarMode = {
 } as const
 export type SidebarMode = typeof SidebarMode[keyof typeof SidebarMode]
 
-export const InspectMode = {
+export const InspectorMode = {
   Meta: 'meta',
   Preview: 'preview',
 } as const
-export type InspectMode = typeof InspectMode[keyof typeof InspectMode]
+export type InspectorMode = typeof InspectorMode[keyof typeof InspectorMode]

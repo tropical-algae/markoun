@@ -1,137 +1,112 @@
 <template>
-  <div ref="profileMotionShellRef">
-    <div ref="profileMotionContentRef" class="user-profile-motion-content">
-      <AsyncGate
-        :status="userStore.currentUserProfileState"
-        :is-empty="!userStore.currentUserProfile"
-      >
-        <template #loading>
-          <div class="user-profile-shell">
+  <AsyncGate
+    :status="userStore.currentUserProfileState"
+    :is-empty="!userStore.currentUserProfile"
+    :tag="MotionDiv"
+    layout="position"
+    class="user-profile-state"
+  >
+    <template #loading>
+      <div class="user-profile-shell">
+        <BaseSkeleton
+          width="var(--skeleton-width-md)"
+          height="var(--skeleton-text-height-lg)"
+        />
+
+        <div class="user-meta-shell user-meta-shell-loading">
+          <BaseSkeleton
+            width="var(--skeleton-width-xl)"
+            height="var(--skeleton-text-height-xs)"
+          />
+          <div class="user-tag-shell">
             <BaseSkeleton
-              width="var(--skeleton-width-md)"
-              height="var(--skeleton-text-height-lg)"
+              width="var(--skeleton-width-xs)"
+              height="var(--meta-tag-height)"
             />
-
-            <div class="user-meta-shell user-meta-shell-loading">
-              <BaseSkeleton
-                width="var(--skeleton-width-xl)"
-                height="var(--skeleton-text-height-xs)"
-              />
-              <div class="user-tag-shell">
-                <BaseSkeleton
-                  width="var(--skeleton-width-xs)"
-                  height="var(--meta-tag-height)"
-                />
-                <BaseSkeleton
-                  width="var(--skeleton-width-xs)"
-                  height="var(--meta-tag-height)"
-                />
-              </div>
-
-              <BaseSkeleton
-                width="var(--skeleton-width-lg)"
-                height="var(--skeleton-text-height-xs)"
-              />
-              <BaseSkeleton
-                width="var(--skeleton-width-sm)"
-                height="var(--skeleton-text-height-sm)"
-              />
-
-              <BaseSkeleton
-                width="var(--skeleton-width-lg)"
-                height="var(--skeleton-text-height-xs)"
-              />
-              <BaseSkeleton
-                width="var(--skeleton-width-md)"
-                height="var(--skeleton-text-height-sm)"
-              />
-            </div>
-          </div>
-        </template>
-
-        <template #empty>
-          <div class="user-profile-empty f-s fc-sec">
-            User information is temporarily unavailable.
-          </div>
-        </template>
-
-        <div class="user-profile-card">
-          <div class="user-name f-m fw-bold fc-pri">
-            {{ userStore.currentUserProfile?.full_name || 'Unnamed user' }}
-          </div>
-          <div class="user-email f-s">
-            {{ userStore.currentUserProfile?.email }}
+            <BaseSkeleton
+              width="var(--skeleton-width-xs)"
+              height="var(--meta-tag-height)"
+            />
           </div>
 
-          <div class="user-meta-grid">
-            <span class="user-meta-label f-s">Scopes</span>
-            <div class="user-scopes">
-              <span
-                v-for="scope in userStore.currentUserProfile?.scopes || []"
-                :key="scope"
-                class="meta-tag"
-              >
-                {{ scope }}
-              </span>
-            </div>
+          <BaseSkeleton
+            width="var(--skeleton-width-lg)"
+            height="var(--skeleton-text-height-xs)"
+          />
+          <BaseSkeleton
+            width="var(--skeleton-width-sm)"
+            height="var(--skeleton-text-height-sm)"
+          />
 
-            <span class="user-meta-label f-s">Status</span>
-            <span class="user-meta-value f-s">
-              {{ userStore.currentUserProfile?.is_active ? 'Active' : 'Inactive' }}
-            </span>
-
-            <span class="user-meta-label f-s">Joined</span>
-            <span class="user-meta-value f-s">
-              {{ userStore.currentUserProfile?.joined_at || 'Unknown' }}
-            </span>
-          </div>
+          <BaseSkeleton
+            width="var(--skeleton-width-lg)"
+            height="var(--skeleton-text-height-xs)"
+          />
+          <BaseSkeleton
+            width="var(--skeleton-width-md)"
+            height="var(--skeleton-text-height-sm)"
+          />
         </div>
-      </AsyncGate>
+      </div>
+    </template>
+
+    <template #empty>
+      <div class="user-profile-empty f-s fc-sec">
+        User information is temporarily unavailable.
+      </div>
+    </template>
+
+    <div class="user-profile-card">
+      <div class="user-name f-m fw-bold fc-pri">
+        {{ userStore.currentUserProfile?.full_name || 'Unnamed user' }}
+      </div>
+      <div class="user-email f-s">
+        {{ userStore.currentUserProfile?.email }}
+      </div>
+
+      <div class="user-meta-grid">
+        <span class="user-meta-label f-s">Scopes</span>
+        <div class="user-scopes">
+          <span
+            v-for="scope in userStore.currentUserProfile?.scopes || []"
+            :key="scope"
+            class="meta-tag"
+          >
+            {{ scope }}
+          </span>
+        </div>
+
+        <span class="user-meta-label f-s">Status</span>
+        <span class="user-meta-value f-s">
+          {{ userStore.currentUserProfile?.is_active ? 'Active' : 'Inactive' }}
+        </span>
+
+        <span class="user-meta-label f-s">Joined</span>
+        <span class="user-meta-value f-s">
+          {{ userStore.currentUserProfile?.joined_at || 'Unknown' }}
+        </span>
+      </div>
     </div>
-  </div>
+  </AsyncGate>
 </template>
 
 <script setup lang="ts">
-import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { onMounted } from 'vue'
+import { m } from 'motion-v'
 import { useUserStore } from '@/stores/user'
-import { useHeightMotion } from '@/composables/useHeightMotion'
-import { readCssNumber } from '@/utils/css'
 import AsyncGate from '@/components/base/AsyncGate.vue'
 import BaseSkeleton from '@/components/base/BaseSkeleton.vue'
 
 const userStore = useUserStore()
-const profileMotionShellRef = ref<HTMLElement | null>(null)
-const profileMotionContentRef = ref<HTMLElement | null>(null)
-const profileMotion = useHeightMotion(profileMotionShellRef, profileMotionContentRef, {
-  duration: readCssNumber('--motion-height-user-duration', 0.35),
-  enterEase: 'power2.out',
-})
+const MotionDiv = m.div
 
-onMounted(async () => {
-  await nextTick()
-  profileMotion.connectResizeObserver()
+onMounted(() => {
   void userStore.refreshCurrentUserProfile().catch(() => null)
-})
-
-watch(
-  [
-    () => userStore.currentUserProfileState,
-    () => userStore.currentUserProfile,
-  ],
-  async () => {
-    await nextTick()
-    profileMotion.animateHeightToContent()
-  },
-  { flush: 'post' },
-)
-
-onBeforeUnmount(() => {
-  profileMotion.disconnectResizeObserver()
 })
 </script>
 
 <style scoped>
-.user-profile-motion-content {
+.user-profile-state {
   width: 100%;
   min-width: 0;
 }

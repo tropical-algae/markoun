@@ -26,7 +26,7 @@ Markoun 是一款轻量、可自托管且完全基于文件的 Markdown 编辑�
 
 ## 快速开始
 
-目前支持通过 `docker` 或 `docker compose` 部署。
+目前支持通过 `docker`、`docker compose` 或 `Nix` 部署。
 
 <details>
 
@@ -105,6 +105,66 @@ docker compose up -d
 | `welcome.md`  | 默认欢迎页面，当没有打开任何文档时显示。 |
 | `data/`       | 存放所有 Markdown 文档及工作区数据。     |
 | `log/`        | 应用日志目录。                           |
+
+</details>
+
+<details>
+
+<summary><strong>❄️ Nix 部署</strong> - 点击展开</summary>
+
+</br>
+
+**启动**
+
+安装 [Nix](https://nixos.org/download/) 并启用 flakes 后，可以直接从 GitHub 仓库的默认分支运行 Markoun：
+
+```bash
+export PORT=10000
+export DEFAULT_ADMIN_NAME=admin
+export DEFAULT_ADMIN_EMAIL=admin@example.com
+export DEFAULT_ADMIN_PASSWORD=change-this-password
+
+nix run github:tropical-algae/markoun
+```
+
+如果需要运行当前检出的本地源码：
+
+```bash
+nix run .
+```
+
+也可以选择将 Markoun 安装到当前用户的 profile 中，运行：
+
+```bash
+nix profile install github:tropical-algae/markoun#markoun
+markoun
+```
+
+启动后可通过 [`http://localhost:10000`](http://localhost:10000) 访问完整的 Web 应用。该命令默认在前台运行；如需长期运行，请使用合适的进程管理器或服务管理器。
+
+> `DEFAULT_ADMIN_*` 环境变量为可选项。如果未提供，首次启动时会创建一个随机密码的管理员账号，并在终端输出中显示账号信息。
+
+**运行目录说明**
+
+Markoun 会将可编辑文件存放在标准的 XDG 用户目录下：
+
+| 路径                                                                              | 说明                                           |
+| --------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `$XDG_CONFIG_HOME/markoun/config.yaml`<br/>默认：`~/.config/markoun/config.yaml`  | 应用配置文件。                                 |
+| `$XDG_DATA_HOME/markoun/welcome.md`<br/>默认：`~/.local/share/markoun/welcome.md` | 可编辑的欢迎页面，首次启动时从内置模板初始化。 |
+| `$XDG_DATA_HOME/markoun/data/`<br/>默认：`~/.local/share/markoun/data/`           | 存放所有 Markdown 文档及工作区数据。           |
+| `$XDG_STATE_HOME/markoun/log/`<br/>默认：`~/.local/state/markoun/log/`            | 应用日志目录。                                 |
+
+如需自定义运行目录，可以在启动前覆盖对应环境变量：
+
+```bash
+export MARKOUN_CONFIG_FILE=/path/to/config.yaml
+export DOCUMENT_ROOT=/path/to/documents
+export WELCOME_NOTE_PATH=/path/to/welcome.md
+export LOG_ROOT=/path/to/log
+
+nix run github:tropical-algae/markoun
+```
 
 </details>
 

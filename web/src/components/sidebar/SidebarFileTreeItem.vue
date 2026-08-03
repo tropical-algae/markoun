@@ -1,5 +1,15 @@
 <template>
-  <div>
+  <m.div
+    layout="position"
+    :layout-id="node.path"
+    :initial="treeMotion.itemInitial.value"
+    :animate="treeMotion.itemVisible.value"
+    :transition="{
+      layout: treeMotion.transition.value,
+      default: treeMotion.transition.value,
+    }"
+    class="tree-node-motion"
+  >
     <SidebarFileTreeNodeRow
       v-model:edit-name="editName"
       :depth="depth"
@@ -30,49 +40,43 @@
       @cancel-rename="cancelRename"
     />
 
-    <Transition
-      @enter="onEnter"
-      @leave="onLeave"
-      :css="false"
-    >
-      <div
-        v-if="isDir && isOpened"
-        ref="childrenPanelRef"
-        class="node-children-panel overflow-hidden"
-      >
-        <div ref="childrenContentRef" class="node-children-content">
-          <AsyncGate
-            :status="childLoadStatus"
-            transition-name="tree-node-swap"
-          >
-            <template #loading>
-              <SidebarFileTreeSkeleton :depth="depth + 1" />
-            </template>
+    <div v-if="isDir && isOpened" class="node-children-panel">
+      <div class="node-children-state">
+        <AsyncGate
+          :status="childLoadStatus"
+          class="tree-node-state-layer"
+          transition-name="tree-node-swap"
+          transition-mode="out-in"
+        >
+          <template #loading>
+            <SidebarFileTreeSkeleton :depth="depth + 1" />
+          </template>
 
-            <div class="node-children-list">
-              <SidebarFileTreeItem
-                v-for="(child, _index) in normalizedChildren"
-                :key="child.path"
-                :node="child"
-                :depth="depth + 1"
-                @node-opened="emit('nodeOpened')"
-              />
-            </div>
-          </AsyncGate>
-        </div>
+          <div class="node-children-list">
+            <SidebarFileTreeItem
+              v-for="child in normalizedChildren"
+              :key="child.path"
+              :node="child"
+              :depth="depth + 1"
+              @node-opened="emit('nodeOpened')"
+            />
+          </div>
+        </AsyncGate>
       </div>
-    </Transition>
-  </div>
+    </div>
+  </m.div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
+import { m } from 'motion-v'
 import type { FsNode } from '@/types/file-system'
 import { useNodeStore } from '@/stores/note'
 import { useFileTreeItemExpansion } from '@/composables/useFileTreeItemExpansion'
 import { useFileTreeItemRename } from '@/composables/useFileTreeItemRename'
 import { useFileTreeDropTarget } from '@/composables/useFileTreeDropTarget'
 import { useFileTreeNodeDrag } from '@/composables/useFileTreeNodeDrag'
+import { useFileTreeMotion } from '@/composables/useFileTreeMotion'
 
 import FolderOpenIcon from '@/assets/icons/folder-open.svg'
 import FolderIcon from '@/assets/icons/folder.svg'
@@ -81,6 +85,7 @@ import SidebarFileTreeNodeRow from '@/components/sidebar/SidebarFileTreeNodeRow.
 import SidebarFileTreeSkeleton from '@/components/sidebar/SidebarFileTreeSkeleton.vue'
 
 const nodeStore = useNodeStore()
+const treeMotion = useFileTreeMotion()
 const props = defineProps<{ node: FsNode, depth: number }>()
 const emit = defineEmits<{
   (event: 'nodeOpened'): void
@@ -89,16 +94,12 @@ const emit = defineEmits<{
 const node = computed(() => props.node)
 const isDir = computed(() => node.value.type === 'dir')
 const isActive = computed(() => nodeStore.currentNode?.path === node.value.path)
-const childrenPanelRef = ref<HTMLElement | null>(null)
-const childrenContentRef = ref<HTMLElement | null>(null)
 const {
   isOpened,
   normalizedChildren,
   childLoadStatus,
   canExpand,
-  onEnter,
-  onLeave,
-} = useFileTreeItemExpansion(node, isDir, childrenPanelRef, childrenContentRef)
+} = useFileTreeItemExpansion(node, isDir)
 const currentIcon = computed(() => isOpened.value ? FolderOpenIcon : FolderIcon)
 const {
   editName,
@@ -170,18 +171,63 @@ const {
 </script>
 
 <style scoped>
-.node-children-content {
+.tree-node-motion {
   width: 100%;
+  min-width: 0;
 }
 
-:deep(.tree-node-swap-enter-active),
+.node-children-panel {
+  width: 100%;
+  min-width: 0;
+}
+
+.node-children-state {
+  width: 100%;
+  min-width: 0;
+  min-height: var(--tree-node-row-height);
+}
+
+:deep(.tree-node-state-layer) {
+  width: 100%;
+  min-width: 0;
+}
+
+.node-children-list {
+  width: 100%;
+  min-width: 0;
+}
+
+:deep(.tree-node-swap-enter-active) {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition:
+    grid-template-rows var(--motion-tree-duration) var(--motion-tree-easing),
+    opacity var(--motion-soft-duration) ease;
+}
+
+:deep(.tree-node-swap-enter-active > *) {
+  min-height: 0;
+  overflow: hidden;
+}
+
 :deep(.tree-node-swap-leave-active) {
   transition: opacity var(--motion-soft-duration) ease;
 }
 
-:deep(.tree-node-swap-enter-from),
+:deep(.tree-node-swap-enter-from) {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+
 :deep(.tree-node-swap-leave-to) {
   opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :deep(.tree-node-swap-enter-active),
+  :deep(.tree-node-swap-leave-active) {
+    transition: none;
+  }
 }
 
 </style>

@@ -44,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import { InspectMode } from '@/types/ui'
+import { InspectorMode, type InspectorMode as InspectorModeType } from '@/types/ui'
 import PreviewIcon from '@/assets/icons/overview.svg'
 import MetaIcon from '@/assets/icons/info.svg'
 import SaveIcon from '@/assets/icons/disk.svg'
@@ -55,17 +55,17 @@ defineProps<{
   title: string
   savePending: boolean
   inspectorOpen: boolean
-  activeMode: InspectMode
+  activeMode: InspectorModeType
 }>()
 
 const emit = defineEmits<{
   (event: 'save'): void
-  (event: 'toggleInspector', mode: InspectMode): void
+  (event: 'toggleInspector', mode: InspectorModeType): void
 }>()
 
 const inspectActions = [
-  { icon: MetaIcon, label: 'File meta', mode: InspectMode.Meta },
-  { icon: PreviewIcon, label: 'Preview', mode: InspectMode.Preview },
+  { icon: MetaIcon, label: 'File meta', mode: InspectorMode.Meta },
+  { icon: PreviewIcon, label: 'Preview', mode: InspectorMode.Preview },
 ] as const
 </script>
 
