@@ -141,7 +141,6 @@ async def api_save_note(
             relative_path,
             data.content,
             base_revision_id=data.base_revision_id,
-            operation_id=data.operation_id,
         )
         revision_id = result.revision_id
         default_revision_id = result.default_revision_id

@@ -4,10 +4,7 @@ from pathlib import Path
 
 from fastapi import HTTPException
 
-from markoun.app.services.workspace_service import (
-    WORKSPACE_DATA_DIRECTORY,
-    WorkspaceContext,
-)
+from markoun.app.services.workspace_service import WorkspaceContext
 from markoun.app.utils.constant import CONSTANT
 from markoun.common.config import settings
 from markoun.common.decorator import exception_handling
@@ -32,9 +29,7 @@ def _directory_has_children(
     displayed_file_types: set[str],
 ) -> bool:
     for item_path in current_path.iterdir():
-        if item_path.is_symlink() or item_path == (
-            workspace.root / WORKSPACE_DATA_DIRECTORY
-        ):
+        if item_path.is_symlink() or workspace.is_internal_path(item_path):
             continue
         if item_path.is_dir() or file_suffix(item_path) in displayed_file_types:
             return True
@@ -46,9 +41,7 @@ def _get_node_summary(
     current_path: Path,
     displayed_file_types: set[str],
 ) -> FileNode | None:
-    if current_path.is_symlink() or current_path == (
-        workspace.root / WORKSPACE_DATA_DIRECTORY
-    ):
+    if current_path.is_symlink() or workspace.is_internal_path(current_path):
         return None
     is_dir = current_path.is_dir()
     suffix = "" if is_dir else file_suffix(current_path)

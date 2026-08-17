@@ -31,10 +31,19 @@ HISTORY_EXCEPTION_RESPONSES = {
 
 def create_file_history(workspace: WorkspaceContext) -> FileHistory:
     return FileHistory(
-        workspace_root=workspace.root,
-        repository_root=workspace.root / WORKSPACE_DATA_DIRECTORY / HISTORY_DIRECTORY,
+        workspace_root=workspace.document_root,
+        repository_root=(
+            workspace.document_root / WORKSPACE_DATA_DIRECTORY / HISTORY_DIRECTORY
+        ),
         allowed_suffixes=MANAGED_HISTORY_SUFFIXES,
     )
+
+
+def _resolve_history_path(
+    workspace: WorkspaceContext,
+    path: str | Path,
+) -> str:
+    return workspace.document_relative(workspace.resolve(path)).as_posix()
 
 
 async def save_file_history(
@@ -43,15 +52,13 @@ async def save_file_history(
     content: str,
     *,
     base_revision_id: str | None = None,
-    operation_id: str | None = None,
 ) -> HistorySaveResult:
     history = create_file_history(workspace)
     return await _run_history_operation(
         history.save,
-        path,
+        _resolve_history_path(workspace, path),
         content,
         base_revision_id=base_revision_id,
-        operation_id=operation_id,
         author=workspace.username,
     )
 
@@ -61,7 +68,10 @@ async def get_file_history_tree(
     path: str | Path,
 ) -> HistoryTree:
     history = create_file_history(workspace)
-    return await _run_history_operation(history.get_tree, path)
+    return await _run_history_operation(
+        history.get_tree,
+        _resolve_history_path(workspace, path),
+    )
 
 
 async def get_file_history_revision(
@@ -70,7 +80,11 @@ async def get_file_history_revision(
     revision_id: str,
 ) -> str:
     history = create_file_history(workspace)
-    return await _run_history_operation(history.get_revision, path, revision_id)
+    return await _run_history_operation(
+        history.get_revision,
+        _resolve_history_path(workspace, path),
+        revision_id,
+    )
 
 
 async def delete_file_history_revision(
@@ -79,7 +93,11 @@ async def delete_file_history_revision(
     revision_id: str,
 ) -> HistoryTree:
     history = create_file_history(workspace)
-    return await _run_history_operation(history.delete_revision, path, revision_id)
+    return await _run_history_operation(
+        history.delete_revision,
+        _resolve_history_path(workspace, path),
+        revision_id,
+    )
 
 
 async def move_file_history(
@@ -88,7 +106,11 @@ async def move_file_history(
     target: str | Path,
 ) -> int:
     history = create_file_history(workspace)
-    return await _run_history_operation(history.move, source, target)
+    return await _run_history_operation(
+        history.move,
+        _resolve_history_path(workspace, source),
+        _resolve_history_path(workspace, target),
+    )
 
 
 async def mark_file_history_deleted(
@@ -98,7 +120,11 @@ async def mark_file_history_deleted(
     purge: bool = False,
 ) -> int:
     history = create_file_history(workspace)
-    return await _run_history_operation(history.mark_deleted, path, purge=purge)
+    return await _run_history_operation(
+        history.mark_deleted,
+        _resolve_history_path(workspace, path),
+        purge=purge,
+    )
 
 
 async def purge_file_history(
@@ -106,7 +132,10 @@ async def purge_file_history(
     path: str | Path,
 ) -> int:
     history = create_file_history(workspace)
-    return await _run_history_operation(history.purge, path)
+    return await _run_history_operation(
+        history.purge,
+        _resolve_history_path(workspace, path),
+    )
 
 
 @exception_handling(

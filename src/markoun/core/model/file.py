@@ -56,7 +56,6 @@ class FileSaveRequest(BaseModel):
     filepath: str
     content: str
     base_revision_id: str | None = None
-    operation_id: str | None = None
 
 
 class FileSaveResponse(FileMeta):

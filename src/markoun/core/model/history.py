@@ -4,11 +4,9 @@ from pydantic import BaseModel, Field
 class HistoryNodeResponse(BaseModel):
     id: str
     parent_id: str | None
-    blob_id: str
     created_at: str
     sequence: int
     content_size: int
-    operation_id: str
     author: str | None
     path: str
     message: str | None

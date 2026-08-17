@@ -17,6 +17,12 @@ class WorkspaceContext:
     root: Path
     username: str | None = None
 
+    def is_internal_path(self, path: Path) -> bool:
+        resolved_path = path.resolve(strict=False)
+        if not resolved_path.is_relative_to(self.root):
+            return False
+        return WORKSPACE_DATA_DIRECTORY in resolved_path.relative_to(self.root).parts
+
     def resolve(self, relative_path: str | Path, *, allow_root: bool = True) -> Path:
         if "\0" in str(relative_path) or "\\" in str(relative_path):
             raise HTTPException(**CONSTANT.SERV_INVALID_WORKSPACE_PATH)
@@ -30,7 +36,7 @@ class WorkspaceContext:
 
         workspace_path = candidate.relative_to(self.root)
         if (not allow_root and candidate == self.root) or (
-            workspace_path.parts and workspace_path.parts[0] == WORKSPACE_DATA_DIRECTORY
+            WORKSPACE_DATA_DIRECTORY in workspace_path.parts
         ):
             raise HTTPException(**CONSTANT.SERV_INVALID_WORKSPACE_PATH)
         return candidate
@@ -61,11 +67,10 @@ class WorkspaceContext:
 
 def create_workspace_context(user: UserAccount | None) -> WorkspaceContext:
     document_root = Path(settings.DOCUMENT_ROOT).resolve()
-    username: str | None = None
+    username = user.full_name if user else None
     workspace_root = document_root
 
     if settings.AUTH_REQUIRED and settings.USER_WORKSPACE_ISOLATION:
-        username = user.full_name if user else None
         if username is None or not is_valid_username(username):
             raise HTTPException(**CONSTANT.SERV_INVALID_WORKSPACE_USER)
         workspace_root = document_root / username

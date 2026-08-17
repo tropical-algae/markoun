@@ -79,6 +79,8 @@ async def search_markdown_files(
         f"*.{NOTE_SUFFIX}",
         "--glob",
         f"!{WORKSPACE_DATA_DIRECTORY}/**",
+        "--glob",
+        f"!**/{WORKSPACE_DATA_DIRECTORY}/**",
         normalized_keyword,
         str(workspace.root),
         stdout=asyncio.subprocess.PIPE,

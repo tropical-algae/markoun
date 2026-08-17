@@ -28,7 +28,6 @@ from markoun.core.file_history.model import (
 )
 
 SCHEMA_VERSION = 1
-MAX_RECENT_OPERATIONS = 128
 
 
 class FileHistory:
@@ -53,7 +52,6 @@ class FileHistory:
         content: str,
         *,
         base_revision_id: str | None = None,
-        operation_id: str | None = None,
         author: str | None = None,
         message: str | None = None,
     ) -> HistorySaveResult:
@@ -64,7 +62,6 @@ class FileHistory:
 
         content_bytes = content.encode("utf-8")
         blob_id = hashlib.sha256(content_bytes).hexdigest()
-        operation_id = operation_id or secrets.token_hex(16)
 
         with self._locked():
             catalog = self._load_catalog()
@@ -75,17 +72,6 @@ class FileHistory:
                 index = self._new_index(note_id)
             else:
                 index = self._load_index(note_id)
-
-            previous_operation = index["operations"].get(operation_id)
-            if previous_operation is not None:
-                node = self._require_node(index, previous_operation)
-                return HistorySaveResult(
-                    note_id=note_id,
-                    revision_id=node["id"],
-                    default_revision_id=index["default_revision_id"],
-                    created=False,
-                    reused=True,
-                )
 
             nodes: dict[str, dict[str, Any]] = index["nodes"]
             default_revision_id: str | None = index["default_revision_id"]
@@ -129,7 +115,6 @@ class FileHistory:
                     "created_at": datetime.now(UTC).isoformat(),
                     "sequence": sequence,
                     "content_size": len(content_bytes),
-                    "operation_id": operation_id,
                     "author": author,
                     "path": relative_path,
                     "message": message,
@@ -142,8 +127,6 @@ class FileHistory:
                 revision_id = matching_child["id"]
 
             index["default_revision_id"] = revision_id
-            index["operations"][operation_id] = revision_id
-            self._trim_operations(index["operations"])
 
             self._write_source(source_path, content_bytes)
             try:
@@ -242,12 +225,6 @@ class FileHistory:
                     for node_id, node in nodes.items()
                     if node["parent_id"] is None
                 )
-
-            index["operations"] = {
-                operation_id: node_id
-                for operation_id, node_id in index["operations"].items()
-                if node_id in nodes
-            }
 
             previous_content: bytes | None = None
             if restore_node_id is not None:
@@ -400,7 +377,6 @@ class FileHistory:
             "default_revision_id": None,
             "next_sequence": 1,
             "nodes": {},
-            "operations": {},
         }
 
     def _load_index(self, note_id: str) -> dict[str, Any]:
@@ -454,11 +430,6 @@ class FileHistory:
         return node
 
     @staticmethod
-    def _trim_operations(operations: dict[str, str]) -> None:
-        while len(operations) > MAX_RECENT_OPERATIONS:
-            operations.pop(next(iter(operations)))
-
-    @staticmethod
     def _to_node(node: dict[str, Any]) -> HistoryNode:
         return HistoryNode(
             id=node["id"],
@@ -467,7 +438,6 @@ class FileHistory:
             created_at=node["created_at"],
             sequence=node["sequence"],
             content_size=node["content_size"],
-            operation_id=node["operation_id"],
             author=node["author"],
             path=node["path"],
             message=node.get("message"),

@@ -35,7 +35,19 @@ def _to_tree_response(tree: HistoryTree) -> HistoryTreeResponse:
         note_id=tree.note_id,
         root_node_id=tree.root_node_id,
         default_revision_id=tree.default_revision_id,
-        nodes=[HistoryNodeResponse(**vars(node)) for node in tree.nodes],
+        nodes=[
+            HistoryNodeResponse(
+                id=node.id,
+                parent_id=node.parent_id,
+                created_at=node.created_at,
+                sequence=node.sequence,
+                content_size=node.content_size,
+                author=node.author,
+                path=node.path,
+                message=node.message,
+            )
+            for node in tree.nodes
+        ],
     )
 
 
