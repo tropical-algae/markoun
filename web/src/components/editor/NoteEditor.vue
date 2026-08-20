@@ -8,6 +8,7 @@
         :save-pending="nodeStore.isSavePending()"
         :inspector-open="inspectorOpen"
         :active-mode="inspectorMode"
+        :history-enabled="nodeStore.historyEnabled"
         @save="saveCurrentFile"
         @toggle-inspector="emit('toggleInspector', $event)"
       />

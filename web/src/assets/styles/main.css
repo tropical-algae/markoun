@@ -115,6 +115,15 @@
   --inspector-meta-font-size: 0.875em;
   --inspector-preview-skeleton-media-height: 180px;
   --inspector-meta-value-min-width: 40px;
+  --history-node-width: 184px;
+  --history-node-height: 86px;
+  --history-node-padding-y: var(--space-sm);
+  --history-node-padding-x: var(--space-md);
+  --history-tree-gap-x: 28px;
+  --history-tree-gap-y: 44px;
+  --history-canvas-padding: 28px;
+  --history-link-width: 1.5px;
+  --history-drag-threshold: 4px;
   --markdown-table-margin-y: 1em;
   --markdown-table-cell-padding: 0.15rem 0.5rem;
 

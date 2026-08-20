@@ -20,13 +20,23 @@
 
     <AsyncGate
       :status="props.status"
+      :is-empty="props.isEmpty"
       :show-delay-ms="props.showDelayMs"
+      :loading-on-refreshing="props.loadingOnRefreshing"
       tag="div"
       class="inspector-panel-body touch-scroll"
       :class="props.bodyClass"
     >
       <template #loading>
         <slot name="loading"></slot>
+      </template>
+
+      <template #empty>
+        <slot name="empty"></slot>
+      </template>
+
+      <template #error>
+        <slot name="error"></slot>
       </template>
 
       <slot></slot>
@@ -47,6 +57,8 @@ const props = defineProps<{
   status: AsyncStatus
   showDelayMs: number
   bodyClass?: string
+  isEmpty?: boolean
+  loadingOnRefreshing?: boolean
 }>()
 
 const emit = defineEmits<{

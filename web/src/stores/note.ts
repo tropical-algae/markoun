@@ -25,15 +25,18 @@ import {
   saveNoteApi,
   saveNoteKeepalive,
 } from '@/api/file'
+import { deleteHistoryRevisionApi, getHistoryRevisionApi } from '@/api/history'
 import { moveItemApi, removeItemApi, renameItemApi } from '@/api/item'
 import { createDirApi } from '@/api/dir'
 import { getWelcomeNoteApi } from '@/api/system'
 import { useFileTreeState } from '@/stores/note/file-tree-state'
 import { useCurrentFileState } from '@/stores/note/current-file-state'
+import { useHistoryState } from '@/stores/note/history-state'
 
 export const useNodeStore = defineStore('note', () => {
   const fileTree = useFileTreeState()
   const fileState = useCurrentFileState()
+  const historyState = useHistoryState()
   const currentNode = ref<FsNode | null>(null)
   const currentPreviewImageNode = ref<FsNode | null>(null)
   const currentParentPath = computed(() => {
@@ -81,6 +84,7 @@ export const useNodeStore = defineStore('note', () => {
     )
 
     fileState.remapCurrentFilePathPrefix(oldPath, newPath, exactName)
+    historyState.remapHistoryPath(oldPath, newPath)
   }
 
   const removeNodeFromDirectoryTree = (path: string) => {
@@ -129,13 +133,13 @@ export const useNodeStore = defineStore('note', () => {
     fileState.syncCurrentFileNode(normalizedNode)
   }
 
-  const loadCurrentFile = async (node: FsNode) => {
+  const loadCurrentFile = async (node: FsNode, force = false) => {
     if (!isMarkdownNode(node)) {
       return
     }
 
     const normalizedNode = normalizeFsNode(node)
-    if (fileState.currentFileNode.value?.path === normalizedNode.path) {
+    if (!force && fileState.currentFileNode.value?.path === normalizedNode.path) {
       if (fileState.currentFileStatus.value === 'ready') {
         currentNode.value = normalizedNode
         return
@@ -147,11 +151,19 @@ export const useNodeStore = defineStore('note', () => {
     }
 
     currentNode.value = normalizedNode
+    historyState.initializeHistory(normalizedNode.path, false, null)
     const requestId = fileState.beginFileLoad(normalizedNode)
 
     try {
       const response = await getFileContentApi(normalizedNode.path)
-      fileState.completeFileLoad(requestId, normalizedNode, response.data)
+      const completed = fileState.completeFileLoad(requestId, normalizedNode, response.data)
+      if (completed) {
+        historyState.initializeHistory(
+          normalizedNode.path,
+          response.data.history_enabled,
+          response.data.default_revision_id,
+        )
+      }
     } catch (error) {
       fileState.failFileLoad(requestId, normalizedNode)
     }
@@ -226,6 +238,7 @@ export const useNodeStore = defineStore('note', () => {
     pendingFileSwitchSave = null
     fileTree.resetFileTree()
     fileState.resetCurrentFileState()
+    historyState.resetHistoryState()
     currentNode.value = null
     currentPreviewImageNode.value = null
   }
@@ -279,7 +292,9 @@ export const useNodeStore = defineStore('note', () => {
     return response.data
   }
 
-  const saveCurrentFile = async (options: { silent?: boolean } = {}): Promise<void> => {
+  const saveCurrentFile = async (
+    options: { silent?: boolean; refreshHistory?: boolean } = {},
+  ): Promise<void> => {
     if (!fileState.isCurrentFileInitialized.value) {
       toastStore.pushNotice('warning', 'The home page cannot be changed.')
       return
@@ -287,14 +302,36 @@ export const useNodeStore = defineStore('note', () => {
     const savedPath = fileState.currentFile.value.path
     const savedContent = fileState.currentFile.value.content
     const response = await actionLedger.runAction('save-current-file', async () => {
-      const saveResponse = await saveNoteApi(savedPath, savedContent)
+      const saveResponse = await saveNoteApi(
+        savedPath,
+        savedContent,
+        historyState.baseRevisionId.value,
+      )
       if (fileState.currentFile.value.path === savedPath) {
         fileState.markSavedContent(savedContent)
+        historyState.applySaveResult(
+          savedPath,
+          saveResponse.data.history_enabled,
+          saveResponse.data.revision_id,
+          saveResponse.data.default_revision_id,
+        )
       }
       return saveResponse
     })
     if (fileState.currentFile.value.path === savedPath) {
-      fileState.updateCurrentFileMeta(response.data)
+      const meta = Object.fromEntries(
+        Object.entries(response.data).filter(([key, value]) => {
+          return ![
+            'history_enabled',
+            'revision_id',
+            'default_revision_id',
+          ].includes(key) && typeof value === 'string'
+        }),
+      ) as Record<string, string>
+      fileState.updateCurrentFileMeta(meta)
+      if (options.refreshHistory !== false) {
+        void historyState.refreshHistoryTreeIfRequested(savedPath).catch(() => null)
+      }
     }
     if (!options.silent) {
       toastStore.pushNotice('info', 'The note has been saved.')
@@ -330,8 +367,102 @@ export const useNodeStore = defineStore('note', () => {
       return
     }
 
-    saveNoteKeepalive(fileState.currentFile.value.path, fileState.currentFile.value.content)
+    saveNoteKeepalive(
+      fileState.currentFile.value.path,
+      fileState.currentFile.value.content,
+      historyState.baseRevisionId.value,
+    )
     fileState.markSavedContent(fileState.currentFile.value.content)
+  }
+
+  const loadHistoryTree = async (): Promise<void> => {
+    const path = fileState.currentFile.value.path
+    if (path) {
+      await historyState.loadHistoryTree(path)
+    }
+  }
+
+  const loadRevisionContent = async (
+    path: string,
+    revisionId: string,
+  ): Promise<void> => {
+    const previousContent = fileState.currentFile.value.content
+    const requestId = fileState.beginRevisionLoad()
+    historyState.beginRevisionLoad(revisionId)
+    try {
+      const response = await getHistoryRevisionApi(path, revisionId)
+      if (fileState.completeRevisionLoad(requestId, path, response.data.content)) {
+        historyState.completeRevisionLoad(revisionId)
+      }
+    } catch (error) {
+      fileState.restoreRevisionLoad(requestId, path, previousContent)
+      historyState.failRevisionLoad()
+      throw error
+    }
+  }
+
+  const selectHistoryRevision = async (revisionId: string): Promise<void> => {
+    if (
+      actionLedger.isActionPending('load-history-revision')
+      || actionLedger.isActionPending('delete-history-revision')
+      || historyState.pendingRevisionId.value
+      || historyState.viewedRevisionId.value === revisionId
+      || !fileState.currentFile.value.path
+    ) {
+      return
+    }
+
+    await actionLedger.runAction('load-history-revision', async () => {
+      const path = fileState.currentFile.value.path
+      await saveCurrentFileIfDirty()
+      if (fileState.currentFile.value.path === path) {
+        await loadRevisionContent(path, revisionId)
+      }
+    })
+  }
+
+  const prepareHistoryRevisionDelete = async (): Promise<void> => {
+    const path = fileState.currentFile.value.path
+    if (fileState.isCurrentFileDirty.value) {
+      await saveCurrentFile({ silent: false, refreshHistory: false })
+    }
+    if (fileState.currentFile.value.path === path) {
+      await historyState.loadHistoryTree(path, true)
+    }
+  }
+
+  const deleteHistoryRevision = async (revisionId: string): Promise<void> => {
+    const path = fileState.currentFile.value.path
+    const node = fileState.currentFileNode.value
+    if (
+      !path
+      || !node
+      || actionLedger.isActionPending('delete-history-revision')
+      || actionLedger.isActionPending('load-history-revision')
+    ) {
+      return
+    }
+
+    await actionLedger.runAction('delete-history-revision', async () => {
+      await saveCurrentFileIfDirty()
+      const response = await deleteHistoryRevisionApi(path, revisionId)
+      historyState.replaceHistoryTree(path, response.data)
+
+      const viewedRevisionStillExists = response.data.nodes.some(
+        (item) => item.id === historyState.viewedRevisionId.value,
+      )
+      if (viewedRevisionStillExists) {
+        return
+      }
+
+      if (response.data.default_revision_id) {
+        await loadRevisionContent(path, response.data.default_revision_id)
+        return
+      }
+
+      await loadCurrentFile(node, true)
+    })
+    toastStore.pushNotice('info', 'The revision has been deleted.')
   }
 
   const deleteCurrentNode = async (): Promise<void> => {
@@ -352,6 +483,7 @@ export const useNodeStore = defineStore('note', () => {
 
     if (isPathInside(fileState.currentFile.value.path, targetPath)) {
       fileState.resetCurrentFileState()
+      historyState.resetHistoryState()
     }
 
     removeNodeFromDirectoryTree(targetPath)
@@ -424,6 +556,7 @@ export const useNodeStore = defineStore('note', () => {
     )
 
     fileState.remapCurrentFilePathPrefix(normalizedOldPath, movedNode.path, movedNode.name)
+    historyState.remapHistoryPath(normalizedOldPath, movedNode.path)
 
     await fileTree.ensureDirectoryVisible(normalizedTargetDir)
     toastStore.pushNotice('info', "Move successful!")
@@ -443,10 +576,18 @@ export const useNodeStore = defineStore('note', () => {
     currentPathLabel,
     canEditCurrentFile: fileState.canEditCurrentFile,
     isCurrentFileDirty: fileState.isCurrentFileDirty,
+    historyEnabled: historyState.historyEnabled,
+    historyTree: historyState.historyTree,
+    historyTreeStatus: historyState.historyTreeStatus,
+    defaultRevisionId: historyState.defaultRevisionId,
+    viewedRevisionId: historyState.viewedRevisionId,
+    pendingRevisionId: historyState.pendingRevisionId,
     isCreatePending: (type: 'file' | 'dir') => actionLedger.isActionPending(type === 'file' ? 'create-file' : 'create-dir'),
     isDeletePending: () => actionLedger.isActionPending('delete-item'),
     isUploadPending: () => actionLedger.isActionPending('upload-file'),
     isSavePending: () => actionLedger.isActionPending('save-current-file'),
+    isHistoryRevisionPending: () => actionLedger.isActionPending('load-history-revision'),
+    isHistoryDeletePending: () => actionLedger.isActionPending('delete-history-revision'),
     currentRenderedFile: fileState.currentRenderedFile,
     ensureWelcomeNoteLoaded,
     loadDirectory,
@@ -468,6 +609,10 @@ export const useNodeStore = defineStore('note', () => {
     saveCurrentFile,
     saveCurrentFileIfDirty,
     saveCurrentFileBeforeUnload,
+    loadHistoryTree,
+    selectHistoryRevision,
+    prepareHistoryRevisionDelete,
+    deleteHistoryRevision,
     deleteCurrentNode,
     renameNode,
     moveNode,

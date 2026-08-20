@@ -121,9 +121,9 @@ export const useCurrentFileState = () => {
     requestId: number,
     node: FsNode,
     detail: FileDetailResponse,
-  ) => {
+  ): boolean => {
     if (isStaleFileRequest(requestId, node)) {
-      return
+      return false
     }
 
     const nextFile = {
@@ -137,6 +137,7 @@ export const useCurrentFileState = () => {
     lastSavedContent.value = nextFile.content
     currentFileStatus.value = 'ready'
     isCurrentFileInitialized.value = true
+    return true
   }
 
   const failFileLoad = (requestId: number, node: FsNode) => {
@@ -150,6 +151,39 @@ export const useCurrentFileState = () => {
 
   const markSavedContent = (content: string) => {
     lastSavedContent.value = content
+  }
+
+  const beginRevisionLoad = (): number => {
+    const requestId = ++currentFileRequestId
+    currentFileStatus.value = 'loading'
+    return requestId
+  }
+
+  const completeRevisionLoad = (
+    requestId: number,
+    path: string,
+    content: string,
+  ): boolean => {
+    if (requestId !== currentFileRequestId || currentFile.value.path !== path) {
+      return false
+    }
+    currentFile.value.content = content
+    lastSavedContent.value = content
+    currentFileStatus.value = 'ready'
+    return true
+  }
+
+  const restoreRevisionLoad = (
+    requestId: number,
+    path: string,
+    content: string,
+  ) => {
+    if (requestId !== currentFileRequestId || currentFile.value.path !== path) {
+      return
+    }
+    currentFile.value.content = content
+    lastSavedContent.value = content
+    currentFileStatus.value = 'ready'
   }
 
   const updateCurrentFileMeta = (meta: Record<string, string>) => {
@@ -215,6 +249,9 @@ export const useCurrentFileState = () => {
     completeFileLoad,
     failFileLoad,
     markSavedContent,
+    beginRevisionLoad,
+    completeRevisionLoad,
+    restoreRevisionLoad,
     updateCurrentFileMeta,
     remapCurrentFilePathPrefix,
     syncCurrentFileNode,

@@ -32,6 +32,7 @@
           type="button"
           class="icon-btn"
           :class="{ active: inspectorOpen && activeMode === item.mode }"
+          :disabled="item.mode === InspectorMode.History && !historyEnabled"
           @click="emit('toggleInspector', item.mode)"
           :aria-label="item.label"
           :aria-pressed="inspectorOpen && activeMode === item.mode"
@@ -56,6 +57,7 @@ defineProps<{
   savePending: boolean
   inspectorOpen: boolean
   activeMode: InspectorModeType
+  historyEnabled: boolean
 }>()
 
 const emit = defineEmits<{
@@ -65,6 +67,7 @@ const emit = defineEmits<{
 
 const inspectActions = [
   { icon: MetaIcon, label: 'File meta', mode: InspectorMode.Meta },
+  { icon: MetaIcon, label: 'History', mode: InspectorMode.History },
   { icon: PreviewIcon, label: 'Preview', mode: InspectorMode.Preview },
 ] as const
 </script>

@@ -1,6 +1,7 @@
 import type { ApiResponse } from '@/types/api'
 import type {
   FileDetailResponse,
+  FileSaveResponse,
   FileSearchResult,
   FsNode,
   PastedImageResponse,
@@ -114,20 +115,26 @@ export const uploadPastedImageApi = (
  * 更新文件内容
  */
 export const saveNoteApi = (
-  path: string, 
-  content: string
-): Promise<ApiResponse<Record<string, string>>> => {
+  path: string,
+  content: string,
+  baseRevisionId: string | null,
+): Promise<ApiResponse<FileSaveResponse>> => {
   return request({
     url: '/api/v1/file/save',
     method: 'post',
     data: {
       filepath: path,
-      content: content
+      content,
+      base_revision_id: baseRevisionId,
     }
   })
 }
 
-export const saveNoteKeepalive = (path: string, content: string): void => {
+export const saveNoteKeepalive = (
+  path: string,
+  content: string,
+  baseRevisionId: string | null,
+): void => {
   if (typeof window === 'undefined') {
     return
   }
@@ -142,6 +149,7 @@ export const saveNoteKeepalive = (path: string, content: string): void => {
     body: JSON.stringify({
       filepath: path,
       content,
+      base_revision_id: baseRevisionId,
     }),
   })
 }

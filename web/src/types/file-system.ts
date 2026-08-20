@@ -25,6 +25,20 @@ export interface FileDetail {
 export interface FileDetailResponse {
   content: string
   meta: Record<string, string>
+  history_enabled: boolean
+  default_revision_id: string | null
+}
+
+export interface FileSaveResponse {
+  path: string
+  suffix: string
+  size: string
+  modified: string
+  changed: string
+  accessed: string
+  history_enabled: boolean
+  revision_id: string | null
+  default_revision_id: string | null
 }
 
 export interface FileSearchMatch {

@@ -15,6 +15,12 @@
     :rendered-html="nodeStore.currentRenderedFile"
     @close="emit('close')"
   />
+
+  <InspectorHistory
+    v-else-if="mode === InspectorMode.History"
+    :show-delay-ms="showDelayMs"
+    @close="emit('close')"
+  />
 </template>
 
 <script setup lang="ts">
@@ -23,6 +29,7 @@ import { InspectorMode, type InspectorMode as InspectorModeType } from '@/types/
 import { readCssTimeMs } from '@/utils/css'
 import InspectorFileMeta from '@/components/inspector/InspectorFileMeta.vue'
 import InspectorPreview from '@/components/inspector/InspectorPreview.vue'
+import InspectorHistory from '@/components/inspector/InspectorHistory.vue'
 
 defineProps<{
   mode: InspectorModeType
