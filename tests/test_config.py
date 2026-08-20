@@ -77,6 +77,7 @@ def test_nix_runtime_environment_uses_xdg_paths(tmp_path: Path) -> None:
     for key in (
         CONFIG_FILE_ENV,
         "DOCUMENT_ROOT",
+        "WELCOME_NOTE_PATH",
         "SQL_DATABASE_URI",
         "LOG_ROOT",
     ):
@@ -87,7 +88,7 @@ def test_nix_runtime_environment_uses_xdg_paths(tmp_path: Path) -> None:
             "bash",
             "-c",
             '. "$1"; printf "%s\\n" "$MARKOUN_CONFIG_FILE" "$DOCUMENT_ROOT" '
-            '"$SQL_DATABASE_URI" "$LOG_ROOT"',
+            '"$WELCOME_NOTE_PATH" "$SQL_DATABASE_URI" "$LOG_ROOT"',
             "bash",
             str(RUNTIME_ENV_SCRIPT),
         ],
@@ -100,6 +101,7 @@ def test_nix_runtime_environment_uses_xdg_paths(tmp_path: Path) -> None:
     assert process.stdout.splitlines() == [
         str(tmp_path / "config/markoun/config.yaml"),
         str(tmp_path / "data/markoun/data"),
+        str(tmp_path / "data/markoun/welcome.md"),
         f"sqlite+aiosqlite:///{tmp_path}/data/markoun/database.db",
         str(tmp_path / "state/markoun/log"),
     ]
@@ -107,18 +109,26 @@ def test_nix_runtime_environment_uses_xdg_paths(tmp_path: Path) -> None:
 
 def test_nix_runtime_environment_preserves_overrides(tmp_path: Path) -> None:
     document_root = tmp_path / "documents"
+    welcome_note = tmp_path / "custom-welcome.md"
     process = subprocess.run(
         [
             "bash",
             "-c",
-            '. "$1"; printf "%s" "$DOCUMENT_ROOT"',
+            '. "$1"; printf "%s\\n%s" "$DOCUMENT_ROOT" "$WELCOME_NOTE_PATH"',
             "bash",
             str(RUNTIME_ENV_SCRIPT),
         ],
-        env={**os.environ, "DOCUMENT_ROOT": str(document_root)},
+        env={
+            **os.environ,
+            "DOCUMENT_ROOT": str(document_root),
+            "WELCOME_NOTE_PATH": str(welcome_note),
+        },
         check=True,
         capture_output=True,
         text=True,
     )
 
-    assert process.stdout == str(document_root)
+    assert process.stdout.splitlines() == [
+        str(document_root),
+        str(welcome_note),
+    ]

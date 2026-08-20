@@ -31,12 +31,17 @@ def _register_and_login(client: TestClient, username: str) -> None:
 
 
 @pytest.mark.parametrize(
-    ("auth_required", "isolation_enabled", "expected_suffix"),
+    (
+        "auth_required",
+        "isolation_enabled",
+        "expected_suffix",
+        "expected_username",
+    ),
     [
-        (True, True, "workspace-user"),
-        (True, False, ""),
-        (False, True, ""),
-        (False, False, ""),
+        (True, True, "workspace-user", "workspace-user"),
+        (True, False, "", "workspace-user"),
+        (False, True, "", None),
+        (False, False, "", None),
     ],
 )
 def test_workspace_root_configuration_matrix(
@@ -45,16 +50,18 @@ def test_workspace_root_configuration_matrix(
     auth_required: bool,
     isolation_enabled: bool,
     expected_suffix: str,
+    expected_username: str | None,
 ):
     monkeypatch.setattr(settings, "DOCUMENT_ROOT", str(tmp_path))
     monkeypatch.setattr(settings, "AUTH_REQUIRED", auth_required)
     monkeypatch.setattr(settings, "USER_WORKSPACE_ISOLATION", isolation_enabled)
-    user = UserAccount(full_name="workspace-user")
+    user = UserAccount(full_name="workspace-user") if auth_required else None
 
     workspace = create_workspace_context(user)
 
     expected_root = tmp_path / expected_suffix if expected_suffix else tmp_path
     assert workspace.root == expected_root.resolve()
+    assert workspace.username == expected_username
 
 
 def test_authenticated_users_have_isolated_workspaces(

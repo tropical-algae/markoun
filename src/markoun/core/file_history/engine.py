@@ -191,30 +191,13 @@ class FileHistory:
                 raise HistoryNodeNotFoundError(revision_id)
 
             children = self._children_by_parent(nodes)
-            default_path = self._path_to_ancestor(nodes, default_id, revision_id)
-            restore_node_id: str | None = None
-
-            if revision_id == default_id:
-                deleted_ids = self._descendants(children, revision_id)
-                restore_node_id = target["parent_id"]
-                for node_id in deleted_ids:
-                    nodes.pop(node_id, None)
+            deleted_ids = self._descendants(children, revision_id)
+            default_deleted = default_id in deleted_ids
+            restore_node_id = target["parent_id"] if default_deleted else None
+            for node_id in deleted_ids:
+                nodes.pop(node_id, None)
+            if default_deleted:
                 index["default_revision_id"] = restore_node_id
-            elif default_path is not None:
-                kept_child_id = default_path[-2]
-                deleted_ids = {revision_id}
-                for child_id in children.get(revision_id, ()):
-                    if child_id != kept_child_id:
-                        deleted_ids.update(self._descendants(children, child_id))
-                for node_id in deleted_ids:
-                    nodes.pop(node_id, None)
-                nodes[kept_child_id]["parent_id"] = target["parent_id"]
-                if index["root_node_id"] == revision_id:
-                    index["root_node_id"] = kept_child_id
-            else:
-                deleted_ids = self._descendants(children, revision_id)
-                for node_id in deleted_ids:
-                    nodes.pop(node_id, None)
 
             if not nodes:
                 index["root_node_id"] = None
@@ -479,22 +462,6 @@ class FileHistory:
             result.add(current)
             pending.extend(children.get(current, ()))
         return result
-
-    @staticmethod
-    def _path_to_ancestor(
-        nodes: dict[str, dict[str, Any]],
-        start_id: str,
-        ancestor_id: str,
-    ) -> list[str] | None:
-        path = [start_id]
-        current_id = start_id
-        while current_id != ancestor_id:
-            parent_id = nodes[current_id]["parent_id"]
-            if parent_id is None:
-                return None
-            path.append(parent_id)
-            current_id = parent_id
-        return path
 
     @staticmethod
     def _is_in_scope(path: str, scope: str) -> bool:

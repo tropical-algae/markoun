@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 
 from markoun.app.services.system_service import (
     DEFAULT_SETTING,
+    FILE_HISTORY_SETTING_ID,
     PASTE_IMAGE_NOTE_DIR_SETTING_ID,
 )
 from markoun.common.config import settings
@@ -16,6 +17,14 @@ def test_pasted_image_grouping_is_disabled_by_default():
     )
 
     assert image_setting["value"] is False
+
+
+def test_file_history_is_enabled_by_default():
+    history_setting = next(
+        item for item in DEFAULT_SETTING if item["key"] == FILE_HISTORY_SETTING_ID
+    )
+
+    assert history_setting["value"] is True
 
 
 @pytest.mark.run(order=14)
