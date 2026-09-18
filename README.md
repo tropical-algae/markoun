@@ -18,6 +18,8 @@ Markoun is a lightweight, self-hosted, and entirely file-based Markdown editor d
 
 - **File-Based Architecture**: Works directly on local files — no database, no indexing, fully portable
 
+- **Version History**: Browse branching edit history for Markdown files
+
 - **LaTeX support**: Live Markdown preview with built-in LaTeX support
 
 - **Keyboard Shortcuts**: Paste clipboard images and save the current document without leaving the editor
@@ -222,6 +224,7 @@ Administrators can manage these options from the sidebar settings:
 
 - Enable or disable user registration.
 - Group pasted images by note, storing them in a folder named after the Markdown file.
+- Enable or disable Markdown file history.
 
 ## Limitations & Roadmap
 
@@ -234,7 +237,7 @@ Administrators can manage these options from the sidebar settings:
 - [x] **Enhanced previews**: support richer previews, including image preview and ~~Gantt chart rendering~~ in Markdown files
 - [x] **Frontend refactoring**: codebase requires further optimization
 - [ ] **File synchronization**: support syncing files with a remote source
-- [ ] **Version management**: introduce file versioning with history tracking and restore capability
+- [x] **Version management**: introduce file versioning with history tracking and restore capability
 - [ ] **Deployment options**: support more installation and deployment methods across different environments
 
 ## License
