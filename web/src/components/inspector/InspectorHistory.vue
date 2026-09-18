@@ -8,13 +8,27 @@
     :loading-on-refreshing="false"
     @close="emit('close')"
   >
+    <template #header-actions>
+      <BaseTooltip text="Reset layout" placement="bottom">
+        <button
+          type="button"
+          class="icon-btn"
+          aria-label="Reset history layout"
+          :disabled="!nodeStore.historyTree?.nodes.length"
+          @click="historyCanvasRef?.resetView()"
+        >
+          <component :is="ResetIcon" />
+        </button>
+      </BaseTooltip>
+    </template>
+
     <template #loading>
       <div class="history-skeleton-list">
         <BaseSkeleton
           v-for="index in 3"
           :key="index"
-          width="var(--history-node-width)"
-          height="var(--history-node-height)"
+          width="var(--skeleton-width-lg)"
+          height="var(--history-node-min-height)"
           class="history-node-skeleton"
         />
       </div>
@@ -37,6 +51,7 @@
 
     <HistoryCanvas
       v-if="nodeStore.historyTree"
+      ref="historyCanvasRef"
       :tree="nodeStore.historyTree"
       :selected-revision-id="nodeStore.viewedRevisionId"
       :default-revision-id="nodeStore.defaultRevisionId"
@@ -65,6 +80,8 @@ import GhostButton from '@/components/base/GhostButton.vue'
 import InspectorPanel from '@/components/inspector/InspectorPanel.vue'
 import HistoryCanvas from '@/components/inspector/HistoryCanvas.vue'
 import DeleteHistoryRevisionModal from '@/components/overlay/modals/DeleteHistoryRevisionModal.vue'
+import BaseTooltip from '@/components/base/BaseTooltip.vue'
+import ResetIcon from '@/assets/icons/refresh.svg'
 
 defineProps<{
   showDelayMs: number
@@ -75,6 +92,7 @@ const emit = defineEmits<{
 }>()
 
 const nodeStore = useNodeStore()
+const historyCanvasRef = ref<InstanceType<typeof HistoryCanvas> | null>(null)
 const deleteModalVisible = ref(false)
 const deleteTarget = ref<HistoryNode | null>(null)
 const isEmpty = computed(() => {
@@ -148,7 +166,7 @@ watch(() => nodeStore.currentFile.path, () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--history-tree-gap-y);
+  gap: var(--space-lg);
   width: 100%;
   min-width: 0;
   overflow: hidden;
@@ -157,6 +175,7 @@ watch(() => nodeStore.currentFile.path, () => {
 .history-node-skeleton {
   flex: 0 0 auto;
   max-width: 100%;
+  border-radius: var(--radius-md);
 }
 
 .history-message {

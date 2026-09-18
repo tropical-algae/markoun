@@ -116,7 +116,7 @@
   --inspector-preview-skeleton-media-height: 180px;
   --inspector-meta-value-min-width: 40px;
   --history-node-width: 184px;
-  --history-node-height: 86px;
+  --history-node-min-height: 48px;
   --history-node-padding-y: var(--space-sm);
   --history-node-padding-x: var(--space-md);
   --history-tree-gap-x: 28px;

@@ -5,16 +5,19 @@
     <BaseHeader>
       <div class="inspector-header-content">
         <div class="text-uppercase f-s fc-pri">{{ props.title }}</div>
-        <BaseTooltip class="inspector-close-control" text="Close" placement="bottom">
-          <button
-            class="inspector-close-button icon-btn"
-            type="button"
-            aria-label="Close inspector"
-            @click="emit('close')"
-          >
-            <component :is="CloseIcon" />
-          </button>
-        </BaseTooltip>
+        <div class="inspector-header-actions">
+          <slot name="header-actions"></slot>
+          <BaseTooltip class="inspector-close-control" text="Close" placement="bottom">
+            <button
+              class="inspector-close-button icon-btn"
+              type="button"
+              aria-label="Close inspector"
+              @click="emit('close')"
+            >
+              <component :is="CloseIcon" />
+            </button>
+          </BaseTooltip>
+        </div>
       </div>
     </BaseHeader>
 
@@ -89,6 +92,13 @@ const emit = defineEmits<{
   display: none;
 }
 
+.inspector-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-left: auto;
+}
+
 .inspector-panel-body {
   flex: 1;
   margin-top: var(--space-md);
@@ -102,7 +112,6 @@ const emit = defineEmits<{
 @media (max-width: 768px) {
   .inspector-close-control {
     display: inline-flex;
-    margin-left: auto;
   }
 
   .inspector-close-button:active {

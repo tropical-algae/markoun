@@ -49,6 +49,7 @@ import { InspectorMode, type InspectorMode as InspectorModeType } from '@/types/
 import PreviewIcon from '@/assets/icons/overview.svg'
 import MetaIcon from '@/assets/icons/info.svg'
 import SaveIcon from '@/assets/icons/disk.svg'
+import HistoryIcon from '@/assets/icons/pending.svg'
 import BaseHeader from '@/components/base/BaseHeader.vue'
 import BaseTooltip from '@/components/base/BaseTooltip.vue'
 
@@ -67,7 +68,7 @@ const emit = defineEmits<{
 
 const inspectActions = [
   { icon: MetaIcon, label: 'File meta', mode: InspectorMode.Meta },
-  { icon: MetaIcon, label: 'History', mode: InspectorMode.History },
+  { icon: HistoryIcon, label: 'History', mode: InspectorMode.History },
   { icon: PreviewIcon, label: 'Preview', mode: InspectorMode.Preview },
 ] as const
 </script>

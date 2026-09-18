@@ -17,19 +17,17 @@
     >
       <span class="history-node-heading">
         <span class="history-node-sequence f-s fw-bold">Revision {{ node.sequence }}</span>
-        <span v-if="latest" class="history-node-latest f-xs">Latest</span>
+        <span v-if="latest" class="history-node-latest meta-tag">Latest</span>
       </span>
-      <span class="history-node-meta f-xs fc-sec">{{ authorLabel }}</span>
-      <time class="history-node-meta f-xs fc-sec" :datetime="node.created_at">
-        {{ createdAtLabel }}
-      </time>
+      <span class="history-node-details">
+        <span class="history-node-meta f-xs fc-sec">{{ authorLabel }}</span>
+        <time class="history-node-meta f-xs fc-sec" :datetime="node.created_at">
+          {{ createdAtLabel }}
+        </time>
+      </span>
     </button>
 
-    <BaseTooltip
-      class="history-node-delete-control"
-      text="Delete revision"
-      placement="left"
-    >
+    <BaseTooltip text="Delete revision" placement="bottom">
       <button
         type="button"
         class="icon-btn"
@@ -79,9 +77,11 @@ const createdAtLabel = computed(() => {
 
 <style scoped>
 .history-node-card {
-  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
   width: var(--history-node-width);
-  min-height: var(--history-node-height);
+  padding: var(--history-node-padding-y) var(--history-node-padding-x);
   border-radius: var(--radius-md);
   box-shadow: inset 0 0 0 var(--line-width) var(--color-line);
   background-color: var(--color-bg-pri);
@@ -104,20 +104,21 @@ const createdAtLabel = computed(() => {
 }
 
 .history-node-select {
-  width: 100%;
-  min-height: var(--history-node-height);
-  padding: var(--history-node-padding-y) var(--history-node-padding-x);
+  min-height: var(--history-node-min-height);
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0;
   border: 0;
-  border-radius: inherit;
   background: transparent;
   color: inherit;
   text-align: left;
   cursor: pointer;
-  box-sizing: border-box;
 }
 
 .history-node-select:disabled,
-.history-node-delete-control :deep(button:disabled) {
+.history-node-card :deep(.icon-btn:disabled) {
   cursor: default;
 }
 
@@ -125,8 +126,27 @@ const createdAtLabel = computed(() => {
   display: flex;
   align-items: center;
   min-width: 0;
-  padding-right: var(--icon-button-size);
   gap: var(--space-sm);
+}
+
+.history-node-card :deep(.tooltip-anchor) {
+  flex: 0 0 auto;
+  opacity: 0;
+  transition: opacity var(--motion-soft-duration) ease;
+}
+
+.history-node-card:hover :deep(.tooltip-anchor),
+.history-node-card :deep(.tooltip-anchor:focus-within) {
+  opacity: 1;
+}
+
+.history-node-details {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  margin-top: var(--space-xs);
+  gap: var(--space-xs);
 }
 
 .history-node-sequence,
@@ -139,32 +159,11 @@ const createdAtLabel = computed(() => {
 
 .history-node-latest {
   flex: 0 0 auto;
-  padding-inline: var(--meta-tag-padding-x);
-  border-radius: var(--radius-pill);
   background-color: var(--color-action);
-  color: var(--color-text-inverse);
-  line-height: var(--meta-tag-height);
-}
-
-.history-node-meta {
-  margin-top: var(--space-xs);
-}
-
-.history-node-delete-control {
-  position: absolute;
-  top: var(--space-xs);
-  right: var(--space-xs);
-  opacity: 0;
-  transition: opacity var(--motion-soft-duration) ease;
-}
-
-.history-node-card:hover .history-node-delete-control,
-.history-node-delete-control:focus-within {
-  opacity: 1;
 }
 
 @media (hover: none) {
-  .history-node-delete-control {
+  .history-node-card :deep(.tooltip-anchor) {
     opacity: 1;
   }
 }

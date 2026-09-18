@@ -7,19 +7,11 @@
     @pointerup="stopDrag"
     @pointercancel="stopDrag"
   >
-    <BaseTooltip class="history-canvas-reset" text="Reset layout" placement="left">
-      <button
-        type="button"
-        class="icon-btn"
-        aria-label="Reset history layout"
-        @pointerdown.stop
-        @click="resetView"
-      >
-        <component :is="ResetIcon" />
-      </button>
-    </BaseTooltip>
-
-    <div class="history-world" :style="worldStyle">
+    <div
+      class="history-world"
+      :class="{ 'is-measuring': !measurementsReady }"
+      :style="worldStyle"
+    >
       <svg
         class="history-links"
         :width="layout.width"
@@ -37,6 +29,8 @@
       <div
         v-for="item in positionedNodes"
         :key="item.node.id"
+        :ref="(element) => setNodeRef(item.node.id, element)"
+        :data-node-id="item.node.id"
         class="history-node-position"
         :class="{ 'is-dragging': draggingNodeId === item.node.id }"
         :style="{ transform: `translate3d(${item.x}px, ${item.y}px, 0)` }"
@@ -71,9 +65,7 @@ import {
 import { stratify, tree } from 'd3-hierarchy'
 import type { HistoryNode, HistoryTree } from '@/types/history'
 import { readCssLengthPx } from '@/utils/css'
-import BaseTooltip from '@/components/base/BaseTooltip.vue'
 import HistoryNodeCard from '@/components/inspector/HistoryNodeCard.vue'
-import ResetIcon from '@/assets/icons/overview.svg'
 
 const props = defineProps<{
   tree: HistoryTree
@@ -107,7 +99,6 @@ interface ActiveDrag {
 }
 
 const nodeWidth = readCssLengthPx('--history-node-width', 184)
-const nodeHeight = readCssLengthPx('--history-node-height', 86)
 const horizontalGap = readCssLengthPx('--history-tree-gap-x', 28)
 const verticalGap = readCssLengthPx('--history-tree-gap-y', 44)
 const worldPadding = readCssLengthPx('--history-canvas-padding', 28)
@@ -115,6 +106,8 @@ const dragThreshold = readCssLengthPx('--history-drag-threshold', 4)
 
 const viewportRef = ref<HTMLElement | null>(null)
 const viewportWidth = ref(0)
+const nodeElements = new Map<string, HTMLElement>()
+const nodeHeights = reactive(new Map<string, number>())
 const pan = reactive<Point>({ x: 0, y: 0 })
 const nodeOffsets = reactive(new Map<string, Point>())
 const draggingNodeId = ref<string | null>(null)
@@ -123,6 +116,28 @@ let activeDrag: ActiveDrag | null = null
 let pendingPointer: Point | null = null
 let dragFrame: number | null = null
 let resizeObserver: ResizeObserver | null = null
+let nodeResizeObserver: ResizeObserver | null = null
+let initialTreeCentered = false
+
+const setNodeRef = (nodeId: string, element: unknown) => {
+  const previous = nodeElements.get(nodeId)
+  if (previous === element) {
+    return
+  }
+  if (previous) {
+    nodeResizeObserver?.unobserve(previous)
+  }
+  if (!(element instanceof HTMLElement)) {
+    nodeElements.delete(nodeId)
+    return
+  }
+  nodeElements.set(nodeId, element)
+  nodeResizeObserver?.observe(element)
+}
+
+const measurementsReady = computed(() => {
+  return props.tree.nodes.every((node) => nodeHeights.has(node.id))
+})
 
 const layout = computed(() => {
   if (props.tree.nodes.length === 0) {
@@ -134,20 +149,32 @@ const layout = computed(() => {
     .parentId((node) => node.parent_id)(props.tree.nodes)
   root.sort((left, right) => left.data.sequence - right.data.sequence)
   const positionedRoot = tree<HistoryNode>()
-    .nodeSize([nodeWidth + horizontalGap, nodeHeight + verticalGap])(root)
+    .nodeSize([nodeWidth + horizontalGap, 1])(root)
   const descendants = positionedRoot.descendants()
   const minX = Math.min(...descendants.map((node) => node.x))
   const maxX = Math.max(...descendants.map((node) => node.x))
-  const maxY = Math.max(...descendants.map((node) => node.y))
+  const rowHeights = new Map<number, number>()
+  for (const item of descendants) {
+    rowHeights.set(
+      item.depth,
+      Math.max(rowHeights.get(item.depth) ?? 0, nodeHeights.get(item.data.id) ?? 0),
+    )
+  }
+  const rowTops = new Map<number, number>()
+  let nextTop = worldPadding
+  for (let depth = 0; depth < rowHeights.size; depth += 1) {
+    rowTops.set(depth, nextTop)
+    nextTop += (rowHeights.get(depth) ?? 0) + verticalGap
+  }
 
   return {
     nodes: descendants.map((node) => ({
       node: node.data,
       x: node.x - minX + worldPadding,
-      y: node.y + worldPadding,
+      y: rowTops.get(node.depth) ?? worldPadding,
     })),
     width: maxX - minX + nodeWidth + worldPadding * 2,
-    height: maxY + nodeHeight + worldPadding * 2,
+    height: nextTop - verticalGap + worldPadding,
   }
 })
 
@@ -173,7 +200,7 @@ const links = computed(() => {
       return []
     }
     const sourceX = source.x + nodeWidth / 2
-    const sourceY = source.y + nodeHeight
+    const sourceY = source.y + (nodeHeights.get(source.node.id) ?? 0)
     const targetX = target.x + nodeWidth / 2
     const targetY = target.y
     const middleY = (sourceY + targetY) / 2
@@ -199,6 +226,8 @@ const resetView = () => {
   nodeOffsets.clear()
   centerTree()
 }
+
+defineExpose({ resetView })
 
 const beginDrag = (
   kind: ActiveDrag['kind'],
@@ -314,15 +343,28 @@ const selectNode = (revisionId: string) => {
 }
 
 watch(() => props.tree.note_id, async () => {
+  initialTreeCentered = false
   await nextTick()
   resetView()
 }, { immediate: true })
+
+watch(measurementsReady, (ready) => {
+  if (ready && !initialTreeCentered) {
+    centerTree()
+    initialTreeCentered = true
+  }
+})
 
 watch(() => props.tree.nodes.map((node) => node.id), (nodeIds) => {
   const currentIds = new Set(nodeIds)
   for (const nodeId of nodeOffsets.keys()) {
     if (!currentIds.has(nodeId)) {
       nodeOffsets.delete(nodeId)
+    }
+  }
+  for (const nodeId of nodeHeights.keys()) {
+    if (!currentIds.has(nodeId)) {
+      nodeHeights.delete(nodeId)
     }
   }
 })
@@ -342,6 +384,20 @@ onMounted(() => {
     }
   })
   resizeObserver.observe(viewportRef.value)
+  nodeResizeObserver = new ResizeObserver((entries) => {
+    for (const entry of entries) {
+      const nodeId = (entry.target as HTMLElement).dataset.nodeId
+      if (nodeId && nodeElements.get(nodeId) === entry.target) {
+        const height = entry.borderBoxSize[0]?.blockSize ?? entry.contentRect.height
+        if (nodeHeights.get(nodeId) !== height) {
+          nodeHeights.set(nodeId, height)
+        }
+      }
+    }
+  })
+  for (const element of nodeElements.values()) {
+    nodeResizeObserver.observe(element)
+  }
 })
 
 onBeforeUnmount(() => {
@@ -349,6 +405,7 @@ onBeforeUnmount(() => {
     window.cancelAnimationFrame(dragFrame)
   }
   resizeObserver?.disconnect()
+  nodeResizeObserver?.disconnect()
 })
 </script>
 
@@ -369,19 +426,16 @@ onBeforeUnmount(() => {
   cursor: grabbing;
 }
 
-.history-canvas-reset {
-  position: absolute;
-  top: var(--space-xs);
-  right: var(--space-xs);
-  z-index: 3;
-}
-
 .history-world {
   position: absolute;
   top: 0;
   left: 0;
   transform-origin: top left;
   will-change: transform;
+}
+
+.history-world.is-measuring {
+  visibility: hidden;
 }
 
 .history-links {
@@ -405,19 +459,11 @@ onBeforeUnmount(() => {
   left: 0;
   z-index: 1;
   cursor: grab;
-  will-change: transform;
-  transition: transform var(--motion-medium-duration) var(--motion-tree-easing);
 }
 
 .history-node-position.is-dragging {
   z-index: 2;
   cursor: grabbing;
-  transition: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .history-node-position {
-    transition: none;
-  }
+  will-change: transform;
 }
 </style>
