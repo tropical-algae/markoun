@@ -1,5 +1,39 @@
 <!-- version list -->
 
+## v0.2.6 (2026-09-20)
+
+### Bug Fixes
+
+- **history**: Enforce revision subtree deletion
+  ([`bc87cf9`](https://github.com/tropical-algae/markoun/commit/bc87cf9064d50c8fc3afe89d2959d92807a36a3c))
+
+- **nix**: Derive frontend dependencies from npm lockfile
+  ([`fd36aea`](https://github.com/tropical-algae/markoun/commit/fd36aea020df6c959316131c632ffb6b337bb180))
+
+### Documentation
+
+- Update DEADME
+  ([`4c7be54`](https://github.com/tropical-algae/markoun/commit/4c7be54477401264742d9c3732c8107d10a420e4))
+
+### Features
+
+- **site**: Add visual revision history
+  ([`1cdbc69`](https://github.com/tropical-algae/markoun/commit/1cdbc69d1bd5c4dccbc36a4c1eb479bc9628dc6b))
+
+### Refactoring
+
+- **history**: Centralize storage and simplify revision metadata
+  ([`fddb5e9`](https://github.com/tropical-algae/markoun/commit/fddb5e9e015217b5eacb4b67f5b8f17bd4437f23))
+
+- **site**: Refine history panel layout and revision tree connections
+  ([`6e4aaeb`](https://github.com/tropical-algae/markoun/commit/6e4aaeb8949e2c87e9bb54adc09829df2af6a6a4))
+
+### Testing
+
+- **history**: Add tests for history manage
+  ([`7ff70c9`](https://github.com/tropical-algae/markoun/commit/7ff70c9208ca00e6fce514e6284be914a41d9e1b))
+
+
 ## v0.2.5 (2026-07-30)
 
 ### Bug Fixes
