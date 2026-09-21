@@ -68,11 +68,11 @@
 }
 
 .modal-field.is-last {
-  margin-bottom: var(--space-xl);
+  margin-bottom: 0;
 }
 
 .modal-hint {
-  margin-bottom: var(--space-lg);
+  margin-bottom: 0;
 }
 
 .modal-actions {

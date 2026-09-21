@@ -40,4 +40,8 @@ const props = withDefaults(defineProps<{
   width: 100%;
   min-width: 0;
 }
+
+.modal-actions {
+  margin-top: var(--space-xl);
+}
 </style>

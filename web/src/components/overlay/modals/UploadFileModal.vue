@@ -130,7 +130,6 @@ const handleUpload = async (file: File) => {
 }
 
 .upload-drop-zone {
-  margin-bottom: var(--space-lg);
   padding-inline: var(--space-xl);
   border: var(--control-line-width) dashed var(--color-line);
   border-radius: var(--radius-lg);
@@ -183,7 +182,6 @@ const handleUpload = async (file: File) => {
 }
 
 .upload-state {
-  margin-bottom: var(--space-lg);
   height: var(--upload-dropzone-height);
   display: flex;
   flex-direction: column;
