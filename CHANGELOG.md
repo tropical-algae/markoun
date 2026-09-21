@@ -1,5 +1,40 @@
 <!-- version list -->
 
+## v0.2.7 (2026-09-21)
+
+### Bug Fixes
+
+- **mcp**: Normalize serialized tool errors
+  ([`0fd0baf`](https://github.com/tropical-algae/markoun/commit/0fd0baf1953d184730a513a986c0b239670d15c9))
+
+### Documentation
+
+- **mcp**: Document agent workspace integration
+  ([`a2ca766`](https://github.com/tropical-algae/markoun/commit/a2ca7668f7599b556fe479f380b561f800a73284))
+
+### Features
+
+- **deploy**: Proxy MCP streamable HTTP transport
+  ([`4fef665`](https://github.com/tropical-algae/markoun/commit/4fef6653a954ecedd824dcb2e0976118b3e97166))
+
+- **mcp**: Add scoped workspace access for agents
+  ([`d3f5ba3`](https://github.com/tropical-algae/markoun/commit/d3f5ba372764a4b458ae05cc2bb53e794a81b850))
+
+- **site**: Add MCP API key management
+  ([`9277389`](https://github.com/tropical-algae/markoun/commit/9277389be34991c67644f9e2548c4f9cd9f4325a))
+
+### Refactoring
+
+- **history**: Centralize history-aware file operations
+  ([`d813568`](https://github.com/tropical-algae/markoun/commit/d8135687f046b3d86ca6d2d5526eeacd53f21e9f))
+
+- **site**: Centralize modal action spacing
+  ([`d31065c`](https://github.com/tropical-algae/markoun/commit/d31065c804a01f8326d18c079ebe34204da1a7d7))
+
+- **site**: Refine history states and revision cards
+  ([`a7fbcfd`](https://github.com/tropical-algae/markoun/commit/a7fbcfd79515d037fab623c026e18bc1b6622797))
+
+
 ## v0.2.6 (2026-09-20)
 
 ### Bug Fixes
