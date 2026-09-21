@@ -1,7 +1,7 @@
 <template>
   <BaseHeader>
     <div class="editor-header-actions">
-      <BaseTooltip text="Save note" placement="bottom">
+      <BaseTooltip v-if="hasOpenFile" text="Save note" placement="bottom">
         <button
           type="button"
           class="icon-btn"
@@ -32,7 +32,6 @@
           type="button"
           class="icon-btn"
           :class="{ active: inspectorOpen && activeMode === item.mode }"
-          :disabled="item.mode === InspectorMode.History && !historyEnabled"
           @click="emit('toggleInspector', item.mode)"
           :aria-label="item.label"
           :aria-pressed="inspectorOpen && activeMode === item.mode"
@@ -45,6 +44,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { InspectorMode, type InspectorMode as InspectorModeType } from '@/types/ui'
 import PreviewIcon from '@/assets/icons/overview.svg'
 import MetaIcon from '@/assets/icons/info.svg'
@@ -53,12 +53,12 @@ import HistoryIcon from '@/assets/icons/pending.svg'
 import BaseHeader from '@/components/base/BaseHeader.vue'
 import BaseTooltip from '@/components/base/BaseTooltip.vue'
 
-defineProps<{
+const props = defineProps<{
   title: string
   savePending: boolean
   inspectorOpen: boolean
   activeMode: InspectorModeType
-  historyEnabled: boolean
+  hasOpenFile: boolean
 }>()
 
 const emit = defineEmits<{
@@ -66,11 +66,17 @@ const emit = defineEmits<{
   (event: 'toggleInspector', mode: InspectorModeType): void
 }>()
 
-const inspectActions = [
+const allInspectActions = [
   { icon: MetaIcon, label: 'File meta', mode: InspectorMode.Meta },
   { icon: HistoryIcon, label: 'History', mode: InspectorMode.History },
   { icon: PreviewIcon, label: 'Preview', mode: InspectorMode.Preview },
 ] as const
+
+const inspectActions = computed(() => {
+  return props.hasOpenFile
+    ? allInspectActions
+    : allInspectActions.filter((item) => item.mode === InspectorMode.Preview)
+})
 </script>
 
 <style scoped>

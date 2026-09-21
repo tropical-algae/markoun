@@ -9,6 +9,7 @@ export const getHistoryTreeApi = (
     url: '/api/v1/history/tree',
     method: 'get',
     params: { filepath },
+    suppressErrorToast: true,
   })
 }
 

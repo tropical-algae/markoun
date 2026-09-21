@@ -1,11 +1,12 @@
 import { ref } from 'vue'
 import type { AsyncStatus } from '@/types/async'
-import type { HistoryTree } from '@/types/history'
+import type { HistoryAvailability, HistoryTree } from '@/types/history'
 import { getHistoryTreeApi } from '@/api/history'
 import { replacePathPrefix } from '@/utils/file-system'
+import { normalizeRequestError } from '@/utils/request'
 
 export const useHistoryState = () => {
-  const historyEnabled = ref(false)
+  const historyAvailability = ref<HistoryAvailability>('unknown')
   const historyTree = ref<HistoryTree | null>(null)
   const historyTreeStatus = ref<AsyncStatus>('idle')
   const defaultRevisionId = ref<string | null>(null)
@@ -21,9 +22,22 @@ export const useHistoryState = () => {
     treeRequestId += 1
     currentPath = ''
     treeWasRequested = false
-    historyEnabled.value = false
+    historyAvailability.value = 'unknown'
     historyTree.value = null
     historyTreeStatus.value = 'idle'
+    defaultRevisionId.value = null
+    viewedRevisionId.value = null
+    baseRevisionId.value = null
+    pendingRevisionId.value = null
+  }
+
+  const beginHistoryInitialization = (path: string) => {
+    treeRequestId += 1
+    currentPath = path
+    treeWasRequested = false
+    historyAvailability.value = 'unknown'
+    historyTree.value = null
+    historyTreeStatus.value = 'loading'
     defaultRevisionId.value = null
     viewedRevisionId.value = null
     baseRevisionId.value = null
@@ -38,20 +52,32 @@ export const useHistoryState = () => {
     treeRequestId += 1
     currentPath = path
     treeWasRequested = false
-    historyEnabled.value = enabled
+    historyAvailability.value = enabled ? 'enabled' : 'disabled'
     historyTree.value = null
-    historyTreeStatus.value = enabled && revisionId ? 'idle' : 'ready'
+    historyTreeStatus.value = enabled ? 'idle' : 'ready'
     defaultRevisionId.value = revisionId
     viewedRevisionId.value = revisionId
     baseRevisionId.value = revisionId
     pendingRevisionId.value = null
   }
 
+  const failHistoryInitialization = (path: string) => {
+    if (path !== currentPath) {
+      return
+    }
+    historyTreeStatus.value = 'error'
+  }
+
   const loadHistoryTree = async (path: string, force = false): Promise<void> => {
     treeWasRequested = true
-    if (!historyEnabled.value || !defaultRevisionId.value || path !== currentPath) {
+    if (path !== currentPath) {
+      return
+    }
+    if (historyAvailability.value !== 'enabled') {
       historyTree.value = null
-      historyTreeStatus.value = 'ready'
+      if (historyAvailability.value === 'disabled') {
+        historyTreeStatus.value = 'ready'
+      }
       return
     }
     if (!force && historyTreeStatus.value === 'ready' && historyTree.value) {
@@ -70,6 +96,21 @@ export const useHistoryState = () => {
       historyTreeStatus.value = 'ready'
     } catch (error) {
       if (requestId === treeRequestId && path === currentPath) {
+        const requestError = normalizeRequestError(error)
+        if (requestError.status === 409) {
+          historyAvailability.value = 'disabled'
+          historyTree.value = null
+          historyTreeStatus.value = 'ready'
+          return
+        }
+        if (requestError.status === 404) {
+          historyTree.value = null
+          historyTreeStatus.value = 'ready'
+          defaultRevisionId.value = null
+          viewedRevisionId.value = null
+          baseRevisionId.value = null
+          return
+        }
         historyTreeStatus.value = 'error'
       }
       throw error
@@ -93,7 +134,7 @@ export const useHistoryState = () => {
       return
     }
 
-    historyEnabled.value = enabled
+    historyAvailability.value = enabled ? 'enabled' : 'disabled'
     defaultRevisionId.value = nextDefaultRevisionId
     viewedRevisionId.value = revisionId
     baseRevisionId.value = revisionId
@@ -122,6 +163,7 @@ export const useHistoryState = () => {
       return
     }
     historyTree.value = tree
+    historyAvailability.value = 'enabled'
     defaultRevisionId.value = tree.default_revision_id
     historyTreeStatus.value = 'ready'
   }
@@ -134,13 +176,15 @@ export const useHistoryState = () => {
     currentPath = nextPath
     treeRequestId += 1
     historyTree.value = null
-    historyTreeStatus.value = historyEnabled.value && defaultRevisionId.value
+    historyTreeStatus.value = historyAvailability.value === 'enabled'
       ? 'idle'
-      : 'ready'
+      : historyAvailability.value === 'disabled'
+        ? 'ready'
+        : 'loading'
   }
 
   return {
-    historyEnabled,
+    historyAvailability,
     historyTree,
     historyTreeStatus,
     defaultRevisionId,
@@ -148,7 +192,9 @@ export const useHistoryState = () => {
     baseRevisionId,
     pendingRevisionId,
     resetHistoryState,
+    beginHistoryInitialization,
     initializeHistory,
+    failHistoryInitialization,
     loadHistoryTree,
     refreshHistoryTreeIfRequested,
     applySaveResult,

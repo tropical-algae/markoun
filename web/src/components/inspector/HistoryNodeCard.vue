@@ -1,11 +1,15 @@
 <template>
-  <article
+  <BaseDeleteCard
     class="history-node-card"
     :class="{
       'is-selected': selected,
       'is-pending': pending,
       'is-dragging': dragging,
     }"
+    delete-label="Delete revision"
+    reveal-delete-on-hover
+    :disabled="disabled"
+    @delete="emit('delete')"
   >
     <button
       type="button"
@@ -26,27 +30,13 @@
         </time>
       </span>
     </button>
-
-    <BaseTooltip text="Delete revision" placement="bottom">
-      <button
-        type="button"
-        class="icon-btn"
-        :disabled="disabled"
-        aria-label="Delete revision"
-        @pointerdown.stop
-        @click.stop="emit('delete')"
-      >
-        <component :is="TrashIcon" />
-      </button>
-    </BaseTooltip>
-  </article>
+  </BaseDeleteCard>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { HistoryNode } from '@/types/history'
-import BaseTooltip from '@/components/base/BaseTooltip.vue'
-import TrashIcon from '@/assets/icons/trash.svg'
+import BaseDeleteCard from '@/components/base/BaseDeleteCard.vue'
 
 const props = defineProps<{
   node: HistoryNode
@@ -77,21 +67,9 @@ const createdAtLabel = computed(() => {
 
 <style scoped>
 .history-node-card {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-sm);
+  --base-delete-card-padding: var(--history-node-padding-y) var(--history-node-padding-x);
+
   width: var(--history-node-width);
-  padding: var(--history-node-padding-y) var(--history-node-padding-x);
-  border-radius: var(--radius-md);
-  box-shadow: inset 0 0 0 var(--line-width) var(--color-line);
-  background-color: var(--color-bg-pri);
-  color: var(--color-text-pri);
-  box-sizing: border-box;
-  overflow: visible;
-  transition:
-    background-color var(--motion-soft-duration) ease,
-    box-shadow var(--motion-soft-duration) ease,
-    opacity var(--motion-soft-duration) ease;
 }
 
 .history-node-card.is-selected {
@@ -129,17 +107,6 @@ const createdAtLabel = computed(() => {
   gap: var(--space-sm);
 }
 
-.history-node-card :deep(.tooltip-anchor) {
-  flex: 0 0 auto;
-  opacity: 0;
-  transition: opacity var(--motion-soft-duration) ease;
-}
-
-.history-node-card:hover :deep(.tooltip-anchor),
-.history-node-card :deep(.tooltip-anchor:focus-within) {
-  opacity: 1;
-}
-
 .history-node-details {
   display: flex;
   flex-direction: column;
@@ -162,9 +129,4 @@ const createdAtLabel = computed(() => {
   background-color: var(--color-action);
 }
 
-@media (hover: none) {
-  .history-node-card :deep(.tooltip-anchor) {
-    opacity: 1;
-  }
-}
 </style>

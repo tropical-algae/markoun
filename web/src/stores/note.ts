@@ -151,7 +151,7 @@ export const useNodeStore = defineStore('note', () => {
     }
 
     currentNode.value = normalizedNode
-    historyState.initializeHistory(normalizedNode.path, false, null)
+    historyState.beginHistoryInitialization(normalizedNode.path)
     const requestId = fileState.beginFileLoad(normalizedNode)
 
     try {
@@ -165,7 +165,9 @@ export const useNodeStore = defineStore('note', () => {
         )
       }
     } catch (error) {
-      fileState.failFileLoad(requestId, normalizedNode)
+      if (fileState.failFileLoad(requestId, normalizedNode)) {
+        historyState.failHistoryInitialization(normalizedNode.path)
+      }
     }
   }
 
@@ -571,12 +573,13 @@ export const useNodeStore = defineStore('note', () => {
     currentPreviewImageUrl,
     currentFileStatus: fileState.currentFileStatus,
     currentFileDisplayName: fileState.currentFileDisplayName,
+    hasCurrentFile: fileState.hasCurrentFile,
     currentPath: currentParentPath,
     currentFileParentPath,
     currentPathLabel,
     canEditCurrentFile: fileState.canEditCurrentFile,
     isCurrentFileDirty: fileState.isCurrentFileDirty,
-    historyEnabled: historyState.historyEnabled,
+    historyAvailability: historyState.historyAvailability,
     historyTree: historyState.historyTree,
     historyTreeStatus: historyState.historyTreeStatus,
     defaultRevisionId: historyState.defaultRevisionId,

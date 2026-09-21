@@ -33,6 +33,7 @@ export const useCurrentFileState = () => {
   const currentFileDisplayName = computed(() => {
     return currentFileNode.value?.name || currentFile.value.name
   })
+  const hasCurrentFile = computed(() => currentFileNode.value !== null)
   const canEditCurrentFile = computed(() => {
     return currentFileStatus.value === 'ready' && Boolean(currentFileNode.value)
   })
@@ -140,13 +141,14 @@ export const useCurrentFileState = () => {
     return true
   }
 
-  const failFileLoad = (requestId: number, node: FsNode) => {
+  const failFileLoad = (requestId: number, node: FsNode): boolean => {
     if (isStaleFileRequest(requestId, node)) {
-      return
+      return false
     }
 
     currentFileStatus.value = 'error'
     currentFile.value = buildFileDetailShell(node)
+    return true
   }
 
   const markSavedContent = (content: string) => {
@@ -234,6 +236,7 @@ export const useCurrentFileState = () => {
     welcomeNoteState,
     isCurrentFileInitialized,
     currentFileDisplayName,
+    hasCurrentFile,
     canEditCurrentFile,
     isCurrentFileDirty,
     currentRenderedFile,

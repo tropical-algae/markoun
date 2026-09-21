@@ -1,3 +1,5 @@
+export type HistoryAvailability = 'unknown' | 'enabled' | 'disabled'
+
 export interface HistoryNode {
   id: string
   parent_id: string | null

@@ -36,7 +36,7 @@
 
     <template #empty>
       <div class="history-message f-s fc-sec">
-        Save this note to create its first revision.
+        {{ emptyMessage }}
       </div>
     </template>
 
@@ -99,6 +99,11 @@ const isEmpty = computed(() => {
   return nodeStore.historyTreeStatus === 'ready'
     && (nodeStore.historyTree?.nodes.length ?? 0) === 0
 })
+const emptyMessage = computed(() => {
+  return nodeStore.historyAvailability === 'disabled'
+    ? 'File history is not enabled.'
+    : 'Save this note to create its first revision.'
+})
 const interactionPending = computed(() => {
   return nodeStore.isHistoryRevisionPending()
     || nodeStore.isHistoryDeletePending()
@@ -140,10 +145,10 @@ watch(
   [
     () => nodeStore.currentFile.path,
     () => nodeStore.currentFileStatus,
-    () => nodeStore.historyEnabled,
+    () => nodeStore.historyAvailability,
   ],
-  ([path, status, enabled]) => {
-    if (path && status === 'ready' && enabled) {
+  ([path, status, availability]) => {
+    if (path && status === 'ready' && availability === 'enabled') {
       void nodeStore.loadHistoryTree().catch(() => null)
     }
   },
