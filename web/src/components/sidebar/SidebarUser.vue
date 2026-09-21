@@ -13,6 +13,10 @@
             </section>
 
             <m.div layout="position" class="user-security-layout">
+              <SidebarUserApiKeys />
+            </m.div>
+
+            <m.div layout="position" class="user-security-layout">
               <SidebarUserSecurity :after-update="handleLogout" />
             </m.div>
           </div>
@@ -52,6 +56,7 @@ import { readCssCubicBezier, readCssTimeMs } from '@/utils/css'
 import GhostButton from '@/components/base/GhostButton.vue'
 import SidebarUserProfile from '@/components/sidebar/SidebarUserProfile.vue'
 import SidebarUserSecurity from '@/components/sidebar/SidebarUserSecurity.vue'
+import SidebarUserApiKeys from '@/components/sidebar/SidebarUserApiKeys.vue'
 import SidebarPanelLayout from '@/layouts/SidebarPanelLayout.vue'
 
 const loadMotionFeatures = () => import('@/utils/motion-features')

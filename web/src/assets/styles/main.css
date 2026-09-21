@@ -124,6 +124,9 @@
   --history-canvas-padding: 28px;
   --history-link-width: 1.5px;
   --history-drag-threshold: 4px;
+  --api-key-card-height: 76px;
+  --api-key-secret-width: 360px;
+  --api-key-create-icon-size: 1rem;
   --markdown-table-margin-y: 1em;
   --markdown-table-cell-padding: 0.15rem 0.5rem;
 
@@ -143,6 +146,7 @@
   --modal-motion-y: 10px;
 
   --icon-button-size: 28px;
+  --icon-button-sm-size: 14px;
 
   --tooltip-z-index: 40;
   --tooltip-padding: 6px 9px;
