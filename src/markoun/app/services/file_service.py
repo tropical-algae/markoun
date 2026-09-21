@@ -69,7 +69,7 @@ async def search_markdown_files(
     if not normalized_keyword:
         raise HTTPException(**CONSTANT.SERV_FILE_SEARCH_EMPTY_KEYWORD)
 
-    safe_limit = max(1, min(limit, MAX_SEARCH_LIMIT))
+    safe_limit = limit
     process = await asyncio.create_subprocess_exec(
         "rg",
         "--json",
@@ -142,6 +142,9 @@ async def search_markdown_files(
 def create_note(
     workspace: WorkspaceContext, parent_path: Path, file_name: str
 ) -> FileNode:
+    if not parent_path.is_dir():
+        raise HTTPException(**CONSTANT.SERV_PARENT_DIR_NOT_EXISTED)
+
     filepath = workspace.resolve_child(parent_path, f"{file_name}.{NOTE_SUFFIX}")
 
     if filepath.exists():

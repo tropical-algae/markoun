@@ -51,7 +51,7 @@ def mount_web_app(
         "/",
         SPAStaticFiles(
             directory=root,
-            excluded_prefixes=(api_prefix.strip("/"),),
+            excluded_prefixes=(api_prefix.strip("/"), "mcp"),
         ),
         name="web",
     )

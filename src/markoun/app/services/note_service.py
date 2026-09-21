@@ -1,8 +1,6 @@
-import asyncio
-import hashlib
 from pathlib import Path
 
-from fastapi import HTTPException, status
+from fastapi import HTTPException
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from markoun.app.services.file_service import get_file_meta
@@ -19,11 +17,6 @@ from markoun.core.model.file import (
     FileSaveRequest,
     FileSaveResponse,
 )
-
-
-async def _content_hash(path: Path) -> str:
-    content = await asyncio.to_thread(path.read_bytes)
-    return hashlib.sha256(content).hexdigest()
 
 
 async def load_note(
@@ -60,18 +53,8 @@ async def save_note(
     db: AsyncSession,
     workspace: WorkspaceContext,
     data: FileSaveRequest,
-    *,
-    expected_hash: str | None = None,
 ) -> FileSaveResponse:
     abs_filepath = workspace.resolve(data.filepath, allow_root=False)
-    if expected_hash is not None:
-        current_hash = await _content_hash(abs_filepath)
-        if current_hash != expected_hash:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="File changed since it was read",
-            )
-
     relative_path = workspace.relative(abs_filepath).as_posix()
     history_enabled = (
         abs_filepath.suffix.lower() == ".md" and await get_file_history_setting(db)
@@ -97,10 +80,3 @@ async def save_note(
         revision_id=revision_id,
         default_revision_id=default_revision_id,
     )
-
-
-async def get_note_content_hash(
-    workspace: WorkspaceContext,
-    path: str | Path,
-) -> str:
-    return await _content_hash(workspace.resolve(path, allow_root=False))

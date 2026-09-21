@@ -10,6 +10,9 @@ from markoun.core.model.file import DirNode
 
 
 def create_dir(workspace: WorkspaceContext, abs_path: Path, dir_name: str) -> DirNode:
+    if not abs_path.is_dir():
+        raise HTTPException(**CONSTANT.SERV_PARENT_DIR_NOT_EXISTED)
+
     new_folder_path = workspace.resolve_child(abs_path, dir_name)
 
     if new_folder_path.exists():

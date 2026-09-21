@@ -83,6 +83,14 @@ class Constant(BaseSettings):
         "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
         "detail": "Failed to create file",
     }
+    SERV_PARENT_DIR_NOT_EXISTED: dict = {
+        "status_code": status.HTTP_404_NOT_FOUND,
+        "detail": "Parent directory does not exist",
+    }
+    SERV_TARGET_DIR_NOT_EXISTED: dict = {
+        "status_code": status.HTTP_404_NOT_FOUND,
+        "detail": "Target directory does not exist",
+    }
     SERV_DIR_EXISTED: dict = {
         "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
         "detail": "Directory already exists",
@@ -183,6 +191,18 @@ class Constant(BaseSettings):
         "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
         "detail": "File history is damaged",
     }
+
+    # MCP
+    MCP_INTERNAL_ERROR_MESSAGE: str = "The operation could not be completed"
+    MCP_PERMISSION_DENIED_HINT: str = (
+        "Use an API key that grants permission for this operation."
+    )
+    MCP_CREATE_PARENT_HINT: str = (
+        "Create the parent directory with create_directory before retrying."
+    )
+    MCP_MOVE_TARGET_HINT: str = (
+        "Create the target directory with create_directory before retrying."
+    )
 
 
 CONSTANT = Constant()

@@ -165,7 +165,7 @@ def _move_item(
         logger.error(
             f"Failed to move {source_path}, target dir {target_dir} not existed!"
         )
-        raise HTTPException(**CONSTANT.SERV_FILE_NOT_EXISTED)
+        raise HTTPException(**CONSTANT.SERV_TARGET_DIR_NOT_EXISTED)
 
     if source_path.parent == target_dir:
         node = _get_node_summary(workspace, source_path, displayed_file_types)

@@ -1,4 +1,3 @@
-import asyncio
 import json
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -13,6 +12,7 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response, StreamingResponse
 
+from markoun.app.mcp import mcp_lifespan
 from markoun.app.services.system_service import insert_default_system_setting
 from markoun.app.services.user_service import insert_default_user
 from markoun.app.utils.constant import CONSTANT
@@ -87,14 +87,15 @@ async def lifespan(app: FastAPI):
     logger.info("Starting service...")
     _ = app
 
-    await asyncio.to_thread(init_runtime_items)
+    init_runtime_items()
 
     await init_db_models()
     async with LocalSession() as db:
         await insert_default_system_setting(db)
         await insert_default_user(db)
 
-    yield
+    async with mcp_lifespan():
+        yield
     logger.info("Shut down and clear cache...")
 
 

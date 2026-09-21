@@ -53,8 +53,8 @@ async def awrite_file(filepath: Path, content: str) -> None:
         logger.error(f"[File {filepath} is not existed]")
         raise HTTPException(**CONSTANT.SERV_FILE_NOT_EXISTED)
     try:
-        async with aiofiles.open(filepath, mode="w", encoding="utf-8") as f:
-            await f.write(content)
+        async with aiofiles.open(filepath, mode="w", encoding="utf-8") as file:
+            await file.write(content)
     except Exception as err:
         logger.exception(f"[Failed to write file {filepath}] {err}")
         raise HTTPException(**CONSTANT.SERV_FILE_SAVE_FAIL) from err

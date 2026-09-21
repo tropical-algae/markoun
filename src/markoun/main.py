@@ -2,6 +2,7 @@ import uvicorn
 from fastapi import FastAPI
 
 from markoun.app.api.routers import router as api_router
+from markoun.app.mcp import mcp_app
 from markoun.app.static import mount_web_app
 from markoun.app.utils.errors import add_exception_handler
 from markoun.app.utils.events import add_middleware, lifespan
@@ -17,6 +18,7 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
     application.include_router(api_router, prefix=settings.API_PREFIX)
+    application.mount("/mcp", mcp_app, name="mcp")
     add_middleware(app=application)
     add_exception_handler(app=application)
     mount_web_app(
