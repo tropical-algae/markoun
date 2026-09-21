@@ -20,6 +20,8 @@ Markoun is a lightweight, self-hosted, and entirely file-based Markdown editor d
 
 - **Version History**: Browse branching edit history for Markdown files
 
+- **MCP Integration**: Let AI agents manage workspace files with scoped API keys
+
 - **LaTeX support**: Live Markdown preview with built-in LaTeX support
 
 - **Keyboard Shortcuts**: Paste clipboard images and save the current document without leaving the editor
@@ -225,6 +227,13 @@ Administrators can manage these options from the sidebar settings:
 - Enable or disable user registration.
 - Group pasted images by note, storing them in a folder named after the Markdown file.
 - Enable or disable Markdown file history.
+
+**MCP Integration**:
+Create an API key from the Account panel, select its `read`, `search`, `write`,
+`create`, `move`, and `delete` permissions, then connect an MCP client to
+`https://<your-markoun-host>/mcp/` using Streamable HTTP and the header
+`Authorization: Bearer <api-key>`. Each key uses its owner's workspace access;
+MCP and API key management are unavailable when authentication is disabled.
 
 ## Limitations & Roadmap
 

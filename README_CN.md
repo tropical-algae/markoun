@@ -20,6 +20,8 @@ Markoun 是一款轻量、可自托管且完全基于文件的 Markdown 编辑�
 
 - **版本历史**：查看 Markdown 文件的分支编辑记录
 
+- **MCP 集成**：使用具有独立权限的 API Key，让 AI Agent 管理工作区文件
+
 - **LaTeX 支持**：实时 Markdown 预览，内置 LaTeX 渲染支持
 
 - **快捷键**：简单的图片粘贴与保存操作，支持拖拽上传或移动
@@ -221,6 +223,13 @@ Markoun 通过 `config.yaml` 进行配置。修改该文件后需要重启服务
 - 启用或关闭用户注册。
 - 按笔记组织粘贴的图片，将图片存放在与 Markdown 文件同名的文件夹中。
 - 启用或关闭 Markdown 文件历史记录。
+
+**MCP 集成**：
+在账户面板中创建 API Key，并按需授予 `read`、`search`、`write`、`create`、
+`move` 和 `delete` 权限。MCP 客户端通过 Streamable HTTP 连接
+`https://<你的 Markoun 地址>/mcp/`，并携带请求头
+`Authorization: Bearer <api-key>`。每个 Key 继承所属用户的工作区访问范围；
+关闭身份认证后，MCP 与 API Key 管理也会同步禁用。
 
 ## 局限性与未来的更新路线图
 
