@@ -121,7 +121,7 @@ onMounted(() => {
   white-space: normal;
   background-color: var(--color-bg-sec);
   box-shadow: inset 0 0 0 var(--line-width) var(--color-line);
-  padding: var(--space-lg);
+  padding: var(--space-md);
   transition:
     background-color var(--motion-theme-duration) ease,
     box-shadow var(--motion-theme-duration) ease;
