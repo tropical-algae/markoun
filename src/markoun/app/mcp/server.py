@@ -24,23 +24,51 @@ async def normalize_mcp_tool_result(
     call_next: CallNext,
 ) -> HandlerResult:
     result = await call_next(context)
+    if context.method != "tools/call":
+        return result
+
+    if isinstance(result, CallToolResult):
+        if not result.is_error or result.structured_content is not None:
+            return result
+        message = next(
+            (
+                block.text
+                for block in result.content
+                if isinstance(block, TextContent) and block.text
+            ),
+            CONSTANT.MCP_INTERNAL_ERROR_MESSAGE,
+        )
+        return McpToolResponse(error=McpError(message=message)).call_tool_result()
+
     if (
-        context.method != "tools/call"
-        or not isinstance(result, CallToolResult)
-        or not result.is_error
-        or result.structured_content is not None
+        not isinstance(result, dict)
+        or result.get("isError") is not True
+        or result.get("structuredContent") is not None
     ):
         return result
 
-    message = next(
-        (
-            block.text
-            for block in result.content
-            if isinstance(block, TextContent) and block.text
-        ),
-        CONSTANT.MCP_INTERNAL_ERROR_MESSAGE,
+    content = result.get("content")
+    message = (
+        next(
+            (
+                block["text"]
+                for block in content
+                if isinstance(block, dict)
+                and block.get("type") == "text"
+                and isinstance(block.get("text"), str)
+                and block["text"]
+            ),
+            CONSTANT.MCP_INTERNAL_ERROR_MESSAGE,
+        )
+        if isinstance(content, list)
+        else CONSTANT.MCP_INTERNAL_ERROR_MESSAGE
     )
-    return McpToolResponse(error=McpError(message=message)).call_tool_result()
+    normalized = (
+        McpToolResponse(error=McpError(message=message))
+        .call_tool_result()
+        .model_dump(mode="json", by_alias=True, exclude_none=True)
+    )
+    return {**result, **normalized}
 
 
 mcp_server = MCPServer(
