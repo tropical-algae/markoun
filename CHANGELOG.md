@@ -1,5 +1,26 @@
 <!-- version list -->
 
+## v0.2.9 (2026-09-23)
+
+### Bug Fixes
+
+- **api**: Format API key timestamps for display
+  ([`0ae8544`](https://github.com/tropical-algae/markoun/commit/0ae8544a500fac03d32060cdc790b461ce402c42))
+
+### Features
+
+- **site**: Improve action feedback and confirmation details
+  ([`1209107`](https://github.com/tropical-algae/markoun/commit/1209107b6395e2d3c37e383b66cfddc32ce14e45))
+
+### Refactoring
+
+- **site**: Clarify deletable card component
+  ([`bf4a258`](https://github.com/tropical-algae/markoun/commit/bf4a2584966d2ffde7376e4941367a1124f189ca))
+
+- **site**: Stabilize file tree state and animations
+  ([`2604d25`](https://github.com/tropical-algae/markoun/commit/2604d25b7d0da5c832ab93372447452e06839fd1))
+
+
 ## v0.2.8 (2026-09-22)
 
 
