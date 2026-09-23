@@ -21,14 +21,16 @@ export const removeItemApi = (
  * 获取目录直接子项
  */
 export const getDirectoryChildrenApi = (
-  path: string = '.'
+  path: string = '.',
+  signal?: AbortSignal,
 ): Promise<ApiResponse<DirectoryChildrenResponse>> => {
   return request({
     url: '/api/v1/item/children',
     method: 'get',
     params: {
       path
-    }
+    },
+    signal,
   })
 }
 

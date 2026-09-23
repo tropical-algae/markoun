@@ -1,5 +1,13 @@
 export type DirectoryLoadState = 'idle' | 'loading' | 'loaded' | 'error'
 
+export interface DirectoryRecord {
+  status: DirectoryLoadState
+  children: FsNode[] | null
+  error: unknown | null
+}
+
+export type DirectoryRenderState = 'collapsed' | 'loading' | 'error' | 'content' | 'empty'
+
 export interface FsNode {
   name: string
   path: string

@@ -24,12 +24,14 @@
       <MotionConfig reduced-motion="user">
         <m.div
           layout-scroll
+          ref="fileTreeRootRef"
           class="file-tree-root sidebar-panel-body"
           :class="{ 'is-root-dragover': isRootDirectoryDragOver }"
-          @dragenter.prevent="handleRootDirectoryDragEnter"
-          @dragover.prevent="handleRootDirectoryDragOver"
-          @dragleave.prevent="handleRootDirectoryDragLeave"
-          @drop.prevent="handleRootDirectoryDrop"
+          :data-tree-drop-path="ROOT_DIRECTORY_PATH"
+          @dragover.capture="handleTreeDragOver"
+          @dragleave.capture="handleTreeDragLeave"
+          @drop.capture="handleTreeDrop"
+          @dragend.capture="clearTreeDropTarget"
         >
           <LayoutGroup id="file-tree">
             <AsyncGate :status="rootLoadStatus">
@@ -37,7 +39,13 @@
                 <SidebarFileTreeSkeleton :rows="6" />
               </template>
 
-              <div class="file-tree-list">
+              <template #error>
+                <button type="button" class="file-tree-error f-xs" @click="retryRootDirectory">
+                  Unable to load files. Retry
+                </button>
+              </template>
+
+              <div class="file-tree-list" :data-tree-drop-path="ROOT_DIRECTORY_PATH">
                 <SidebarFileTreeItem
                   v-for="item in nodeStore.rootNodes"
                   :key="item.path"
@@ -93,7 +101,7 @@ import TrashIcon from '@/assets/icons/trash.svg'
 
 import { useNodeStore } from '@/stores/note'
 import type { AsyncStatus } from '@/types/async'
-import { useFileTreeDropTarget } from '@/composables/useFileTreeDropTarget'
+import { provideFileTreeDropController } from '@/composables/useFileTreeDropController'
 import { provideFileTreeMotion } from '@/composables/useFileTreeMotion'
 import { ROOT_DIRECTORY_PATH } from '@/utils/file-system'
 
@@ -108,6 +116,7 @@ const showNewNote = ref(false)
 const showNewFolder = ref(false)
 const showUpload = ref(false)
 const deleteItem = ref(false)
+const fileTreeRootRef = ref<HTMLElement | null>(null)
 const nodeStore = useNodeStore()
 provideFileTreeMotion()
 const rootLoadStatus = computed<AsyncStatus>(() => {
@@ -117,17 +126,29 @@ const rootLoadStatus = computed<AsyncStatus>(() => {
   }
   return state
 })
+const retryRootDirectory = () => {
+  void nodeStore.retryDirectory(ROOT_DIRECTORY_PATH).catch(() => null)
+}
 const {
-  isDirectoryDragOver: isRootDirectoryDragOver,
-  handleDirectoryDragEnter: handleRootDirectoryDragEnter,
-  handleDirectoryDragOver: handleRootDirectoryDragOver,
-  handleDirectoryDragLeave: handleRootDirectoryDragLeave,
-  handleDirectoryDrop: handleRootDirectoryDrop,
-} = useFileTreeDropTarget({
-  isDirectory: true,
-  getDestinationPath: () => ROOT_DIRECTORY_PATH,
+  activeDropPath,
+  clearDropTarget: clearTreeDropTarget,
+  handleDragOver: handleTreeDragOver,
+  handleDragLeave: handleTreeDragLeave,
+  handleDrop: handleTreeDrop,
+} = provideFileTreeDropController({
+  rootElement: fileTreeRootRef,
   moveNode: nodeStore.moveNode,
+  selectDirectory: async (path) => {
+    if (path === ROOT_DIRECTORY_PATH) {
+      return
+    }
+    const node = nodeStore.getCachedNode(path)
+    if (node?.type === 'dir') {
+      await nodeStore.setCurrentNode(node)
+    }
+  },
 })
+const isRootDirectoryDragOver = computed(() => activeDropPath.value === ROOT_DIRECTORY_PATH)
 
 const toolBtns = [
   { icon: NewNoteIcon, label: 'New note', func: () => { showNewNote.value = true } },
@@ -152,8 +173,8 @@ const createFolderModalConfig = {
   nodeType: 'dir',
 } as const
 
-onMounted(async () => {
-  await nodeStore.loadDirectory()
+onMounted(() => {
+  void nodeStore.loadDirectory().catch(() => null)
 })
 </script>
 
@@ -181,6 +202,15 @@ onMounted(async () => {
 
 .file-tree-list {
   margin-bottom: var(--space-xl);
+}
+
+.file-tree-error {
+  width: 100%;
+  padding: var(--space-md);
+  border: 0;
+  color: var(--color-text-sec);
+  background: transparent;
+  cursor: pointer;
 }
 
 .file-tree-root.is-root-dragover {

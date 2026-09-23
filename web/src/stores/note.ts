@@ -61,18 +61,20 @@ export const useNodeStore = defineStore('note', () => {
   let pendingFileSwitchSave: Promise<void> | null = null
   const {
     loadDirectory,
+    getCachedNode,
     getDirectoryChildren,
     getDirectoryLoadState,
-    isDirectoryLoaded,
-    markDirectoryHasChildren,
     isDirectoryExpanded,
+    canExpandDirectory,
+    getDirectoryRenderState,
+    retryDirectory,
     expandDirectory,
     collapseDirectory,
     toggleDirectory,
   } = fileTree
 
-  const remapDirectoryTreePathPrefix = (oldPath: string, newPath: string, exactName: string) => {
-    fileTree.remapDirectoryTreePathPrefix(oldPath, newPath, exactName)
+  const remapNodePathState = (oldPath: string, newPath: string, exactName: string) => {
+    fileTree.renameSubtree(oldPath, newPath, exactName)
 
     currentNode.value = remapOptionalFsNodePathPrefix(currentNode.value, oldPath, newPath, exactName)
     fileState.remapCurrentFileNodePathPrefix(oldPath, newPath, exactName)
@@ -87,9 +89,9 @@ export const useNodeStore = defineStore('note', () => {
     historyState.remapHistoryPath(oldPath, newPath)
   }
 
-  const removeNodeFromDirectoryTree = (path: string) => {
+  const removeNodeState = (path: string) => {
     const normalizedPath = normalizeNodePath(path)
-    fileTree.removeNodeFromDirectoryTree(normalizedPath)
+    fileTree.removeSubtree(normalizedPath)
 
     if (
       currentPreviewImageNode.value
@@ -124,8 +126,8 @@ export const useNodeStore = defineStore('note', () => {
     currentPreviewImageNode.value = null
   }
 
-  const upsertNode = (parentPath: string, node: FsNode) => {
-    const normalizedNode = fileTree.upsertNode(parentPath, node)
+  const syncInsertedNode = (parentPath: string, node: FsNode) => {
+    const normalizedNode = fileTree.insertNode(parentPath, node)
 
     if (currentNode.value?.path === normalizedNode.path) {
       currentNode.value = normalizedNode
@@ -180,8 +182,8 @@ export const useNodeStore = defineStore('note', () => {
         : await createDirApi(parentPath, noteName)
     })
 
-    await fileTree.ensureDirectoryVisible(parentPath)
-    upsertNode(parentPath, response.data)
+    syncInsertedNode(parentPath, response.data)
+    void fileTree.expandDirectory(parentPath).catch(() => null)
     await setCurrentNode(response.data)
   }
 
@@ -257,8 +259,8 @@ export const useNodeStore = defineStore('note', () => {
       })
     })
     if (response.data.node) {
-      await fileTree.ensureDirectoryVisible(parentPath)
-      upsertNode(parentPath, response.data.node)
+      syncInsertedNode(parentPath, response.data.node)
+      void fileTree.expandDirectory(parentPath).catch(() => null)
     }
     toastStore.pushNotice('info', `File upload successfully.`)
     return response.data
@@ -278,16 +280,13 @@ export const useNodeStore = defineStore('note', () => {
     const createdDirectory = response.data.created_directory
     if (createdDirectory) {
       const directoryParent = getParentPath(createdDirectory.path)
-      if (isDirectoryLoaded(directoryParent)) {
-        upsertNode(directoryParent, createdDirectory)
-      }
+      syncInsertedNode(directoryParent, createdDirectory)
     }
 
     const uploadedNode = response.data.node
     const uploadParent = getParentPath(response.data.path)
-    markDirectoryHasChildren(uploadParent)
-    if (uploadedNode && isDirectoryLoaded(uploadParent)) {
-      upsertNode(uploadParent, uploadedNode)
+    if (uploadedNode) {
+      syncInsertedNode(uploadParent, uploadedNode)
     }
 
     toastStore.pushNotice('info', `Image upload successfully.`)
@@ -488,7 +487,7 @@ export const useNodeStore = defineStore('note', () => {
       historyState.resetHistoryState()
     }
 
-    removeNodeFromDirectoryTree(targetPath)
+    removeNodeState(targetPath)
 
     if (currentNode.value && isPathInside(currentNode.value.path, targetPath)) {
       currentNode.value = fileState.currentFileNode.value
@@ -513,7 +512,7 @@ export const useNodeStore = defineStore('note', () => {
     await actionLedger.runAction(`rename:${normalizedOldPath}`, async () => {
       return await renameItemApi(normalizedOldPath, newName)
     })
-    remapDirectoryTreePathPrefix(normalizedOldPath, normalizedNewPath, newName)
+    remapNodePathState(normalizedOldPath, normalizedNewPath, newName)
     toastStore.pushNotice('info', "Rename successful!")
   }
 
@@ -537,7 +536,7 @@ export const useNodeStore = defineStore('note', () => {
     const response = await actionLedger.runAction(`move:${normalizedOldPath}`, async () => {
       return await moveItemApi(normalizedOldPath, normalizedTargetDir)
     })
-    const movedNode = fileTree.moveNodeToDirectory(
+    const movedNode = fileTree.moveSubtree(
       normalizedOldPath,
       normalizedTargetDir,
       response.data,
@@ -560,7 +559,7 @@ export const useNodeStore = defineStore('note', () => {
     fileState.remapCurrentFilePathPrefix(normalizedOldPath, movedNode.path, movedNode.name)
     historyState.remapHistoryPath(normalizedOldPath, movedNode.path)
 
-    await fileTree.ensureDirectoryVisible(normalizedTargetDir)
+    void fileTree.expandDirectory(normalizedTargetDir).catch(() => null)
     toastStore.pushNotice('info', "Move successful!")
   }
 
@@ -594,9 +593,13 @@ export const useNodeStore = defineStore('note', () => {
     currentRenderedFile: fileState.currentRenderedFile,
     ensureWelcomeNoteLoaded,
     loadDirectory,
+    getCachedNode,
     getDirectoryChildren,
     getDirectoryLoadState,
     isDirectoryExpanded,
+    canExpandDirectory,
+    getDirectoryRenderState,
+    retryDirectory,
     expandDirectory,
     collapseDirectory,
     toggleDirectory,

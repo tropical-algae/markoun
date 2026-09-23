@@ -10,14 +10,11 @@
         'is-dragover': dragOver,
         'is-node-dragging': dragging,
       }"
+      :data-tree-drop-path="dropPath"
       :draggable="!renaming"
       @click="emit('clickNode')"
       @dragstart.stop="emit('dragStart', $event)"
       @dragend="emit('dragEnd', $event)"
-      @dragenter.prevent.stop="emit('dragEnter', $event)"
-      @dragover.prevent.stop="emit('dragOver', $event)"
-      @dragleave.prevent.stop="emit('dragLeave', $event)"
-      @drop.prevent.stop="emit('drop', $event)"
     >
       <button
         type="button"
@@ -80,6 +77,7 @@ const props = defineProps<{
   selected: boolean
   opened: boolean
   canExpand: boolean
+  dropPath?: string
   dragOver: boolean
   dragging: boolean
   renaming: boolean
@@ -93,10 +91,6 @@ const emit = defineEmits<{
   (event: 'clickDirectoryIcon'): void
   (event: 'dragStart', value: DragEvent): void
   (event: 'dragEnd', value: DragEvent): void
-  (event: 'dragEnter', value: DragEvent): void
-  (event: 'dragOver', value: DragEvent): void
-  (event: 'dragLeave', value: DragEvent): void
-  (event: 'drop', value: DragEvent): void
   (event: 'pointerDown', value: PointerEvent): void
   (event: 'pointerUp', value: PointerEvent): void
   (event: 'pointerLeave', value: PointerEvent): void

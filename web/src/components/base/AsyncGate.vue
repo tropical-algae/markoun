@@ -1,5 +1,5 @@
 <template>
-  <Transition :name="transitionName" :mode="transitionMode">
+  <Transition :name="transitionName" :mode="resolvedTransitionMode">
     <component v-if="gate.showLoading.value" :is="tag" key="loading" v-bind="attrs">
       <slot name="loading" />
     </component>
@@ -50,7 +50,7 @@ interface Props {
   loadingOnRefreshing?: boolean
   tag?: string | Component
   transitionName?: string
-  transitionMode?: 'out-in' | 'in-out'
+  transitionMode?: 'out-in' | 'in-out' | 'simultaneous'
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -68,6 +68,9 @@ const slots = useSlots()
 const hasDefaultSlot = computed(() => Boolean(slots.default))
 const hasEmptySlot = computed(() => Boolean(slots.empty))
 const hasErrorSlot = computed(() => Boolean(slots.error))
+const resolvedTransitionMode = computed(() => (
+  props.transitionMode === 'simultaneous' ? undefined : props.transitionMode
+))
 
 const gate = useAsyncGate({
   status: computed(() => props.status),
