@@ -218,9 +218,9 @@
   --underlined-input-content-font-size: inherit;
   --underlined-input-letter-spacing: 0.5px;
   --underlined-input-placeholder-opacity: 0.5;
-  --ghost-button-padding: 2px 16px;
+  --ghost-button-padding: 4px 16px;
   --ghost-button-bg-bleed: -20px;
-  --ghost-button-spinner-size: 0.85rem;
+  --ghost-button-spinner-size: 0.75rem;
   --ghost-button-spinner-border-width: 2px;
 
   --toast-bottom: 42px;

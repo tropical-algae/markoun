@@ -7,6 +7,7 @@ import {
   updateSettingApi,
 } from '@/api/system'
 import { useActionLedger } from '@/composables/useActionLedger'
+import { useToastStore } from '@/stores/toast'
 import type { AsyncStatus } from '@/types/async'
 import { SysSettingType, type SysSettingResponse } from '@/types/system'
 
@@ -20,6 +21,7 @@ export const useSysStore = defineStore('sys', () => {
   const settingsState = ref<AsyncStatus>('idle')
   const registrationAllowedState = ref<AsyncStatus>('idle')
   const actionLedger = useActionLedger()
+  const toastStore = useToastStore()
   let sysStatusPromise: Promise<void> | null = null
 
   const withUpdatedSettingValue = (
@@ -114,6 +116,10 @@ export const useSysStore = defineStore('sys', () => {
       await actionLedger.runAction(`setting:${id}`, async () => {
         await updateSettingApi(id, newValue)
       })
+      const updateDescription = typeof newValue === 'boolean'
+        ? `${setting.name} ${newValue ? 'enabled' : 'disabled'}.`
+        : `${setting.name} updated.`
+      toastStore.pushNotice('info', updateDescription)
       return true
     } catch (_) {
       currentSettings.value = previousSettings

@@ -167,7 +167,7 @@
   width: var(--switch-width);
   height: var(--switch-height);
   flex-shrink: 0;
-  border: var(--control-line-width) solid var(--color-line);
+  border: var(--line-width) solid var(--color-line);
   border-radius: var(--radius-pill);
   background-color: var(--color-bg-field);
   box-sizing: border-box;

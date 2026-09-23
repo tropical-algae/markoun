@@ -11,7 +11,16 @@
         <p class="api-key-warning f-s fc-sec">
           Copy this key now. It will not be shown again.
         </p>
-        <code class="api-key-secret f-xs">{{ createdKey }}</code>
+        <div class="api-key-result">
+          <div class="api-key-result-item">
+            <span class="f-xs fw-bold fc-pri">Server URL</span>
+            <code class="api-key-result-value f-xs">{{ mcpServerUrl }}</code>
+          </div>
+          <div class="api-key-result-item">
+            <span class="f-xs fw-bold fc-pri">API Key</span>
+            <code class="api-key-result-value f-xs">{{ createdKey }}</code>
+          </div>
+        </div>
       </template>
 
       <form v-else :id="createFormId" @submit.prevent="handleCreate">
@@ -56,7 +65,7 @@
             theme="secondary"
             @click="copyKey"
           >
-            Copy
+            Copy Key
           </GhostButton>
           <GhostButton
             class="modal-button f-s"
@@ -93,6 +102,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, useId, watch } from 'vue'
 import { useToastStore } from '@/stores/toast'
+import { resolveAbsoluteApiUrl } from '@/utils/api-url'
 import {
   McpPermission,
   type ApiKeyCreateRequest,
@@ -127,6 +137,7 @@ const isVisible = computed({
 const nameInputRef = ref<InstanceType<typeof UnderlinedInput> | null>(null)
 const keyName = ref('')
 const selectedPermissions = ref<McpPermission[]>([...permissionOptions])
+const mcpServerUrl = resolveAbsoluteApiUrl('/mcp')
 
 const canCreate = computed(() => {
   return Boolean(keyName.value.trim() && selectedPermissions.value.length) && !props.pending
@@ -199,7 +210,20 @@ watch(
   margin: 0 0 var(--space-lg);
 }
 
-.api-key-secret {
+.api-key-result {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.api-key-result-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+
+.api-key-result-value {
   display: block;
   width: var(--api-key-secret-width);
   max-width: 100%;

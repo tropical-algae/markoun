@@ -62,6 +62,7 @@ export const useUserStore = defineStore('user', () => {
         const res = await loginApi(loginForm)
         resetUserProfileState()
         markAuthenticated()
+        toastStore.pushNotice('info', `Welcome back, ${loginForm.username}.`)
         return res
       })
     } catch (error) {

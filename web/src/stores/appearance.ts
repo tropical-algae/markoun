@@ -7,6 +7,7 @@ import {
   THEME_OPTIONS,
   type ThemeMode,
 } from '@/constants/appearance'
+import { useToastStore } from '@/stores/toast'
 
 const THEME_STORAGE_KEY = 'markoun.theme'
 const TOOLTIP_STORAGE_KEY = 'markoun.showTooltips'
@@ -38,6 +39,7 @@ export const useAppearanceStore = defineStore('appearance', () => {
   const currentTheme = ref<ThemeMode>(DEFAULT_THEME_MODE)
   const showTooltips = ref(DEFAULT_SHOW_TOOLTIPS)
   const useWideEditorLines = ref(DEFAULT_USE_WIDE_EDITOR_LINES)
+  const toastStore = useToastStore()
 
   const initAppearance = () => {
     if (typeof window === 'undefined') {
@@ -61,19 +63,35 @@ export const useAppearanceStore = defineStore('appearance', () => {
   }
 
   const setTheme = (themeMode: ThemeMode) => {
+    if (currentTheme.value === themeMode) {
+      return
+    }
+
     currentTheme.value = themeMode
     applyTheme(themeMode)
     window.localStorage.setItem(THEME_STORAGE_KEY, themeMode)
+    const themeLabel = THEME_OPTIONS.find((option) => option.id === themeMode)?.label ?? themeMode
+    toastStore.pushNotice('info', `${themeLabel} theme enabled.`)
   }
 
   const setShowTooltips = (isEnabled: boolean) => {
+    if (showTooltips.value === isEnabled) {
+      return
+    }
+
     showTooltips.value = isEnabled
     window.localStorage.setItem(TOOLTIP_STORAGE_KEY, String(isEnabled))
+    toastStore.pushNotice('info', `Bubble hints ${isEnabled ? 'enabled' : 'disabled'}.`)
   }
 
   const setUseWideEditorLines = (isEnabled: boolean) => {
+    if (useWideEditorLines.value === isEnabled) {
+      return
+    }
+
     useWideEditorLines.value = isEnabled
     window.localStorage.setItem(WIDE_EDITOR_LINES_STORAGE_KEY, String(isEnabled))
+    toastStore.pushNotice('info', `Wide editor lines ${isEnabled ? 'enabled' : 'disabled'}.`)
   }
 
   return {
