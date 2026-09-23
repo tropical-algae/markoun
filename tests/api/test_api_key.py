@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 from uuid import uuid4
 
@@ -90,12 +91,18 @@ def test_api_key_lifecycle_and_mcp_permissions(
     assert create_response.status_code == 200
     created = create_response.json()["data"]
     api_key = created["key"]
+    display_time_pattern = r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}"
     assert api_key.startswith(f"mk_{created['id']}_")
+    assert re.fullmatch(display_time_pattern, created["created_at"])
+    assert created["last_used_at"] is None
 
     list_response = client.get(f"{settings.API_PREFIX}/api-keys")
     assert list_response.status_code == 200
-    assert list_response.json()["data"][0]["prefix"] == f"mk_{created['id']}"
-    assert "key" not in list_response.json()["data"][0]
+    listed_key = list_response.json()["data"][0]
+    assert listed_key["prefix"] == f"mk_{created['id']}"
+    assert re.fullmatch(display_time_pattern, listed_key["created_at"])
+    assert listed_key["last_used_at"] is None
+    assert "key" not in listed_key
 
     initialize_response = _mcp_request(
         client,
@@ -108,6 +115,9 @@ def test_api_key_lifecycle_and_mcp_permissions(
         },
     )
     assert initialize_response.status_code == 200
+
+    used_key = client.get(f"{settings.API_PREFIX}/api-keys").json()["data"][0]
+    assert re.fullmatch(display_time_pattern, used_key["last_used_at"])
 
     read_response = _mcp_request(
         client,

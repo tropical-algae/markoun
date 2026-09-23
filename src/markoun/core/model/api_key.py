@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
 from enum import StrEnum
 from typing import TYPE_CHECKING
 
@@ -80,8 +79,8 @@ class ApiKeyInfo(BaseModel):
     prefix: str
     permissions: list[McpPermission]
     is_active: bool
-    created_at: datetime | None
-    last_used_at: datetime | None
+    created_at: str | None
+    last_used_at: str | None
 
 
 class ApiKeyCreated(ApiKeyInfo):

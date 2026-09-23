@@ -1,4 +1,5 @@
 import asyncio
+import hashlib
 import importlib
 import json
 import os
@@ -23,11 +24,20 @@ from markoun.core.db.session import LocalSession
 TOKEN_SEQUENCE = string.ascii_uppercase + string.digits
 USERNAME_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{2,31}$")
 SIZE_UNITS = ["B", "KB", "MB", "GB"]
+DISPLAY_TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 
 def local_now() -> datetime:
     """Return the current time using the operating system's local timezone."""
     return datetime.now().astimezone()
+
+
+def hash_secret(secret: str) -> str:
+    return hashlib.sha256(secret.encode("utf-8")).hexdigest()
+
+
+def format_display_time(value: datetime | None) -> str | None:
+    return value.strftime(DISPLAY_TIME_FORMAT) if value else None
 
 
 async def async_db_wrapper(func: Callable, *args, **kwargs) -> Any:

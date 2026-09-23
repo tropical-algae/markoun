@@ -1,4 +1,3 @@
-import hashlib
 import hmac
 import json
 import secrets
@@ -7,6 +6,7 @@ from datetime import UTC, datetime
 from sqlmodel import col, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+from markoun.common.util import format_display_time, hash_secret
 from markoun.core.db.models import McpApiKey, UserAccount
 from markoun.core.model.api_key import (
     ApiKeyCreated,
@@ -21,10 +21,6 @@ from markoun.core.model.user import ScopeType
 API_KEY_PREFIX = "mk"
 
 
-def _hash_secret(secret: str) -> str:
-    return hashlib.sha256(secret.encode("utf-8")).hexdigest()
-
-
 def _to_info(api_key: McpApiKey) -> ApiKeyInfo:
     return ApiKeyInfo(
         id=api_key.id,
@@ -32,8 +28,8 @@ def _to_info(api_key: McpApiKey) -> ApiKeyInfo:
         prefix=f"{API_KEY_PREFIX}_{api_key.id}",
         permissions=[McpPermission(item) for item in api_key.permissions],
         is_active=api_key.is_active,
-        created_at=api_key.create_date,
-        last_used_at=api_key.last_used_at,
+        created_at=format_display_time(api_key.create_date),
+        last_used_at=format_display_time(api_key.last_used_at),
     )
 
 
@@ -49,7 +45,7 @@ async def create_api_key(
         id=key_id,
         user_id=user.id,
         name=payload.name,
-        secret_hash=_hash_secret(secret),
+        secret_hash=hash_secret(secret),
         permissions=[permission.value for permission in payload.permissions],
         is_active=True,
     )
@@ -113,7 +109,7 @@ async def authenticate_api_key(
     api_key = await db.get(McpApiKey, key_id)
     if api_key is None or not api_key.is_active:
         return None
-    if not hmac.compare_digest(api_key.secret_hash, _hash_secret(secret)):
+    if not hmac.compare_digest(api_key.secret_hash, hash_secret(secret)):
         return None
 
     user = await db.get(UserAccount, api_key.user_id)
