@@ -15,7 +15,7 @@
       </template>
 
       <div v-if="activeKeys.length" class="api-key-list">
-        <BaseDeleteCard
+        <BaseDeletableCard
           v-for="apiKey in activeKeys"
           :key="apiKey.id"
           class="api-key-card"
@@ -45,7 +45,7 @@
               </span>
             </div>
           </div>
-        </BaseDeleteCard>
+        </BaseDeletableCard>
       </div>
     </AsyncGate>
 
@@ -99,7 +99,7 @@ import { useToastStore } from '@/stores/toast'
 import { normalizeRequestError } from '@/utils/request'
 
 import AsyncGate from '@/components/base/AsyncGate.vue'
-import BaseDeleteCard from '@/components/base/BaseDeleteCard.vue'
+import BaseDeletableCard from '@/components/base/BaseDeletableCard.vue'
 import BaseSkeleton from '@/components/base/BaseSkeleton.vue'
 import BaseTooltip from '@/components/base/BaseTooltip.vue'
 import GhostButton from '@/components/base/GhostButton.vue'

@@ -1,5 +1,5 @@
 <template>
-  <BaseDeleteCard
+  <BaseDeletableCard
     class="history-node-card"
     :class="{
       'is-selected': selected,
@@ -30,13 +30,13 @@
         </time>
       </span>
     </button>
-  </BaseDeleteCard>
+  </BaseDeletableCard>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { HistoryNode } from '@/types/history'
-import BaseDeleteCard from '@/components/base/BaseDeleteCard.vue'
+import BaseDeletableCard from '@/components/base/BaseDeletableCard.vue'
 
 const props = defineProps<{
   node: HistoryNode
@@ -67,7 +67,7 @@ const createdAtLabel = computed(() => {
 
 <style scoped>
 .history-node-card {
-  --base-delete-card-padding: var(--history-node-padding-y) var(--history-node-padding-x);
+  --base-deletable-card-padding: var(--history-node-padding-y) var(--history-node-padding-x);
 
   width: var(--history-node-width);
 }

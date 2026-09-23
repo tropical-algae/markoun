@@ -1,9 +1,9 @@
 <template>
   <article
-    class="base-delete-card"
+    class="base-deletable-card"
     :class="{ 'reveal-delete-on-hover': revealDeleteOnHover }"
   >
-    <div class="base-delete-card-content">
+    <div class="base-deletable-card-content">
       <slot></slot>
     </div>
 
@@ -44,11 +44,11 @@ const emit = defineEmits<{
 </script>
 
 <style scoped>
-.base-delete-card {
+.base-deletable-card {
   display: flex;
   align-items: flex-start;
   gap: var(--space-sm);
-  padding: var(--base-delete-card-padding, var(--space-sm));
+  padding: var(--base-deletable-card-padding, var(--space-sm));
   border-radius: var(--radius-md);
   box-shadow: inset 0 0 0 var(--line-width) var(--color-line);
   background-color: var(--color-bg-pri);
@@ -61,27 +61,31 @@ const emit = defineEmits<{
     opacity var(--motion-soft-duration) ease;
 }
 
-.base-delete-card-content {
+.base-deletable-card-content {
   flex: 1 1 auto;
   min-width: 0;
 }
 
-.base-delete-card :deep(.tooltip-anchor) {
+.base-deletable-card :deep(.tooltip-anchor) {
   flex: 0 0 auto;
 }
 
-.base-delete-card.reveal-delete-on-hover :deep(.tooltip-anchor) {
+.base-deletable-card :deep(.icon-btn) {
+  fill: var(--color-bg-error);
+}
+
+.base-deletable-card.reveal-delete-on-hover :deep(.tooltip-anchor) {
   opacity: 0;
   transition: opacity var(--motion-soft-duration) ease;
 }
 
-.base-delete-card.reveal-delete-on-hover:hover :deep(.tooltip-anchor),
-.base-delete-card.reveal-delete-on-hover :deep(.tooltip-anchor:focus-within) {
+.base-deletable-card.reveal-delete-on-hover:hover :deep(.tooltip-anchor),
+.base-deletable-card.reveal-delete-on-hover :deep(.tooltip-anchor:focus-within) {
   opacity: 1;
 }
 
 @media (hover: none) {
-  .base-delete-card.reveal-delete-on-hover :deep(.tooltip-anchor) {
+  .base-deletable-card.reveal-delete-on-hover :deep(.tooltip-anchor) {
     opacity: 1;
   }
 }
