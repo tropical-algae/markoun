@@ -67,6 +67,8 @@
   --motion-medium-duration: 0.3s;
   --motion-pane-duration: 0.72s;
   --motion-pane-easing: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --motion-pane-line-show-easing: cubic-bezier(0, 1, 0.2, 1);
+  --motion-pane-line-hide-easing: cubic-bezier(0.8, 0, 1, 0);
   --motion-tree-duration: 0.42s;
   --motion-tree-easing: cubic-bezier(0.2, 0.8, 0.2, 1);
   --motion-tree-offset-y: -4px;

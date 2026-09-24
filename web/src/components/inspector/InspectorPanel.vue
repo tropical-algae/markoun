@@ -102,8 +102,6 @@ const emit = defineEmits<{
 .inspector-panel-body {
   flex: 1;
   margin-top: var(--space-md);
-  content-visibility: auto;
-  contain: layout paint style;
   overflow-y: scroll;
   overflow-x: hidden;
   white-space: normal;

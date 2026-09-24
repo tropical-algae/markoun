@@ -225,6 +225,13 @@ watch(() => props.rightOpen, (open) => {
 .workspace-pane {
   z-index: 1;
   contain: layout paint;
+  visibility: hidden;
+  transition: visibility 0s linear var(--motion-pane-duration);
+}
+
+.workspace-pane.is-open {
+  visibility: visible;
+  transition-delay: 0s;
 }
 
 .workspace-left-pane {
@@ -283,6 +290,8 @@ watch(() => props.rightOpen, (open) => {
 }
 
 .workspace-pane-handle::before {
+  --pane-line-easing: var(--motion-pane-line-hide-easing);
+
   position: absolute;
   inset-block: 0;
   inset-inline-start: calc(50% - var(--line-width) / 2);
@@ -291,7 +300,7 @@ watch(() => props.rightOpen, (open) => {
   opacity: 0;
   content: "";
   transition:
-    opacity var(--motion-pane-duration) ease,
+    opacity var(--motion-pane-duration) var(--pane-line-easing),
     background-color var(--motion-theme-duration) ease,
     box-shadow var(--motion-soft-duration) ease;
 }
@@ -321,6 +330,8 @@ watch(() => props.rightOpen, (open) => {
 }
 
 .workspace-pane-handle.is-active::before {
+  --pane-line-easing: var(--motion-pane-line-show-easing);
+
   opacity: 1;
 }
 
@@ -353,10 +364,13 @@ watch(() => props.rightOpen, (open) => {
   .workspace-pane {
     display: none;
     z-index: 2;
+    visibility: hidden;
+    transition: none;
   }
 
   .workspace-pane.is-open {
     display: block;
+    visibility: visible;
   }
 
   .workspace-stage.has-mobile-pane .workspace-editor-surface {
