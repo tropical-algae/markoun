@@ -77,11 +77,13 @@ const branchIndentStyle = computed(() => ({ '--tree-depth': props.depth }))
 
 .tree-branch-shell {
   min-height: 0;
-  overflow: hidden;
+  min-width: 0;
+  overflow: visible;
 }
 
 .tree-branch-content {
   position: relative;
+  min-width: 0;
 }
 
 .tree-branch-state,

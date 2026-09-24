@@ -16,7 +16,7 @@
     </div>
 
     <div class="editor-title-slot">
-      <span class="editor-title-text fc-pri">
+      <span class="editor-title-text fc-pri fw-bold">
         {{ title }}
       </span>
     </div>
