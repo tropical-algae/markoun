@@ -20,45 +20,38 @@
       </div>
     </template>
 
-    <LazyMotion :features="loadMotionFeatures" strict>
-      <MotionConfig reduced-motion="user">
-        <m.div
-          layout-scroll
-          ref="fileTreeRootRef"
-          class="file-tree-root sidebar-panel-body"
-          :class="{ 'is-root-dragover': isRootDirectoryDragOver }"
-          :data-tree-drop-path="ROOT_DIRECTORY_PATH"
-          @dragover.capture="handleTreeDragOver"
-          @dragleave.capture="handleTreeDragLeave"
-          @drop.capture="handleTreeDrop"
-          @dragend.capture="clearTreeDropTarget"
-        >
-          <LayoutGroup id="file-tree">
-            <SidebarFileTreeStateGate :status="rootLoadStatus">
-              <template #loading>
-                <SidebarFileTreeSkeleton :rows="6" />
-              </template>
+    <div
+      ref="fileTreeRootRef"
+      class="file-tree-root sidebar-panel-body"
+      :class="{ 'is-root-dragover': isRootDirectoryDragOver }"
+      :data-tree-drop-path="ROOT_DIRECTORY_PATH"
+      @dragover.capture="handleTreeDragOver"
+      @dragleave.capture="handleTreeDragLeave"
+      @drop.capture="handleTreeDrop"
+      @dragend.capture="clearTreeDropTarget"
+    >
+      <SidebarFileTreeStateGate :status="rootLoadStatus">
+        <template #loading>
+          <SidebarFileTreeSkeleton :rows="6" />
+        </template>
 
-              <template #error>
-                <button type="button" class="file-tree-error f-xs" @click="retryRootDirectory">
-                  Unable to load files. Retry
-                </button>
-              </template>
+        <template #error>
+          <button type="button" class="file-tree-error f-xs" @click="retryRootDirectory">
+            Unable to load files. Retry
+          </button>
+        </template>
 
-              <div class="file-tree-list" :data-tree-drop-path="ROOT_DIRECTORY_PATH">
-                <SidebarFileTreeItem
-                  v-for="item in nodeStore.rootNodes"
-                  :key="item.path"
-                  :node="item"
-                  :depth="0"
-                  @node-opened="emit('nodeOpened')"
-                />
-              </div>
-            </SidebarFileTreeStateGate>
-          </LayoutGroup>
-        </m.div>
-      </MotionConfig>
-    </LazyMotion>
+        <div class="file-tree-list" :data-tree-drop-path="ROOT_DIRECTORY_PATH">
+          <SidebarFileTreeItem
+            v-for="item in nodeStore.rootNodes"
+            :key="item.path"
+            :node="item"
+            :depth="0"
+            @node-opened="emit('nodeOpened')"
+          />
+        </div>
+      </SidebarFileTreeStateGate>
+    </div>
 
     <CreateNodeModal
       v-model="showNewNote"
@@ -76,12 +69,6 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import {
-  LayoutGroup,
-  LazyMotion,
-  m,
-  MotionConfig,
-} from 'motion-v'
 
 import CreateNodeModal from '@/components/overlay/modals/CreateNodeModal.vue'
 import UploadFileModal from '@/components/overlay/modals/UploadFileModal.vue'
@@ -104,9 +91,6 @@ import type { AsyncStatus } from '@/types/async'
 import { provideFileTreeDropController } from '@/composables/useFileTreeDropController'
 import { provideFileTreeMotion } from '@/composables/useFileTreeMotion'
 import { ROOT_DIRECTORY_PATH } from '@/utils/file-system'
-
-const loadMotionFeatures = () => import('@/utils/motion-features')
-  .then((module) => module.default)
 
 const emit = defineEmits<{
   (event: 'nodeOpened'): void
@@ -183,6 +167,7 @@ onMounted(() => {
   position: relative;
   display: flex;
   flex-direction: column;
+  contain: layout;
   transition: background-color var(--motion-soft-duration) ease;
   border-radius: var(--radius-sm);
   isolation: isolate;

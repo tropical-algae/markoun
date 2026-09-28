@@ -403,9 +403,13 @@ onMounted(() => {
 onBeforeUnmount(() => {
   if (dragFrame !== null) {
     window.cancelAnimationFrame(dragFrame)
+    dragFrame = null
   }
   resizeObserver?.disconnect()
   nodeResizeObserver?.disconnect()
+  resizeObserver = null
+  nodeResizeObserver = null
+  nodeElements.clear()
 })
 </script>
 

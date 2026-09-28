@@ -1,20 +1,22 @@
 <template>
-  <AsyncGate
-    :status="status"
-    class="file-tree-state"
-    transition-name="file-tree-state-swap"
-    transition-mode="simultaneous"
-  >
-    <template #loading>
-      <slot name="loading" />
-    </template>
+  <div class="file-tree-state-host">
+    <AsyncGate
+      :status="status"
+      class="file-tree-state"
+      transition-name="file-tree-state-swap"
+      transition-mode="simultaneous"
+    >
+      <template #loading>
+        <slot name="loading" />
+      </template>
 
-    <template #error>
-      <slot name="error" />
-    </template>
+      <template #error>
+        <slot name="error" />
+      </template>
 
-    <slot />
-  </AsyncGate>
+      <slot />
+    </AsyncGate>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -27,15 +29,20 @@ defineProps<{
 </script>
 
 <style scoped>
+.file-tree-state-host,
 .file-tree-state {
   width: 100%;
   min-width: 0;
 }
 
-:deep(.file-tree-state-swap-enter-active) {
+.file-tree-state-host {
+  position: relative;
+  isolation: isolate;
+}
+
+.file-tree-state {
   position: relative;
   z-index: 1;
-  transition: opacity var(--motion-soft-duration) ease;
 }
 
 :deep(.file-tree-state-swap-leave-active) {
@@ -55,7 +62,6 @@ defineProps<{
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :deep(.file-tree-state-swap-enter-active),
   :deep(.file-tree-state-swap-leave-active) {
     transition: none;
   }

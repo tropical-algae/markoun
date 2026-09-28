@@ -1,16 +1,6 @@
 <template>
-  <m.div
-    layout="position"
-    :layout-id="node.path"
-    :transition="{ layout: treeMotion.transition.value }"
-    class="tree-node-motion"
-  >
-    <m.div
-      :initial="treeMotion.itemInitial.value"
-      :animate="treeMotion.itemVisible.value"
-      :transition="treeMotion.transition.value"
-      class="tree-node-entrance"
-    >
+  <div class="tree-node">
+    <div class="tree-node-entrance">
       <SidebarFileTreeNodeRow
         v-model:edit-name="editName"
         :depth="depth"
@@ -37,7 +27,7 @@
         @submit-rename="submitRename"
         @cancel-rename="cancelRename"
       />
-    </m.div>
+    </div>
 
     <SidebarFileTreeBranch
       v-if="isDir"
@@ -54,19 +44,17 @@
         @node-opened="emit('nodeOpened')"
       />
     </SidebarFileTreeBranch>
-  </m.div>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { m } from 'motion-v'
 import type { FsNode } from '@/types/file-system'
 import { useNodeStore } from '@/stores/note'
 import { useFileTreeItemExpansion } from '@/composables/useFileTreeItemExpansion'
 import { useFileTreeItemRename } from '@/composables/useFileTreeItemRename'
 import { useFileTreeDropTargetState } from '@/composables/useFileTreeDropController'
 import { useFileTreeNodeDrag } from '@/composables/useFileTreeNodeDrag'
-import { useFileTreeMotion } from '@/composables/useFileTreeMotion'
 
 import FolderOpenIcon from '@/assets/icons/folder-open.svg'
 import FolderIcon from '@/assets/icons/folder.svg'
@@ -74,7 +62,6 @@ import SidebarFileTreeBranch from '@/components/sidebar/SidebarFileTreeBranch.vu
 import SidebarFileTreeNodeRow from '@/components/sidebar/SidebarFileTreeNodeRow.vue'
 
 const nodeStore = useNodeStore()
-const treeMotion = useFileTreeMotion()
 const props = defineProps<{ node: FsNode, depth: number }>()
 const emit = defineEmits<{
   (event: 'nodeOpened'): void
@@ -152,10 +139,32 @@ const handleClickDirectoryIcon = async () => {
 </script>
 
 <style scoped>
-.tree-node-motion,
+.tree-node,
 .tree-node-entrance {
   width: 100%;
   min-width: 0;
+}
+
+.tree-node-entrance {
+  animation: tree-node-enter var(--motion-tree-duration) var(--motion-tree-easing) backwards;
+}
+
+@keyframes tree-node-enter {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-tree-offset-y));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tree-node-entrance {
+    animation: none;
+  }
 }
 
 </style>

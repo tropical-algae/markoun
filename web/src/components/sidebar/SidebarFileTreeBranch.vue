@@ -21,11 +21,9 @@
               </button>
             </template>
 
-            <LayoutGroup :id="layoutGroupId">
-              <div class="tree-branch-list" :data-tree-drop-path="path">
-                <slot />
-              </div>
-            </LayoutGroup>
+            <div class="tree-branch-list" :data-tree-drop-path="path">
+              <slot />
+            </div>
           </SidebarFileTreeStateGate>
         </div>
       </div>
@@ -35,8 +33,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { LayoutGroup } from 'motion-v'
-import { useAutoHeightMotion } from '@/composables/useAutoHeightMotion'
+import { useFileTreeAutoHeightMotion } from '@/composables/useFileTreeAutoHeightMotion'
 import SidebarFileTreeSkeleton from '@/components/sidebar/SidebarFileTreeSkeleton.vue'
 import SidebarFileTreeStateGate from '@/components/sidebar/SidebarFileTreeStateGate.vue'
 import type { AsyncStatus } from '@/types/async'
@@ -52,7 +49,7 @@ const emit = defineEmits<{
   (event: 'retry'): void
 }>()
 
-const heightMotion = useAutoHeightMotion()
+const heightMotion = useFileTreeAutoHeightMotion()
 const isVisible = computed(() => ['loading', 'error', 'content'].includes(props.state))
 const asyncStatus = computed<AsyncStatus>(() => {
   if (props.state === 'error') {
@@ -60,7 +57,6 @@ const asyncStatus = computed<AsyncStatus>(() => {
   }
   return props.state === 'loading' ? 'loading' : 'ready'
 })
-const layoutGroupId = computed(() => `file-tree:${props.path}`)
 const branchIndentStyle = computed(() => ({ '--tree-depth': props.depth }))
 </script>
 
@@ -79,9 +75,7 @@ const branchIndentStyle = computed(() => ({ '--tree-depth': props.depth }))
 }
 
 .tree-branch-content {
-  position: relative;
   min-width: 0;
-  isolation: isolate;
 }
 
 .tree-branch-list {

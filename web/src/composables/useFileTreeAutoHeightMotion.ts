@@ -1,8 +1,5 @@
 import { onBeforeUnmount, ref, watch, type ComponentPublicInstance } from 'vue'
-import { resolveFileTreeMotionDurationMs } from '@/composables/useFileTreeMotion'
-import { readCssCubicBezier } from '@/utils/css'
-
-const TREE_EASING_FALLBACK: [number, number, number, number] = [0, 0, 1, 1]
+import { useFileTreeMotion } from '@/composables/useFileTreeMotion'
 
 const getObservedHeight = (entry: ResizeObserverEntry): number => {
   const borderBoxSize = entry.borderBoxSize
@@ -10,21 +7,58 @@ const getObservedHeight = (entry: ResizeObserverEntry): number => {
   return box?.blockSize ?? entry.target.getBoundingClientRect().height
 }
 
-export const useAutoHeightMotion = () => {
+export const useFileTreeAutoHeightMotion = () => {
+  const treeMotion = useFileTreeMotion()
   const shellRef = ref<HTMLElement | null>(null)
   const contentRef = ref<HTMLElement | null>(null)
   let resizeObserver: ResizeObserver | null = null
   let heightAnimation: Animation | null = null
   let lastContentHeight: number | null = null
 
-  const finishAnimation = (animation: Animation, targetHeight: number) => {
-    if (heightAnimation !== animation || !shellRef.value) {
+  const disposeHeightAnimation = (animation: Animation) => {
+    animation.onfinish = null
+    animation.oncancel = null
+    animation.cancel()
+    animation.effect = null
+  }
+
+  const clearHeightAnimation = () => {
+    const animation = heightAnimation
+    heightAnimation = null
+    if (animation) {
+      disposeHeightAnimation(animation)
+    }
+    shellRef.value?.style.removeProperty('height')
+  }
+
+  const finishAnimation = (animation: Animation) => {
+    if (heightAnimation !== animation) {
       return
     }
-    shellRef.value.style.height = `${targetHeight}px`
-    animation.cancel()
-    shellRef.value.style.removeProperty('height')
-    heightAnimation = null
+    clearHeightAnimation()
+  }
+
+  const retargetHeightAnimation = (
+    animation: Animation,
+    startHeight: number,
+    targetHeight: number,
+    duration: number,
+  ): boolean => {
+    if (!(animation.effect instanceof KeyframeEffect)) {
+      return false
+    }
+    animation.effect.setKeyframes([
+      { height: `${startHeight}px` },
+      { height: `${targetHeight}px` },
+    ])
+    animation.effect.updateTiming({
+      duration,
+      easing: treeMotion.resizeEasing,
+      fill: 'forwards',
+    })
+    animation.currentTime = 0
+    animation.play()
+    return true
   }
 
   const animateToHeight = (targetHeight: number) => {
@@ -38,43 +72,47 @@ export const useAutoHeightMotion = () => {
       ? shell.getBoundingClientRect().height
       : lastContentHeight
     lastContentHeight = targetHeight
-    heightAnimation?.cancel()
-    heightAnimation = null
 
-    if (
-      Math.abs(startHeight - targetHeight) < 0.5
-      || window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    ) {
-      shell.style.removeProperty('height')
+    const distance = Math.abs(targetHeight - startHeight)
+    if (distance < 0.5 || treeMotion.shouldReduceMotion()) {
+      clearHeightAnimation()
       return
     }
 
-    const easing = readCssCubicBezier('--motion-tree-easing', TREE_EASING_FALLBACK)
+    const duration = treeMotion.resolveResizeDurationMs(distance)
+    if (
+      heightAnimation
+      && retargetHeightAnimation(
+        heightAnimation,
+        startHeight,
+        targetHeight,
+        duration,
+      )
+    ) {
+      return
+    }
+
+    clearHeightAnimation()
     const animation = shell.animate(
       [
         { height: `${startHeight}px` },
         { height: `${targetHeight}px` },
       ],
       {
-        duration: resolveFileTreeMotionDurationMs(
-          Math.abs(targetHeight - startHeight),
-        ),
-        easing: `cubic-bezier(${easing.join(',')})`,
+        duration,
+        easing: treeMotion.resizeEasing,
         fill: 'forwards',
       },
     )
     heightAnimation = animation
-    void animation.finished
-      .then(() => finishAnimation(animation, targetHeight))
-      .catch(() => null)
+    animation.onfinish = () => finishAnimation(animation)
   }
 
   watch(contentRef, (content, previousContent) => {
     if (previousContent) {
       resizeObserver?.unobserve(previousContent)
     }
-    heightAnimation?.cancel()
-    heightAnimation = null
+    clearHeightAnimation()
     lastContentHeight = null
     if (content) {
       resizeObserver ??= new ResizeObserver(([entry]) => {
@@ -91,7 +129,11 @@ export const useAutoHeightMotion = () => {
 
   onBeforeUnmount(() => {
     resizeObserver?.disconnect()
-    heightAnimation?.cancel()
+    resizeObserver = null
+    clearHeightAnimation()
+    lastContentHeight = null
+    contentRef.value = null
+    shellRef.value = null
   })
 
   const setShellRef = (element: Element | ComponentPublicInstance | null) => {
