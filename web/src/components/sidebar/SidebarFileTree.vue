@@ -34,7 +34,7 @@
           @dragend.capture="clearTreeDropTarget"
         >
           <LayoutGroup id="file-tree">
-            <AsyncGate :status="rootLoadStatus">
+            <SidebarFileTreeStateGate :status="rootLoadStatus">
               <template #loading>
                 <SidebarFileTreeSkeleton :rows="6" />
               </template>
@@ -54,7 +54,7 @@
                   @node-opened="emit('nodeOpened')"
                 />
               </div>
-            </AsyncGate>
+            </SidebarFileTreeStateGate>
           </LayoutGroup>
         </m.div>
       </MotionConfig>
@@ -90,7 +90,7 @@ import ImagePreviewModal from '@/components/overlay/modals/ImagePreviewModal.vue
 
 import SidebarFileTreeItem from '@/components/sidebar/SidebarFileTreeItem.vue'
 import SidebarFileTreeSkeleton from '@/components/sidebar/SidebarFileTreeSkeleton.vue'
-import AsyncGate from '@/components/base/AsyncGate.vue'
+import SidebarFileTreeStateGate from '@/components/sidebar/SidebarFileTreeStateGate.vue'
 import BaseTooltip from '@/components/base/BaseTooltip.vue'
 import SidebarPanelLayout from '@/layouts/SidebarPanelLayout.vue'
 

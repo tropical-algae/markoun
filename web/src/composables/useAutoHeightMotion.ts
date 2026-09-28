@@ -1,5 +1,6 @@
 import { onBeforeUnmount, ref, watch, type ComponentPublicInstance } from 'vue'
-import { readCssCubicBezier, readCssTimeMs } from '@/utils/css'
+import { resolveFileTreeMotionDurationMs } from '@/composables/useFileTreeMotion'
+import { readCssCubicBezier } from '@/utils/css'
 
 const TREE_EASING_FALLBACK: [number, number, number, number] = [0, 0, 1, 1]
 
@@ -55,7 +56,9 @@ export const useAutoHeightMotion = () => {
         { height: `${targetHeight}px` },
       ],
       {
-        duration: readCssTimeMs('--motion-tree-duration', 0),
+        duration: resolveFileTreeMotionDurationMs(
+          Math.abs(targetHeight - startHeight),
+        ),
         easing: `cubic-bezier(${easing.join(',')})`,
         fill: 'forwards',
       },

@@ -2,40 +2,42 @@
   <m.div
     layout="position"
     :layout-id="node.path"
-    :initial="treeMotion.itemInitial.value"
-    :animate="treeMotion.itemVisible.value"
-    :transition="{
-      layout: treeMotion.transition.value,
-      default: treeMotion.transition.value,
-    }"
+    :transition="{ layout: treeMotion.transition.value }"
     class="tree-node-motion"
   >
-    <SidebarFileTreeNodeRow
-      v-model:edit-name="editName"
-      :depth="depth"
-      :name="node.name"
-      :suffix="node.suffix"
-      :icon="currentIcon"
-      :is-directory="isDir"
-      :selected="isActive"
-      :opened="isOpened"
-      :can-expand="canExpand"
-      :drop-path="isDir ? node.path : undefined"
-      :drag-over="isDirectoryDragOver"
-      :dragging="isNodeDragging"
-      :renaming="isRenaming"
-      :set-rename-input-ref="setRenameInputRef"
-      @click-node="handleClickNode"
-      @click-directory-icon="handleClickDirectoryIcon"
-      @drag-start="handleDragStart"
-      @drag-end="handleNodeDragEnd"
-      @pointer-down="startLongPress"
-      @pointer-up="stopLongPress"
-      @pointer-leave="stopLongPress"
-      @pointer-cancel="stopLongPress"
-      @submit-rename="submitRename"
-      @cancel-rename="cancelRename"
-    />
+    <m.div
+      :initial="treeMotion.itemInitial.value"
+      :animate="treeMotion.itemVisible.value"
+      :transition="treeMotion.transition.value"
+      class="tree-node-entrance"
+    >
+      <SidebarFileTreeNodeRow
+        v-model:edit-name="editName"
+        :depth="depth"
+        :name="node.name"
+        :suffix="node.suffix"
+        :icon="currentIcon"
+        :is-directory="isDir"
+        :selected="isActive"
+        :opened="isOpened"
+        :can-expand="canExpand"
+        :drop-path="isDir ? node.path : undefined"
+        :drag-over="isDirectoryDragOver"
+        :dragging="isNodeDragging"
+        :renaming="isRenaming"
+        :set-rename-input-ref="setRenameInputRef"
+        @click-node="handleClickNode"
+        @click-directory-icon="handleClickDirectoryIcon"
+        @drag-start="handleDragStart"
+        @drag-end="handleNodeDragEnd"
+        @pointer-down="startLongPress"
+        @pointer-up="stopLongPress"
+        @pointer-leave="stopLongPress"
+        @pointer-cancel="stopLongPress"
+        @submit-rename="submitRename"
+        @cancel-rename="cancelRename"
+      />
+    </m.div>
 
     <SidebarFileTreeBranch
       v-if="isDir"
@@ -150,7 +152,8 @@ const handleClickDirectoryIcon = async () => {
 </script>
 
 <style scoped>
-.tree-node-motion {
+.tree-node-motion,
+.tree-node-entrance {
   width: 100%;
   min-width: 0;
 }

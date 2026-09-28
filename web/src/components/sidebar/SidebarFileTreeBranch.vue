@@ -3,11 +3,8 @@
     <div v-if="isVisible" class="tree-branch">
       <div :ref="heightMotion.setShellRef" class="tree-branch-shell">
         <div :ref="heightMotion.setContentRef" class="tree-branch-content">
-          <AsyncGate
+          <SidebarFileTreeStateGate
             :status="asyncStatus"
-            class="tree-branch-state"
-            transition-name="tree-node-swap"
-            transition-mode="simultaneous"
           >
             <template #loading>
               <SidebarFileTreeSkeleton :depth="depth" />
@@ -29,7 +26,7 @@
                 <slot />
               </div>
             </LayoutGroup>
-          </AsyncGate>
+          </SidebarFileTreeStateGate>
         </div>
       </div>
     </div>
@@ -40,8 +37,8 @@
 import { computed } from 'vue'
 import { LayoutGroup } from 'motion-v'
 import { useAutoHeightMotion } from '@/composables/useAutoHeightMotion'
-import AsyncGate from '@/components/base/AsyncGate.vue'
 import SidebarFileTreeSkeleton from '@/components/sidebar/SidebarFileTreeSkeleton.vue'
+import SidebarFileTreeStateGate from '@/components/sidebar/SidebarFileTreeStateGate.vue'
 import type { AsyncStatus } from '@/types/async'
 import type { DirectoryRenderState } from '@/types/file-system'
 
@@ -84,9 +81,9 @@ const branchIndentStyle = computed(() => ({ '--tree-depth': props.depth }))
 .tree-branch-content {
   position: relative;
   min-width: 0;
+  isolation: isolate;
 }
 
-.tree-branch-state,
 .tree-branch-list {
   width: 100%;
   min-width: 0;
@@ -107,43 +104,30 @@ const branchIndentStyle = computed(() => ({ '--tree-depth': props.depth }))
   cursor: pointer;
 }
 
-.tree-branch-enter-active,
+.tree-branch-enter-active {
+  transition: grid-template-rows
+    var(--motion-tree-duration)
+    var(--motion-tree-easing);
+}
+
 .tree-branch-leave-active {
   transition:
     grid-template-rows var(--motion-tree-duration) var(--motion-tree-easing),
     opacity var(--motion-soft-duration) ease;
 }
 
-.tree-branch-enter-from,
+.tree-branch-enter-from {
+  grid-template-rows: 0fr;
+}
+
 .tree-branch-leave-to {
   grid-template-rows: 0fr;
   opacity: 0;
 }
 
-:deep(.tree-node-swap-enter-active) {
-  transition: opacity var(--motion-soft-duration) ease;
-}
-
-:deep(.tree-node-swap-leave-active) {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  transition: opacity var(--motion-soft-duration) ease;
-}
-
-:deep(.tree-node-swap-enter-from) {
-  opacity: 0;
-}
-
-:deep(.tree-node-swap-leave-to) {
-  opacity: 0;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .tree-branch-enter-active,
-  .tree-branch-leave-active,
-  :deep(.tree-node-swap-enter-active),
-  :deep(.tree-node-swap-leave-active) {
+  .tree-branch-leave-active {
     transition: none;
   }
 }
