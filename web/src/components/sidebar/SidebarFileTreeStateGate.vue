@@ -5,6 +5,7 @@
       class="file-tree-state"
       transition-name="file-tree-state-swap"
       transition-mode="simultaneous"
+      @before-display-change="motion.beforeLayoutChange(path)"
     >
       <template #loading>
         <slot name="loading" />
@@ -21,11 +22,16 @@
 
 <script setup lang="ts">
 import AsyncGate from '@/components/base/AsyncGate.vue'
+import { useFileTreeMotion } from '@/composables/useFileTreeMotion'
 import type { AsyncStatus } from '@/types/async'
+import { ROOT_DIRECTORY_PATH } from '@/utils/file-system'
 
-defineProps<{
+const motion = useFileTreeMotion()
+
+withDefaults(defineProps<{
   status: AsyncStatus
-}>()
+  path?: string
+}>(), { path: ROOT_DIRECTORY_PATH })
 </script>
 
 <style scoped>
@@ -36,6 +42,7 @@ defineProps<{
 }
 
 .file-tree-state-host {
+  display: flow-root;
   position: relative;
   isolation: isolate;
 }
@@ -43,6 +50,14 @@ defineProps<{
 .file-tree-state {
   position: relative;
   z-index: 1;
+}
+
+:deep(.file-tree-state-swap-enter-active) {
+  transition: opacity var(--motion-tree-enter-duration) var(--motion-tree-easing);
+}
+
+:deep(.file-tree-state-swap-enter-from) {
+  opacity: 0;
 }
 
 :deep(.file-tree-state-swap-leave-active) {
@@ -62,6 +77,7 @@ defineProps<{
 }
 
 @media (prefers-reduced-motion: reduce) {
+  :deep(.file-tree-state-swap-enter-active),
   :deep(.file-tree-state-swap-leave-active) {
     transition: none;
   }

@@ -30,27 +30,29 @@
       @drop.capture="handleTreeDrop"
       @dragend.capture="clearTreeDropTarget"
     >
-      <SidebarFileTreeStateGate :status="rootLoadStatus">
-        <template #loading>
-          <SidebarFileTreeSkeleton :rows="6" />
-        </template>
+      <div ref="fileTreeLayoutRef" class="file-tree-layout">
+        <SidebarFileTreeStateGate :status="rootLoadStatus">
+          <template #loading>
+            <SidebarFileTreeSkeleton :rows="6" />
+          </template>
 
-        <template #error>
-          <button type="button" class="file-tree-error f-xs" @click="retryRootDirectory">
-            Unable to load files. Retry
-          </button>
-        </template>
+          <template #error>
+            <button type="button" class="file-tree-error f-xs" @click="retryRootDirectory">
+              Unable to load files. Retry
+            </button>
+          </template>
 
-        <div class="file-tree-list" :data-tree-drop-path="ROOT_DIRECTORY_PATH">
-          <SidebarFileTreeItem
-            v-for="item in nodeStore.rootNodes"
-            :key="item.path"
-            :node="item"
-            :depth="0"
-            @node-opened="emit('nodeOpened')"
-          />
-        </div>
-      </SidebarFileTreeStateGate>
+          <div class="file-tree-list" :data-tree-drop-path="ROOT_DIRECTORY_PATH">
+            <SidebarFileTreeItem
+              v-for="item in nodeStore.rootNodes"
+              :key="item.path"
+              :node="item"
+              :depth="0"
+              @node-opened="emit('nodeOpened')"
+            />
+          </div>
+        </SidebarFileTreeStateGate>
+      </div>
     </div>
 
     <CreateNodeModal
@@ -68,7 +70,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 
 import CreateNodeModal from '@/components/overlay/modals/CreateNodeModal.vue'
 import UploadFileModal from '@/components/overlay/modals/UploadFileModal.vue'
@@ -101,8 +103,17 @@ const showNewFolder = ref(false)
 const showUpload = ref(false)
 const deleteItem = ref(false)
 const fileTreeRootRef = ref<HTMLElement | null>(null)
+const fileTreeLayoutRef = ref<HTMLElement | null>(null)
 const nodeStore = useNodeStore()
-provideFileTreeMotion()
+const motion = provideFileTreeMotion(fileTreeRootRef, fileTreeLayoutRef)
+watch(() => nodeStore.rootNodes, (children, previousChildren) => {
+  if (
+    children.length !== previousChildren.length
+    || children.some((child, index) => child.path !== previousChildren[index]?.path)
+  ) {
+    motion.beforeLayoutChange(ROOT_DIRECTORY_PATH)
+  }
+})
 const rootLoadStatus = computed<AsyncStatus>(() => {
   const state = nodeStore.getDirectoryLoadState(ROOT_DIRECTORY_PATH)
   if (state === 'loaded') {
@@ -171,6 +182,12 @@ onMounted(() => {
   transition: background-color var(--motion-soft-duration) ease;
   border-radius: var(--radius-sm);
   isolation: isolate;
+  overflow-anchor: none;
+}
+
+.file-tree-layout {
+  flex: 0 0 auto;
+  min-width: 0;
 }
 
 .file-tree-root::after {

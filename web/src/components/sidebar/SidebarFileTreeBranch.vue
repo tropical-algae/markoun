@@ -1,56 +1,69 @@
 <template>
   <Transition name="tree-branch">
     <div v-if="isVisible" class="tree-branch">
-      <div :ref="heightMotion.setShellRef" class="tree-branch-shell">
-        <div :ref="heightMotion.setContentRef" class="tree-branch-content">
-          <SidebarFileTreeStateGate
-            :status="asyncStatus"
+      <SidebarFileTreeStateGate :status="asyncStatus" :path="path">
+        <template #loading>
+          <SidebarFileTreeSkeleton :depth="depth" />
+        </template>
+
+        <template #error>
+          <button
+            type="button"
+            class="tree-branch-error f-xs"
+            :style="branchIndentStyle"
+            @click="emit('retry')"
           >
-            <template #loading>
-              <SidebarFileTreeSkeleton :depth="depth" />
-            </template>
+            Unable to load. Retry
+          </button>
+        </template>
 
-            <template #error>
-              <button
-                type="button"
-                class="tree-branch-error f-xs"
-                :style="branchIndentStyle"
-                @click="emit('retry')"
-              >
-                Unable to load. Retry
-              </button>
-            </template>
-
-            <div class="tree-branch-list" :data-tree-drop-path="path">
-              <slot />
-            </div>
-          </SidebarFileTreeStateGate>
+        <div class="tree-branch-list" :data-tree-drop-path="path">
+          <SidebarFileTreeItem
+            v-for="child in nodes"
+            :key="child.path"
+            :node="child"
+            :depth="depth"
+            @node-opened="emit('nodeOpened')"
+          />
         </div>
-      </div>
+      </SidebarFileTreeStateGate>
     </div>
   </Transition>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useFileTreeAutoHeightMotion } from '@/composables/useFileTreeAutoHeightMotion'
+import { computed, watch } from 'vue'
+import SidebarFileTreeItem from '@/components/sidebar/SidebarFileTreeItem.vue'
 import SidebarFileTreeSkeleton from '@/components/sidebar/SidebarFileTreeSkeleton.vue'
 import SidebarFileTreeStateGate from '@/components/sidebar/SidebarFileTreeStateGate.vue'
+import { useFileTreeMotion } from '@/composables/useFileTreeMotion'
 import type { AsyncStatus } from '@/types/async'
-import type { DirectoryRenderState } from '@/types/file-system'
+import type { DirectoryRenderState, FsNode } from '@/types/file-system'
 
 const props = defineProps<{
   path: string
   depth: number
   state: DirectoryRenderState
+  nodes: FsNode[]
 }>()
 
 const emit = defineEmits<{
   (event: 'retry'): void
+  (event: 'nodeOpened'): void
 }>()
 
-const heightMotion = useFileTreeAutoHeightMotion()
+const motion = useFileTreeMotion()
 const isVisible = computed(() => ['loading', 'error', 'content'].includes(props.state))
+watch([isVisible, () => props.nodes], ([visible, children], [previousVisible, previousChildren]) => {
+  if (
+    visible !== previousVisible
+    || children.length !== previousChildren.length
+    || children.some((child, index) => child.path !== previousChildren[index]?.path)
+  ) {
+    motion.beforeLayoutChange(props.path)
+  }
+})
+
 const asyncStatus = computed<AsyncStatus>(() => {
   if (props.state === 'error') {
     return 'error'
@@ -62,19 +75,7 @@ const branchIndentStyle = computed(() => ({ '--tree-depth': props.depth }))
 
 <style scoped>
 .tree-branch {
-  display: grid;
-  grid-template-rows: 1fr;
   width: 100%;
-  min-width: 0;
-}
-
-.tree-branch-shell {
-  min-height: 0;
-  min-width: 0;
-  overflow: visible;
-}
-
-.tree-branch-content {
   min-width: 0;
 }
 
@@ -99,23 +100,22 @@ const branchIndentStyle = computed(() => ({ '--tree-depth': props.depth }))
 }
 
 .tree-branch-enter-active {
-  transition: grid-template-rows
-    var(--motion-tree-duration)
-    var(--motion-tree-easing);
+  transition: opacity var(--motion-tree-enter-duration) var(--motion-tree-easing);
 }
 
 .tree-branch-leave-active {
-  transition:
-    grid-template-rows var(--motion-tree-duration) var(--motion-tree-easing),
-    opacity var(--motion-soft-duration) ease;
+  position: absolute;
+  top: 100%;
+  inset-inline: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-soft-duration) ease;
 }
 
 .tree-branch-enter-from {
-  grid-template-rows: 0fr;
+  opacity: 0;
 }
 
 .tree-branch-leave-to {
-  grid-template-rows: 0fr;
   opacity: 0;
 }
 

@@ -34,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, useAttrs, useSlots, type Component } from 'vue'
+import { computed, useAttrs, useSlots, watch, type Component } from 'vue'
 import { useAsyncGate } from '@/composables/useAsyncGate'
 import type { AsyncStatus } from '@/types/async'
 
@@ -63,6 +63,10 @@ const props = withDefaults(defineProps<Props>(), {
   transitionMode: 'out-in',
 })
 
+const emit = defineEmits<{
+  (event: 'before-display-change'): void
+}>()
+
 const attrs = useAttrs()
 const slots = useSlots()
 const hasDefaultSlot = computed(() => Boolean(slots.default))
@@ -79,4 +83,6 @@ const gate = useAsyncGate({
   minVisibleMs: computed(() => props.minVisibleMs),
   loadingOnRefreshing: computed(() => props.loadingOnRefreshing),
 })
+
+watch(gate.displayState, () => emit('before-display-change'), { flush: 'pre' })
 </script>

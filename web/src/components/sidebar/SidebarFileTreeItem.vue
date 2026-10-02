@@ -1,49 +1,43 @@
 <template>
   <div class="tree-node">
-    <div class="tree-node-entrance">
-      <SidebarFileTreeNodeRow
-        v-model:edit-name="editName"
-        :depth="depth"
-        :name="node.name"
-        :suffix="node.suffix"
-        :icon="currentIcon"
-        :is-directory="isDir"
-        :selected="isActive"
-        :opened="isOpened"
-        :can-expand="canExpand"
-        :drop-path="isDir ? node.path : undefined"
-        :drag-over="isDirectoryDragOver"
-        :dragging="isNodeDragging"
-        :renaming="isRenaming"
-        :set-rename-input-ref="setRenameInputRef"
-        @click-node="handleClickNode"
-        @click-directory-icon="handleClickDirectoryIcon"
-        @drag-start="handleDragStart"
-        @drag-end="handleNodeDragEnd"
-        @pointer-down="startLongPress"
-        @pointer-up="stopLongPress"
-        @pointer-leave="stopLongPress"
-        @pointer-cancel="stopLongPress"
-        @submit-rename="submitRename"
-        @cancel-rename="cancelRename"
-      />
-    </div>
+    <SidebarFileTreeNodeRow
+      class="tree-node-row"
+      :data-tree-node-path="node.path"
+      v-model:edit-name="editName"
+      :depth="depth"
+      :name="node.name"
+      :suffix="node.suffix"
+      :icon="currentIcon"
+      :is-directory="isDir"
+      :selected="isActive"
+      :opened="isOpened"
+      :can-expand="canExpand"
+      :drop-path="isDir ? node.path : undefined"
+      :drag-over="isDirectoryDragOver"
+      :dragging="isNodeDragging"
+      :renaming="isRenaming"
+      :set-rename-input-ref="setRenameInputRef"
+      @click-node="handleClickNode"
+      @click-directory-icon="handleClickDirectoryIcon"
+      @drag-start="handleDragStart"
+      @drag-end="handleNodeDragEnd"
+      @pointer-down="startLongPress"
+      @pointer-up="stopLongPress"
+      @pointer-leave="stopLongPress"
+      @pointer-cancel="stopLongPress"
+      @submit-rename="submitRename"
+      @cancel-rename="cancelRename"
+    />
 
     <SidebarFileTreeBranch
       v-if="isDir"
       :path="node.path"
       :depth="depth + 1"
       :state="renderState"
+      :nodes="normalizedChildren"
       @retry="retryDirectory"
-    >
-      <SidebarFileTreeItem
-        v-for="child in normalizedChildren"
-        :key="child.path"
-        :node="child"
-        :depth="depth + 1"
-        @node-opened="emit('nodeOpened')"
-      />
-    </SidebarFileTreeBranch>
+      @node-opened="emit('nodeOpened')"
+    />
   </div>
 </template>
 
@@ -140,31 +134,13 @@ const handleClickDirectoryIcon = async () => {
 
 <style scoped>
 .tree-node,
-.tree-node-entrance {
+.tree-node-row {
   width: 100%;
   min-width: 0;
 }
 
-.tree-node-entrance {
-  animation: tree-node-enter var(--motion-tree-duration) var(--motion-tree-easing) backwards;
-}
-
-@keyframes tree-node-enter {
-  from {
-    opacity: 0;
-    transform: translateY(var(--motion-tree-offset-y));
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .tree-node-entrance {
-    animation: none;
-  }
+.tree-node {
+  position: relative;
 }
 
 </style>
