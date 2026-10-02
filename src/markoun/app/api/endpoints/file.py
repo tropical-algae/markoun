@@ -15,7 +15,6 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from markoun.app.api.deps import get_db, get_workspace_context
 from markoun.app.services.file_service import (
     DEFAULT_SEARCH_LIMIT,
-    MAX_SEARCH_LIMIT,
     create_note,
     get_media_response,
     search_markdown_files,
@@ -57,7 +56,7 @@ async def api_load_note(
 @exception_handling(CONSTANT.RESP_SERVER_ERROR)
 async def api_search_notes(
     keyword: str,
-    limit: int = Query(DEFAULT_SEARCH_LIMIT, ge=1, le=MAX_SEARCH_LIMIT),
+    limit: int = Query(DEFAULT_SEARCH_LIMIT, ge=-1),
     workspace: WorkspaceContext = Security(
         get_workspace_context, scopes=[ScopeType.ADMIN, ScopeType.USER]
     ),

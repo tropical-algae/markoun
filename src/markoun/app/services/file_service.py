@@ -1,6 +1,9 @@
 import asyncio
 import json
+import os
 import uuid
+from collections.abc import AsyncGenerator
+from contextlib import aclosing, suppress
 from datetime import datetime
 from pathlib import Path
 from urllib.parse import quote
@@ -34,8 +37,7 @@ from markoun.core.model.file import (
 TIME_FORMAT = "%Y-%m-%d %H:%M"
 NOTE_SUFFIX = "md"
 DISPLAYED_FILE_TYPES = set(settings.DISPLAYED_FILE_TYPES)
-DEFAULT_SEARCH_LIMIT = 20
-MAX_SEARCH_LIMIT = 200
+DEFAULT_SEARCH_LIMIT = -1
 MEDIA_FILE_TYPES = {"png", "jpg", "jpeg", "bmp", "svg"}
 INTERNAL_MEDIA_PREFIX = "/_protected_media"
 
@@ -60,6 +62,61 @@ def get_file_meta(workspace: WorkspaceContext, abs_filepath: Path) -> FileMeta:
     )
 
 
+async def _iter_search_records(
+    workspace: WorkspaceContext,
+    *arguments: str,
+    separator: bytes = b"\n",
+) -> AsyncGenerator[bytes]:
+    """Stream rg records and reap the process even when the consumer stops early."""
+    process = await asyncio.create_subprocess_exec(
+        "rg",
+        "--no-config",
+        "--no-ignore",
+        "--glob",
+        f"*.{NOTE_SUFFIX}",
+        "--glob",
+        f"!{WORKSPACE_DATA_DIRECTORY}/**",
+        "--glob",
+        f"!**/{WORKSPACE_DATA_DIRECTORY}/**",
+        *arguments,
+        "--",
+        str(workspace.root),
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+
+    assert process.stdout is not None
+    assert process.stderr is not None
+
+    stderr_task = asyncio.create_task(process.stderr.read())
+    try:
+        pending = b""
+        # Read chunks rather than readline(), which imposes a maximum line length.
+        while chunk := await process.stdout.read(64 * 1024):
+            records = (pending + chunk).split(separator)
+            pending = records.pop()
+            for record in records:
+                yield record
+        if pending:
+            yield pending
+
+        returncode = await process.wait()
+        stderr = await stderr_task
+        if returncode not in (0, 1):
+            logger.error(
+                f"[Failed to search markdown files] {stderr.decode(errors='replace').strip()}"
+            )
+            raise HTTPException(**CONSTANT.SERV_FILE_SEARCH_FAIL)
+    finally:
+        if process.returncode is None:
+            with suppress(ProcessLookupError):
+                process.kill()
+        # Drain before waiting so a full stdout pipe cannot block process cleanup.
+        await process.stdout.read()
+        await process.wait()
+        await stderr_task
+
+
 async def search_markdown_files(
     keyword: str,
     workspace: WorkspaceContext,
@@ -68,72 +125,55 @@ async def search_markdown_files(
     normalized_keyword = keyword.strip()
     if not normalized_keyword:
         raise HTTPException(**CONSTANT.SERV_FILE_SEARCH_EMPTY_KEYWORD)
+    if limit != -1 and limit < 1:
+        raise HTTPException(**CONSTANT.SERV_FILE_SEARCH_INVALID_LIMIT)
 
-    safe_limit = limit
-    process = await asyncio.create_subprocess_exec(
-        "rg",
-        "--json",
-        "--fixed-strings",
-        "--no-ignore",
-        "--glob",
-        f"*.{NOTE_SUFFIX}",
-        "--glob",
-        f"!{WORKSPACE_DATA_DIRECTORY}/**",
-        "--glob",
-        f"!**/{WORKSPACE_DATA_DIRECTORY}/**",
-        normalized_keyword,
-        str(workspace.root),
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
-    )
-
-    if process.stdout is None or process.stderr is None:
-        raise HTTPException(**CONSTANT.SERV_FILE_SEARCH_FAIL)
-
-    stderr_task = asyncio.create_task(process.stderr.read())
     results_by_path: dict[str, FileSearchResult] = {}
-    reached_limit = False
 
-    while line := await process.stdout.readline():
-        data: dict = json.loads(line.decode("utf-8"))
-        if data.get("type") == "match":
+    def get_result(filepath: Path) -> FileSearchResult:
+        relative_path = str(workspace.relative(filepath))
+        if relative_path not in results_by_path:
+            results_by_path[relative_path] = FileSearchResult(
+                node=FileNode(
+                    name=filepath.stem,
+                    path=relative_path,
+                    type=FsNodeType.FILE,
+                    suffix=NOTE_SUFFIX,
+                ),
+            )
+        return results_by_path[relative_path]
+
+    # Keep all matched lines for each selected file before applying the file limit.
+    async with aclosing(
+        _iter_search_records(
+            workspace, "--json", "--fixed-strings", "--regexp", normalized_keyword
+        )
+    ) as records:
+        async for record in records:
+            data: dict = json.loads(record)
+            if data.get("type") == "end" and 0 < limit <= len(results_by_path):
+                return list(results_by_path.values())
+            if data.get("type") != "match":
+                continue
             match_data = data["data"]
             filepath = Path(match_data["path"]["text"])
-            if file_suffix(filepath) != NOTE_SUFFIX:
-                continue
-
-            relative_path = str(workspace.relative(filepath))
-            result = results_by_path.get(relative_path)
-            if result is None:
-                if len(results_by_path) >= safe_limit:
-                    reached_limit = True
-                    process.terminate()
-                    break
-
-                result = FileSearchResult(
-                    node=FileNode(
-                        name=filepath.stem,
-                        path=relative_path,
-                        type=FsNodeType.FILE,
-                        suffix=NOTE_SUFFIX,
-                    ),
-                )
-                results_by_path[relative_path] = result
-
-            result.matches.append(
+            get_result(filepath).matches.append(
                 FileSearchMatch(
                     snippet=match_data["lines"]["text"].strip(),
                     line=match_data["line_number"],
                 )
             )
 
-    returncode = await process.wait()
-    stderr = await stderr_task
-    if returncode == 1:
-        return []
-    if returncode != 0 and not reached_limit:
-        logger.error(f"[Failed to search markdown files] {stderr.decode().strip()}")
-        raise HTTPException(**CONSTANT.RESP_SERVER_ERROR)
+    # rg enumerates the same files; only the basename is matched, not parent folders.
+    async with aclosing(
+        _iter_search_records(workspace, "--files", "--null", separator=b"\0")
+    ) as records:
+        async for record in records:
+            filepath = Path(os.fsdecode(record))
+            if normalized_keyword in filepath.name:
+                get_result(filepath)
+                if 0 < limit <= len(results_by_path):
+                    break
 
     return list(results_by_path.values())
 

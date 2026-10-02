@@ -127,6 +127,10 @@ class Constant(BaseSettings):
         "status_code": status.HTTP_400_BAD_REQUEST,
         "detail": "Search keyword cannot be empty",
     }
+    SERV_FILE_SEARCH_INVALID_LIMIT: dict = {
+        "status_code": status.HTTP_400_BAD_REQUEST,
+        "detail": "Search limit must be -1 or a positive integer",
+    }
     SERV_FILE_SEARCH_FAIL: dict = {
         "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
         "detail": "Failed to search file",

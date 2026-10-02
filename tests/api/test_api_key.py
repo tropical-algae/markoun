@@ -67,6 +67,66 @@ def _mcp_tool_error(response) -> dict:
     return structured_content["error"]
 
 
+def test_mcp_search_filenames_and_unlimited_results(
+    client: TestClient, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    username = f"search-{uuid4().hex[:8]}"
+    monkeypatch.setattr(settings, "DOCUMENT_ROOT", str(tmp_path))
+    monkeypatch.setattr(settings, "USER_WORKSPACE_ISOLATION", True)
+    _register_and_login(client, username)
+    workspace = tmp_path / username
+    workspace.mkdir(parents=True, exist_ok=True)
+    for index in range(25):
+        (workspace / f"needle-{index}.md").write_text(
+            "needle\nneedle again" if index == 0 else "unrelated", encoding="utf-8"
+        )
+    (tmp_path / "needle-outside.md").write_text("needle", encoding="utf-8")
+    api_key = client.post(
+        f"{settings.API_PREFIX}/api-keys",
+        json={"name": "search-only", "permissions": ["search"]},
+    ).json()["data"]["key"]
+
+    tools = _mcp_request(client, api_key, "tools/list").json()["result"]["tools"]
+    search_tool = next(tool for tool in tools if tool["name"] == "search_files")
+    schema = search_tool["inputSchema"]
+    assert schema["properties"]["limit"]["default"] == -1
+    assert "maximum" not in schema["properties"]["limit"]
+    assert "limit" not in schema.get("required", [])
+
+    for limit, count in [(None, 25), (-1, 25), (1, 1), (2, 2), (300, 25)]:
+        arguments = {"keyword": "needle"}
+        if limit is not None:
+            arguments["limit"] = limit
+        payload = _mcp_tool_result(
+            _mcp_request(
+                client,
+                api_key,
+                "tools/call",
+                {"name": "search_files", "arguments": arguments},
+            )
+        )
+        results = payload["results"]
+        assert len(results) == count
+        assert results[0]["node"]["path"] == "needle-0.md"
+        assert len(results[0]["matches"]) == 2
+        assert all(item["matches"] == [] for item in results[1:])
+        assert all("outside" not in item["node"]["path"] for item in results)
+
+    for limit in (0, -2):
+        error = _mcp_tool_error(
+            _mcp_request(
+                client,
+                api_key,
+                "tools/call",
+                {
+                    "name": "search_files",
+                    "arguments": {"keyword": "needle", "limit": limit},
+                },
+            )
+        )
+        assert "limit" in error["message"].lower()
+
+
 def test_api_key_lifecycle_and_mcp_permissions(
     client: TestClient,
     tmp_path: Path,

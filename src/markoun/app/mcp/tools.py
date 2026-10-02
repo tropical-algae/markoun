@@ -7,7 +7,11 @@ from pydantic import Field
 
 from markoun.app.mcp.auth import get_mcp_principal
 from markoun.app.services.dir_service import create_dir
-from markoun.app.services.file_service import create_note, search_markdown_files
+from markoun.app.services.file_service import (
+    DEFAULT_SEARCH_LIMIT,
+    create_note,
+    search_markdown_files,
+)
 from markoun.app.services.item_service import get_directory_children
 from markoun.app.services.note_service import load_note, save_note
 from markoun.app.services.workspace_item_service import (
@@ -126,18 +130,28 @@ def register_workspace_tools(server: MCPServer) -> None:
             str,
             Field(
                 min_length=1,
-                description="Fixed, case-sensitive text to find in Markdown files.",
+                description=(
+                    "Non-blank, case-sensitive literal text to find in Markdown "
+                    "filenames or content."
+                ),
             ),
         ],
         limit: Annotated[
             int,
-            Field(ge=1, description="Maximum number of matching files to return."),
-        ],
+            Field(
+                ge=-1,
+                description=(
+                    "Maximum matching files: a positive integer, or -1 for no limit "
+                    "(default). There is no upper bound."
+                ),
+            ),
+        ] = DEFAULT_SEARCH_LIMIT,
     ) -> dict[str, Any]:
-        """Find Markdown files containing a literal keyword (no fuzzy matching).
+        """Find Markdown files whose filename or content contains a literal keyword.
 
-        Returns each matching file's node information and the line number and text
-        of every match.
+        No fuzzy matching. Returns each file once with its node information and
+        all matching content lines (line number and text). Filename-only matches
+        have an empty matches list. Content matches are returned first.
         """
         workspace = _workspace(McpPermission.SEARCH)
         results = await search_markdown_files(keyword, workspace, limit)
