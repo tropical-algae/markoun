@@ -73,6 +73,10 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   (response: AxiosResponse) => response,
   (error: unknown) => {
+    if (axios.isCancel(error)) {
+      return Promise.reject(error)
+    }
+
     const requestConfig = axios.isAxiosError(error)
       ? (error.config ?? {}) as RequestConfig
       : {}

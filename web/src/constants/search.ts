@@ -1,1 +1,3 @@
-export const DEFAULT_SEARCH_RESULT_LIMIT = 50
+export const SEARCH_FILES_PER_PAGE = 10
+export const SEARCH_MATCH_PREVIEW_COUNT = 3
+export const SEARCH_MATCH_BATCH_SIZE = 20

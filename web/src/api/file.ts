@@ -25,13 +25,14 @@ export const getFileContentApi = (
   })
 }
 
-export const searchFileContentApi = (
+export const searchFilesApi = (
   keyword: string,
-  limit: number
+  { limit = -1, signal }: { limit?: number, signal?: AbortSignal } = {},
 ): Promise<ApiResponse<FileSearchResult[]>> => {
   return request({
     url: '/api/v1/file/search',
     method: 'get',
+    signal,
     params: {
       keyword,
       limit,

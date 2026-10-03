@@ -73,7 +73,7 @@
   /* Updated per entrance by the tree's layout animation plan. */
   --motion-tree-enter-duration: var(--motion-tree-duration);
   --motion-tree-resize-duration-min: 0.48s;
-  --motion-tree-resize-duration-max: 1.52s;
+  --motion-tree-resize-duration-max: 1.1s;
   --motion-tree-resize-reference-distance: 80px;
   --motion-tree-easing: cubic-bezier(0.2, 0.8, 0.2, 1);
   --motion-profile-duration: 0.35s;
