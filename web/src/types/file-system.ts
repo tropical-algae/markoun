@@ -30,6 +30,8 @@ export interface FileDetail {
   meta: Record<string, string>
 }
 
+export type SelectedItem = Pick<FsNode, 'path' | 'type'>
+
 export interface FileDetailResponse {
   content: string
   meta: Record<string, string>

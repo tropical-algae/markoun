@@ -14,11 +14,14 @@ import { resolveApiUrl } from '@/utils/api-url'
  * 获取文件信息接口
  */
 export const getFileContentApi = (
-  filepath: string
+  filepath: string,
+  signal?: AbortSignal,
 ): Promise<ApiResponse<FileDetailResponse>> => {
   return request({
     url: '/api/v1/file/load',
     method: 'get',
+    signal,
+    suppressErrorToast: true,
     params: {
       filepath: filepath
     }

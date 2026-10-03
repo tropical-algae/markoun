@@ -48,6 +48,12 @@
         </div>
       </template>
 
+      <template #error>
+        <button type="button" class="f-s fc-sec" @click="retryFile">
+          Unable to load this file. Retry
+        </button>
+      </template>
+
       <div class="editor-ready-state fc-pri">
         <textarea
           v-model="nodeStore.currentFile.content"
@@ -79,6 +85,8 @@ import type { InspectorMode } from '@/types/ui'
 import { readCssTimeMs } from '@/utils/css'
 import { useMarkdownPasteUpload } from '@/composables/useMarkdownPasteUpload'
 import { useTextareaIndentation } from '@/composables/useTextareaIndentation'
+import { useWorkspaceActions } from '@/composables/useWorkspaceActions'
+import { fileNodeFromPath } from '@/utils/file-node'
 
 import EditorLayout from '@/layouts/EditorLayout.vue'
 import NoteEditorHeader from '@/components/editor/NoteEditorHeader.vue'
@@ -96,6 +104,8 @@ const emit = defineEmits<{
 
 const nodeStore = useNodeStore()
 const appearanceStore = useAppearanceStore()
+const workspace = useWorkspaceActions()
+const retryFile = () => workspace.openNode(fileNodeFromPath(nodeStore.currentFile.path))
 
 const markdownEditorRef = ref<HTMLTextAreaElement | null>(null)
 const { handleEditorKeydown, resetTabNavigation } = useTextareaIndentation()

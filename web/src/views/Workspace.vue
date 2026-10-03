@@ -35,7 +35,6 @@
 
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
-import { onBeforeRouteLeave } from 'vue-router'
 
 import WorkspaceLayout from '@/layouts/WorkspaceLayout.vue'
 import SidebarRail from '@/components/sidebar/SidebarRail.vue'
@@ -49,12 +48,8 @@ import {
   type InspectorMode as InspectorModeType,
 } from '@/types/ui'
 import { useNodeStore } from '@/stores/note'
-import { useSysStore } from '@/stores/system'
-import { useUserStore } from '@/stores/user'
 
 const nodeStore = useNodeStore()
-const sysStore = useSysStore()
-const userStore = useUserStore()
 const panes = useWorkspacePanes()
 const sidebarMode = ref<SidebarMode>(SidebarMode.FileTree)
 const inspectorMode = ref<InspectorModeType>(InspectorMode.Meta)
@@ -87,20 +82,11 @@ const toggleInspector = async (mode: InspectorModeType) => {
 }
 
 onMounted(() => {
-  void nodeStore.ensureWelcomeNoteLoaded().catch(() => null)
   window.addEventListener('pagehide', handlePageHide)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('pagehide', handlePageHide)
-  nodeStore.resetWorkspaceState()
-})
-
-onBeforeRouteLeave(async () => {
-  if (sysStore.authRequired && !userStore.isAuthenticated) {
-    return
-  }
-  await nodeStore.saveCurrentFileIfDirty()
 })
 
 const handlePageHide = () => {

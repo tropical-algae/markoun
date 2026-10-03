@@ -24,7 +24,7 @@
       </div>
     </template>
 
-    <div v-html="renderedHtml" class="fc-pri"></div>
+    <div v-html="renderedHtml" class="fc-pri" @click="followMarkdownLink"></div>
   </InspectorPanel>
 </template>
 
@@ -32,6 +32,9 @@
 import type { AsyncStatus } from '@/types/async'
 import BaseSkeleton from '@/components/base/BaseSkeleton.vue'
 import InspectorPanel from '@/components/inspector/InspectorPanel.vue'
+import { useWorkspaceActions } from '@/composables/useWorkspaceActions'
+
+const { followMarkdownLink } = useWorkspaceActions()
 
 defineProps<{
   status: AsyncStatus

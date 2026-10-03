@@ -47,7 +47,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { useNodeStore } from '@/stores/note'
+import { useWorkspaceActions } from '@/composables/useWorkspaceActions'
 import type { FileSearchResult } from '@/types/file-system'
 import { useFileSearch } from '@/composables/useFileSearch'
 import { usePagination } from '@/composables/usePagination'
@@ -63,7 +63,7 @@ const emit = defineEmits<{
   (event: 'nodeOpened'): void
 }>()
 
-const nodeStore = useNodeStore()
+const workspace = useWorkspaceActions()
 const { keyword, results, status, hasSearched, isPending, submitSearch } = useFileSearch()
 const { page, pageCount, pageItems, total, firstItem, lastItem, setPage } = usePagination(
   results, SEARCH_FILES_PER_PAGE,
@@ -77,8 +77,7 @@ watch([page, results], () => {
 }, { flush: 'post' })
 
 const openSearchResult = async (result: FileSearchResult) => {
-  await nodeStore.setCurrentNode(result.node)
-  emit('nodeOpened')
+  if (await workspace.openNode(result.node)) emit('nodeOpened')
 }
 </script>
 

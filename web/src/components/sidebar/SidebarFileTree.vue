@@ -89,6 +89,7 @@ import UploadIcon from '@/assets/icons/cloud-upload-alt.svg'
 import TrashIcon from '@/assets/icons/trash.svg'
 
 import { useNodeStore } from '@/stores/note'
+import { useWorkspaceActions } from '@/composables/useWorkspaceActions'
 import type { AsyncStatus } from '@/types/async'
 import { provideFileTreeDropController } from '@/composables/useFileTreeDropController'
 import { provideFileTreeMotion } from '@/composables/useFileTreeMotion'
@@ -105,6 +106,7 @@ const deleteItem = ref(false)
 const fileTreeRootRef = ref<HTMLElement | null>(null)
 const fileTreeLayoutRef = ref<HTMLElement | null>(null)
 const nodeStore = useNodeStore()
+const workspace = useWorkspaceActions()
 const motion = provideFileTreeMotion(fileTreeRootRef, fileTreeLayoutRef)
 watch(() => nodeStore.rootNodes, (children, previousChildren) => {
   if (
@@ -132,14 +134,14 @@ const {
   handleDrop: handleTreeDrop,
 } = provideFileTreeDropController({
   rootElement: fileTreeRootRef,
-  moveNode: nodeStore.moveNode,
+  moveNode: workspace.moveNode,
   selectDirectory: async (path) => {
     if (path === ROOT_DIRECTORY_PATH) {
       return
     }
     const node = nodeStore.getCachedNode(path)
     if (node?.type === 'dir') {
-      await nodeStore.setCurrentNode(node)
+      nodeStore.selectItem(node)
     }
   },
 })

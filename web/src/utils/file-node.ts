@@ -8,6 +8,17 @@ import {
 
 const PREVIEWABLE_IMAGE_SUFFIXES = new Set(['png', 'jpg', 'jpeg', 'bmp', 'svg'])
 
+export const fileNodeFromPath = (path: string): FsNode => {
+  const filename = path.slice(path.lastIndexOf('/') + 1)
+  const dot = filename.lastIndexOf('.')
+  return {
+    path,
+    name: dot > 0 ? filename.slice(0, dot) : filename,
+    suffix: dot > 0 ? filename.slice(dot + 1) : '',
+    type: 'file',
+  }
+}
+
 export const normalizeFsNode = (node: FsNode): FsNode => ({
   ...node,
   path: normalizeNodePath(node.path),

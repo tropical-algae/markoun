@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref, type Ref } from 'vue'
 import { useActionLedger } from '@/composables/useActionLedger'
-import type { FsNode, PastedImageResponse, UploadResponse } from '@/types/file-system'
+import type { FsNode, PastedImageResponse, SelectedItem, UploadResponse } from '@/types/file-system'
 import { useToastStore } from '@/stores/toast'
 import {
   getMediaPath,
@@ -9,10 +9,10 @@ import {
   isPathInside,
   normalizeNodePath,
   ROOT_DIRECTORY_PATH,
+  replacePathPrefix,
 } from '@/utils/file-system'
 import {
   buildRenamedPath,
-  isMarkdownNode,
   isPreviewableImageNode,
   normalizeFsNode,
   remapOptionalFsNodePathPrefix,
@@ -30,20 +30,22 @@ import { moveItemApi, removeItemApi, renameItemApi } from '@/api/item'
 import { createDirApi } from '@/api/dir'
 import { getWelcomeNoteApi } from '@/api/system'
 import { useFileTreeState } from '@/stores/note/file-tree-state'
-import { useCurrentFileState } from '@/stores/note/current-file-state'
+import { useCurrentFileState, type FileContext } from '@/stores/note/current-file-state'
 import { useHistoryState } from '@/stores/note/history-state'
+import { normalizeFilePath } from '@/utils/file-navigation'
+import { normalizeRequestError } from '@/utils/request'
 
 export const useNodeStore = defineStore('note', () => {
   const fileTree = useFileTreeState()
   const fileState = useCurrentFileState()
   const historyState = useHistoryState()
-  const currentNode = ref<FsNode | null>(null)
+  const selectedItem = ref<SelectedItem | null>(null)
   const currentPreviewImageNode = ref<FsNode | null>(null)
   const currentParentPath = computed(() => {
-    return getParentPath(currentNode.value ?? fileState.currentFileNode.value)
-  })
-  const currentFileParentPath = computed(() => {
-    return getParentPath(fileState.currentFileNode.value ?? fileState.currentFile.value.path)
+    const item = selectedItem.value
+    return item?.type === 'dir'
+      ? item.path
+      : getParentPath(item?.path ?? fileState.currentFile.value.path)
   })
   const currentPathLabel = computed(() => {
     return currentParentPath.value === ROOT_DIRECTORY_PATH ? '/' : currentParentPath.value
@@ -57,8 +59,9 @@ export const useNodeStore = defineStore('note', () => {
 
   const toastStore = useToastStore()
   const actionLedger = useActionLedger()
-  let currentSelectionId = 0
-  let pendingFileSwitchSave: Promise<void> | null = null
+  let fileRequest: AbortController | null = null
+  let pendingSave: Promise<void> | null = null
+  let welcomeRequest: Promise<string> | null = null
   const {
     loadDirectory,
     getCachedNode,
@@ -73,11 +76,13 @@ export const useNodeStore = defineStore('note', () => {
     toggleDirectory,
   } = fileTree
 
-  const remapNodePathState = (oldPath: string, newPath: string, exactName: string) => {
-    fileTree.renameSubtree(oldPath, newPath, exactName)
-
-    currentNode.value = remapOptionalFsNodePathPrefix(currentNode.value, oldPath, newPath, exactName)
-    fileState.remapCurrentFileNodePathPrefix(oldPath, newPath, exactName)
+  const remapWorkspacePaths = (oldPath: string, newPath: string, exactName: string) => {
+    if (selectedItem.value) {
+      selectedItem.value = {
+        ...selectedItem.value,
+        path: replacePathPrefix(selectedItem.value.path, oldPath, newPath),
+      }
+    }
     currentPreviewImageNode.value = remapOptionalFsNodePathPrefix(
       currentPreviewImageNode.value,
       oldPath,
@@ -106,16 +111,16 @@ export const useNodeStore = defineStore('note', () => {
       return fileState.welcomeNoteContent.value
     }
 
+    if (welcomeRequest) return welcomeRequest
     fileState.beginWelcomeNoteLoad()
-
-    try {
-      const response = await getWelcomeNoteApi()
+    welcomeRequest = getWelcomeNoteApi().then((response) => {
       fileState.completeWelcomeNoteLoad(response.data)
       return fileState.welcomeNoteContent.value
-    } catch (error) {
+    }).catch((error) => {
       fileState.failWelcomeNoteLoad()
       throw error
-    }
+    }).finally(() => { welcomeRequest = null })
+    return welcomeRequest
   }
 
   const openImagePreview = (node: FsNode) => {
@@ -126,50 +131,36 @@ export const useNodeStore = defineStore('note', () => {
     currentPreviewImageNode.value = null
   }
 
-  const syncInsertedNode = (parentPath: string, node: FsNode) => {
-    const normalizedNode = fileTree.insertNode(parentPath, node)
-
-    if (currentNode.value?.path === normalizedNode.path) {
-      currentNode.value = normalizedNode
+  const loadFile = async (filePath: string, force = false): Promise<boolean> => {
+    const path = normalizeFilePath(filePath)
+    if (!force && fileState.currentFile.value.path === path
+      && ['ready', 'loading'].includes(fileState.currentFileStatus.value)) {
+      return true
     }
-    fileState.syncCurrentFileNode(normalizedNode)
-  }
-
-  const loadCurrentFile = async (node: FsNode, force = false) => {
-    if (!isMarkdownNode(node)) {
-      return
-    }
-
-    const normalizedNode = normalizeFsNode(node)
-    if (!force && fileState.currentFileNode.value?.path === normalizedNode.path) {
-      if (fileState.currentFileStatus.value === 'ready') {
-        currentNode.value = normalizedNode
-        return
-      }
-      if (fileState.currentFileStatus.value === 'loading') {
-        currentNode.value = normalizedNode
-        return
-      }
-    }
-
-    currentNode.value = normalizedNode
-    historyState.beginHistoryInitialization(normalizedNode.path)
-    const requestId = fileState.beginFileLoad(normalizedNode)
+    fileRequest?.abort()
+    const controller = new AbortController()
+    fileRequest = controller
+    historyState.beginHistoryInitialization(path)
+    const read = fileState.beginFileLoad(path)
 
     try {
-      const response = await getFileContentApi(normalizedNode.path)
-      const completed = fileState.completeFileLoad(requestId, normalizedNode, response.data)
+      const response = await getFileContentApi(path, controller.signal)
+      const completed = fileState.completeFileLoad(read, response.data)
       if (completed) {
         historyState.initializeHistory(
-          normalizedNode.path,
+          path,
           response.data.history_enabled,
           response.data.default_revision_id,
         )
       }
+      return completed
     } catch (error) {
-      if (fileState.failFileLoad(requestId, normalizedNode)) {
-        historyState.failHistoryInitialization(normalizedNode.path)
-      }
+      if (controller.signal.aborted || !fileState.failFileLoad(read)) return false
+      historyState.failHistoryInitialization(path)
+      if (normalizeRequestError(error).status === 404) fileTree.removeSubtree(path)
+      throw error
+    } finally {
+      if (fileRequest === controller) fileRequest = null
     }
   }
 
@@ -182,69 +173,38 @@ export const useNodeStore = defineStore('note', () => {
         : await createDirApi(parentPath, noteName)
     })
 
-    syncInsertedNode(parentPath, response.data)
+    fileTree.insertNode(parentPath, response.data)
     void fileTree.expandDirectory(parentPath).catch(() => null)
-    await setCurrentNode(response.data)
+    return response.data
   }
 
-  const setCurrentNode = async (node: FsNode): Promise<void> => {
-    const selectionId = ++currentSelectionId
+  const selectItem = (node: FsNode): void => {
     const normalizedNode = normalizeFsNode(node)
-    if (isMarkdownNode(normalizedNode)) {
-      if (fileState.currentFileNode.value?.path !== normalizedNode.path) {
-        const sourceNode = fileState.currentFileNode.value
-        const sourcePath = sourceNode?.path ?? ''
-        const shouldSave = fileState.isCurrentFileDirty.value
-
-        currentNode.value = normalizedNode
-        closeImagePreview()
-        fileState.beginFileSwitch()
-
-        try {
-          if (shouldSave || pendingFileSwitchSave) {
-            await saveCurrentFileForSwitch()
-          }
-        } catch (_) {
-          fileState.cancelFileSwitch(sourcePath)
-          if (selectionId === currentSelectionId) {
-            currentNode.value = sourceNode
-          }
-          return
-        }
-
-        if (selectionId !== currentSelectionId) {
-          fileState.cancelFileSwitch(sourcePath)
-          return
-        }
-      }
-      closeImagePreview()
-      void loadCurrentFile(normalizedNode)
-    } else if (isPreviewableImageNode(normalizedNode)) {
-      currentNode.value = normalizedNode
+    selectedItem.value = { path: normalizedNode.path, type: normalizedNode.type }
+    if (isPreviewableImageNode(normalizedNode)) {
       openImagePreview(normalizedNode)
-    } else if (node.type === 'dir') {
-      closeImagePreview()
-      currentNode.value = normalizedNode
     } else {
       closeImagePreview()
-      currentNode.value = normalizedNode
-      toastStore.pushNotice('warning', `WARNING: The selected object cannot be opened.`)
     }
   }
 
-  const clearCurrentNode = () => {
-    currentNode.value = null
+  const clearSelection = () => {
+    selectedItem.value = null
     closeImagePreview()
   }
 
-  const resetWorkspaceState = () => {
-    currentSelectionId += 1
-    pendingFileSwitchSave = null
-    fileTree.resetFileTree()
+  const showWelcome = () => {
+    fileRequest?.abort()
+    fileRequest = null
     fileState.resetCurrentFileState()
     historyState.resetHistoryState()
-    currentNode.value = null
-    currentPreviewImageNode.value = null
+    clearSelection()
+  }
+
+  const resetWorkspaceState = () => {
+    showWelcome()
+    pendingSave = null
+    fileTree.resetFileTree()
   }
 
   const uploadFile = async (
@@ -259,7 +219,7 @@ export const useNodeStore = defineStore('note', () => {
       })
     })
     if (response.data.node) {
-      syncInsertedNode(parentPath, response.data.node)
+      fileTree.insertNode(parentPath, response.data.node)
       void fileTree.expandDirectory(parentPath).catch(() => null)
     }
     toastStore.pushNotice('info', `File upload successfully.`)
@@ -280,35 +240,36 @@ export const useNodeStore = defineStore('note', () => {
     const createdDirectory = response.data.created_directory
     if (createdDirectory) {
       const directoryParent = getParentPath(createdDirectory.path)
-      syncInsertedNode(directoryParent, createdDirectory)
+      fileTree.insertNode(directoryParent, createdDirectory)
     }
 
     const uploadedNode = response.data.node
     const uploadParent = getParentPath(response.data.path)
     if (uploadedNode) {
-      syncInsertedNode(uploadParent, uploadedNode)
+      fileTree.insertNode(uploadParent, uploadedNode)
     }
 
     toastStore.pushNotice('info', `Image upload successfully.`)
     return response.data
   }
 
-  const saveCurrentFile = async (
+  const performSave = async (
     options: { silent?: boolean; refreshHistory?: boolean } = {},
   ): Promise<void> => {
-    if (!fileState.isCurrentFileInitialized.value) {
+    const context = fileState.captureFileContext()
+    if (!context || !fileState.canEditCurrentFile.value) {
       toastStore.pushNotice('warning', 'The home page cannot be changed.')
       return
     }
-    const savedPath = fileState.currentFile.value.path
-    const savedContent = fileState.currentFile.value.content
+    const savedPath = context.path
+    const savedContent = context.file.content
     const response = await actionLedger.runAction('save-current-file', async () => {
       const saveResponse = await saveNoteApi(
         savedPath,
         savedContent,
         historyState.baseRevisionId.value,
       )
-      if (fileState.currentFile.value.path === savedPath) {
+      if (fileState.isCurrentFileContext(context)) {
         fileState.markSavedContent(savedContent)
         historyState.applySaveResult(
           savedPath,
@@ -319,7 +280,7 @@ export const useNodeStore = defineStore('note', () => {
       }
       return saveResponse
     })
-    if (fileState.currentFile.value.path === savedPath) {
+    if (fileState.isCurrentFileContext(context)) {
       const meta = Object.fromEntries(
         Object.entries(response.data).filter(([key, value]) => {
           return ![
@@ -339,28 +300,31 @@ export const useNodeStore = defineStore('note', () => {
     }
   }
 
-  const saveCurrentFileForSwitch = (): Promise<void> => {
-    if (pendingFileSwitchSave) {
-      return pendingFileSwitchSave
-    }
-
-    const operation = saveCurrentFile({ silent: false })
-    pendingFileSwitchSave = operation
-
-    const clearPendingSave = () => {
-      if (pendingFileSwitchSave === operation) {
-        pendingFileSwitchSave = null
-      }
-    }
-    void operation.then(clearPendingSave, clearPendingSave)
+  const saveCurrentFile = (
+    options: { silent?: boolean; refreshHistory?: boolean } = {},
+  ): Promise<void> => {
+    if (pendingSave) return pendingSave
+    const operation = performSave(options)
+    pendingSave = operation
+    const clear = () => { if (pendingSave === operation) pendingSave = null }
+    void operation.then(clear, clear)
     return operation
   }
 
-  const saveCurrentFileIfDirty = async (): Promise<void> => {
-    if (!fileState.isCurrentFileDirty.value) {
+  const saveCurrentFileIfDirty = async (
+    options: { refreshHistory?: boolean } = {},
+  ): Promise<void> => {
+    const context = fileState.captureFileContext()
+    if (!context) return
+    if (pendingSave) await pendingSave
+    if (!fileState.isCurrentFileContext(context) || !fileState.isCurrentFileDirty.value) {
       return
     }
-    await saveCurrentFile({ silent: false })
+    await saveCurrentFile({ ...options, silent: false })
+    if (fileState.isCurrentFileContext(context) && fileState.isCurrentFileDirty.value) {
+      toastStore.pushNotice('warning', 'The note changed while saving. Please try again.')
+      throw new Error('The note changed while saving')
+    }
   }
 
   const saveCurrentFileBeforeUnload = () => {
@@ -384,60 +348,57 @@ export const useNodeStore = defineStore('note', () => {
   }
 
   const loadRevisionContent = async (
-    path: string,
+    context: FileContext,
     revisionId: string,
   ): Promise<void> => {
-    const previousContent = fileState.currentFile.value.content
-    const requestId = fileState.beginRevisionLoad()
+    const read = fileState.beginRevisionLoad(context)
+    if (!read) return
+    const previousContent = context.file.content
     historyState.beginRevisionLoad(revisionId)
     try {
-      const response = await getHistoryRevisionApi(path, revisionId)
-      if (fileState.completeRevisionLoad(requestId, path, response.data.content)) {
+      const response = await getHistoryRevisionApi(context.path, revisionId)
+      if (fileState.completeRevisionLoad(read, response.data.content)) {
         historyState.completeRevisionLoad(revisionId)
       }
     } catch (error) {
-      fileState.restoreRevisionLoad(requestId, path, previousContent)
-      historyState.failRevisionLoad()
-      throw error
+      if (fileState.completeRevisionLoad(read, previousContent)) {
+        historyState.failRevisionLoad()
+        throw error
+      }
     }
   }
 
   const selectHistoryRevision = async (revisionId: string): Promise<void> => {
+    const context = fileState.captureFileContext()
     if (
       actionLedger.isActionPending('load-history-revision')
       || actionLedger.isActionPending('delete-history-revision')
       || historyState.pendingRevisionId.value
       || historyState.viewedRevisionId.value === revisionId
-      || !fileState.currentFile.value.path
+      || !context
     ) {
       return
     }
 
     await actionLedger.runAction('load-history-revision', async () => {
-      const path = fileState.currentFile.value.path
       await saveCurrentFileIfDirty()
-      if (fileState.currentFile.value.path === path) {
-        await loadRevisionContent(path, revisionId)
-      }
+      await loadRevisionContent(context, revisionId)
     })
   }
 
   const prepareHistoryRevisionDelete = async (): Promise<void> => {
-    const path = fileState.currentFile.value.path
-    if (fileState.isCurrentFileDirty.value) {
-      await saveCurrentFile({ silent: false, refreshHistory: false })
-    }
-    if (fileState.currentFile.value.path === path) {
-      await historyState.loadHistoryTree(path, true)
+    const context = fileState.captureFileContext()
+    if (!context) return
+    await saveCurrentFileIfDirty({ refreshHistory: false })
+    if (fileState.isCurrentFileContext(context)) {
+      await historyState.loadHistoryTree(context.path, true)
     }
   }
 
   const deleteHistoryRevision = async (revisionId: string): Promise<void> => {
-    const path = fileState.currentFile.value.path
-    const node = fileState.currentFileNode.value
+    const context = fileState.captureFileContext()
     if (
-      !path
-      || !node
+      !context
       || actionLedger.isActionPending('delete-history-revision')
       || actionLedger.isActionPending('load-history-revision')
     ) {
@@ -446,8 +407,11 @@ export const useNodeStore = defineStore('note', () => {
 
     await actionLedger.runAction('delete-history-revision', async () => {
       await saveCurrentFileIfDirty()
-      const response = await deleteHistoryRevisionApi(path, revisionId)
-      historyState.replaceHistoryTree(path, response.data)
+      if (!fileState.isCurrentFileContext(context)) return
+      const response = await deleteHistoryRevisionApi(context.path, revisionId)
+      toastStore.pushNotice('info', 'The revision has been deleted.')
+      if (!fileState.isCurrentFileContext(context)) return
+      historyState.replaceHistoryTree(context.path, response.data)
 
       const viewedRevisionStillExists = response.data.nodes.some(
         (item) => item.id === historyState.viewedRevisionId.value,
@@ -457,22 +421,15 @@ export const useNodeStore = defineStore('note', () => {
       }
 
       if (response.data.default_revision_id) {
-        await loadRevisionContent(path, response.data.default_revision_id)
+        await loadRevisionContent(context, response.data.default_revision_id)
         return
       }
 
-      await loadCurrentFile(node, true)
+      await loadFile(context.path, true)
     })
-    toastStore.pushNotice('info', 'The revision has been deleted.')
   }
 
-  const deleteCurrentNode = async (): Promise<void> => {
-    if (currentNode.value === null) {
-      toastStore.pushNotice('warning', 'No file / folder selected.')
-      return
-    }
-
-    const targetNode = currentNode.value
+  const deleteNode = async (targetNode: SelectedItem): Promise<void> => {
     const targetPath = normalizeNodePath(targetNode.path)
     const response = await actionLedger.runAction('delete-item', async () => {
       return await removeItemApi(targetPath)
@@ -483,53 +440,47 @@ export const useNodeStore = defineStore('note', () => {
     }
 
     if (isPathInside(fileState.currentFile.value.path, targetPath)) {
+      fileRequest?.abort()
       fileState.resetCurrentFileState()
       historyState.resetHistoryState()
     }
 
     removeNodeState(targetPath)
 
-    if (currentNode.value && isPathInside(currentNode.value.path, targetPath)) {
-      currentNode.value = fileState.currentFileNode.value
-        && !isPathInside(fileState.currentFileNode.value.path, targetPath)
-        ? fileState.currentFileNode.value
-        : null
-    }
-
-    if (
-      fileState.currentFileNode.value
-      && isPathInside(fileState.currentFileNode.value.path, targetPath)
-    ) {
-      fileState.clearCurrentFileNode()
+    if (selectedItem.value && isPathInside(selectedItem.value.path, targetPath)) {
+      const path = fileState.currentFile.value.path
+      selectedItem.value = path ? { path, type: 'file' } : null
     }
 
     toastStore.pushNotice('info', `${nodeType} has been deleted.`)
   }
 
-  const renameNode = async (node: FsNode, newName: string): Promise<void> => {
+  const renameNode = async (node: FsNode, newName: string): Promise<string> => {
     const normalizedOldPath = normalizeNodePath(node.path)
     const normalizedNewPath = buildRenamedPath(node, newName)
+    if (isPathInside(fileState.currentFile.value.path, normalizedOldPath)) {
+      await saveCurrentFileIfDirty()
+    }
     await actionLedger.runAction(`rename:${normalizedOldPath}`, async () => {
       return await renameItemApi(normalizedOldPath, newName)
     })
-    remapNodePathState(normalizedOldPath, normalizedNewPath, newName)
+    fileTree.renameSubtree(normalizedOldPath, normalizedNewPath, newName)
+    remapWorkspacePaths(normalizedOldPath, normalizedNewPath, newName)
     toastStore.pushNotice('info', "Rename successful!")
+    return normalizedNewPath
   }
 
-  const moveNode = async (node: FsNode, targetDir: string): Promise<void> => {
+  const moveNode = async (node: FsNode, targetDir: string): Promise<string> => {
     const normalizedNode = normalizeFsNode(node)
     const normalizedOldPath = normalizedNode.path
     const normalizedTargetDir = normalizeNodePath(targetDir)
     const currentParent = getParentPath(normalizedOldPath)
 
     if (currentParent === normalizedTargetDir) {
-      return
+      return normalizedOldPath
     }
 
-    if (
-      fileState.currentFileNode.value
-      && isPathInside(fileState.currentFileNode.value.path, normalizedOldPath)
-    ) {
+    if (isPathInside(fileState.currentFile.value.path, normalizedOldPath)) {
       await saveCurrentFileIfDirty()
     }
 
@@ -542,39 +493,23 @@ export const useNodeStore = defineStore('note', () => {
       response.data,
     )
 
-    currentNode.value = remapOptionalFsNodePathPrefix(
-      currentNode.value,
-      normalizedOldPath,
-      movedNode.path,
-      movedNode.name,
-    )
-    fileState.remapCurrentFileNodePathPrefix(normalizedOldPath, movedNode.path, movedNode.name)
-    currentPreviewImageNode.value = remapOptionalFsNodePathPrefix(
-      currentPreviewImageNode.value,
-      normalizedOldPath,
-      movedNode.path,
-      movedNode.name,
-    )
-
-    fileState.remapCurrentFilePathPrefix(normalizedOldPath, movedNode.path, movedNode.name)
-    historyState.remapHistoryPath(normalizedOldPath, movedNode.path)
+    remapWorkspacePaths(normalizedOldPath, movedNode.path, movedNode.name)
 
     void fileTree.expandDirectory(normalizedTargetDir).catch(() => null)
     toastStore.pushNotice('info', "Move successful!")
+    return movedNode.path
   }
 
   return { 
     rootNodes,
     welcomeNoteState: fileState.welcomeNoteState,
-    currentNode,
+    selectedItem,
     currentFile: fileState.currentFile,
     currentPreviewImageNode,
     currentPreviewImageUrl,
     currentFileStatus: fileState.currentFileStatus,
     currentFileDisplayName: fileState.currentFileDisplayName,
     hasCurrentFile: fileState.hasCurrentFile,
-    currentPath: currentParentPath,
-    currentFileParentPath,
     currentPathLabel,
     canEditCurrentFile: fileState.canEditCurrentFile,
     isCurrentFileDirty: fileState.isCurrentFileDirty,
@@ -603,12 +538,12 @@ export const useNodeStore = defineStore('note', () => {
     expandDirectory,
     collapseDirectory,
     toggleDirectory,
-    loadCurrentFile,
+    loadFile,
+    showWelcome,
     addNewNode,
-    setCurrentNode,
-    clearCurrentNode,
+    selectItem,
+    clearSelection,
     resetWorkspaceState,
-    openImagePreview,
     closeImagePreview,
     uploadFile,
     uploadPastedImage,
@@ -619,7 +554,7 @@ export const useNodeStore = defineStore('note', () => {
     selectHistoryRevision,
     prepareHistoryRevisionDelete,
     deleteHistoryRevision,
-    deleteCurrentNode,
+    deleteNode,
     renameNode,
     moveNode,
   }

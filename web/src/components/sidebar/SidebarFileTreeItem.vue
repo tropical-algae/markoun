@@ -45,6 +45,7 @@
 import { computed } from 'vue'
 import type { FsNode } from '@/types/file-system'
 import { useNodeStore } from '@/stores/note'
+import { useWorkspaceActions } from '@/composables/useWorkspaceActions'
 import { useFileTreeItemExpansion } from '@/composables/useFileTreeItemExpansion'
 import { useFileTreeItemRename } from '@/composables/useFileTreeItemRename'
 import { useFileTreeDropTargetState } from '@/composables/useFileTreeDropController'
@@ -56,6 +57,7 @@ import SidebarFileTreeBranch from '@/components/sidebar/SidebarFileTreeBranch.vu
 import SidebarFileTreeNodeRow from '@/components/sidebar/SidebarFileTreeNodeRow.vue'
 
 const nodeStore = useNodeStore()
+const workspace = useWorkspaceActions()
 const props = defineProps<{ node: FsNode, depth: number }>()
 const emit = defineEmits<{
   (event: 'nodeOpened'): void
@@ -63,7 +65,7 @@ const emit = defineEmits<{
 
 const node = computed(() => props.node)
 const isDir = computed(() => node.value.type === 'dir')
-const isActive = computed(() => nodeStore.currentNode?.path === node.value.path)
+const isActive = computed(() => nodeStore.selectedItem?.path === node.value.path)
 const {
   renderState,
   isOpened,
@@ -84,7 +86,7 @@ const {
   stopLongPress,
   submitRename,
   cancelRename,
-} = useFileTreeItemRename(node, nodeStore.renameNode)
+} = useFileTreeItemRename(node, workspace.renameNode)
 const {
   isNodeDragging,
   handleNodeDragStart,
@@ -106,15 +108,14 @@ const handleClickNode = async () => {
   }
 
   if (isDir.value) {
-    await nodeStore.setCurrentNode(node.value)
+    nodeStore.selectItem(node.value)
     if (canExpand.value) {
       await nodeStore.toggleDirectory(node.value).catch(() => null)
     }
     return
   }
 
-  await nodeStore.setCurrentNode(node.value)
-  emit('nodeOpened')
+  if (await workspace.openNode(node.value)) emit('nodeOpened')
 }
 
 const handleClickDirectoryIcon = async () => {
@@ -123,11 +124,11 @@ const handleClickDirectoryIcon = async () => {
   }
 
   if (isActive.value) {
-    nodeStore.clearCurrentNode()
+    nodeStore.clearSelection()
     return
   }
 
-  await nodeStore.setCurrentNode(node.value)
+  nodeStore.selectItem(node.value)
 }
 
 </script>

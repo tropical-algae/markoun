@@ -4,6 +4,7 @@ import '@/assets/styles/main.css'
 
 import App from '@/App.vue'
 import router from '@/router'
+import { buildLoginRedirectLocation } from '@/router/auth'
 import { useToastStore } from '@/stores/toast'
 import { useAppearanceStore } from '@/stores/appearance'
 import { useUserStore } from '@/stores/user'
@@ -21,8 +22,8 @@ appearanceStore.initAppearance()
 setRequestErrorHandler((error) => {
   if (error.status === 401) {
     useUserStore(pinia).handleUnauthorized()
-    if (router.currentRoute.value.name === 'Workspace') {
-      void router.replace({ name: 'Login' })
+    if (router.currentRoute.value.meta.workspace) {
+      void router.replace(buildLoginRedirectLocation(router.currentRoute.value))
     }
   }
   const toastStore = useToastStore(pinia)

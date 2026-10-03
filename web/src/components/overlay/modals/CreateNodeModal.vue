@@ -59,6 +59,7 @@ import UnderlinedInput from '@/components/base/UnderlinedInput.vue'
 import ModalContentLayout from '@/layouts/ModalContentLayout.vue'
 import InfoIcon from '@/assets/icons/info.svg'
 import { useNodeStore } from '@/stores/note'
+import { useWorkspaceActions } from '@/composables/useWorkspaceActions'
 import { useModelProxy } from '@/composables/useModelProxy'
 
 const props = defineProps<{
@@ -75,6 +76,7 @@ const emit = defineEmits<{
 }>()
 
 const nodeStore = useNodeStore()
+const workspace = useWorkspaceActions()
 const nodeName = ref('')
 const inputRef = ref<InstanceType<typeof UnderlinedInput> | null>(null)
 
@@ -91,7 +93,7 @@ const handleConfirm = async () => {
     return
   }
 
-  await nodeStore.addNewNode(nextName, props.nodeType)
+  await workspace.createNode(nextName, props.nodeType)
   isVisible.value = false
   nodeName.value = ''
 }

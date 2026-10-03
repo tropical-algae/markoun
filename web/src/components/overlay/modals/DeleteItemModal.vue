@@ -39,9 +39,11 @@ import GhostButton from '@/components/base/GhostButton.vue'
 import ModalContentLayout from '@/layouts/ModalContentLayout.vue'
 
 import { useNodeStore } from '@/stores/note'
+import { useWorkspaceActions } from '@/composables/useWorkspaceActions'
 import { useModelProxy } from '@/composables/useModelProxy'
 
 const nodeStore = useNodeStore()
+const workspace = useWorkspaceActions()
 const props = defineProps<{ modelValue: boolean }>()
 const emit = defineEmits<{
   (event: 'update:modelValue', value: boolean): void
@@ -64,15 +66,16 @@ watch(
   () => isVisible.value,
   (visible) => {
     if (visible) {
-      targetPath.value = nodeStore.currentNode?.path ?? 'Default Page'
-      targetType.value = nodeStore.currentNode?.type ?? null
+      targetPath.value = nodeStore.selectedItem?.path ?? 'Default Page'
+      targetType.value = nodeStore.selectedItem?.type ?? null
     }
   },
   { immediate: true }
 )
 
 const handleConfirm = async () => {
-  await nodeStore.deleteCurrentNode()
+  if (!targetType.value) return
+  await workspace.deleteNode({ path: targetPath.value, type: targetType.value })
   isVisible.value = false
 }
 </script>

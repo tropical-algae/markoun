@@ -2,6 +2,7 @@ import { Marked, Renderer } from 'marked'
 import DOMPurify from 'dompurify'
 import { katexExtensions } from '@/utils/katex'
 import { getMediaPath, getParentPath } from '@/utils/file-system'
+import { resolveMarkdownLink } from '@/utils/file-navigation'
 
 const marked = new Marked()
 marked.use(katexExtensions())
@@ -18,6 +19,11 @@ const escapeHtmlAttribute = (value: string): string => {
 export const renderMarkdownFile = (path: string, content: string): string => {
   const parentPath = getParentPath(path)
   const renderer = new Renderer()
+  const renderLink = renderer.link.bind(renderer)
+  renderer.link = (token) => renderLink({
+    ...token,
+    href: resolveMarkdownLink(path, token.href),
+  })
 
   renderer.image = ({ href, title, text }) => {
     const mediaPath = getMediaPath(parentPath, href)

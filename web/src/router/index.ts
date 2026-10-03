@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useSysStore } from '@/stores/system'
 import { useUserStore } from '@/stores/user'
 import { buildLoginRedirectLocation, resolvePostAuthRedirect } from '@/router/auth'
+import { installWorkspaceNavigation } from '@/router/workspace'
+import { FILE_ROUTE_PREFIX } from '@/utils/file-navigation'
 
 const Workspace = () => import('@/views/Workspace.vue')
 const Login = () => import('@/views/Login.vue')
@@ -16,6 +18,17 @@ const routes = [
     },
     meta: {
       requiresAuth: true,
+      workspace: true,
+      title: `Timeline - ${siteTitle}`,
+    },
+  },
+  {
+    path: `${FILE_ROUTE_PREFIX}:path(.*)+`,
+    name: 'WorkspaceFile',
+    component: Workspace,
+    meta: {
+      requiresAuth: true,
+      workspace: true,
       title: `Timeline - ${siteTitle}`,
     },
   },
@@ -54,7 +67,7 @@ router.beforeEach(async (to) => {
 
   if (!sysStore.authRequired) {
     if (to.meta.guestOnly) {
-      return { name: 'Workspace' }
+      return resolvePostAuthRedirect(to.query.redirect)
     }
     return true
   }
@@ -73,5 +86,7 @@ router.beforeEach(async (to) => {
 
   return true
 })
+
+installWorkspaceNavigation(router)
 
 export default router

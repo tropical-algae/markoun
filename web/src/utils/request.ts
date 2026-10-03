@@ -25,6 +25,10 @@ export const setRequestErrorHandler = (handler: RequestErrorHandler | null) => {
   requestErrorHandler = handler
 }
 
+export const reportRequestError = (error: unknown) => {
+  requestErrorHandler?.(normalizeRequestError(error))
+}
+
 const service = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: 10000,
