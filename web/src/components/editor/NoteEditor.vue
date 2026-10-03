@@ -56,9 +56,14 @@
           :disabled="!nodeStore.canEditCurrentFile"
           placeholder="Start typing..."
           spellcheck="false"
+          aria-label="Markdown editor"
+          aria-description="Tab indents; Shift+Tab unindents. Press Escape, then Tab to leave the editor."
           @paste="handlePaste"
+          @keydown="handleEditorKeydown"
           @keydown.ctrl.s.prevent="saveCurrentFile"
           @keydown.meta.s.prevent="saveCurrentFile"
+          @blur="resetTabNavigation"
+          @pointerdown="resetTabNavigation"
         ></textarea>
       </div>
     </AsyncGate>
@@ -73,6 +78,7 @@ import { useAppearanceStore } from '@/stores/appearance'
 import type { InspectorMode } from '@/types/ui'
 import { readCssTimeMs } from '@/utils/css'
 import { useMarkdownPasteUpload } from '@/composables/useMarkdownPasteUpload'
+import { useTextareaIndentation } from '@/composables/useTextareaIndentation'
 
 import EditorLayout from '@/layouts/EditorLayout.vue'
 import NoteEditorHeader from '@/components/editor/NoteEditorHeader.vue'
@@ -92,6 +98,7 @@ const nodeStore = useNodeStore()
 const appearanceStore = useAppearanceStore()
 
 const markdownEditorRef = ref<HTMLTextAreaElement | null>(null)
+const { handleEditorKeydown, resetTabNavigation } = useTextareaIndentation()
 const editorAsyncGateDelayMs = readCssTimeMs('--editor-async-gate-delay-ms', 0)
 const { handlePaste } = useMarkdownPasteUpload({
   textareaRef: markdownEditorRef,
