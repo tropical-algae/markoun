@@ -1,5 +1,32 @@
 <!-- version list -->
 
+## v0.2.11 (2026-10-03)
+
+### Bug Fixes
+
+- **site**: Return 404 for missing workspace files
+  ([`77c51c2`](https://github.com/tropical-algae/markoun/commit/77c51c2192be0394b37d5e6e172cf92328434c1f))
+
+### Documentation
+
+- **site**: Refresh welcome tips and add MCP guidance
+  ([`74d6a5a`](https://github.com/tropical-algae/markoun/commit/74d6a5a25fabffaacb40a2d2688e765259dbf115))
+
+### Features
+
+- **site**: Add editor tab indentation
+  ([`97e2b79`](https://github.com/tropical-algae/markoun/commit/97e2b791991bc620397ccbcc76d4fa5bbe61509b))
+
+- **site**: Add file routes and isolate editor sessions
+  ([`8cdb10c`](https://github.com/tropical-algae/markoun/commit/8cdb10c9948e4e13644ae14541a5267fefe07b30))
+
+- **site**: Paginate search results and refine sidebar interactions
+  ([`6fd8fc4`](https://github.com/tropical-algae/markoun/commit/6fd8fc4673c17df3ac29b1b84981d30ad9655422))
+
+- **site**: Support filename search and unlimited results
+  ([`cb9f0d1`](https://github.com/tropical-algae/markoun/commit/cb9f0d1dbfb7fdd4a1f7b28fc553c9021d88f29a))
+
+
 ## v0.2.10 (2026-09-28)
 
 
