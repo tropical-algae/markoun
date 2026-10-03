@@ -8,6 +8,22 @@ from markoun.app.services import file_service
 from markoun.common.config import settings
 
 
+def test_load_missing_note_returns_not_found(
+    client: TestClient,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+):
+    monkeypatch.setattr(settings, "AUTH_REQUIRED", False)
+    monkeypatch.setattr(settings, "DOCUMENT_ROOT", str(tmp_path))
+    (tmp_path / "folder.md").mkdir()
+    for path in ("missing.md", "missing/nested/note.md", "folder.md"):
+        response = client.get(
+            f"{settings.API_PREFIX}/file/load", params={"filepath": path}
+        )
+        assert response.status_code == 404
+        assert response.json()["message"] == "File does not exist"
+
+
 @pytest.mark.run(order=6)
 def test_upload_rejects_existing_file(client: TestClient):
     suffix = uuid4().hex[:8]

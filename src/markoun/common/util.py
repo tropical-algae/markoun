@@ -53,6 +53,8 @@ async def aread_file(filepath: Path) -> str:
         async with aiofiles.open(str(filepath), encoding="utf-8") as f:
             content = await f.read()
             return content
+    except (FileNotFoundError, NotADirectoryError, IsADirectoryError) as err:
+        raise HTTPException(**CONSTANT.SERV_FILE_NOT_EXISTED) from err
     except Exception as err:
         logger.exception(f"[Failed to read file {filepath}] {err}")
         raise HTTPException(**CONSTANT.SERV_READ_FILE_FAIL) from err

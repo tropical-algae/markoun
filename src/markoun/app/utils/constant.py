@@ -112,7 +112,7 @@ class Constant(BaseSettings):
         "detail": "A file already uses the image folder name",
     }
     SERV_FILE_NOT_EXISTED: dict = {
-        "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+        "status_code": status.HTTP_404_NOT_FOUND,
         "detail": "File does not exist",
     }
     SERV_ITEM_MOVE_FORBIDDEN: dict = {
