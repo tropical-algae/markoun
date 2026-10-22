@@ -87,6 +87,8 @@ def test_mcp_search_filenames_and_unlimited_results(
     ).json()["data"]["key"]
 
     tools = _mcp_request(client, api_key, "tools/list").json()["result"]["tools"]
+    for tool in tools:
+        assert "Markoun workspace" in tool["description"].splitlines()[0]
     search_tool = next(tool for tool in tools if tool["name"] == "search_files")
     schema = search_tool["inputSchema"]
     assert schema["properties"]["limit"]["default"] == -1

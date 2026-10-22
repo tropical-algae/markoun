@@ -62,7 +62,7 @@ def register_workspace_tools(server: MCPServer) -> None:
             ),
         ] = ".",
     ) -> dict[str, Any]:
-        """List visible files and folders in a workspace directory."""
+        """List visible files and folders in a directory of the Markoun workspace."""
         workspace = _workspace(McpPermission.READ)
         directory = workspace.resolve(path)
         nodes = await get_directory_children(
@@ -99,7 +99,10 @@ def register_workspace_tools(server: MCPServer) -> None:
             Field(ge=1, description="One-based line number at which reading starts."),
         ] = 1,
     ) -> dict[str, Any]:
-        """Read Markdown lines and return total lines and the current revision ID."""
+        """Read lines from a Markdown file in the Markoun workspace.
+
+        Return the requested lines, total line count, and current revision ID.
+        """
         _ensure_markdown(path)
         workspace = _workspace(McpPermission.READ)
         async with LocalSession() as db:
@@ -147,11 +150,12 @@ def register_workspace_tools(server: MCPServer) -> None:
             ),
         ] = DEFAULT_SEARCH_LIMIT,
     ) -> dict[str, Any]:
-        """Find Markdown files whose filename or content contains a literal keyword.
+        """Find Markdown files in the Markoun workspace by a literal keyword.
 
-        No fuzzy matching. Returns each file once with its node information and
-        all matching content lines (line number and text). Filename-only matches
-        have an empty matches list. Content matches are returned first.
+        Match filenames or content, without fuzzy matching.
+        Return each file once with its information and all matching content lines.
+        Filename-only matches have an empty matches list.
+        Content matches are returned first.
         """
         workspace = _workspace(McpPermission.SEARCH)
         results = await search_markdown_files(keyword, workspace, limit)
@@ -185,7 +189,7 @@ def register_workspace_tools(server: MCPServer) -> None:
             ),
         ] = None,
     ) -> dict[str, Any]:
-        """Overwrite a Markdown file with the provided complete text content."""
+        """Overwrite a Markdown file in the Markoun workspace with complete text."""
         _ensure_markdown(path)
         workspace = _workspace(McpPermission.WRITE)
         async with LocalSession() as db:
@@ -227,7 +231,7 @@ def register_workspace_tools(server: MCPServer) -> None:
             Field(description="Initial Markdown content for the new file."),
         ] = "",
     ) -> dict[str, Any]:
-        """Create a Markdown file and save its initial content."""
+        """Create a Markdown file in the Markoun workspace and save its initial content."""
         workspace = _workspace(McpPermission.CREATE)
         parent = workspace.resolve(parent_path)
         node = create_note(workspace, parent, name)
@@ -265,7 +269,7 @@ def register_workspace_tools(server: MCPServer) -> None:
             Field(min_length=1, description="Name of the new directory."),
         ],
     ) -> dict[str, Any]:
-        """Create a directory in the workspace."""
+        """Create a directory in the Markoun workspace."""
         workspace = _workspace(McpPermission.CREATE)
         node = create_dir(workspace, workspace.resolve(parent_path), name)
         return node.model_dump(mode="json")
@@ -293,7 +297,7 @@ def register_workspace_tools(server: MCPServer) -> None:
             ),
         ],
     ) -> dict[str, Any]:
-        """Move a file or directory into another workspace directory."""
+        """Move a file or directory to another directory within the Markoun workspace."""
         workspace = _workspace(McpPermission.MOVE)
         node = await move_workspace_item(
             workspace,
@@ -326,7 +330,7 @@ def register_workspace_tools(server: MCPServer) -> None:
             ),
         ],
     ) -> dict[str, Any]:
-        """Rename a file or directory without changing its parent directory."""
+        """Rename a file or directory in the Markoun workspace without moving it."""
         workspace = _workspace(McpPermission.MOVE)
         await rename_workspace_item(workspace, path, new_name)
         return {"renamed": True}
@@ -347,7 +351,7 @@ def register_workspace_tools(server: MCPServer) -> None:
             Field(min_length=1, description="Workspace-relative file or directory path."),
         ],
     ) -> dict[str, Any]:
-        """Delete a workspace file or directory while retaining its history."""
+        """Delete a file or directory in the Markoun workspace."""
         workspace = _workspace(McpPermission.DELETE)
         await remove_workspace_item(workspace, path)
         return {"deleted": True}
