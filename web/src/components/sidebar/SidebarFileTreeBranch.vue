@@ -100,7 +100,7 @@ const branchIndentStyle = computed(() => ({ '--tree-depth': props.depth }))
 }
 
 .tree-branch-enter-active {
-  transition: opacity var(--motion-tree-enter-duration) var(--motion-tree-easing);
+  transition: opacity var(--motion-tree-enter-duration) var(--motion-tree-enter-easing);
 }
 
 .tree-branch-leave-active {
@@ -108,7 +108,7 @@ const branchIndentStyle = computed(() => ({ '--tree-depth': props.depth }))
   top: 100%;
   inset-inline: 0;
   pointer-events: none;
-  transition: opacity var(--motion-soft-duration) ease;
+  transition: opacity var(--motion-soft-duration) var(--motion-tree-leave-easing);
 }
 
 .tree-branch-enter-from {

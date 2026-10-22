@@ -55,6 +55,8 @@ export const provideFileTreeMotion = (
   }
   const [x1, y1, x2, y2] = readCssCubicBezier('--motion-tree-easing', [0, 0, 1, 1])
   const ease = CustomEase.create('', `M0,0 C${x1},${y1} ${x2},${y2} 1,1`)
+  const [enterX1, enterY1, enterX2, enterY2] = readCssCubicBezier('--motion-tree-enter-easing', [0, 0, 1, 1])
+  const enterEase = CustomEase.create('', `M0,0 C${enterX1},${enterY1} ${enterX2},${enterY2} 1,1`)
   const changedDirectories = new Set<string>()
   let snapshot: LayoutSnapshot | null = null
   let timeline: gsap.core.Timeline | null = null
@@ -167,7 +169,7 @@ export const provideFileTreeMotion = (
       const elements = entering.map((row) => row.element)
       elements.forEach((element) => animatedRows.add(element))
       gsap.set(elements, { opacity: (index) => before.get(entering[index]!.path)?.opacity ?? 0 })
-      timeline.to(elements, { opacity: 1, duration: entranceDuration / 1000, ease }, 0)
+      timeline.to(elements, { opacity: 1, duration: entranceDuration / 1000, ease: enterEase }, 0)
     }
     if (scrollTop !== root.scrollTop) {
       timeline.to(root, { scrollTop, duration: plan.duration / 1000, ease }, 0)
