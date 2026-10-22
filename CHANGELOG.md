@@ -1,5 +1,18 @@
 <!-- version list -->
 
+## v0.2.12 (2026-10-22)
+
+### Bug Fixes
+
+- **site**: Clarify Markoun workspace scope in MCP tool descriptions
+  ([`0022e8d`](https://github.com/tropical-algae/markoun/commit/0022e8dfb5deb280784cf952487ad1a832132df2))
+
+### Refactoring
+
+- **site**: Separate file tree fade easing and refine animation timing
+  ([`dea2be0`](https://github.com/tropical-algae/markoun/commit/dea2be0d86ef1bd666b8fbc45b1a33f11b079146))
+
+
 ## v0.2.11 (2026-10-03)
 
 ### Bug Fixes
