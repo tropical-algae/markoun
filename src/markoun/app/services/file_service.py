@@ -2,14 +2,16 @@ import asyncio
 import json
 import os
 import uuid
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, Sequence
 from contextlib import aclosing, suppress
 from datetime import datetime
+from hashlib import sha256
 from pathlib import Path
+from stat import S_ISREG
 from urllib.parse import quote
 
 import aiofiles
-from fastapi import HTTPException, UploadFile
+from fastapi import HTTPException, UploadFile, status
 from fastapi.responses import FileResponse, Response
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -39,7 +41,6 @@ NOTE_SUFFIX = "md"
 DISPLAYED_FILE_TYPES = set(settings.DISPLAYED_FILE_TYPES)
 DEFAULT_SEARCH_LIMIT = -1
 MEDIA_FILE_TYPES = {"png", "jpg", "jpeg", "bmp", "svg"}
-INTERNAL_MEDIA_PREFIX = "/_protected_media"
 
 
 def get_file_meta(workspace: WorkspaceContext, abs_filepath: Path) -> FileMeta:
@@ -294,18 +295,38 @@ async def upload_pasted_image(
 
 
 def get_media_response(
-    workspace: WorkspaceContext, relative_path: str
+    workspace: WorkspaceContext,
+    relative_path: str,
+    *,
+    if_none_match: Sequence[str],
 ) -> FileResponse | Response:
     filepath = workspace.resolve(relative_path, allow_root=False)
-    if not filepath.is_file() or file_suffix(filepath) not in MEDIA_FILE_TYPES:
+    if file_suffix(filepath) not in MEDIA_FILE_TYPES:
         raise HTTPException(**CONSTANT.SERV_MEDIA_FILE_NOT_FOUND)
 
-    if settings.MEDIA_DELIVERY_MODE == "nginx":
-        internal_path = quote(workspace.document_relative(filepath).as_posix(), safe="/")
-        return Response(
-            headers={
-                "X-Accel-Redirect": f"{INTERNAL_MEDIA_PREFIX}/{internal_path}",
-            }
-        )
+    try:
+        file_stat = filepath.stat()
+    except (FileNotFoundError, NotADirectoryError) as exc:
+        raise HTTPException(**CONSTANT.SERV_MEDIA_FILE_NOT_FOUND) from exc
+    if not S_ISREG(file_stat.st_mode):
+        raise HTTPException(**CONSTANT.SERV_MEDIA_FILE_NOT_FOUND)
 
-    return FileResponse(filepath)
+    # A workspace-relative URL can refer to different files across logins.
+    identity = (
+        f"{os.fsencode(filepath).hex()}:{file_stat.st_dev}:{file_stat.st_ino}:"
+        f"{file_stat.st_size}:{file_stat.st_mtime_ns}:{file_stat.st_ctime_ns}"
+    )
+    etag = f'"{sha256(identity.encode()).hexdigest()}"'
+    headers = {
+        "Cache-Control": "private, no-cache",
+        "Vary": "Cookie",
+        "ETag": f"W/{etag}",
+        "X-Content-Type-Options": "nosniff",
+    }
+    if any(value.strip() == "*" for value in if_none_match) or any(
+        tag.strip().removeprefix("W/") == etag
+        for value in if_none_match
+        for tag in value.split(",")
+    ):
+        return Response(status_code=status.HTTP_304_NOT_MODIFIED, headers=headers)
+    return FileResponse(filepath, stat_result=file_stat, headers=headers)

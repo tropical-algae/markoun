@@ -119,6 +119,9 @@ def add_middleware(app: FastAPI):
         if is_access or is_not_api or is_successful_media:
             return response
 
+        if is_media:
+            response.headers["Cache-Control"] = "no-store"
+
         body_chunks: list[bytes] = [
             chunk.encode() if isinstance(chunk, str) else bytes(chunk)
             async for chunk in response.body_iterator

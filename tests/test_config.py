@@ -28,7 +28,6 @@ print(json.dumps({
     "documents": settings.DOCUMENT_ROOT,
     "logs": settings.LOG_ROOT,
     "web": settings.WEB_ROOT,
-    "media_mode": settings.MEDIA_DELIVERY_MODE,
 }))
 """
     environ = {
@@ -41,7 +40,6 @@ print(json.dumps({
         "DOCUMENT_ROOT": "/tmp/markoun/data",
         "LOG_ROOT": "/tmp/markoun/log",
         "WEB_ROOT": "/nix/store/markoun/web",
-        "MEDIA_DELIVERY_MODE": "application",
     }
 
     process = subprocess.run(
@@ -63,7 +61,6 @@ print(json.dumps({
         "documents": "/tmp/markoun/data",
         "logs": "/tmp/markoun/log",
         "web": "/nix/store/markoun/web",
-        "media_mode": "application",
     }
 
 

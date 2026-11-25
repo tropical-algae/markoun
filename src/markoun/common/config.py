@@ -1,7 +1,7 @@
 import os
 import secrets
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any
 
 from pydantic import Field
 from pydantic_settings import (
@@ -66,7 +66,6 @@ class BasicSetting(BaseSettings):
     ACCESS_TOKEN_COOKIE_SECURE: bool = False
 
     DOCUMENT_ROOT: str = "./data"
-    MEDIA_DELIVERY_MODE: Literal["application", "nginx"] = "nginx"
     WELCOME_NOTE_PATH: str = DEFAULT_WELCOME_FILE
     DISPLAYED_FILE_TYPES: list = ["md", "png", "jpg", "jpeg", "bmp", "svg"]
 

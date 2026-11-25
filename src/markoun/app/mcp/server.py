@@ -87,7 +87,8 @@ register_workspace_tools(mcp_server)
 
 mcp_app = ApiKeyAuthMiddleware(
     mcp_server.streamable_http_app(
-        streamable_http_path="/",
+        # The parent router exposes this transport at the two exact MCP paths.
+        streamable_http_path="/{path:path}",
         json_response=True,
         stateless_http=True,
         host=settings.HOST,

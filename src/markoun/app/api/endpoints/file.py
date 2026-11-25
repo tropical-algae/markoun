@@ -1,10 +1,12 @@
 from pathlib import Path
+from typing import Annotated
 
 from fastapi import (
     APIRouter,
     Depends,
     File,
     Form,
+    Header,
     Query,
     Security,
     UploadFile,
@@ -71,8 +73,9 @@ async def api_get_media(
     workspace: WorkspaceContext = Security(
         get_workspace_context, scopes=[ScopeType.ADMIN, ScopeType.USER]
     ),
+    if_none_match: Annotated[list[str] | None, Header()] = None,
 ) -> FileResponse | Response:
-    return get_media_response(workspace, path)
+    return get_media_response(workspace, path, if_none_match=if_none_match or ())
 
 
 @router.post("/create", response_model=FileNode)
