@@ -9,6 +9,14 @@ from markoun.common.util import is_valid_username
 from markoun.core.db.models import UserAccount
 
 WORKSPACE_DATA_DIRECTORY = ".markoun"
+UPLOAD_STAGING_PREFIX = ".markoun-upload-"
+
+
+def _is_internal_workspace_path(path: Path) -> bool:
+    return any(
+        part == WORKSPACE_DATA_DIRECTORY or part.startswith(UPLOAD_STAGING_PREFIX)
+        for part in path.parts
+    )
 
 
 @dataclass(frozen=True)
@@ -21,7 +29,7 @@ class WorkspaceContext:
         resolved_path = path.resolve(strict=False)
         if not resolved_path.is_relative_to(self.root):
             return False
-        return WORKSPACE_DATA_DIRECTORY in resolved_path.relative_to(self.root).parts
+        return _is_internal_workspace_path(resolved_path.relative_to(self.root))
 
     def resolve(self, relative_path: str | Path, *, allow_root: bool = True) -> Path:
         if "\0" in str(relative_path) or "\\" in str(relative_path):
@@ -35,8 +43,8 @@ class WorkspaceContext:
             raise HTTPException(**CONSTANT.SERV_INVALID_WORKSPACE_PATH)
 
         workspace_path = candidate.relative_to(self.root)
-        if (not allow_root and candidate == self.root) or (
-            WORKSPACE_DATA_DIRECTORY in workspace_path.parts
+        if (not allow_root and candidate == self.root) or _is_internal_workspace_path(
+            workspace_path
         ):
             raise HTTPException(**CONSTANT.SERV_INVALID_WORKSPACE_PATH)
         return candidate

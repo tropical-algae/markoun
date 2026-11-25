@@ -11,12 +11,14 @@ from stat import S_ISREG
 from urllib.parse import quote
 
 import aiofiles
+from aiofiles.tempfile import TemporaryDirectory
 from fastapi import HTTPException, UploadFile, status
 from fastapi.responses import FileResponse, Response
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from markoun.app.services.system_service import get_paste_image_note_dir_setting
 from markoun.app.services.workspace_service import (
+    UPLOAD_STAGING_PREFIX,
     WORKSPACE_DATA_DIRECTORY,
     WorkspaceContext,
 )
@@ -207,9 +209,15 @@ async def upload_file(
     filename = file.filename or f"file_{uuid.uuid4().hex[:8]}.unknown"
     filepath = workspace.resolve_child(abs_path, filename)
     try:
-        async with aiofiles.open(filepath, "xb") as f:
-            while content := await file.read(1024 * 1024):
-                await f.write(content)
+        async with TemporaryDirectory(
+            prefix=UPLOAD_STAGING_PREFIX, dir=filepath.parent
+        ) as temporary_directory:
+            staged_path = Path(temporary_directory) / filepath.name
+            async with aiofiles.open(staged_path, "xb") as staged_file:
+                while content := await file.read(1024 * 1024):
+                    await staged_file.write(content)
+            # Publish the complete file without replacing an existing destination.
+            await asyncio.to_thread(os.link, staged_path, filepath)
     except FileExistsError as err:
         logger.error(f"[{filepath} is existed]")
         raise HTTPException(**CONSTANT.SERV_FILE_EXISTED) from err
@@ -265,7 +273,13 @@ async def upload_pasted_image(
                 if not target_dir.is_dir():
                     raise HTTPException(**CONSTANT.SERV_IMAGE_DIR_CONFLICT) from None
 
-            uploaded = await upload_file(workspace, target_dir, file)
+            try:
+                uploaded = await upload_file(workspace, target_dir, file)
+            except (Exception, asyncio.CancelledError):
+                if directory_created:
+                    with suppress(OSError):
+                        await asyncio.to_thread(target_dir.rmdir)
+                raise
             if directory_created:
                 children = [uploaded.node] if uploaded.node else []
                 created_directory = DirNode(
@@ -301,7 +315,8 @@ def get_media_response(
     if_none_match: Sequence[str],
 ) -> FileResponse | Response:
     filepath = workspace.resolve(relative_path, allow_root=False)
-    if file_suffix(filepath) not in MEDIA_FILE_TYPES:
+    suffix = file_suffix(filepath)
+    if suffix not in MEDIA_FILE_TYPES:
         raise HTTPException(**CONSTANT.SERV_MEDIA_FILE_NOT_FOUND)
 
     try:
@@ -323,6 +338,8 @@ def get_media_response(
         "ETag": f"W/{etag}",
         "X-Content-Type-Options": "nosniff",
     }
+    if suffix == "svg":
+        headers["Content-Security-Policy"] = "sandbox"
     if any(value.strip() == "*" for value in if_none_match) or any(
         tag.strip().removeprefix("W/") == etag
         for value in if_none_match
