@@ -33,7 +33,7 @@
         :data-node-id="item.node.id"
         class="history-node-position"
         :class="{ 'is-dragging': draggingNodeId === item.node.id }"
-        :style="{ transform: `translate3d(${item.x}px, ${item.y}px, 0)` }"
+        :style="{ transform: `translate(${item.x}px, ${item.y}px)` }"
         @pointerdown.stop="startNodeDrag(item.node.id, $event)"
       >
         <HistoryNodeCard
@@ -98,7 +98,7 @@ interface ActiveDrag {
   captured: boolean
 }
 
-const nodeWidth = readCssLengthPx('--history-node-width', 184)
+const nodeWidth = readCssLengthPx('--history-node-width', 216)
 const horizontalGap = readCssLengthPx('--history-tree-gap-x', 28)
 const verticalGap = readCssLengthPx('--history-tree-gap-y', 44)
 const worldPadding = readCssLengthPx('--history-canvas-padding', 28)
@@ -214,11 +214,11 @@ const links = computed(() => {
 const worldStyle = computed<CSSProperties>(() => ({
   width: `${layout.value.width}px`,
   height: `${layout.value.height}px`,
-  transform: `translate3d(${pan.x}px, ${pan.y}px, 0)`,
+  transform: `translate(${pan.x}px, ${pan.y}px)`,
 }))
 
 const centerTree = () => {
-  pan.x = Math.max(0, (viewportWidth.value - layout.value.width) / 2)
+  pan.x = Math.max(-worldPadding, (viewportWidth.value - layout.value.width) / 2)
   pan.y = 0
 }
 

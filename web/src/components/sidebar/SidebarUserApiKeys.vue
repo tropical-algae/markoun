@@ -39,7 +39,7 @@
               <span
                 v-for="permission in apiKey.permissions"
                 :key="permission"
-                class="meta-tag f-xs"
+                class="meta-tag"
               >
                 {{ permission }}
               </span>
@@ -200,6 +200,7 @@ watch(showCreateModal, (visible) => {
 .api-key-tags {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: var(--space-xs);
 }
 

@@ -134,7 +134,7 @@
   --inspector-meta-font-size: 0.875em;
   --inspector-preview-skeleton-media-height: 180px;
   --inspector-meta-value-min-width: 40px;
-  --history-node-width: 184px;
+  --history-node-width: 216px;
   --history-node-min-height: 48px;
   --history-node-padding-y: var(--space-sm);
   --history-node-padding-x: var(--space-md);
@@ -192,8 +192,12 @@
   --skeleton-opacity-min: 0.56;
   --skeleton-opacity-max: 0.88;
 
-  --meta-tag-height: 1rem;
-  --meta-tag-padding: 1px 5px;
+  --meta-tag-line-height: 1.25;
+  --meta-tag-padding-block: 2px;
+  --meta-tag-padding-inline: 6px;
+  --meta-tag-block-size: calc(
+    var(--font-size-xs) * var(--meta-tag-line-height) + var(--meta-tag-padding-block) * 2
+  );
 
   --tree-indent-step: 12px;
   --tree-row-padding-y: 3px;
@@ -209,8 +213,11 @@
     var(--tree-node-text-line-height) + var(--tree-node-text-padding-y) * 2
   );
   --tree-node-row-height: calc(
-    var(--tree-node-text-height) +
-    var(--tree-node-text-slot-padding-y) * 2 +
+    max(
+      var(--tree-node-text-height) + var(--tree-node-text-slot-padding-y) * 2,
+      var(--meta-tag-block-size),
+      var(--tree-icon-size)
+    ) +
     var(--tree-row-padding-y) * 2
   );
   --tree-long-press-delay-ms: 600;

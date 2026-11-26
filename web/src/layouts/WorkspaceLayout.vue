@@ -294,7 +294,7 @@ watch(() => props.rightOpen, (open) => {
 
   position: absolute;
   inset-block: 0;
-  inset-inline-start: calc(50% - var(--line-width) / 2);
+  inset-inline-start: 50%;
   width: var(--line-width);
   background-color: var(--color-line);
   opacity: 0;

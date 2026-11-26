@@ -60,7 +60,7 @@
         </div>
       </div>
 
-      <span v-if="suffix" class="meta-tag">{{ suffix.toUpperCase() }}</span>
+      <span v-if="suffix" class="meta-tag">{{ suffix }}</span>
     </div>
   </div>
 </template>
@@ -155,10 +155,6 @@ const handleRenameInput = (event: Event) => {
   box-sizing: border-box;
   content: "";
   pointer-events: none;
-}
-
-.node-content > .meta-tag {
-  flex-shrink: 0;
 }
 
 .node-text-wrapper {

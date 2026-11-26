@@ -9,7 +9,7 @@
       >
         <span class="search-result-title-row">
           <span class="search-result-title fw-bold f-s fc-pri">{{ result.node.name }}</span>
-          <span class="meta-tag">{{ result.node.suffix.toUpperCase() }}</span>
+          <span class="meta-tag">{{ result.node.suffix }}</span>
         </span>
         <span class="search-result-path f-xs fc-sec">{{ result.node.path }}</span>
         <span v-if="result.matches.length" :id="matchListId" class="search-result-match-list">
@@ -121,10 +121,6 @@ watch(() => props.result, collapse)
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.search-result-title-row .meta-tag {
-  flex-shrink: 0;
 }
 
 .search-result-path {

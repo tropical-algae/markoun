@@ -21,11 +21,11 @@
           <div class="user-tag-shell">
             <BaseSkeleton
               width="var(--skeleton-width-xs)"
-              height="var(--meta-tag-height)"
+              height="var(--meta-tag-block-size)"
             />
             <BaseSkeleton
               width="var(--skeleton-width-xs)"
-              height="var(--meta-tag-height)"
+              height="var(--meta-tag-block-size)"
             />
           </div>
 
@@ -141,16 +141,19 @@ onMounted(() => {
   overflow-wrap: anywhere;
 }
 
-.user-scopes {
+.user-scopes,
+.user-tag-shell {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
+  min-width: 0;
   gap: var(--space-compact);
 }
 
 .user-meta-grid,
 .user-meta-shell {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: var(--space-xs) var(--space-md);
   align-items: center;
 }
@@ -169,13 +172,6 @@ onMounted(() => {
   color: var(--color-text-pri);
   line-height: var(--profile-meta-line-height);
   word-break: break-word;
-}
-
-.user-tag-shell {
-  display: flex;
-  flex-wrap: wrap;
-  min-width: 0;
-  gap: var(--space-compact);
 }
 
 .user-meta-shell-loading {

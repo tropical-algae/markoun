@@ -54,12 +54,12 @@
               <template #loading>
                 <BaseSkeleton
                   width="var(--skeleton-width-xl)"
-                  height="var(--meta-tag-height)"
+                  height="var(--meta-tag-block-size)"
                   radius="var(--radius-sm)"
                 />
               </template>
 
-              <span class="meta-tag settings-footer-tag">v{{ sysStore.version }}</span>
+              <span class="meta-tag">v{{ sysStore.version }}</span>
             </AsyncGate>
           </div>
         </div>
@@ -71,12 +71,12 @@
               <template #loading>
                 <BaseSkeleton
                   width="var(--skeleton-width-full)"
-                  height="var(--meta-tag-height)"
+                  height="var(--meta-tag-block-size)"
                   radius="var(--radius-sm)"
                 />
               </template>
 
-              <span class="meta-tag settings-footer-tag">{{ sysStore.status }}</span>
+              <span class="meta-tag">{{ sysStore.status }}</span>
             </AsyncGate>
           </div>
         </div>
@@ -126,7 +126,6 @@ const handleUpdateSetting = async (id: string, newValue: string | boolean) => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: var(--meta-tag-height);
 }
 
 .settings-footer-row + .settings-footer-row {
@@ -135,7 +134,7 @@ const handleUpdateSetting = async (id: string, newValue: string | boolean) => {
 
 .settings-footer-value-slot {
   min-width: var(--settings-footer-value-min-width);
-  min-height: var(--meta-tag-height);
+  min-height: var(--meta-tag-block-size);
   display: inline-flex;
   align-items: center;
   justify-content: flex-end;
@@ -148,12 +147,6 @@ const handleUpdateSetting = async (id: string, newValue: string | boolean) => {
   min-width: 0;
   align-items: center;
   justify-content: flex-end;
-  min-height: var(--meta-tag-height);
-}
-
-.settings-footer-tag {
-  min-height: var(--meta-tag-height);
-  height: var(--meta-tag-height);
 }
 
 .setting-skeleton-row {
