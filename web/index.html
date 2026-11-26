@@ -4,10 +4,40 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/markoun.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
     <title>markoun</title>
+    <script>
+      try {
+        const theme = localStorage.getItem('markoun.theme')
+        if (theme === 'light' || theme === 'dark') {
+          document.documentElement.dataset.theme = theme
+          document.querySelector('meta[name="color-scheme"]').content = theme
+        }
+      } catch {
+      }
+
+      window.addEventListener('error', (event) => {
+        if (event.target instanceof HTMLScriptElement && event.target.type === 'module') {
+          document.getElementById('startup-error')?.removeAttribute('hidden')
+        }
+      }, true)
+    </script>
+    <link rel="stylesheet" href="/src/assets/styles/main.css" />
   </head>
   <body>
     <div id="app"></div>
+    <div id="startup-curtain" class="page-curtain startup-curtain">
+      <div class="startup-curtain-content">
+        <div class="curtain-brand" role="status" aria-label="Loading Markoun">
+          <span class="curtain-logo" aria-hidden="true"></span>
+          <span>MARKOUN.</span>
+        </div>
+        <p id="startup-error" role="alert" hidden>
+          Markoun could not start. <a href="">Reload the page</a>.
+        </p>
+        <noscript><p>Enable JavaScript to use Markoun.</p></noscript>
+      </div>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

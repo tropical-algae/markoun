@@ -1,6 +1,5 @@
-import { createApp } from 'vue'
+import { createApp, nextTick } from 'vue'
 import { createPinia } from 'pinia'
-import '@/assets/styles/main.css'
 
 import App from '@/App.vue'
 import router from '@/router'
@@ -31,3 +30,16 @@ setRequestErrorHandler((error) => {
 })
 
 app.mount('#app')
+
+const startupCurtain = document.getElementById('startup-curtain')
+if (startupCurtain) {
+  void router.isReady().then(async () => {
+    await nextTick()
+    startupCurtain.classList.add('is-leaving')
+    await Promise.allSettled(startupCurtain.getAnimations().map((animation) => animation.finished))
+    startupCurtain.remove()
+  }).catch((error) => {
+    console.error('Markoun could not start.', error)
+    document.getElementById('startup-error')?.removeAttribute('hidden')
+  })
+}

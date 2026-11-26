@@ -46,20 +46,24 @@ export const useAppearanceStore = defineStore('appearance', () => {
       return
     }
 
-    const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY)
-    currentTheme.value = isThemeMode(storedTheme) ? storedTheme : DEFAULT_THEME_MODE
+    const initialTheme = document.documentElement.getAttribute('data-theme')
+    currentTheme.value = isThemeMode(initialTheme) ? initialTheme : DEFAULT_THEME_MODE
     applyTheme(currentTheme.value)
 
-    showTooltips.value = parseStoredBoolean(
-      window.localStorage.getItem(TOOLTIP_STORAGE_KEY),
-      DEFAULT_SHOW_TOOLTIPS,
-    )
-    useWideEditorLines.value = parseStoredBoolean(
-      window.localStorage.getItem(WIDE_EDITOR_LINES_STORAGE_KEY),
-      DEFAULT_USE_WIDE_EDITOR_LINES,
-    )
+    try {
+      showTooltips.value = parseStoredBoolean(
+        window.localStorage.getItem(TOOLTIP_STORAGE_KEY),
+        DEFAULT_SHOW_TOOLTIPS,
+      )
+      useWideEditorLines.value = parseStoredBoolean(
+        window.localStorage.getItem(WIDE_EDITOR_LINES_STORAGE_KEY),
+        DEFAULT_USE_WIDE_EDITOR_LINES,
+      )
 
-    window.localStorage.removeItem(LEGACY_THEME_COLOR_STORAGE_KEY)
+      window.localStorage.removeItem(LEGACY_THEME_COLOR_STORAGE_KEY)
+    } catch {
+      // Default preferences still work without persistent storage.
+    }
   }
 
   const setTheme = (themeMode: ThemeMode) => {

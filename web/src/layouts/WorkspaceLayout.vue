@@ -177,7 +177,7 @@ watch(() => props.rightOpen, (open) => {
   aspect-ratio: var(--brand-logo-aspect-ratio);
   flex-shrink: 0;
   background-color: currentColor;
-  mask: url('@/assets/icons/markoun-logo.svg') center / contain no-repeat;
+  mask: var(--brand-logo-mask) center / contain no-repeat;
 }
 
 .workspace-main {
