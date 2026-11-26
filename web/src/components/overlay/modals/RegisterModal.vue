@@ -15,7 +15,6 @@
           autocomplete="username"
           required
           class="modal-field f-s"
-          placeholder="e.g. John Doe"
           @keydown.enter.prevent="focusNext('emailInputRef')"
         />
 
@@ -28,7 +27,6 @@
           autocomplete="email"
           required
           class="modal-field f-s"
-          placeholder="name@example.com"
           @keydown.enter.prevent="focusNext('passwordInputRef')"
         />
 
@@ -41,7 +39,6 @@
           autocomplete="new-password"
           required
           class="modal-field is-last f-s"
-          placeholder="Enter your password"
         />
 
         <template #actions>

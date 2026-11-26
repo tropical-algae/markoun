@@ -116,7 +116,6 @@ const handleInput = (event: Event) => {
   border: none;
   background: transparent;
   outline: none;
-  font-size: var(--filled-input-content-font-size);
   line-height: var(--input-line-height);
   /* border-radius: var(--radius-md); */
   color: var(--color-text-pri);

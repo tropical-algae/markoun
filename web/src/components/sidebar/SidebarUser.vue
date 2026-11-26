@@ -8,7 +8,7 @@
         <LayoutGroup id="user-profile">
           <div class="user-sidebar-body sidebar-panel-body">
             <section class="sidebar-section">
-              <div class="sidebar-section-title f-m">Profile</div>
+              <div class="sidebar-section-title">Profile</div>
               <SidebarUserProfile />
             </section>
 

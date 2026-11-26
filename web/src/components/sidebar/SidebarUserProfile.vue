@@ -57,10 +57,10 @@
     </template>
 
     <div class="user-profile-card">
-      <div class="user-name f-m fw-bold fc-pri">
+      <div class="user-name fw-bold fc-pri">
         {{ userStore.currentUserProfile?.full_name || 'Unnamed user' }}
       </div>
-      <div class="user-email f-s">
+      <div class="user-email f-xs">
         {{ userStore.currentUserProfile?.email }}
       </div>
 
@@ -151,17 +151,16 @@ onMounted(() => {
 .user-meta-shell {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: var(--space-sm) var(--space-md);
+  gap: var(--space-xs) var(--space-md);
   align-items: center;
 }
 
 .user-meta-grid {
-  margin-top: var(--space-lg);
+  margin-top: var(--space-sm);
 }
 
 .user-meta-label {
   color: var(--color-text-sec);
-  text-transform: uppercase;
   font-weight: 700;
 }
 

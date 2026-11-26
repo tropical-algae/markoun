@@ -157,7 +157,8 @@ const toolBtns = [
 const createNoteModalConfig = {
   title: 'New Note',
   inputLabel: 'Note Name',
-  placeholder: 'e.g. my_note',
+  // placeholder: 'e.g. my_note',
+  placeholder: '',
   hint: 'Created in the selected path. No extension needed.',
   nodeType: 'file',
 } as const
@@ -165,7 +166,8 @@ const createNoteModalConfig = {
 const createFolderModalConfig = {
   title: 'New Folder',
   inputLabel: 'Folder Name',
-  placeholder: 'e.g. temp_folder',
+  // placeholder: 'e.g. temp_folder',
+  placeholder: '',
   hint: 'Created in the selected path.',
   nodeType: 'dir',
 } as const

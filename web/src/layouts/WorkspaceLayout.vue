@@ -1,9 +1,9 @@
 <template>
   <div class="workspace-shell">
-    <header class="workspace-header f-m fw-9 fc-pri">
+    <header class="workspace-header fw-9 fc-pri">
       <slot name="header">
         <span class="workspace-brand-logo" aria-hidden="true"></span>
-        <span>Markoun</span>
+        <span>MARKOUN.</span>
       </slot>
     </header>
 
@@ -85,7 +85,7 @@
       </section>
     </main>
 
-    <footer class="workspace-footer f-s fc-sec">
+    <footer class="workspace-footer f-xs fc-sec">
       <slot name="footer">&copy; 2026 tropical algae. MIT License</slot>
     </footer>
   </div>

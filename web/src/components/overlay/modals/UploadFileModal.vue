@@ -176,7 +176,6 @@ const handleUpload = async (file: File) => {
 .upload-drop-zone .upload-subtitle {
   max-width: 100%;
   color: var(--color-text-sec);
-  font-size: var(--font-size-md);
   margin: 0;
   overflow-wrap: anywhere;
 }
@@ -210,7 +209,6 @@ const handleUpload = async (file: File) => {
 
 .upload-file-text {
   color: var(--color-text-sec);
-  font-size: var(--font-size-md);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -222,7 +220,6 @@ const handleUpload = async (file: File) => {
 
 .progress-text {
   color: var(--color-text-sec);
-  font-size: var(--font-size-md);
 }
 
 .progress-track {

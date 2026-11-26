@@ -31,7 +31,6 @@
           name="api_key_name"
           autocomplete="off"
           class="modal-field f-s"
-          placeholder="Agent name"
           :disabled="pending"
         />
 

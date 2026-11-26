@@ -61,11 +61,11 @@
   --control-line-width: 1.5px;
   --opacity-disabled: 0.6;
 
-  --font-size-xs: 0.55rem;
-  --font-size-sm: 0.75rem;
-  --font-size-md: 0.9rem;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
   --font-size-lg: 1.15rem;
   --font-size-xl: 1.25rem;
+  --input-font-size: 1rem;
   --input-line-height: 1.25;
 
   --motion-soft-duration: 0.2s;
@@ -78,7 +78,7 @@
   --motion-page-transition-progress-duration: 0.23s;
   --motion-page-transition-easing: cubic-bezier(0.22, 1, 0.36, 1);
   --motion-page-transition-brand-easing: cubic-bezier(0.8, 0, 0, 1);
-  --motion-pane-duration: 0.72s;
+  --motion-pane-duration: 0.62s;
   --motion-pane-easing: cubic-bezier(0.2, 0.8, 0.2, 1);
   --motion-pane-line-show-easing: cubic-bezier(0, 1, 0.2, 1);
   --motion-pane-line-hide-easing: cubic-bezier(0.8, 0, 1, 0);
@@ -108,12 +108,11 @@
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
   --safe-area-left: env(safe-area-inset-left, 0px);
   --browser-text-size-adjust: 100%;
-  --mobile-text-input-font-size: 1rem;
 
   --layout-header-height: 48px;
   --workspace-brand-logo-height: 18px;
   --layout-sidebar-rail-width: 45;
-  --layout-sidebar-width-default: 250;
+  --layout-sidebar-width-default: 280;
   --layout-sidebar-width-min: 240;
   --layout-sidebar-width-max: 500;
   --layout-sidebar-inner-min-width: 220px;
@@ -130,7 +129,6 @@
   --editor-content-max-width: 800px;
   --editor-content-padding-y: 30px;
   --editor-content-padding-x-min: 20px;
-  --editor-font-size: 16px;
   --editor-line-height: 1.6;
   --editor-async-gate-delay-ms: 0;
   --inspector-meta-font-size: 0.875em;
@@ -195,10 +193,10 @@
   --skeleton-opacity-max: 0.88;
 
   --meta-tag-height: 1rem;
-  --meta-tag-padding-x: 5px;
+  --meta-tag-padding: 1px 5px;
 
   --tree-indent-step: 12px;
-  --tree-row-padding-y: 2px;
+  --tree-row-padding-y: 3px;
   --tree-row-padding-x: var(--space-compact);
   --tree-row-padding: var(--tree-row-padding-y) var(--tree-row-padding-x);
   --tree-icon-size: 1rem;
@@ -215,7 +213,6 @@
     var(--tree-node-text-slot-padding-y) * 2 +
     var(--tree-row-padding-y) * 2
   );
-  --tree-rename-input-font-size: inherit;
   --tree-long-press-delay-ms: 600;
   --tree-node-dragging-opacity: 0.45;
 
@@ -235,8 +232,6 @@
   --filled-input-label-top: -14px;
   --filled-input-label-height: 24px;
   --filled-input-label-bg-bleed-bottom: -20px;
-  --filled-input-content-font-size: var(--font-size-md);
-  --underlined-input-content-font-size: inherit;
   --underlined-input-letter-spacing: 0.5px;
   --underlined-input-placeholder-opacity: 0.5;
   --ghost-button-padding: 4px 16px;
@@ -305,7 +300,6 @@
   --auth-submit-width: 220px;
   --auth-submit-current-width: var(--auth-submit-width);
   --setting-text-input-width: 120px;
-  --setting-text-input-font-size: var(--font-size-md);
   --setting-text-input-line-height: 1.5;
   --settings-footer-value-min-width: 88px;
   --settings-skeleton-control-height: 1.8rem;
@@ -357,11 +351,6 @@
 
 @media (max-width: 768px) {
   :root {
-    --editor-font-size: var(--mobile-text-input-font-size);
-    --filled-input-content-font-size: var(--mobile-text-input-font-size);
-    --underlined-input-content-font-size: var(--mobile-text-input-font-size);
-    --setting-text-input-font-size: var(--mobile-text-input-font-size);
-    --tree-rename-input-font-size: var(--mobile-text-input-font-size);
     --modal-card-current-max-width: calc(
       100vw -
       var(--modal-mobile-viewport-gap) * 2 -
@@ -420,6 +409,12 @@ input,
 select,
 textarea {
   font-family: inherit;
+}
+
+input,
+select,
+textarea {
+  font-size: var(--input-font-size);
 }
 
 #app {

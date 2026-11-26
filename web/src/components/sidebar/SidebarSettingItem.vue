@@ -1,7 +1,7 @@
 <template>
   <div class="setting-item">
     <div class="setting-copy">
-      <span class="fw-bold f-s fc-pri">{{ settingName }}</span>
+      <span class="f-s fc-pri">{{ settingName }}</span>
       <span class="setting-desc f-xs fc-sec">{{ settingDesc }}</span>
     </div>
 
@@ -155,7 +155,6 @@ const commitDraft = () => {
   border-radius: var(--radius-sm);
   background-color: var(--color-bg-field);
   color: var(--color-text-pri);
-  font-size: var(--setting-text-input-font-size);
   line-height: var(--setting-text-input-line-height);
   text-align: end;
   box-sizing: border-box;

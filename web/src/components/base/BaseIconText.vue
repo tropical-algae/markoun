@@ -6,7 +6,7 @@
       </slot>
     </div>
 
-    <div class="hint-content">
+    <div class="hint-content f-xs">
       <slot>{{ text }}</slot>
     </div>
   </div>
@@ -38,15 +38,14 @@ const hintStyle = computed<CSSProperties>(() => ({
   justify-content: center;
   gap: var(--space-compact);
 
-  font-size: var(--font-size-sm);
-  line-height: var(--font-size-sm);
+  line-height: var(--font-size-xs);
   width: 100%;
 }
 
 .hint-icon {
   flex-shrink: 0;
-  width: var(--font-size-sm);
-  height: var(--font-size-sm);
+  width: var(--font-size-xs);
+  height: var(--font-size-xs);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -64,7 +63,6 @@ const hintStyle = computed<CSSProperties>(() => ({
   min-width: 0;
   word-break: normal;
   overflow-wrap: anywhere;
-
   text-align: left;
 }
 </style>

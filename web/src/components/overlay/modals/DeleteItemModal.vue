@@ -4,9 +4,10 @@
     title="Delete Item"
   >
     <ModalContentLayout class="delete-item-modal fc-pri">
-      <div>Delete <span class="fw-bold">{{ targetPath }}</span>?</div>
-      <div class="f-s fc-sec">
-        {{ deleteDescription }} This action cannot be undone.
+      <div>Delete '<span class="fw-bold">{{ targetPath }}</span>' ?</div>
+      <div class="f-s fc-sec delete-item-message">
+        {{ deleteDescription }}<br/>
+        This action cannot be undone.
       </div>
 
       <template #actions>
@@ -88,5 +89,9 @@ const handleConfirm = async () => {
 
 .delete-item-modal > div {
   overflow-wrap: anywhere;
+}
+
+.delete-item-message {
+  margin-top: var(--space-sm);
 }
 </style>

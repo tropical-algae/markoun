@@ -8,7 +8,7 @@
 
       <div class="curtain-meter">
         <div class="curtain-readout" aria-hidden="true">
-          <span class="curtain-label">Opening<br />workspace</span>
+          <span class="curtain-label text-uppercase">Opening<br />workspace</span>
           <span class="curtain-percentage"><span ref="count">0</span><span>%</span></span>
         </div>
         <div
@@ -108,7 +108,6 @@ onBeforeUnmount(() => tween?.kill())
   font-weight: 700;
   line-height: 1.15;
   letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .curtain-percentage {

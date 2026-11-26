@@ -1,6 +1,6 @@
 <template>
   <section class="sidebar-section api-key-section">
-    <div class="sidebar-section-title f-m">MCP API Keys</div>
+    <div class="sidebar-section-title">MCP Keys</div>
 
     <AsyncGate :status="status">
       <template #loading>
@@ -25,7 +25,7 @@
           @delete="openRevokeModal(apiKey)"
         >
           <div class="api-key-copy">
-            <span class="f-s fw-bold">{{ apiKey.name }}</span>
+            <span class="fw-bold">{{ apiKey.name }}</span>
             <span class="f-xs fc-sec">{{ apiKey.prefix }}...</span>
             <span class="f-xs fc-sec">
               <span class="fw-bold">Created at:</span>
@@ -239,7 +239,7 @@ watch(showCreateModal, (visible) => {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  gap: var(--space-xs);
+  gap: var(--space-sm);
 }
 
 .api-key-copy > span {

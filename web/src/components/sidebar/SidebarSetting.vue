@@ -1,13 +1,13 @@
 <template>
   <SidebarPanelLayout class="settings-sidebar" title="Settings">
     <div class="settings-body sidebar-panel-body">
-      <div class="sidebar-section-title f-m">Appearance</div>
+      <div class="sidebar-section-title">Appearance</div>
 
       <section class="sidebar-section">
         <SidebarSettingAppearance />
       </section>
 
-      <div class="sidebar-section-title f-m">General</div>
+      <div class="sidebar-section-title">General</div>
 
       <AsyncGate :status="sysStore.settingsState">
         <template #loading>
@@ -48,7 +48,7 @@
     <template #footer>
       <div class="settings-footer sidebar-panel-footer horizontal-line-top">
         <div class="settings-footer-row f-s fc-pri">
-          <span class="text-uppercase f-s">App Version:</span>
+          <span class="f-s">App Version:</span>
           <div class="settings-footer-value-slot">
             <AsyncGate :status="sysStore.sysStatusState" class="settings-footer-gate">
               <template #loading>
@@ -65,7 +65,7 @@
         </div>
 
         <div class="settings-footer-row f-s fc-pri">
-          <span class="text-uppercase f-s">System Status:</span>
+          <span class="f-s">System Status:</span>
           <div class="settings-footer-value-slot">
             <AsyncGate :status="sysStore.sysStatusState" class="settings-footer-gate">
               <template #loading>

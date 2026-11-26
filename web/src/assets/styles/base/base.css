@@ -22,12 +22,13 @@
   font-size: var(--font-size-xs);
   font-weight: 700;
   min-height: var(--meta-tag-height);
-  padding: 0 var(--meta-tag-padding-x);
+  padding: var(--meta-tag-padding);
   margin: 0;
   border-radius: var(--radius-sm);
   white-space: nowrap;
   vertical-align: middle;
   box-sizing: border-box;
+  text-transform: uppercase;
   transition: background-color var(--motion-theme-duration) ease;
 }
 
@@ -51,7 +52,6 @@
   margin-bottom: var(--space-sm);
   color: var(--color-text-pri);
   font-weight: 700;
-  text-transform: uppercase;
 }
 
 .sidebar-toolbar {

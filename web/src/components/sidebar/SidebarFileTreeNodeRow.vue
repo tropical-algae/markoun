@@ -267,7 +267,6 @@ const handleRenameInput = (event: Event) => {
   border-radius: var(--radius-sm);
   color: var(--color-text-pri);
   font-family: inherit;
-  font-size: var(--tree-rename-input-font-size);
   box-sizing: border-box;
   line-height: var(--tree-node-text-line-height);
 }

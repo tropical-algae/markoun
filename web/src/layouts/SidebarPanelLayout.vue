@@ -2,7 +2,7 @@
   <section class="sidebar-panel-layout">
     <BaseHeader v-if="props.title || $slots.header">
       <slot name="header">
-        <div class="f-m fw-bold text-uppercase">{{ props.title }}</div>
+        <div class="fw-bold text-uppercase">{{ props.title }}</div>
       </slot>
     </BaseHeader>
 

@@ -7,10 +7,6 @@
     font-size: var(--font-size-sm);
 }
 
-.f-m {
-    font-size: var(--font-size-md);
-}
-
 .f-l {
     font-size: var(--font-size-lg);
 }
@@ -33,4 +29,8 @@
 
 .fw-bold { 
     font-weight: 700;
+}
+
+.text-uppercase {
+  text-transform: uppercase;
 }
