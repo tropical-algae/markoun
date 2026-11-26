@@ -39,6 +39,7 @@
   --color-action-light: #ecf5ff;
   --color-page-transition-bg: var(--color-bg-pri);
   --color-page-transition-ink: var(--color-text-pri);
+  --color-page-transition-track: var(--color-text-sec);
   --brand-logo-aspect-ratio: 60.325 / 70.136;
   --brand-logo-mask: url('@/assets/icons/markoun-logo.svg?inline');
 
@@ -69,6 +70,14 @@
 
   --motion-soft-duration: 0.2s;
   --motion-medium-duration: 0.3s;
+  --motion-page-transition-min-duration: 1.46s;
+  --motion-page-transition-enter-duration: 0.12s;
+  --motion-page-transition-leave-duration: 0.38s;
+  --motion-page-transition-brand-duration: 0.78s;
+  --motion-page-transition-brand-delay: 0.22s;
+  --motion-page-transition-progress-duration: 0.23s;
+  --motion-page-transition-easing: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-page-transition-brand-easing: cubic-bezier(0.8, 0, 0, 1);
   --motion-pane-duration: 0.72s;
   --motion-pane-easing: cubic-bezier(0.2, 0.8, 0.2, 1);
   --motion-pane-line-show-easing: cubic-bezier(0, 1, 0.2, 1);
@@ -249,8 +258,10 @@
 
   --page-transition-z-index: calc(var(--toast-z-index) + 1);
   --page-transition-font-family: "Helvetica Neue", "Nimbus Sans", "Liberation Sans", sans-serif;
+  --page-transition-gutter: clamp(1.25rem, 4vw, 4.5rem);
   --page-transition-brand-gap: clamp(0.65rem, 1.8vw, 1.5rem);
   --page-transition-brand-font-size: clamp(1.65rem, 5vw, 4.25rem);
+  --page-transition-percentage-font-size: clamp(3rem, min(12vw, 22dvh), 9rem);
 
   --upload-dropzone-height: 180px;
   --upload-icon-size: 42px;
