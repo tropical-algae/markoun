@@ -41,6 +41,7 @@ class SysSetting(BaseSettings):
     PORT: int = 8080
     WORKERS: int = 2
     API_PREFIX: str = "/api/v1"
+    API_DOCS_ENABLED: bool = False
     DEBUG: bool = False
     WEB_ROOT: str | None = None
 

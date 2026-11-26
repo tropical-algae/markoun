@@ -23,6 +23,7 @@ LABEL org.opencontainers.image.authors="tropical-algae tropicalalgae@gmail.com"
 
 ENV PYTHONUNBUFFERED=1 \
     PORT=80 \
+    API_DOCS_ENABLED=false \
     WEB_ROOT=/app/web \
     SQL_DATABASE_URI=sqlite+aiosqlite:////markoun/database.db \
     DOCUMENT_ROOT=/markoun/data \

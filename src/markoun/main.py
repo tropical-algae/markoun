@@ -16,6 +16,7 @@ def create_app() -> FastAPI:
         title=settings.PROJECT_NAME,
         debug=settings.DEBUG,
         version=settings.VERSION,
+        openapi_url="/openapi.json" if settings.API_DOCS_ENABLED else None,
         lifespan=lifespan,
     )
     application.include_router(api_router, prefix=settings.API_PREFIX)
