@@ -61,6 +61,8 @@ docker run -itd --name markoun \
 >
 > To view the generated credentials, run: `docker logs -f markoun`
 
+The container serves the web UI, API, and MCP on port `80`. Open `http://localhost:10000` with the default port mapping, or point an existing reverse proxy at the published port.
+
 **Volume Explanation**
 
 After the container starts for the first time, Markoun will automatically create the following files and directories under `MARKOUN_ROOT`:
@@ -180,17 +182,17 @@ nix run github:tropical-algae/markoun
 Markoun is configured via a `config.yaml` file. Restart the service after
 modifying this file for changes to take effect. Below are some important options:
 
-| **Key**                                | **Description**                                                                                           | **Default**                                | **Since** |
-| -------------------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------ | --------- |
-| `USER_WORKSPACE_ISOLATION`             | Uses `<DOCUMENT_ROOT>/<username>` as each authenticated user's workspace when authentication is enabled.  | false                                      | `v0.2.2`  |
-| `MEDIA_DELIVERY_MODE`                  | Sends protected images through FastAPI (`application`) or an Nginx internal redirect (`nginx`).           | `nginx`                                    | `v0.2.2`  |
-| `AUTH_REQUIRED`                        | Requires users to sign in before accessing and editing workspace files.                                   | true                                       | `v0.2.1`  |
-| `DEBUG`                                | Enables/disable debug-level logging for the backend service.                                              | false                                      | `v0.0.1`  |
-| `ACCESS_TOKEN_DEFAULT_EXPIRE_MINUTES`  | **Standard Session Lifetime**: Duration (in minutes) a user remains logged in before the session expires. | 1440                                       | `v0.0.1`  |
-| `ACCESS_TOKEN_EXTENDED_EXPIRE_MINUTES` | **Persistent Session Lifetime**: Duration (in minutes) for users who select "Remember Me" during login.   | 43200                                      | `v0.0.1`  |
-| `ACCESS_TOKEN_COOKIE_SECURE`           | Sends the auth cookie only over HTTPS. Enable this when the public site is served through HTTPS.          | false                                      | `v0.1.4`  |
-| `DISPLAYED_FILE_TYPES`                 | **File Filter**: A list of file extensions that the editor is permitted to display.                       | ["md", "png", "jpg", "jpeg", "bmp", "svg"] | `v0.0.1`  |
-| `WELCOME_NOTE_PATH`                    | Path to the Markdown file used as the default welcome page when no document is open.                      | `./welcome.md`                             | `v0.1.0`  |
+| **Key**                                | **Description**                                                                                                                              | **Default**                                | **Since**    |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ | ------------ |
+| `USER_WORKSPACE_ISOLATION`             | Uses `<DOCUMENT_ROOT>/<username>` as each authenticated user's workspace when authentication is enabled.                                     | false                                      | `v0.2.2`     |
+| `AUTH_REQUIRED`                        | Requires users to sign in before accessing and editing workspace files.                                                                      | true                                       | `v0.2.1`     |
+| `DEBUG`                                | Enables/disable debug-level logging for the backend service.                                                                                 | false                                      | `v0.0.1`     |
+| `ACCESS_TOKEN_DEFAULT_EXPIRE_MINUTES`  | **Standard Session Lifetime**: Duration (in minutes) a user remains logged in before the session expires.                                    | 1440                                       | `v0.0.1`     |
+| `ACCESS_TOKEN_EXTENDED_EXPIRE_MINUTES` | **Persistent Session Lifetime**: Duration (in minutes) for users who select "Remember Me" during login.                                      | 43200                                      | `v0.0.1`     |
+| `ACCESS_TOKEN_COOKIE_SECURE`           | Sends the auth cookie only over HTTPS. Enable this when the public site is served through HTTPS.                                             | false                                      | `v0.1.4`     |
+| `DISPLAYED_FILE_TYPES`                 | **File Filter**: A list of file extensions that the editor is permitted to display.                                                          | ["md", "png", "jpg", "jpeg", "bmp", "svg"] | `v0.0.1`     |
+| `WELCOME_NOTE_PATH`                    | Path to the Markdown file used as the default welcome page when no document is open.                                                         | `./welcome.md`                             | `v0.1.0`     |
+| ~~`MEDIA_DELIVERY_MODE`~~              | ~~Sends protected images through FastAPI (`application`) or an Nginx internal redirect (`nginx`). The feature has been removed in `v0.3.0`~~ | ~~`nginx`~~                                | ~~`v0.2.2`~~ |
 
 All configuration options can be initialized via environment variables at startup, and then modified at runtime through `config.yaml`.
 

@@ -60,6 +60,8 @@ docker run -itd --name markoun \
 >
 > 可通过以下命令查看生成的账号信息：`docker logs -f markoun`
 
+容器在 `80` 端口统一提供网页、API 和 MCP。使用默认端口映射时，可以直接打开 `http://localhost:10000`，也可以将已有的反向代理指向发布端口。
+
 **挂载目录说明**
 
 容器首次启动后，Markoun 会自动在 `MARKOUN_ROOT` 下创建以下文件和目录：
@@ -176,17 +178,17 @@ nix run github:tropical-algae/markoun
 
 Markoun 通过 `config.yaml` 进行配置。修改该文件后需要重启服务才能生效。以下是部分重要选项：
 
-| **配置项**                             | **说明**                                                                      | **默认值**                                 | **引入版本** |
-| -------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------ | ------------ |
-| `USER_WORKSPACE_ISOLATION`             | 启用身份认证时，将 `<DOCUMENT_ROOT>/<username>` 作为每个用户独立的工作区。    | false                                      | `v0.2.2`     |
-| `MEDIA_DELIVERY_MODE`                  | 通过 FastAPI（`application`）或 Nginx 内部重定向（`nginx`）传输受保护的图片。 | `nginx`                                    | `v0.2.2`     |
-| `AUTH_REQUIRED`                        | 访问和编辑工作区文件前是否要求用户登录。                                      | true                                       | `v0.2.1`     |
-| `DEBUG`                                | 是否开启DEBUG日志。                                                           | false                                      | `v0.0.1`     |
-| `ACCESS_TOKEN_DEFAULT_EXPIRE_MINUTES`  | 标准会话的有效时间，单位分钟。                                                | 1440                                       | `v0.0.1`     |
-| `ACCESS_TOKEN_EXTENDED_EXPIRE_MINUTES` | 用户选择“Remember me”后，持久会话的有效时间，单位分钟。                       | 43200                                      | `v0.0.1`     |
-| `ACCESS_TOKEN_COOKIE_SECURE`           | 是否仅通过 HTTPS 发送身份认证 Cookie。公网使用 HTTPS 时应启用。               | false                                      | `v0.1.4`     |
-| `DISPLAYED_FILE_TYPES`                 | 允许编辑器显示的文件扩展名列表。                                              | ["md", "png", "jpg", "jpeg", "bmp", "svg"] | `v0.0.1`     |
-| `WELCOME_NOTE_PATH`                    | 默认欢迎页显示内容的 Markdown 文件路径。                                      | `./welcome.md`                             | `v0.1.0`     |
+| **配置项**                             | **说明**                                                                                      | **默认值**                                 | **引入版本** |
+| -------------------------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------ | ------------ |
+| `USER_WORKSPACE_ISOLATION`             | 启用身份认证时，将 `<DOCUMENT_ROOT>/<username>` 作为每个用户独立的工作区。                    | false                                      | `v0.2.2`     |
+| `AUTH_REQUIRED`                        | 访问和编辑工作区文件前是否要求用户登录。                                                      | true                                       | `v0.2.1`     |
+| `DEBUG`                                | 是否开启DEBUG日志。                                                                           | false                                      | `v0.0.1`     |
+| `ACCESS_TOKEN_DEFAULT_EXPIRE_MINUTES`  | 标准会话的有效时间，单位分钟。                                                                | 1440                                       | `v0.0.1`     |
+| `ACCESS_TOKEN_EXTENDED_EXPIRE_MINUTES` | 用户选择“Remember me”后，持久会话的有效时间，单位分钟。                                       | 43200                                      | `v0.0.1`     |
+| `ACCESS_TOKEN_COOKIE_SECURE`           | 是否仅通过 HTTPS 发送身份认证 Cookie。公网使用 HTTPS 时应启用。                               | false                                      | `v0.1.4`     |
+| `DISPLAYED_FILE_TYPES`                 | 允许编辑器显示的文件扩展名列表。                                                              | ["md", "png", "jpg", "jpeg", "bmp", "svg"] | `v0.0.1`     |
+| `WELCOME_NOTE_PATH`                    | 默认欢迎页显示内容的 Markdown 文件路径。                                                      | `./welcome.md`                             | `v0.1.0`     |
+| ~~`MEDIA_DELIVERY_MODE`~~              | ~~通过 FastAPI（`application`）或 Nginx 内部重定向（`nginx`）传输受保护的图片。`v0.3.0`移除~~ | `nginx`                                    | ~~`v0.2.2`~~ |
 
 所有配置项都可以通过环境变量在启动时初始化，之后再通过 `config.yaml` 进行修改。
 
