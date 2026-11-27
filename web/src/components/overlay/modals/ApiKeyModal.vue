@@ -6,11 +6,8 @@
     :close-on-escape="!pending"
     @opened="handleOpened"
   >
-    <ModalContentLayout>
+    <ModalContentLayout size="md">
       <template v-if="createdKey">
-        <p class="api-key-warning f-s fc-sec">
-          Copy this key now. It will not be shown again.
-        </p>
         <div class="api-key-result">
           <div class="api-key-result-item">
             <span class="f-xs fw-bold fc-pri">Server URL</span>
@@ -21,6 +18,12 @@
             <code class="api-key-result-value f-xs">{{ createdKey }}</code>
           </div>
         </div>
+        <BaseIconText
+          :icon="InfoIcon"
+          text="Copy this key now. It will not be shown again."
+          class="api-key-warning"
+          color="var(--color-text-muted)"
+        />
       </template>
 
       <form v-else :id="createFormId" @submit.prevent="handleCreate">
@@ -111,6 +114,8 @@ import BaseModal from '@/components/base/BaseModal.vue'
 import GhostButton from '@/components/base/GhostButton.vue'
 import UnderlinedInput from '@/components/base/UnderlinedInput.vue'
 import ModalContentLayout from '@/layouts/ModalContentLayout.vue'
+import BaseIconText from '@/components/base/BaseIconText.vue'
+import InfoIcon from '@/assets/icons/info.svg'
 
 const props = withDefaults(defineProps<{
   modelValue: boolean
@@ -206,7 +211,7 @@ watch(
 }
 
 .api-key-warning {
-  margin: 0 0 var(--space-lg);
+  margin: var(--space-md) 0 0 0;
 }
 
 .api-key-result {
@@ -223,9 +228,6 @@ watch(
 }
 
 .api-key-result-value {
-  display: block;
-  width: var(--api-key-secret-width);
-  max-width: 100%;
   padding: var(--space-sm);
   margin: 0;
   overflow-wrap: anywhere;
