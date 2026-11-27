@@ -37,7 +37,11 @@ interface LayoutSnapshot {
 const fileTreeMotionKey: InjectionKey<FileTreeMotionContext> = Symbol('file-tree-motion')
 const leavingSelector = '.tree-branch-leave-active, .file-tree-state-swap-leave-active'
 const enteringSelector = '.tree-branch-enter-active, .file-tree-state-swap-enter-active'
-const enteringFromSelector = '.tree-branch-enter-from, .file-tree-state-swap-enter-from'
+const branchTransitionStartSelector = [
+  '.tree-branch-enter-from',
+  '.tree-branch-leave-from',
+  '.file-tree-state-swap-enter-from',
+].join(', ')
 const contentHeightOf = (layout: HTMLElement) => (
   (layout.firstElementChild as HTMLElement | null)?.offsetHeight ?? 0
 )
@@ -124,12 +128,11 @@ export const provideFileTreeMotion = (
       return
     }
 
-    const entranceDuration = plan.curves[0]!.duration
-    // Vue starts the opacity transition on its next animation frame. Give only
-    // new entrances this plan's timing, without retiming an ancestor already fading.
-    for (const element of root.querySelectorAll<HTMLElement>(enteringFromSelector)) {
-      if (!element.closest(leavingSelector)) {
-        element.style.setProperty('--motion-tree-enter-duration', `${entranceDuration}ms`)
+    const branchDuration = plan.curves[0]!.duration
+    // Set the timing before Vue starts the new fades; do not retime other fades.
+    for (const element of root.querySelectorAll<HTMLElement>(branchTransitionStartSelector)) {
+      if (!element.parentElement?.closest(leavingSelector)) {
+        element.style.setProperty('--motion-tree-branch-duration', `${branchDuration}ms`)
       }
     }
     const scrollTop = Math.min(root.scrollTop, Math.max(0, contentHeight - root.clientHeight))
@@ -169,7 +172,7 @@ export const provideFileTreeMotion = (
       const elements = entering.map((row) => row.element)
       elements.forEach((element) => animatedRows.add(element))
       gsap.set(elements, { opacity: (index) => before.get(entering[index]!.path)?.opacity ?? 0 })
-      timeline.to(elements, { opacity: 1, duration: entranceDuration / 1000, ease: enterEase }, 0)
+      timeline.to(elements, { opacity: 1, duration: branchDuration / 1000, ease: enterEase }, 0)
     }
     if (scrollTop !== root.scrollTop) {
       timeline.to(root, { scrollTop, duration: plan.duration / 1000, ease }, 0)

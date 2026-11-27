@@ -53,7 +53,7 @@ withDefaults(defineProps<{
 }
 
 :deep(.file-tree-state-swap-enter-active) {
-  transition: opacity var(--motion-tree-enter-duration) var(--motion-tree-enter-easing);
+  transition: opacity var(--motion-tree-branch-duration) var(--motion-tree-enter-easing);
 }
 
 :deep(.file-tree-state-swap-enter-from) {

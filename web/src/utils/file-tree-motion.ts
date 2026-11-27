@@ -93,6 +93,17 @@ const propagationLevel = (source: string[], target: string[]) => {
   return Math.max(0, source.length - common - 1)
 }
 
+const visibleChildrenHeight = (rows: ReadonlyMap<string, TreeRowLayout>, path: string) => {
+  const prefix = path === '.' ? '' : `${path}/`
+  let height = 0
+  for (const row of rows.values()) {
+    if (row.path.startsWith(prefix)) {
+      height += row.height
+    }
+  }
+  return height
+}
+
 export const planFileTreeMotion = (
   before: ReadonlyMap<string, TreeRowLayout>,
   after: ReadonlyMap<string, TreeRowLayout>,
@@ -138,9 +149,17 @@ export const planFileTreeMotion = (
     maxLevel = Math.max(maxLevel, level)
   }
 
-  // A last branch can grow without moving any existing row. Its entrance still
-  // uses the actual layout change; active rows keep their visual displacement.
-  distance = distance || Math.abs(extentChange)
+  // An opening, closing or placeholder swap is timed by the complete visible
+  // subtree. FLIP offsets still start from the currently rendered position.
+  let branchHeight = 0
+  for (const path of changedDirectories) {
+    const beforeHeight = visibleChildrenHeight(before, path)
+    const afterHeight = visibleChildrenHeight(after, path)
+    if (!beforeHeight || !afterHeight) {
+      branchHeight = Math.max(branchHeight, beforeHeight, afterHeight)
+    }
+  }
+  distance = branchHeight || distance || Math.abs(extentChange)
   const duration = resolveMotionDuration(distance, timing)
   const curves: TreeMotionCurve[] = [{ duration, ease }]
   if (duration > 0) {

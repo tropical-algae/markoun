@@ -3,18 +3,19 @@
     <template #header>
       <div class="sidebar-toolbar">
         <BaseTooltip
-          v-for="item in toolBtns"
-          :key="item.label"
-          :text="item.label"
+          v-for="action in toolbarActions"
+          :key="action"
+          :text="actions[action].label"
           placement="bottom"
         >
           <button
             type="button"
             class="icon-btn"
-            @click="item.func()"
-            :aria-label="item.label"
+            :disabled="action === 'delete' && !nodeStore.selectedItem"
+            @click="openToolbarAction(action)"
+            :aria-label="actions[action].label"
           >
-            <component :is="item.icon"></component>
+            <component :is="actions[action].icon" />
           </button>
         </BaseTooltip>
       </div>
@@ -28,7 +29,12 @@
       @dragover.capture="handleTreeDragOver"
       @dragleave.capture="handleTreeDragLeave"
       @drop.capture="handleTreeDrop"
+      @dragstart.capture="closeMenu()"
       @dragend.capture="clearTreeDropTarget"
+      @contextmenu="handleContextMenu"
+      @keydown="handleContextKey"
+      @click="handleMenuButtonClick"
+      @scroll.passive="closeMenu()"
     >
       <div ref="fileTreeLayoutRef" class="file-tree-layout">
         <SidebarFileTreeStateGate :status="rootLoadStatus">
@@ -55,24 +61,50 @@
       </div>
     </div>
 
-    <CreateNodeModal
-      v-model="showNewNote"
-      v-bind="createNoteModalConfig"
+    <BaseContextMenu
+      v-if="menu"
+      :point="menu.point"
+      :align="menu.align"
+      :label="`Actions for ${menu.node.name}`"
+      @dismiss="closeMenu"
+    >
+      <button
+        v-for="action in menuActions"
+        :key="action"
+        type="button"
+        role="menuitem"
+        tabindex="-1"
+        class="context-menu-item"
+        :class="{ 'is-danger': action === 'delete' }"
+        @click="openMenuAction(action)"
+      >
+        {{ actions[action].label }}
+      </button>
+    </BaseContextMenu>
+
+    <NodeNameModal
+      :model-value="dialogOpen && nameOperation !== null"
+      :operation="nameOperation"
+      @update:model-value="dialogOpen = $event"
     />
-    <CreateNodeModal
-      v-model="showNewFolder"
-      v-bind="createFolderModalConfig"
+    <UploadFileModal
+      :model-value="dialogOpen && dialog?.kind === 'upload'"
+      :parent-path="dialog?.kind === 'upload' ? dialog.parentPath : ROOT_DIRECTORY_PATH"
+      @update:model-value="dialogOpen = $event"
     />
-    <UploadFileModal v-model="showUpload" />
-    <DeleteItemModal v-model="deleteItem" />
+    <DeleteItemModal
+      :model-value="dialogOpen && dialog?.kind === 'delete'"
+      :target="dialog?.kind === 'delete' ? dialog.target : null"
+      @update:model-value="dialogOpen = $event"
+    />
     <ImagePreviewModal />
   </SidebarPanelLayout>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, shallowRef, watch } from 'vue'
 
-import CreateNodeModal from '@/components/overlay/modals/CreateNodeModal.vue'
+import NodeNameModal, { type NodeNameOperation } from '@/components/overlay/modals/NodeNameModal.vue'
 import UploadFileModal from '@/components/overlay/modals/UploadFileModal.vue'
 import DeleteItemModal from '@/components/overlay/modals/DeleteItemModal.vue'
 import ImagePreviewModal from '@/components/overlay/modals/ImagePreviewModal.vue'
@@ -81,6 +113,7 @@ import SidebarFileTreeItem from '@/components/sidebar/SidebarFileTreeItem.vue'
 import SidebarFileTreeSkeleton from '@/components/sidebar/SidebarFileTreeSkeleton.vue'
 import SidebarFileTreeStateGate from '@/components/sidebar/SidebarFileTreeStateGate.vue'
 import BaseTooltip from '@/components/base/BaseTooltip.vue'
+import BaseContextMenu from '@/components/base/BaseContextMenu.vue'
 import SidebarPanelLayout from '@/layouts/SidebarPanelLayout.vue'
 
 import NewNoteIcon from '@/assets/icons/add-document.svg'
@@ -91,6 +124,8 @@ import TrashIcon from '@/assets/icons/trash.svg'
 import { useNodeStore } from '@/stores/note'
 import { useWorkspaceActions } from '@/composables/useWorkspaceActions'
 import type { AsyncStatus } from '@/types/async'
+import type { SelectedItem } from '@/types/file-system'
+import { useFileTreeContextMenu } from '@/composables/useFileTreeContextMenu'
 import { provideFileTreeDropController } from '@/composables/useFileTreeDropController'
 import { provideFileTreeMotion } from '@/composables/useFileTreeMotion'
 import { ROOT_DIRECTORY_PATH } from '@/utils/file-system'
@@ -99,14 +134,27 @@ const emit = defineEmits<{
   (event: 'nodeOpened'): void
 }>()
 
-const showNewNote = ref(false)
-const showNewFolder = ref(false)
-const showUpload = ref(false)
-const deleteItem = ref(false)
+type FileTreeDialog = NodeNameOperation
+  | { kind: 'upload', parentPath: string }
+  | { kind: 'delete', target: SelectedItem }
+
+const dialog = shallowRef<FileTreeDialog | null>(null)
+const dialogOpen = ref(false)
+const nameOperation = computed(() => {
+  const active = dialog.value
+  return active?.kind === 'create' || active?.kind === 'rename' ? active : null
+})
 const fileTreeRootRef = ref<HTMLElement | null>(null)
 const fileTreeLayoutRef = ref<HTMLElement | null>(null)
 const nodeStore = useNodeStore()
 const workspace = useWorkspaceActions()
+const {
+  menu,
+  closeMenu,
+  handleContextMenu,
+  handleContextKey,
+  handleMenuButtonClick,
+} = useFileTreeContextMenu(nodeStore.getCachedNode)
 const motion = provideFileTreeMotion(fileTreeRootRef, fileTreeLayoutRef)
 watch(() => nodeStore.rootNodes, (children, previousChildren) => {
   if (
@@ -147,30 +195,53 @@ const {
 })
 const isRootDirectoryDragOver = computed(() => activeDropPath.value === ROOT_DIRECTORY_PATH)
 
-const toolBtns = [
-  { icon: NewNoteIcon, label: 'New note', func: () => { showNewNote.value = true } },
-  { icon: NewFolderIcon, label: 'New folder', func: () => { showNewFolder.value = true } },
-  { icon: UploadIcon, label: 'Upload file', func: () => { showUpload.value = true } },
-  { icon: TrashIcon, label: 'Delete item', func: () => { deleteItem.value = true } },
-] as const
-
-const createNoteModalConfig = {
-  title: 'New Note',
-  inputLabel: 'Note Name',
-  // placeholder: 'e.g. my_note',
-  placeholder: '',
-  hint: 'Created in the selected path. No extension needed.',
-  nodeType: 'file',
+const actions = {
+  newNote: { icon: NewNoteIcon, label: 'New note' },
+  newFolder: { icon: NewFolderIcon, label: 'New folder' },
+  upload: { icon: UploadIcon, label: 'Upload file' },
+  rename: { label: 'Rename' },
+  delete: { icon: TrashIcon, label: 'Delete item' },
 } as const
+const directoryActions = ['newNote', 'newFolder', 'upload'] as const
+const toolbarActions = [...directoryActions, 'delete'] as const
+const menuActions = computed<readonly (keyof typeof actions)[]>(() => (
+  menu.value?.node.type === 'dir'
+    ? [...directoryActions, 'rename', 'delete']
+    : ['rename', 'delete']
+))
 
-const createFolderModalConfig = {
-  title: 'New Folder',
-  inputLabel: 'Folder Name',
-  // placeholder: 'e.g. temp_folder',
-  placeholder: '',
-  hint: 'Created in the selected path.',
-  nodeType: 'dir',
-} as const
+const openDialog = (next: FileTreeDialog) => {
+  dialog.value = next
+  dialogOpen.value = true
+}
+
+const openDirectoryAction = (action: typeof directoryActions[number], parentPath: string) => {
+  if (action === 'upload') {
+    openDialog({ kind: 'upload', parentPath })
+  } else {
+    openDialog({ kind: 'create', nodeType: action === 'newNote' ? 'file' : 'dir', parentPath })
+  }
+}
+
+const openToolbarAction = (action: typeof toolbarActions[number]) => {
+  if (action === 'delete') {
+    const target = nodeStore.selectedItem
+    if (target) openDialog({ kind: 'delete', target })
+  } else {
+    openDirectoryAction(action, nodeStore.currentParentPath)
+  }
+}
+
+const openMenuAction = (action: keyof typeof actions) => {
+  const target = menu.value?.node
+  if (!target) return
+  closeMenu(true)
+  if (action === 'rename' || action === 'delete') {
+    openDialog({ kind: action, target })
+  } else if (target.type === 'dir') {
+    openDirectoryAction(action, target.path)
+  }
+}
 
 onMounted(() => {
   void nodeStore.loadDirectory().catch(() => null)

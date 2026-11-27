@@ -84,12 +84,13 @@
   --motion-pane-line-hide-easing: cubic-bezier(0.8, 0, 1, 0);
 
   --motion-tree-duration: 0.45s;
-  --motion-tree-enter-duration: var(--motion-tree-duration);
+  --motion-tree-branch-duration: var(--motion-tree-duration);
   --motion-tree-enter-easing: cubic-bezier(0.42, 0, 0.58, 1);
   --motion-tree-leave-easing: cubic-bezier(0.42, 0, 0.58, 1);
+  --motion-tree-leave-duration-scale: 0.3;
   --motion-tree-resize-duration-min: 0.4s;
   --motion-tree-resize-duration-max: 0.75s;
-  --motion-tree-resize-reference-distance: 80px;
+  --motion-tree-resize-reference-distance: 100px;
   --motion-tree-easing: cubic-bezier(0.2, 0.8, 0.2, 1);
   --motion-profile-duration: 0.35s;
   --motion-profile-easing: cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -141,6 +142,9 @@
   --history-tree-gap-x: 28px;
   --history-tree-gap-y: 44px;
   --history-canvas-padding: 28px;
+  --history-grid-dot-color: var(--color-line);
+  --history-grid-dot-size: 0.75px;
+  --history-grid-spacing: var(--space-lg);
   --history-link-width: 1.5px;
   --history-drag-threshold: 4px;
   --api-key-card-height: 76px;
@@ -168,6 +172,8 @@
   --icon-button-sm-size: 14px;
 
   --tooltip-z-index: 40;
+  --context-menu-z-index: 50;
+  --context-menu-touch-item-min-height: 2.75rem;
   --tooltip-padding: 6px 9px;
   --tooltip-line-height: 1.2;
   --tooltip-max-width: 180px;
@@ -204,7 +210,7 @@
   --tree-row-padding-x: var(--space-compact);
   --tree-row-padding: var(--tree-row-padding-y) var(--tree-row-padding-x);
   --tree-icon-size: 1rem;
-  --tree-rename-max-width: 260px;
+  --tree-skeleton-text-max-width: 260px;
   --tree-node-text-line-height: 1rem;
   --tree-node-text-slot-padding-y: 1px;
   --tree-node-text-padding-y: 2px;
@@ -220,7 +226,6 @@
     ) +
     var(--tree-row-padding-y) * 2
   );
-  --tree-long-press-delay-ms: 600;
   --tree-node-dragging-opacity: 0.45;
 
 
@@ -262,7 +267,7 @@
   --page-transition-font-family: "Helvetica Neue", "Nimbus Sans", "Liberation Sans", sans-serif;
   --page-transition-gutter: clamp(1.25rem, 4vw, 4.5rem);
   --page-transition-brand-gap: clamp(0.65rem, 1.8vw, 1.5rem);
-  --page-transition-brand-font-size: clamp(1.65rem, 5vw, 4.25rem);
+  --page-transition-brand-font-size: clamp(2.15rem, 5vw, 4.25rem);
   --page-transition-percentage-font-size: clamp(3rem, min(12vw, 22dvh), 9rem);
 
   --upload-dropzone-height: 180px;

@@ -2,6 +2,8 @@
   <BaseModal
     v-model="isVisible"
     title="Upload File"
+    :close-on-backdrop="!isUploading"
+    :close-on-escape="!isUploading"
   >
     <ModalContentLayout size="md">
 
@@ -24,7 +26,7 @@
       >
         <component :is="UploadIcon" class="upload-icon"></component>
         <p class="upload-title">Click or Drag file to this area</p>
-        <p class="upload-subtitle">Upload to: {{ nodeStore.currentPathLabel }}</p>
+        <p class="upload-subtitle">Upload to: {{ displayDirectoryPath(parentPath) }}</p>
       </label>
 
       <div v-else class="upload-state">
@@ -49,7 +51,7 @@
           class="modal-button f-s"
           @click="isVisible = false"
           theme="secondary"
-          :disabled="nodeStore.isUploadPending()"
+          :disabled="isUploading"
         >
           Cancel
         </GhostButton>
@@ -60,9 +62,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, useId } from 'vue'
-import { useNodeStore } from '@/stores/note'
+import { ref, useId } from 'vue'
 import { useFileUploadTask } from '@/composables/useFileUploadTask'
+import { useModelProxy } from '@/composables/useModelProxy'
+import { displayDirectoryPath } from '@/utils/file-system'
 
 import UploadIcon from '@/assets/icons/upload.svg'
 
@@ -72,13 +75,13 @@ import ModalContentLayout from '@/layouts/ModalContentLayout.vue'
 
 const props = defineProps<{
   modelValue: boolean
+  parentPath: string
 }>()
 
 const emit = defineEmits<{
   (event: 'update:modelValue', value: boolean): void
 }>()
 
-const nodeStore = useNodeStore()
 const {
   isUploading,
   uploadPercent,
@@ -89,16 +92,7 @@ const {
 const fileInputId = useId()
 const isDragOver = ref(false)
 
-const isVisible = computed({
-  get: () => props.modelValue,
-  set: (value: boolean) => {
-    if (isUploading.value && !value) {
-      return
-    }
-
-    emit('update:modelValue', value)
-  },
-})
+const isVisible = useModelProxy(props, emit)
 
 const handleFileSelect = async (e: Event) => {
   const input = e.target as HTMLInputElement
@@ -118,8 +112,13 @@ const handleDrop = async (e: DragEvent) => {
 }
 
 const handleUpload = async (file: File) => {
-  await uploadFile(file)
-  isVisible.value = false
+  if (isUploading.value) return
+  try {
+    await uploadFile(file, props.parentPath)
+    isVisible.value = false
+  } catch {
+    // The request handler reports failures; allow another attempt.
+  }
 }
 </script>
 

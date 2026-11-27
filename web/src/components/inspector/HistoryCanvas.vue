@@ -424,6 +424,10 @@ onBeforeUnmount(() => {
   cursor: grab;
   touch-action: none;
   contain: layout paint;
+  background-image: radial-gradient(
+    circle, var(--history-grid-dot-color) var(--history-grid-dot-size), transparent var(--line-width)
+  );
+  background-size: var(--history-grid-spacing) var(--history-grid-spacing);
 }
 
 .history-canvas:active {

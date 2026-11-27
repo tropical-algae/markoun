@@ -47,9 +47,6 @@ export const useNodeStore = defineStore('note', () => {
       ? item.path
       : getParentPath(item?.path ?? fileState.currentFile.value.path)
   })
-  const currentPathLabel = computed(() => {
-    return currentParentPath.value === ROOT_DIRECTORY_PATH ? '/' : currentParentPath.value
-  })
   const rootNodes = fileTree.rootNodes
   const currentPreviewImageUrl = computed(() => {
     return currentPreviewImageNode.value
@@ -164,8 +161,8 @@ export const useNodeStore = defineStore('note', () => {
     }
   }
 
-  const addNewNode = async (noteName: string, type: 'file' | 'dir') => {
-    const parentPath = currentParentPath.value
+  const addNewNode = async (noteName: string, type: FsNode['type'], destinationPath: string) => {
+    const parentPath = normalizeNodePath(destinationPath)
     const actionKey = type === 'file' ? 'create-file' : 'create-dir'
     const response = await actionLedger.runAction(actionKey, async () => {
       return type === 'file'
@@ -210,7 +207,7 @@ export const useNodeStore = defineStore('note', () => {
   const uploadFile = async (
     file: File,
     uploadPercent: Ref<number, number>,
-    destinationPath: string = currentParentPath.value,
+    destinationPath: string,
   ): Promise<UploadResponse> => {
     const parentPath = normalizeNodePath(destinationPath)
     const response = await actionLedger.runAction('upload-file', async () => {
@@ -510,7 +507,7 @@ export const useNodeStore = defineStore('note', () => {
     currentFileStatus: fileState.currentFileStatus,
     currentFileDisplayName: fileState.currentFileDisplayName,
     hasCurrentFile: fileState.hasCurrentFile,
-    currentPathLabel,
+    currentParentPath,
     canEditCurrentFile: fileState.canEditCurrentFile,
     isCurrentFileDirty: fileState.isCurrentFileDirty,
     historyAvailability: historyState.historyAvailability,
@@ -519,9 +516,6 @@ export const useNodeStore = defineStore('note', () => {
     defaultRevisionId: historyState.defaultRevisionId,
     viewedRevisionId: historyState.viewedRevisionId,
     pendingRevisionId: historyState.pendingRevisionId,
-    isCreatePending: (type: 'file' | 'dir') => actionLedger.isActionPending(type === 'file' ? 'create-file' : 'create-dir'),
-    isDeletePending: () => actionLedger.isActionPending('delete-item'),
-    isUploadPending: () => actionLedger.isActionPending('upload-file'),
     isSavePending: () => actionLedger.isActionPending('save-current-file'),
     isHistoryRevisionPending: () => actionLedger.isActionPending('load-history-revision'),
     isHistoryDeletePending: () => actionLedger.isActionPending('delete-history-revision'),

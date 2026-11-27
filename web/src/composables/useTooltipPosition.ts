@@ -1,5 +1,6 @@
 import { ref, type CSSProperties, type Ref } from 'vue'
 import { readCssLengthPx } from '@/utils/css'
+import { getViewportBounds } from '@/utils/viewport'
 
 export type TooltipPlacement = 'top' | 'right' | 'bottom' | 'left'
 
@@ -11,19 +12,6 @@ const clamp = (value: number, min: number, max: number) => {
   }
 
   return Math.min(Math.max(value, min), max)
-}
-
-const getViewportBounds = () => {
-  const viewport = window.visualViewport
-  const left = viewport?.offsetLeft ?? 0
-  const top = viewport?.offsetTop ?? 0
-
-  return {
-    left,
-    top,
-    right: left + (viewport?.width ?? window.innerWidth),
-    bottom: top + (viewport?.height ?? window.innerHeight),
-  }
 }
 
 export const useTooltipPosition = (

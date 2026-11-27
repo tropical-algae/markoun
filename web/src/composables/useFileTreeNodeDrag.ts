@@ -26,12 +26,11 @@ export const readDraggedTreeNode = (event: DragEvent): FsNode | null => {
 
 export const useFileTreeNodeDrag = (
   node: Readonly<Ref<FsNode>>,
-  canDrag: () => boolean,
 ) => {
   const isNodeDragging = ref(false)
 
   const handleNodeDragStart = (event: DragEvent) => {
-    if (!canDrag() || !event.dataTransfer) {
+    if (!event.dataTransfer) {
       event.preventDefault()
       return
     }
