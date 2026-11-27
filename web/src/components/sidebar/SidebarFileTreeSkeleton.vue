@@ -97,6 +97,6 @@ const resolveTextWidth = (index: number) => {
 }
 
 .file-tree-skeleton-row.is-nested .file-tree-skeleton-text {
-  max-width: var(--tree-rename-max-width);
+  max-width: var(--tree-skeleton-text-max-width);
 }
 </style>

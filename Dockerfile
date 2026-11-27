@@ -22,7 +22,9 @@ COPY --from=ghcr.io/astral-sh/uv:0.11.21 /uv /uvx /bin/
 LABEL org.opencontainers.image.authors="tropical-algae tropicalalgae@gmail.com"
 
 ENV PYTHONUNBUFFERED=1 \
-    MEDIA_DELIVERY_MODE=nginx \
+    PORT=80 \
+    API_DOCS_ENABLED=false \
+    WEB_ROOT=/app/web \
     SQL_DATABASE_URI=sqlite+aiosqlite:////markoun/database.db \
     DOCUMENT_ROOT=/markoun/data \
     WELCOME_NOTE_PATH=/markoun/welcome.md \
@@ -32,7 +34,7 @@ ENV PYTHONUNBUFFERED=1 \
 WORKDIR /app
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends nginx ripgrep && \
+    apt-get install -y --no-install-recommends ripgrep && \
     rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml uv.lock poe_tasks.toml README.md welcome.md ./
@@ -45,11 +47,6 @@ RUN uv sync --frozen --no-default-groups --no-editable
 
 COPY --from=frontend-builder /app/web/dist /app/web
 
-COPY nginx.conf /etc/nginx/nginx.conf
-COPY scripts/entrypoint.sh /app/entrypoint.sh
-
-RUN chmod +x /app/entrypoint.sh
-
 EXPOSE 80
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+ENTRYPOINT ["/app/.venv/bin/markoun"]

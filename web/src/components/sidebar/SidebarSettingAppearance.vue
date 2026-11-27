@@ -9,7 +9,7 @@
           type="button"
           v-for="option in appearanceStore.themeOptions"
           :key="option.id"
-          class="theme-option f-s"
+          class="theme-option f-xs"
           :class="{ 'is-active': appearanceStore.currentTheme === option.id }"
           :data-theme="option.id"
           :aria-label="`Use ${option.label} theme`"
@@ -83,7 +83,7 @@ const handleBoolSettingUpdate = (id: string, value: string | boolean) => {
 
 .theme-option {
   border: var(--line-width) solid var(--color-line);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   background: var(--color-bg-field);
   color: var(--color-text-sec);
   padding: var(--space-2xs) var(--space-sm);

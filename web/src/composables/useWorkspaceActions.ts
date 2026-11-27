@@ -27,8 +27,8 @@ export const useWorkspaceActions = () => {
     return !await router.push(fileRouteLocation(node.path))
   }
 
-  const createNode = async (name: string, type: 'file' | 'dir') => {
-    const node = await store.addNewNode(name, type)
+  const createNode = async (name: string, type: FsNode['type'], parentPath: string) => {
+    const node = await store.addNewNode(name, type, parentPath)
     await openNode(node)
   }
 

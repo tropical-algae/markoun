@@ -1,5 +1,6 @@
 import uvicorn
 from fastapi import FastAPI
+from starlette.routing import Route
 
 from markoun.app.api.routers import router as api_router
 from markoun.app.mcp import mcp_app
@@ -15,10 +16,16 @@ def create_app() -> FastAPI:
         title=settings.PROJECT_NAME,
         debug=settings.DEBUG,
         version=settings.VERSION,
+        openapi_url="/openapi.json" if settings.API_DOCS_ENABLED else None,
         lifespan=lifespan,
     )
     application.include_router(api_router, prefix=settings.API_PREFIX)
-    application.mount("/mcp", mcp_app, name="mcp")
+    application.routes.extend(
+        (
+            Route("/mcp", mcp_app, include_in_schema=False),
+            Route("/mcp/", mcp_app, name="mcp", include_in_schema=False),
+        )
+    )
     add_middleware(app=application)
     add_exception_handler(app=application)
     mount_web_app(

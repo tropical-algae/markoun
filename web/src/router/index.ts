@@ -5,7 +5,7 @@ import { buildLoginRedirectLocation, resolvePostAuthRedirect } from '@/router/au
 import { installWorkspaceNavigation } from '@/router/workspace'
 import { FILE_ROUTE_PREFIX } from '@/utils/file-navigation'
 
-const Workspace = () => import('@/views/Workspace.vue')
+export const loadWorkspaceView = () => import('@/views/Workspace.vue')
 const Login = () => import('@/views/Login.vue')
 
 const siteTitle = import.meta.env.VITE_SITE_TITLE || 'My Blog'
@@ -14,7 +14,7 @@ const routes = [
     path: '/',
     name: 'Workspace',
     components: {
-      default: Workspace,
+      default: loadWorkspaceView,
     },
     meta: {
       requiresAuth: true,
@@ -25,7 +25,7 @@ const routes = [
   {
     path: `${FILE_ROUTE_PREFIX}:path(.*)+`,
     name: 'WorkspaceFile',
-    component: Workspace,
+    component: loadWorkspaceView,
     meta: {
       requiresAuth: true,
       workspace: true,

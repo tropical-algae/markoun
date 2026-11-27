@@ -32,9 +32,12 @@ def _mcp_request(
     method: str,
     params: dict | None = None,
     request_id: int = 1,
+    *,
+    path: str = "/mcp/",
 ):
     return client.post(
-        "/mcp/",
+        path,
+        follow_redirects=False,
         headers={
             "Authorization": f"Bearer {api_key}",
             "Accept": "application/json, text/event-stream",
@@ -86,7 +89,9 @@ def test_mcp_search_filenames_and_unlimited_results(
         json={"name": "search-only", "permissions": ["search"]},
     ).json()["data"]["key"]
 
-    tools = _mcp_request(client, api_key, "tools/list").json()["result"]["tools"]
+    tools = _mcp_request(client, api_key, "tools/list", path="/mcp").json()["result"][
+        "tools"
+    ]
     for tool in tools:
         assert "Markoun workspace" in tool["description"].splitlines()[0]
     search_tool = next(tool for tool in tools if tool["name"] == "search_files")

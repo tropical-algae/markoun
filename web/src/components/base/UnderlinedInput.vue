@@ -84,7 +84,6 @@ const handleInput = (event: Event) => {
 }
 
 .underlined-input-label {
-  text-transform: uppercase;
   color: var(--color-text-sec);
   font-weight: 600;
   transition: color var(--motion-medium-duration) ease;
@@ -112,7 +111,6 @@ const handleInput = (event: Event) => {
 
   color: var(--color-text-pri);
   font-family: inherit;
-  font-size: var(--underlined-input-content-font-size);
   font-weight: 400;
   line-height: var(--input-line-height);
   letter-spacing: var(--underlined-input-letter-spacing);

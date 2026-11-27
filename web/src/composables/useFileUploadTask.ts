@@ -27,10 +27,8 @@ export const useFileUploadTask = () => {
     }
   }
 
-  const uploadFile = (file: File, destinationPath?: string): Promise<UploadResponse> => {
-    return runUpload(file, () => destinationPath === undefined
-      ? nodeStore.uploadFile(file, uploadPercent)
-      : nodeStore.uploadFile(file, uploadPercent, destinationPath))
+  const uploadFile = (file: File, destinationPath: string): Promise<UploadResponse> => {
+    return runUpload(file, () => nodeStore.uploadFile(file, uploadPercent, destinationPath))
   }
 
   const uploadPastedImage = (file: File, notePath: string): Promise<PastedImageResponse> => {

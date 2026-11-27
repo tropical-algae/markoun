@@ -25,7 +25,6 @@ stdenvNoCC.mkDerivation {
       --prefix PATH : ${lib.makeBinPath [ ripgrep ]} \
       --set-default HOST "0.0.0.0" \
       --set-default PORT "8000" \
-      --set-default MEDIA_DELIVERY_MODE "application" \
       --set-default WEB_ROOT "$resourceRoot/web" \
       --set-default MARKOUN_WELCOME_TEMPLATE_FILE "$resourceRoot/welcome.md" \
       --run ". ${../scripts/nix-runtime-defaults.sh}"

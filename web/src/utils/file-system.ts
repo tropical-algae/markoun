@@ -4,6 +4,10 @@ import { getLocalTime } from '@/utils/datetime'
 
 export const ROOT_DIRECTORY_PATH = '.'
 
+export const displayDirectoryPath = (path: string): string => (
+  path === ROOT_DIRECTORY_PATH ? '/' : path
+)
+
 export const normalizeNodePath = (path?: string | null): string => {
   if (!path || path === './' || path === '/') {
     return ROOT_DIRECTORY_PATH

@@ -1,7 +1,7 @@
 import os
 import secrets
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any
 
 from pydantic import Field
 from pydantic_settings import (
@@ -41,6 +41,7 @@ class SysSetting(BaseSettings):
     PORT: int = 8080
     WORKERS: int = 2
     API_PREFIX: str = "/api/v1"
+    API_DOCS_ENABLED: bool = False
     DEBUG: bool = False
     WEB_ROOT: str | None = None
 
@@ -66,7 +67,6 @@ class BasicSetting(BaseSettings):
     ACCESS_TOKEN_COOKIE_SECURE: bool = False
 
     DOCUMENT_ROOT: str = "./data"
-    MEDIA_DELIVERY_MODE: Literal["application", "nginx"] = "nginx"
     WELCOME_NOTE_PATH: str = DEFAULT_WELCOME_FILE
     DISPLAYED_FILE_TYPES: list = ["md", "png", "jpg", "jpeg", "bmp", "svg"]
 

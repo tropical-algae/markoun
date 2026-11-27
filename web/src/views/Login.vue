@@ -1,5 +1,5 @@
 <template>
-  <AuthLayout>
+  <AuthLayout :inert="pageTransition.isActive">
     <h1 class="auth-title">Login</h1>
     <form @submit.prevent="onLogin" class="auth-form">
       <FilledInput
@@ -89,6 +89,8 @@ import { reactive, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { useSysStore } from '@/stores/system'
+import { usePageTransitionStore } from '@/stores/page-transition'
+import { useToastStore } from '@/stores/toast'
 import AuthLayout from '@/layouts/AuthLayout.vue'
 import AsyncGate from '@/components/base/AsyncGate.vue'
 import FilledInput from '@/components/base/FilledInput.vue'
@@ -96,20 +98,47 @@ import GhostButton from '@/components/base/GhostButton.vue'
 import BaseSkeleton from '@/components/base/BaseSkeleton.vue'
 import RegisterModal from '@/components/overlay/modals/RegisterModal.vue'
 
-import router from '@/router'
+import router, { loadWorkspaceView } from '@/router'
 import { resolvePostAuthRedirect } from '@/router/auth'
 
 const userStore = useUserStore()
 const sysStore = useSysStore()
+const pageTransition = usePageTransitionStore()
+const toastStore = useToastStore()
 const route = useRoute()
 
 const showRegisterModal = ref(false)
 const loginForm = reactive({ username: '', password: '', remember_me: false })
 
 const onLogin = async () => {
-  const response = await userStore.login(loginForm)
-  if (response !== null) {
-    await router.replace(resolvePostAuthRedirect(route.query.redirect))
+  if (pageTransition.isActive) return
+  const { username, password } = loginForm
+  if (!username || !password) {
+    await userStore.login(loginForm)
+    return
+  }
+
+  const target = resolvePostAuthRedirect(route.query.redirect)
+  let signedIn = false
+  try {
+    const entered = await pageTransition.run(async (setProgress) => {
+      const workspaceReady = loadWorkspaceView().then(() => true, () => false)
+      signedIn = (await userStore.login(loginForm)) !== null
+      if (!signedIn) return false
+      setProgress(64)
+      if (!await workspaceReady) throw new Error('Workspace view could not load.')
+      setProgress(90)
+      return true
+    }, async () => {
+      const failure = await router.replace(target)
+      if (failure || !router.currentRoute.value.meta.workspace) {
+        throw new Error('Workspace navigation did not complete.')
+      }
+    })
+
+    if (entered) toastStore.pushNotice('info', `Welcome back, ${username}.`)
+  } catch {
+    if (signedIn) toastStore.pushNotice('error', 'Could not open the workspace. Please try again.')
   }
 }
 

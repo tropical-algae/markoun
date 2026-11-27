@@ -17,7 +17,6 @@ class DataStore(BaseModel):
 def default_runtime_settings(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(settings, "AUTH_REQUIRED", True)
     monkeypatch.setattr(settings, "USER_WORKSPACE_ISOLATION", False)
-    monkeypatch.setattr(settings, "MEDIA_DELIVERY_MODE", "application")
 
 
 @pytest.fixture(scope="session", name="client")

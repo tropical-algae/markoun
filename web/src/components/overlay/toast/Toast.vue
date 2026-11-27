@@ -16,7 +16,7 @@
           :text="currentNotice.message"
           :icon="config.icon"
           :color="config.textColor"
-          font-size="var(--font-size-md)"
+          font-size="inherit"
         />
       </div>
     </Transition>

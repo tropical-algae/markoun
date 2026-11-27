@@ -151,7 +151,6 @@ const saveCurrentFile = async () => {
   outline: none;
   background: transparent;
   color: var(--color-text-pri);
-  font-size: var(--editor-font-size);
   line-height: var(--editor-line-height);
   resize: none;
   box-sizing: border-box;

@@ -2,19 +2,23 @@ import asyncio
 import json
 import os
 import uuid
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, Sequence
 from contextlib import aclosing, suppress
 from datetime import datetime
+from hashlib import sha256
 from pathlib import Path
+from stat import S_ISREG
 from urllib.parse import quote
 
 import aiofiles
-from fastapi import HTTPException, UploadFile
+from aiofiles.tempfile import TemporaryDirectory
+from fastapi import HTTPException, UploadFile, status
 from fastapi.responses import FileResponse, Response
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from markoun.app.services.system_service import get_paste_image_note_dir_setting
 from markoun.app.services.workspace_service import (
+    UPLOAD_STAGING_PREFIX,
     WORKSPACE_DATA_DIRECTORY,
     WorkspaceContext,
 )
@@ -39,7 +43,6 @@ NOTE_SUFFIX = "md"
 DISPLAYED_FILE_TYPES = set(settings.DISPLAYED_FILE_TYPES)
 DEFAULT_SEARCH_LIMIT = -1
 MEDIA_FILE_TYPES = {"png", "jpg", "jpeg", "bmp", "svg"}
-INTERNAL_MEDIA_PREFIX = "/_protected_media"
 
 
 def get_file_meta(workspace: WorkspaceContext, abs_filepath: Path) -> FileMeta:
@@ -206,9 +209,15 @@ async def upload_file(
     filename = file.filename or f"file_{uuid.uuid4().hex[:8]}.unknown"
     filepath = workspace.resolve_child(abs_path, filename)
     try:
-        async with aiofiles.open(filepath, "xb") as f:
-            while content := await file.read(1024 * 1024):
-                await f.write(content)
+        async with TemporaryDirectory(
+            prefix=UPLOAD_STAGING_PREFIX, dir=filepath.parent
+        ) as temporary_directory:
+            staged_path = Path(temporary_directory) / filepath.name
+            async with aiofiles.open(staged_path, "xb") as staged_file:
+                while content := await file.read(1024 * 1024):
+                    await staged_file.write(content)
+            # Publish the complete file without replacing an existing destination.
+            await asyncio.to_thread(os.link, staged_path, filepath)
     except FileExistsError as err:
         logger.error(f"[{filepath} is existed]")
         raise HTTPException(**CONSTANT.SERV_FILE_EXISTED) from err
@@ -264,7 +273,13 @@ async def upload_pasted_image(
                 if not target_dir.is_dir():
                     raise HTTPException(**CONSTANT.SERV_IMAGE_DIR_CONFLICT) from None
 
-            uploaded = await upload_file(workspace, target_dir, file)
+            try:
+                uploaded = await upload_file(workspace, target_dir, file)
+            except (Exception, asyncio.CancelledError):
+                if directory_created:
+                    with suppress(OSError):
+                        await asyncio.to_thread(target_dir.rmdir)
+                raise
             if directory_created:
                 children = [uploaded.node] if uploaded.node else []
                 created_directory = DirNode(
@@ -294,18 +309,41 @@ async def upload_pasted_image(
 
 
 def get_media_response(
-    workspace: WorkspaceContext, relative_path: str
+    workspace: WorkspaceContext,
+    relative_path: str,
+    *,
+    if_none_match: Sequence[str],
 ) -> FileResponse | Response:
     filepath = workspace.resolve(relative_path, allow_root=False)
-    if not filepath.is_file() or file_suffix(filepath) not in MEDIA_FILE_TYPES:
+    suffix = file_suffix(filepath)
+    if suffix not in MEDIA_FILE_TYPES:
         raise HTTPException(**CONSTANT.SERV_MEDIA_FILE_NOT_FOUND)
 
-    if settings.MEDIA_DELIVERY_MODE == "nginx":
-        internal_path = quote(workspace.document_relative(filepath).as_posix(), safe="/")
-        return Response(
-            headers={
-                "X-Accel-Redirect": f"{INTERNAL_MEDIA_PREFIX}/{internal_path}",
-            }
-        )
+    try:
+        file_stat = filepath.stat()
+    except (FileNotFoundError, NotADirectoryError) as exc:
+        raise HTTPException(**CONSTANT.SERV_MEDIA_FILE_NOT_FOUND) from exc
+    if not S_ISREG(file_stat.st_mode):
+        raise HTTPException(**CONSTANT.SERV_MEDIA_FILE_NOT_FOUND)
 
-    return FileResponse(filepath)
+    # A workspace-relative URL can refer to different files across logins.
+    identity = (
+        f"{os.fsencode(filepath).hex()}:{file_stat.st_dev}:{file_stat.st_ino}:"
+        f"{file_stat.st_size}:{file_stat.st_mtime_ns}:{file_stat.st_ctime_ns}"
+    )
+    etag = f'"{sha256(identity.encode()).hexdigest()}"'
+    headers = {
+        "Cache-Control": "private, no-cache",
+        "Vary": "Cookie",
+        "ETag": f"W/{etag}",
+        "X-Content-Type-Options": "nosniff",
+    }
+    if suffix == "svg":
+        headers["Content-Security-Policy"] = "sandbox"
+    if any(value.strip() == "*" for value in if_none_match) or any(
+        tag.strip().removeprefix("W/") == etag
+        for value in if_none_match
+        for tag in value.split(",")
+    ):
+        return Response(status_code=status.HTTP_304_NOT_MODIFIED, headers=headers)
+    return FileResponse(filepath, stat_result=file_stat, headers=headers)

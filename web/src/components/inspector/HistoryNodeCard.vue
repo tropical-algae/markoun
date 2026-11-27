@@ -83,8 +83,8 @@ const createdAtLabel = computed(() => {
 
 .history-node-select {
   min-height: var(--history-node-min-height);
+  width: 100%;
   display: flex;
-  flex: 1 1 auto;
   flex-direction: column;
   min-width: 0;
   padding: 0;
@@ -102,9 +102,10 @@ const createdAtLabel = computed(() => {
 
 .history-node-heading {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   min-width: 0;
-  gap: var(--space-sm);
+  gap: var(--space-xs) var(--space-sm);
 }
 
 .history-node-details {
@@ -125,7 +126,6 @@ const createdAtLabel = computed(() => {
 }
 
 .history-node-latest {
-  flex: 0 0 auto;
   background-color: var(--color-action);
 }
 

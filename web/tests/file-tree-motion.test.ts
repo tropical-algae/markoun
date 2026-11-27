@@ -133,20 +133,20 @@ test('opening and closing scale with displacement and respect the configured bou
   assert.ok(durations[0]! < durations[1]! && durations[1]! < durations[2]! && durations[2]! < durations[3]!)
 })
 
-test('skeleton replacement and cached opening use the same timing for the same displacement', () => {
+test('a placeholder swap and cached opening use the same final visible subtree height', () => {
   const before = layout(['folder', 'after'])
   const after = layout(['folder', ...Array.from({ length: 4 }, (_, i) => `folder/${i}`), 'after'])
   const skeleton = new Map([...before].map(([path, row]) => [path, {
     ...row, top: row.top + (path === 'after' ? 26 : 0), visualTop: row.visualTop + (path === 'after' ? 26 : 0),
   }]))
-  const content = layout(['folder', ...Array.from({ length: 5 }, (_, i) => `folder/${i}`), 'after'])
   const open = planFileTreeMotion(before, after, new Set(['folder']), timing, 1, ease)!
-  const loaded = planFileTreeMotion(skeleton, content, new Set(['folder']), timing, 1, ease)!
+  const loaded = planFileTreeMotion(skeleton, after, new Set(['folder']), timing, 1, ease)!
+  assert.equal(loaded.rows[0]!.offset, -78)
   assert.equal(open.curves[0]!.duration, loaded.curves[0]!.duration)
   assert.equal(open.curves[0]!.duration, timing.duration * Math.sqrt(104 / timing.referenceDistance))
 })
 
-test('interrupted motion duration uses the remaining visual displacement', () => {
+test('interrupted motion keeps the subtree timing but starts at the current visual position', () => {
   const before = layout(['folder', 'after'])
   const after = layout(['folder', ...Array.from({ length: 10 }, (_, i) => `folder/${i}`), 'after'])
   const moving = new Map([...after].map(([path, row]) => [path, {
@@ -155,11 +155,10 @@ test('interrupted motion duration uses the remaining visual displacement', () =>
   const full = planFileTreeMotion(after, before, new Set(['folder']), timing, 1, ease)!
   const interrupted = planFileTreeMotion(moving, before, new Set(['folder']), timing, 1, ease, -260)!
   assert.equal(interrupted.rows[0]!.offset, 80)
-  assert.equal(interrupted.curves[0]!.duration, timing.duration)
-  assert.ok(interrupted.curves[0]!.duration < full.curves[0]!.duration)
+  assert.equal(interrupted.curves[0]!.duration, full.curves[0]!.duration)
 })
 
-test('a terminal branch entrance uses extent change when there are no following rows', () => {
+test('a terminal branch entrance uses its subtree height even without following rows', () => {
   const before = layout(['folder'])
   const after = layout(['folder', ...Array.from({ length: 10 }, (_, i) => `folder/${i}`)])
   const terminal = planFileTreeMotion(before, after, new Set(['folder']), timing, 1, ease, 260)!
@@ -173,11 +172,32 @@ test('a terminal branch entrance uses extent change when there are no following 
   assert.ok(terminal.curves[0]!.duration > timing.duration)
 })
 
-test('a terminal skeleton replacement uses the remaining extent rather than full content size', () => {
+test('a terminal placeholder swap uses full content size, independent of the skeleton height', () => {
   const skeleton = layout(['folder'])
   const content = layout(['folder', ...Array.from({ length: 10 }, (_, i) => `folder/${i}`)])
   const loaded = planFileTreeMotion(skeleton, content, new Set(['folder']), timing, 1, ease, 234)!
-  assert.equal(loaded.curves[0]!.duration, timing.duration * Math.sqrt(234 / timing.referenceDistance))
+  assert.equal(loaded.curves[0]!.duration, timing.duration * Math.sqrt(260 / timing.referenceDistance))
+})
+
+test('parent timing counts visible descendants of expanded folders only', () => {
+  const closed = layout(['a', 'b', 'ab', 'ab/unrelated'])
+  const shallow = layout(['a', 'a/c', 'a/d', 'b', 'ab', 'ab/unrelated'])
+  const deep = layout(['a', 'a/c', 'a/c/e', 'a/c/e/g', 'a/c/f', 'a/d', 'b', 'ab', 'ab/unrelated'])
+  const branchTiming = (before: Map<string, TreeRowLayout>, after: Map<string, TreeRowLayout>, path = 'a') => (
+    planFileTreeMotion(before, after, new Set([path]), timing, 1, ease)!.curves[0]!.duration
+  )
+  assert.equal(branchTiming(closed, shallow), branchTiming(shallow, closed))
+  assert.equal(branchTiming(closed, deep), branchTiming(deep, closed))
+  assert.equal(branchTiming(closed, shallow), timing.minDuration)
+  assert.equal(branchTiming(closed, deep), timing.duration * Math.sqrt(130 / timing.referenceDistance))
+  assert.ok(branchTiming(closed, deep) > branchTiming(closed, shallow))
+})
+
+test('editing an already visible branch times the insertion, not the whole existing subtree', () => {
+  const before = layout(['folder', ...Array.from({ length: 10 }, (_, i) => `folder/${i}`), 'after'])
+  const after = layout([...before.keys()].filter(path => path !== 'after').concat('folder/new', 'after'))
+  const result = planFileTreeMotion(before, after, new Set(['folder']), timing, 1, ease)!
+  assert.equal(result.curves[0]!.duration, timing.minDuration)
 })
 
 test('an extent-only change is measured even without file rows', () => {

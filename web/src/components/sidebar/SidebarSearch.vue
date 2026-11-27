@@ -7,7 +7,6 @@
         label="Keyword"
         name="keyword"
         autocomplete="off"
-        placeholder="Search markdown files..."
         :readonly="isPending"
       />
 

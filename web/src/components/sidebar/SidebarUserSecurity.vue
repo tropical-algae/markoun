@@ -1,6 +1,6 @@
 <template>
   <form class="sidebar-section" @submit.prevent="updatePassword">
-    <div class="sidebar-section-title f-m">Security</div>
+    <div class="sidebar-section-title">Security</div>
 
     <input
       type="text"
@@ -19,7 +19,6 @@
         name="new_password"
         autocomplete="new-password"
         class="password-input f-s"
-        placeholder="Enter new password"
       />
       <UnderlinedInput
         v-model="passwordForm.confirmPassword"
@@ -28,7 +27,6 @@
         name="confirm_password"
         autocomplete="new-password"
         class="password-input is-confirm f-s"
-        placeholder="Confirm new password"
       />
 
       <BaseIconText

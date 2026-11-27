@@ -21,11 +21,11 @@
           <div class="user-tag-shell">
             <BaseSkeleton
               width="var(--skeleton-width-xs)"
-              height="var(--meta-tag-height)"
+              height="var(--meta-tag-block-size)"
             />
             <BaseSkeleton
               width="var(--skeleton-width-xs)"
-              height="var(--meta-tag-height)"
+              height="var(--meta-tag-block-size)"
             />
           </div>
 
@@ -57,10 +57,10 @@
     </template>
 
     <div class="user-profile-card">
-      <div class="user-name f-m fw-bold fc-pri">
+      <div class="user-name fw-bold fc-pri">
         {{ userStore.currentUserProfile?.full_name || 'Unnamed user' }}
       </div>
-      <div class="user-email f-s">
+      <div class="user-email f-xs">
         {{ userStore.currentUserProfile?.email }}
       </div>
 
@@ -141,27 +141,29 @@ onMounted(() => {
   overflow-wrap: anywhere;
 }
 
-.user-scopes {
+.user-scopes,
+.user-tag-shell {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
+  min-width: 0;
   gap: var(--space-compact);
 }
 
 .user-meta-grid,
 .user-meta-shell {
   display: grid;
-  grid-template-columns: auto 1fr;
-  gap: var(--space-sm) var(--space-md);
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-xs) var(--space-md);
   align-items: center;
 }
 
 .user-meta-grid {
-  margin-top: var(--space-lg);
+  margin-top: var(--space-sm);
 }
 
 .user-meta-label {
   color: var(--color-text-sec);
-  text-transform: uppercase;
   font-weight: 700;
 }
 
@@ -170,13 +172,6 @@ onMounted(() => {
   color: var(--color-text-pri);
   line-height: var(--profile-meta-line-height);
   word-break: break-word;
-}
-
-.user-tag-shell {
-  display: flex;
-  flex-wrap: wrap;
-  min-width: 0;
-  gap: var(--space-compact);
 }
 
 .user-meta-shell-loading {

@@ -2,11 +2,14 @@
   <BaseModal
     v-model="isVisible"
     title="Delete Item"
+    :close-on-backdrop="!isPending"
+    :close-on-escape="!isPending"
   >
     <ModalContentLayout class="delete-item-modal fc-pri">
-      <div>Delete <span class="fw-bold">{{ targetPath }}</span>?</div>
-      <div class="f-s fc-sec">
-        {{ deleteDescription }} This action cannot be undone.
+      <div>Delete '<span class="fw-bold">{{ target?.path }}</span>'?</div>
+      <div class="f-s fc-sec delete-item-message">
+        {{ deleteDescription }}<br/>
+        This action cannot be undone.
       </div>
 
       <template #actions>
@@ -14,7 +17,7 @@
           class="modal-button f-s"
           @click="isVisible = false"
           theme="secondary"
-          :disabled="nodeStore.isDeletePending()"
+          :disabled="isPending"
         >
           Cancel
         </GhostButton>
@@ -22,8 +25,8 @@
           class="modal-button f-s"
           @click="handleConfirm"
           theme="danger"
-          :disabled="nodeStore.isDeletePending()"
-          :loading="nodeStore.isDeletePending()"
+          :disabled="isPending || !target"
+          :loading="isPending"
         >
           Delete
         </GhostButton>
@@ -33,50 +36,38 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import BaseModal from '@/components/base/BaseModal.vue'
 import GhostButton from '@/components/base/GhostButton.vue'
 import ModalContentLayout from '@/layouts/ModalContentLayout.vue'
 
-import { useNodeStore } from '@/stores/note'
 import { useWorkspaceActions } from '@/composables/useWorkspaceActions'
 import { useModelProxy } from '@/composables/useModelProxy'
+import type { SelectedItem } from '@/types/file-system'
 
-const nodeStore = useNodeStore()
 const workspace = useWorkspaceActions()
-const props = defineProps<{ modelValue: boolean }>()
+const props = defineProps<{ modelValue: boolean, target: SelectedItem | null }>()
 const emit = defineEmits<{
   (event: 'update:modelValue', value: boolean): void
 }>()
 
-const targetPath = ref('Default Page')
-const targetType = ref<'file' | 'dir' | null>(null)
+const isPending = ref(false)
 const isVisible = useModelProxy(props, emit)
-const deleteDescription = computed(() => {
-  if (targetType.value === 'dir') {
-    return 'This folder and everything inside it will be removed from your workspace.'
-  }
-  if (targetType.value === 'file') {
-    return 'This file will be removed from your workspace.'
-  }
-  return 'This item will be removed from your workspace.'
-})
-
-watch(
-  () => isVisible.value,
-  (visible) => {
-    if (visible) {
-      targetPath.value = nodeStore.selectedItem?.path ?? 'Default Page'
-      targetType.value = nodeStore.selectedItem?.type ?? null
-    }
-  },
-  { immediate: true }
-)
+const deleteDescription = computed(() => props.target?.type === 'dir'
+  ? 'This folder and everything inside it will be removed from your workspace.'
+  : 'This file will be removed from your workspace.')
 
 const handleConfirm = async () => {
-  if (!targetType.value) return
-  await workspace.deleteNode({ path: targetPath.value, type: targetType.value })
-  isVisible.value = false
+  if (!props.target || isPending.value) return
+  isPending.value = true
+  try {
+    await workspace.deleteNode(props.target)
+    isVisible.value = false
+  } catch {
+    // The request handler reports failures.
+  } finally {
+    isPending.value = false
+  }
 }
 </script>
 
@@ -88,5 +79,9 @@ const handleConfirm = async () => {
 
 .delete-item-modal > div {
   overflow-wrap: anywhere;
+}
+
+.delete-item-message {
+  margin-top: var(--space-sm);
 }
 </style>

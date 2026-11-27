@@ -15,19 +15,21 @@
 
 .meta-tag {
   display: inline-flex;
+  flex: none;
   align-items: center;
   justify-content: center;
   background-color: var(--color-text-sec);
   color: var(--color-text-inverse);
   font-size: var(--font-size-xs);
   font-weight: 700;
-  min-height: var(--meta-tag-height);
-  padding: 0 var(--meta-tag-padding-x);
+  line-height: var(--meta-tag-line-height);
+  padding: var(--meta-tag-padding-block) var(--meta-tag-padding-inline);
   margin: 0;
   border-radius: var(--radius-sm);
   white-space: nowrap;
   vertical-align: middle;
   box-sizing: border-box;
+  text-transform: uppercase;
   transition: background-color var(--motion-theme-duration) ease;
 }
 
@@ -51,7 +53,6 @@
   margin-bottom: var(--space-sm);
   color: var(--color-text-pri);
   font-weight: 700;
-  text-transform: uppercase;
 }
 
 .sidebar-toolbar {

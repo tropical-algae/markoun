@@ -1,3 +1,4 @@
+from os import utime
 from pathlib import Path
 from uuid import uuid4
 
@@ -82,7 +83,6 @@ def test_authenticated_users_have_isolated_workspaces(
     monkeypatch.setattr(settings, "DOCUMENT_ROOT", str(tmp_path))
     monkeypatch.setattr(settings, "AUTH_REQUIRED", True)
     monkeypatch.setattr(settings, "USER_WORKSPACE_ISOLATION", True)
-    monkeypatch.setattr(settings, "MEDIA_DELIVERY_MODE", "application")
     monkeypatch.setattr(
         file_service,
         "get_paste_image_note_dir_setting",
@@ -273,7 +273,47 @@ def test_workspace_rejects_absolute_and_symlink_escape(
         create_workspace_context(UserAccount(full_name="linked-user"))
 
 
-def test_nginx_media_delivery_returns_internal_redirect(
+def test_workspace_media_revalidates_only_the_current_users_file(
+    client: TestClient,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    monkeypatch.setattr(settings, "DOCUMENT_ROOT", str(tmp_path))
+    monkeypatch.setattr(settings, "USER_WORKSPACE_ISOLATION", True)
+    endpoint = f"{settings.API_PREFIX}/file/media"
+    params = {"path": "images/shared.png"}
+    suffix = uuid4().hex[:8]
+    old_etag = None
+    for username, content in ((f"first-{suffix}", b"one"), (f"second-{suffix}", b"two")):
+        _register_and_login(client, username)
+        image = tmp_path / username / params["path"]
+        image.parent.mkdir(parents=True)
+        image.write_bytes(content)
+        utime(image, ns=(1_000_000_000, 1_000_000_000))
+
+        headers = {"If-None-Match": old_etag} if old_etag else {}
+        response = client.get(endpoint, params=params, headers=headers)
+        assert response.status_code == 200
+        assert response.content == content
+        etag = response.headers["etag"]
+        assert etag != old_etag
+        old_etag = etag
+
+        unchanged = client.get(endpoint, params=params, headers={"If-None-Match": etag})
+        assert unchanged.status_code == 304
+        assert unchanged.content == b""
+        for result in (response, unchanged):
+            assert result.headers["cache-control"] == "private, no-cache"
+            assert result.headers["vary"] == "Cookie"
+            assert result.headers["etag"] == etag
+
+    client.cookies.clear()
+    denied = client.get(endpoint, params=params, headers={"If-None-Match": "*"})
+    assert denied.status_code == 401
+    assert denied.headers["cache-control"] == "no-store"
+
+
+def test_anonymous_workspace_media_revalidates_and_detects_file_replacement(
     client: TestClient,
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -281,21 +321,39 @@ def test_nginx_media_delivery_returns_internal_redirect(
     monkeypatch.setattr(settings, "DOCUMENT_ROOT", str(tmp_path))
     monkeypatch.setattr(settings, "AUTH_REQUIRED", False)
     monkeypatch.setattr(settings, "USER_WORKSPACE_ISOLATION", True)
-    monkeypatch.setattr(settings, "MEDIA_DELIVERY_MODE", "nginx")
     image_path = tmp_path / "images" / "photo name.png"
     image_path.parent.mkdir()
     image_path.write_bytes(b"image")
     client.cookies.clear()
 
-    response = client.get(
-        f"{settings.API_PREFIX}/file/media",
-        params={"path": "images/photo name.png"},
-    )
-
+    endpoint = f"{settings.API_PREFIX}/file/media"
+    params = {"path": "images/photo name.png"}
+    response = client.get(endpoint, params=params)
     assert response.status_code == 200
-    assert response.headers["x-accel-redirect"] == (
-        "/_protected_media/images/photo%20name.png"
+    assert response.content == b"image"
+    assert response.headers["x-content-type-options"] == "nosniff"
+    etag = response.headers["etag"]
+    unchanged = client.get(
+        endpoint,
+        params=params,
+        headers={"If-None-Match": f'"other", {etag.removeprefix("W/")}'},
     )
+    assert unchanged.status_code == 304
+
+    replacement = image_path.with_name("replacement.png")
+    replacement.write_bytes(b"other")
+    mtime = image_path.stat().st_mtime_ns
+    utime(replacement, ns=(mtime, mtime))
+    replacement.replace(image_path)
+    updated = client.get(endpoint, params=params, headers={"If-None-Match": etag})
+    assert updated.status_code == 200
+    assert updated.content == b"other"
+    assert updated.headers["etag"] != etag
+
+    image_path.unlink()
+    removed = client.get(endpoint, params=params, headers={"If-None-Match": "*"})
+    assert removed.status_code == 404
+    assert removed.headers["cache-control"] == "no-store"
 
 
 def test_registration_rejects_unsafe_workspace_username(client: TestClient):

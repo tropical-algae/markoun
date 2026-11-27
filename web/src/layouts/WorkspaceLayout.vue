@@ -1,9 +1,9 @@
 <template>
   <div class="workspace-shell">
-    <header class="workspace-header f-m fw-9 fc-pri">
+    <header class="workspace-header fw-9 fc-pri">
       <slot name="header">
         <span class="workspace-brand-logo" aria-hidden="true"></span>
-        <span>Markoun</span>
+        <span>MARKOUN.</span>
       </slot>
     </header>
 
@@ -85,7 +85,7 @@
       </section>
     </main>
 
-    <footer class="workspace-footer f-s fc-sec">
+    <footer class="workspace-footer f-xs fc-sec">
       <slot name="footer">&copy; 2026 tropical algae. MIT License</slot>
     </footer>
   </div>
@@ -177,7 +177,7 @@ watch(() => props.rightOpen, (open) => {
   aspect-ratio: var(--brand-logo-aspect-ratio);
   flex-shrink: 0;
   background-color: currentColor;
-  mask: url('@/assets/icons/markoun-logo.svg') center / contain no-repeat;
+  mask: var(--brand-logo-mask) center / contain no-repeat;
 }
 
 .workspace-main {
@@ -294,7 +294,7 @@ watch(() => props.rightOpen, (open) => {
 
   position: absolute;
   inset-block: 0;
-  inset-inline-start: calc(50% - var(--line-width) / 2);
+  inset-inline-start: 50%;
   width: var(--line-width);
   background-color: var(--color-line);
   opacity: 0;

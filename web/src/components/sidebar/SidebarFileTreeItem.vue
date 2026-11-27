@@ -3,7 +3,6 @@
     <SidebarFileTreeNodeRow
       class="tree-node-row"
       :data-tree-node-path="node.path"
-      v-model:edit-name="editName"
       :depth="depth"
       :name="node.name"
       :suffix="node.suffix"
@@ -15,18 +14,10 @@
       :drop-path="isDir ? node.path : undefined"
       :drag-over="isDirectoryDragOver"
       :dragging="isNodeDragging"
-      :renaming="isRenaming"
-      :set-rename-input-ref="setRenameInputRef"
       @click-node="handleClickNode"
       @click-directory-icon="handleClickDirectoryIcon"
-      @drag-start="handleDragStart"
+      @drag-start="handleNodeDragStart"
       @drag-end="handleNodeDragEnd"
-      @pointer-down="startLongPress"
-      @pointer-up="stopLongPress"
-      @pointer-leave="stopLongPress"
-      @pointer-cancel="stopLongPress"
-      @submit-rename="submitRename"
-      @cancel-rename="cancelRename"
     />
 
     <SidebarFileTreeBranch
@@ -47,7 +38,6 @@ import type { FsNode } from '@/types/file-system'
 import { useNodeStore } from '@/stores/note'
 import { useWorkspaceActions } from '@/composables/useWorkspaceActions'
 import { useFileTreeItemExpansion } from '@/composables/useFileTreeItemExpansion'
-import { useFileTreeItemRename } from '@/composables/useFileTreeItemRename'
 import { useFileTreeDropTargetState } from '@/composables/useFileTreeDropController'
 import { useFileTreeNodeDrag } from '@/composables/useFileTreeNodeDrag'
 
@@ -78,35 +68,12 @@ const isDirectoryDragOver = useFileTreeDropTargetState(
   computed(() => isDir.value ? node.value.path : null),
 )
 const {
-  editName,
-  isRenaming,
-  isLongPressed,
-  setRenameInputRef,
-  startLongPress,
-  stopLongPress,
-  submitRename,
-  cancelRename,
-} = useFileTreeItemRename(node, workspace.renameNode)
-const {
   isNodeDragging,
   handleNodeDragStart,
   handleNodeDragEnd,
-} = useFileTreeNodeDrag(node, () => !isRenaming.value)
-
-const handleDragStart = (event: DragEvent) => {
-  stopLongPress()
-  handleNodeDragStart(event)
-}
+} = useFileTreeNodeDrag(node)
 
 const handleClickNode = async () => {
-  if (isLongPressed.value) {
-    isLongPressed.value = false
-    return
-  }
-  if (isRenaming.value) {
-    return
-  }
-
   if (isDir.value) {
     nodeStore.selectItem(node.value)
     if (canExpand.value) {
@@ -118,11 +85,7 @@ const handleClickNode = async () => {
   if (await workspace.openNode(node.value)) emit('nodeOpened')
 }
 
-const handleClickDirectoryIcon = async () => {
-  if (isRenaming.value) {
-    return
-  }
-
+const handleClickDirectoryIcon = () => {
   if (isActive.value) {
     nodeStore.clearSelection()
     return

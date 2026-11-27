@@ -4,7 +4,7 @@
   >
     <BaseHeader>
       <div class="inspector-header-content">
-        <div class="text-uppercase f-s fc-pri">{{ props.title }}</div>
+        <div class="text-uppercase fw-bold f-s fc-pri">{{ props.title }}</div>
         <div class="inspector-header-actions">
           <slot name="header-actions"></slot>
           <BaseTooltip class="inspector-close-control" text="Close" placement="bottom">
